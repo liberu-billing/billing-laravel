@@ -107,7 +107,10 @@ class AppPanelProvider extends PanelProvider
                         ->url(fn () => $this->shouldRegisterMenuItem()
                             ? url(EditTeam::getUrl())
                             : url($panel->getPath())),
-                ]);
+                ])
+ ->plugins([
+            \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make()
+        ]);
         }
 
         return $panel;
