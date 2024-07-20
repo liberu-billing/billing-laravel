@@ -28,4 +28,4 @@ return new class extends Migration
     {
         Schema::dropIfExists('invoice_items');
     }
-}
+};
