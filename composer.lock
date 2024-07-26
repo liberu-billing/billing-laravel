@@ -2820,16 +2820,16 @@
         },
         {
             "name": "laravel/framework",
-            "version": "v11.18.0",
+            "version": "v11.18.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "35901bbdfe3576f21197d4df4f4b72edbd0cf7a9"
+                "reference": "b19ba518c56852567e99fbae9321bc436c2cc5a8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/35901bbdfe3576f21197d4df4f4b72edbd0cf7a9",
-                "reference": "35901bbdfe3576f21197d4df4f4b72edbd0cf7a9",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/b19ba518c56852567e99fbae9321bc436c2cc5a8",
+                "reference": "b19ba518c56852567e99fbae9321bc436c2cc5a8",
                 "shasum": ""
             },
             "require": {
@@ -3022,7 +3022,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2024-07-26T06:20:43+00:00"
+            "time": "2024-07-26T10:39:29+00:00"
         },
         {
             "name": "laravel/jetstream",
