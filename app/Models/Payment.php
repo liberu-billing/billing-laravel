@@ -14,6 +14,7 @@ class Payment extends Model
         'payment_gateway_id',
         'payment_date',
         'amount',
+        'currency',
         'payment_method',
         'transaction_id',
         'refund_status',
@@ -27,6 +28,11 @@ class Payment extends Model
     public function paymentGateway()
     {
         return $this->belongsTo(PaymentGateway::class);
+    }
+
+    public function currency()
+    {
+        return $this->belongsTo(Currency::class, 'currency', 'code');
     }
 
     public function isRefundable()

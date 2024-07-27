@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('invoice_id')->constrained('invoices')->onDelete('cascade');
             $table->date('payment_date');
             $table->decimal('amount', 10, 2);
+            $table->string('currency', 3);
             $table->enum('payment_method', ['credit card', 'bank transfer', 'PayPal']);
             $table->string('transaction_id')->unique();
             $table->timestamps();
