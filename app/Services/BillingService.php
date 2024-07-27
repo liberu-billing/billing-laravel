@@ -5,10 +5,18 @@ namespace App\Services;
 use App\Models\Invoice;
 use App\Models\Subscription;
 use App\Models\Customer;
+use App\Models\HostingAccount;
 use Carbon\Carbon;
 
 class BillingService
 {
+    protected $hostingService;
+
+    public function __construct(HostingService $hostingService)
+    {
+        $this->hostingService = $hostingService;
+    }
+
     public function generateInvoice(Subscription $subscription)
     {
         $customer = $subscription->customer;
@@ -34,10 +42,16 @@ class BillingService
             ->get();
 
         foreach ($dueSubscriptions as $subscription) {
-            $this->generateInvoice($subscription);
+            $invoice = $this->generateInvoice($subscription);
             $subscription->update([
                 'end_date' => Carbon::parse($subscription->end_date)->add($subscription->renewal_period),
             ]);
+
+            if ($invoice->status === 'paid') {
+                $this->ensureHostingAccountActive($subscription);
+            } else {
+                $this->suspendHostingAccount($subscription);
+            }
         }
     }
 
@@ -49,11 +63,28 @@ class BillingService
 
         foreach ($overdueInvoices as $invoice) {
             // TODO: Send overdue reminder email
+            $this->suspendHostingAccount($invoice->subscription);
         }
     }
 
     private function generateInvoiceNumber()
     {
         return 'INV-' . strtoupper(uniqid());
+    }
+
+    private function ensureHostingAccountActive(Subscription $subscription)
+    {
+        $hostingAccount = HostingAccount::where('subscription_id', $subscription->id)->first();
+        if ($hostingAccount && !$hostingAccount->isActive()) {
+            $this->hostingService->unsuspendAccount($hostingAccount);
+        }
+    }
+
+    private function suspendHostingAccount(Subscription $subscription)
+    {
+        $hostingAccount = HostingAccount::where('subscription_id', $subscription->id)->first();
+        if ($hostingAccount && $hostingAccount->isActive()) {
+            $this->hostingService->suspendAccount($hostingAccount);
+        }
     }
 }
