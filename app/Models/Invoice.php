@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Mail\InvoiceGenerated;
+use Illuminate\Support\Facades\Mail;
 
 class Invoice extends Model
 {
@@ -21,5 +23,10 @@ class Invoice extends Model
     public function customer()
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function sendInvoiceEmail()
+    {
+        Mail::to($this->customer->email)->send(new InvoiceGenerated($this));
     }
 }
