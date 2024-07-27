@@ -15,7 +15,13 @@ class Invoice_Item extends Model
         'quantity',
         'unit_price',
         'total_price',
+        'currency',
     ];
+    
+    public function currency()
+    {
+        return $this->belongsTo(Currency::class, 'currency', 'code');
+    }
 
     public function invoice()
     {

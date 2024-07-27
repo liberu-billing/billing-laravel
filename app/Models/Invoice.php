@@ -17,8 +17,14 @@ class Invoice extends Model
         'issue_date',
         'due_date',
         'total_amount',
+        'currency',
         'status',
     ];
+    
+    public function currency()
+    {
+        return $this->belongsTo(Currency::class, 'currency', 'code');
+    }
 
     public function customer()
     {

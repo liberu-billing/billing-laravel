@@ -21,18 +21,42 @@ class BillingService
     {
         $customer = $subscription->customer;
         $amount = $subscription->productService->price;
-
+        $currency = $subscription->currency ?? 'USD'; // Default to USD if not specified
+    
         $invoice = Invoice::create([
             'customer_id' => $customer->id,
             'invoice_number' => $this->generateInvoiceNumber(),
             'issue_date' => Carbon::now(),
             'due_date' => Carbon::now()->addDays(30),
             'total_amount' => $amount,
+            'currency' => $currency,
             'status' => 'pending',
         ]);
-
+    
+        // Create invoice item
+        Invoice_Item::create([
+            'invoice_id' => $invoice->id,
+            'product_service_id' => $subscription->productService->id,
+            'quantity' => 1,
+            'unit_price' => $amount,
+            'total_price' => $amount,
+            'currency' => $currency,
+        ]);
+    
         // TODO: Send invoice email
         return $invoice;
+    }
+    
+    public function convertCurrency($amount, $fromCurrency, $toCurrency)
+    {
+        if ($fromCurrency === $toCurrency) {
+            return $amount;
+        }
+    
+        $fromRate = Currency::where('code', $fromCurrency)->first()->exchange_rate;
+        $toRate = Currency::where('code', $toCurrency)->first()->exchange_rate;
+    
+        return ($amount / $fromRate) * $toRate;
     }
 
     public function processRecurringBilling()
