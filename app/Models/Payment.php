@@ -11,15 +11,20 @@ class Payment extends Model
 
     protected $fillable = [
         'invoice_id',
+        'payment_gateway_id',
         'payment_date',
         'amount',
         'payment_method',
         'transaction_id',
     ];
 
-    
     public function invoice()
     {
         return $this->belongsTo(Invoice::class);
+    }
+
+    public function paymentGateway()
+    {
+        return $this->belongsTo(PaymentGateway::class);
     }
 }
