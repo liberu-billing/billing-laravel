@@ -44,6 +44,7 @@ class User extends Authenticatable implements HasDefaultTenant, HasTenants, Fila
         'name',
         'email',
         'password',
+        'referred_by',
     ];
 
     /**
@@ -122,5 +123,15 @@ class User extends Authenticatable implements HasDefaultTenant, HasTenants, Fila
     public function latestTeam(): BelongsTo
     {
         return $this->belongsTo(Team::class, 'current_team_id');
+    }
+
+    public function affiliate()
+    {
+        return $this->hasOne(Affiliate::class);
+    }
+
+    public function referrer()
+    {
+        return $this->belongsTo(Affiliate::class, 'referred_by');
     }
 }

@@ -18,6 +18,8 @@ class Payment extends Model
         'payment_method',
         'transaction_id',
         'refund_status',
+        'affiliate_id',
+        'affiliate_commission',
     ];
 
     public function invoice()
@@ -33,6 +35,11 @@ class Payment extends Model
     public function currency()
     {
         return $this->belongsTo(Currency::class, 'currency', 'code');
+    }
+
+    public function affiliate()
+    {
+        return $this->belongsTo(Affiliate::class);
     }
 
     public function isRefundable()
