@@ -84,3 +84,9 @@ class HostingAccountResource extends Resource
     public static function getPages(): array
     {
         return [
+            'index' => Pages\ListHostingAccounts::route('/'),
+            'create' => Pages\CreateHostingAccount::route('/create'),
+            'edit' => Pages\EditHostingAccount::route('/{record}/edit'),
+        ];
+    }
+}
