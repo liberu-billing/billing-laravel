@@ -19,4 +19,9 @@ class Customer extends Model
         'postal_code',
         'country',
     ];
+
+    public function credits()
+    {
+        return $this->hasMany(Credit::class);
+    }
 }

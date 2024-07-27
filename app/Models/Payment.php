@@ -16,6 +16,7 @@ class Payment extends Model
         'amount',
         'payment_method',
         'transaction_id',
+        'refund_status',
     ];
 
     public function invoice()
@@ -26,5 +27,10 @@ class Payment extends Model
     public function paymentGateway()
     {
         return $this->belongsTo(PaymentGateway::class);
+    }
+
+    public function isRefundable()
+    {
+        return $this->refund_status === 'none';
     }
 }
