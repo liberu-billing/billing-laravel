@@ -86,14 +86,19 @@ class OrderController extends Controller
 
         // Process payment
         $paymentController = new PaymentController();
-        $paymentResult = $paymentController->processPayment(new Request([
+        $paymentData = [
             'invoice_id' => $invoice->id,
             'payment_gateway_id' => $request->payment_method === 'credit_card' ? 2 : 1, // Assuming 2 is Stripe and 1 is PayPal
             'amount' => $convertedPrice,
             'currency' => $request->currency,
             'payment_method' => $request->payment_method,
-            'stripe_token' => $request->stripe_token,
-        ]));
+        ];
+
+        if ($request->payment_method === 'credit_card') {
+            $paymentData['stripe_token'] = $request->stripe_token;
+        }
+
+        $paymentResult = $paymentController->processPayment(new Request($paymentData));
 
         if ($paymentResult->status() === 200) {
             // Payment successful, update statuses

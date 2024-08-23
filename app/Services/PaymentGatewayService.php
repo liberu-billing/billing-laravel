@@ -6,6 +6,9 @@ use App\Models\PaymentGateway;
 use App\Models\Payment;
 use App\Models\Currency;
 use Illuminate\Support\Facades\Log;
+use Stripe\Stripe;
+use Stripe\Charge;
+use Stripe\Exception\CardException;
 
 class PaymentGatewayService
 {
@@ -43,7 +46,7 @@ class PaymentGatewayService
             }
         }
     }
-
+  
     private function attemptPayment(Payment $payment, PaymentGateway $gateway)
     {
         switch ($gateway->name) {
@@ -68,6 +71,37 @@ class PaymentGatewayService
 
     private function processStripePayment(Payment $payment, PaymentGateway $gateway)
     {
+        // Retrieve the Stripe token from the payment data
+        $stripeToken = $payment->stripe_token;
+
+        if (!$stripeToken) {
+            throw new \Exception('Stripe token is required for payment processing');
+        }
+
+        // Set up Stripe API key
+        \Stripe\Stripe::setApiKey($gateway->secret_key);
+
+        try {
+            // Create a charge using the Stripe token
+            $charge = \Stripe\Charge::create([
+                'amount' => $payment->amount * 100, // Amount in cents
+                'currency' => $payment->currency,
+                'source' => $stripeToken,
+                'description' => 'Payment for Invoice #' . $payment->invoice_id,
+            ]);
+
+            // Update payment with Stripe charge ID
+            $payment->update([
+                'transaction_id' => $charge->id,
+                'status' => 'completed',
+            ]);
+
+            return $charge;
+        } catch (\Stripe\Exception\CardException $e) {
+            // Handle failed charge
+            $payment->update(['status' => 'failed']);
+            throw new \Exception('Payment failed: ' . $e->getMessage());
+        }
         // Implement Stripe payment processing logic here
         // Include currency handling
         $currency = Currency::where('code', $payment->currency)->firstOrFail();

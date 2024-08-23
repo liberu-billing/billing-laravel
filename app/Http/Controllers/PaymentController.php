@@ -26,10 +26,17 @@ class PaymentController extends Controller
             'amount' => 'required|numeric|min:0',
             'payment_method' => 'required|string',
             'currency' => 'required|string|in:USD,GBP,EUR',
+            'stripe_token' => 'required_if:payment_method,stripe|string',
         ]);
 
         // Create a new payment
         $payment = Payment::create($validatedData);
+
+        // If it's a Stripe payment, add the token to the payment data
+        if ($request->payment_method === 'stripe') {
+            $payment->stripe_token = $request->stripe_token;
+            $payment->save();
+        }
 
         // Process the payment using the appropriate gateway
         try {
