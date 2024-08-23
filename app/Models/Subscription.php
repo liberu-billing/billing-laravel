@@ -17,9 +17,12 @@ class Subscription extends Model
         'end_date',
         'renewal_period',
         'status',
+        'domain_name',
+        'domain_registrar',
+        'domain_expiration_date',
     ];
 
-    protected $dates = ['start_date', 'end_date'];
+    protected $dates = ['start_date', 'end_date', 'domain_expiration_date'];
 
     public function customer()
     {
@@ -40,5 +43,10 @@ class Subscription extends Model
     public function isActive()
     {
         return $this->status === 'active' && $this->end_date->isFuture();
+    }
+
+    public function isDomainActive()
+    {
+        return $this->domain_name && $this->domain_expiration_date && $this->domain_expiration_date->isFuture();
     }
 }

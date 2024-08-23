@@ -33,4 +33,9 @@ class HostingAccount extends Model
     {
         return $this->status === 'active';
     }
+
+    public function hasDomain()
+    {
+        return !empty($this->domain);
+    }
 }
