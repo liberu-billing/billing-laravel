@@ -18,6 +18,7 @@ class Payment extends Model
         'payment_method',
         'transaction_id',
         'refund_status',
+        'refunded_amount',
         'affiliate_id',
         'affiliate_commission',
     ];
@@ -44,6 +45,11 @@ class Payment extends Model
 
     public function isRefundable()
     {
-        return $this->refund_status === 'none';
+        return $this->refund_status === 'none' || $this->refund_status === 'partial';
+    }
+
+    public function getRemainingRefundableAmount()
+    {
+        return $this->amount - ($this->refunded_amount ?? 0);
     }
 }

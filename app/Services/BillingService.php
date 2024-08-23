@@ -101,19 +101,11 @@ class BillingService
             return ['success' => false, 'message' => 'No default payment method found'];
         }
         
-        // Convert the invoice amount to the customer's preferred currency if different
-        $amount = $invoice->total_amount;
-        $currency = $invoice->currency;
-        if ($customer->preferred_currency && $customer->preferred_currency !== $invoice->currency) {
-            $amount = $this->convertCurrency($amount, $invoice->currency, $customer->preferred_currency);
-            $currency = $customer->preferred_currency;
-        }
-        
         $payment = new Payment([
             'invoice_id' => $invoice->id,
             'payment_gateway_id' => $paymentMethod->payment_gateway_id,
-            'amount' => $amount,
-            'currency' => $currency,
+            'amount' => $invoice->total_amount,
+            'currency' => $invoice->currency,
             'payment_method' => $paymentMethod->type,
         ]);
         
@@ -161,5 +153,17 @@ class BillingService
     private function generateInvoiceNumber()
     {
         return 'INV-' . strtoupper(uniqid());
+    }
+
+    public function handlePartialPayment(Invoice $invoice, float $amount, int $paymentGatewayId)
+    {
+        $partialPaymentService = new PartialPaymentService(new PaymentGatewayService());
+        return $partialPaymentService->processPartialPayment($invoice, $amount, $paymentGatewayId);
+    }
+
+    public function handleRefund(Payment $payment, float $amount)
+    {
+        $refundService = new RefundService(new PaymentGatewayService());
+        return $refundService->processRefund($payment, $amount);
     }
 }
