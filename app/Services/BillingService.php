@@ -7,6 +7,8 @@ use App\Models\Subscription;
 use App\Models\Customer;
 use App\Models\HostingAccount;
 use App\Models\Invoice_Item;
+use App\Models\Payment;
+use App\Services\PaymentGatewayService;
 use Carbon\Carbon;
 
 class BillingService
@@ -23,7 +25,7 @@ class BillingService
         $customer = $subscription->customer;
         $amount = $subscription->productService->price;
         $currency = $subscription->currency ?? 'USD'; // Default to USD if not specified
-    
+
         $invoice = Invoice::create([
             'customer_id' => $customer->id,
             'invoice_number' => $this->generateInvoiceNumber(),
@@ -33,7 +35,7 @@ class BillingService
             'currency' => $currency,
             'status' => 'pending',
         ]);
-    
+
         // Create invoice item
         Invoice_Item::create([
             'invoice_id' => $invoice->id,
@@ -43,7 +45,7 @@ class BillingService
             'total_price' => $amount,
             'currency' => $currency,
         ]);
-    
+
         // TODO: Send invoice email
         return $invoice;
     }
@@ -68,15 +70,52 @@ class BillingService
 
         foreach ($dueSubscriptions as $subscription) {
             $invoice = $this->generateInvoice($subscription);
-            $subscription->update([
-                'end_date' => Carbon::parse($subscription->end_date)->add($subscription->renewal_period),
-            ]);
-
-            if ($invoice->status === 'paid') {
+            
+            // Process automatic payment
+            $paymentResult = $this->processAutomaticPayment($invoice);
+            
+            if ($paymentResult['success']) {
+                $invoice->update(['status' => 'paid']);
+                $subscription->renew();
                 $this->serviceProvisioningService->manageService($subscription, 'unsuspend');
             } else {
                 $this->serviceProvisioningService->manageService($subscription, 'suspend');
+                // TODO: Implement logic to notify customer of failed payment
             }
+        }
+    }
+
+    public function processAutomaticPayment(Invoice $invoice)
+    {
+        $paymentGatewayService = new PaymentGatewayService();
+        $customer = $invoice->customer;
+        
+        // Assuming the customer has a default payment method stored
+        $paymentMethod = $customer->defaultPaymentMethod;
+        
+        if (!$paymentMethod) {
+            return ['success' => false, 'message' => 'No default payment method found'];
+        }
+        
+        $payment = new Payment([
+            'invoice_id' => $invoice->id,
+            'payment_gateway_id' => $paymentMethod->payment_gateway_id,
+            'amount' => $invoice->total_amount,
+            'currency' => $invoice->currency,
+            'payment_method' => $paymentMethod->type,
+        ]);
+        
+        try {
+            $result = $paymentGatewayService->processPayment($payment);
+            if ($result['success']) {
+                $payment->transaction_id = $result['transaction_id'];
+                $payment->save();
+                return ['success' => true, 'payment' => $payment];
+            } else {
+                return ['success' => false, 'message' => $result['message']];
+            }
+        } catch (\Exception $e) {
+            return ['success' => false, 'message' => 'Payment processing failed: ' . $e->getMessage()];
         }
     }
 
