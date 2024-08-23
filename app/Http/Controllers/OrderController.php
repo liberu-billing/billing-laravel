@@ -26,6 +26,8 @@ class OrderController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'domain' => 'required|string|max:255',
+            'payment_method' => 'required|string|in:credit_card,paypal',
+            'stripe_token' => 'required_if:payment_method,credit_card|string',
         ]);
 
         // Create or update customer
@@ -76,9 +78,10 @@ class OrderController extends Controller
         $paymentController = new PaymentController();
         $paymentResult = $paymentController->processPayment(new Request([
             'invoice_id' => $invoice->id,
-            'payment_gateway_id' => 1, // Assuming 1 is a valid payment gateway ID
+            'payment_gateway_id' => $request->payment_method === 'credit_card' ? 2 : 1, // Assuming 2 is Stripe and 1 is PayPal
             'amount' => $package->price,
-            'payment_method' => 'credit_card', // This should be dynamically set based on user input
+            'payment_method' => $request->payment_method,
+            'stripe_token' => $request->stripe_token,
         ]));
 
         if ($paymentResult->status() === 200) {
