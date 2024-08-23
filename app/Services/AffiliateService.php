@@ -13,14 +13,23 @@ class AffiliateService
         $referrer = $user->referrer;
 
         if ($referrer && $referrer->status === 'active') {
-            $commissionAmount = $payment->amount * ($referrer->commission_rate / 100);
+            $product = $payment->invoice->items->first()->product;
+            $commissionRate = $referrer->getCommissionRate($product->id, $product->category_id);
+            $commissionAmount = $payment->amount * ($commissionRate / 100);
 
             $payment->update([
                 'affiliate_id' => $referrer->id,
                 'affiliate_commission' => $commissionAmount,
             ]);
 
-            // Here you can add logic to credit the affiliate's account or create a separate transaction
+            $referrer->increment('total_earnings', $commissionAmount);
+
+            // Create a transaction record for the affiliate
+            $referrer->transactions()->create([
+                'amount' => $commissionAmount,
+                'type' => 'commission',
+                'description' => "Commission for payment #{$payment->id}",
+            ]);
         }
     }
 }

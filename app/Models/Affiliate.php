@@ -14,6 +14,11 @@ class Affiliate extends Model
         'code',
         'commission_rate',
         'status',
+        'custom_rates',
+    ];
+
+    protected $casts = [
+        'custom_rates' => 'array',
     ];
 
     public function user()
@@ -29,5 +34,18 @@ class Affiliate extends Model
     public function payments()
     {
         return $this->hasMany(Payment::class);
+    }
+
+    public function getCommissionRate($productId = null, $categoryId = null)
+    {
+        if ($productId && isset($this->custom_rates['products'][$productId])) {
+            return $this->custom_rates['products'][$productId];
+        }
+
+        if ($categoryId && isset($this->custom_rates['categories'][$categoryId])) {
+            return $this->custom_rates['categories'][$categoryId];
+        }
+
+        return $this->commission_rate;
     }
 }
