@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Payment;
+use App\Models\Currency;
 use App\Services\PaymentGatewayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -24,6 +25,7 @@ class PaymentController extends Controller
             'payment_gateway_id' => 'required|exists:payment_gateways,id',
             'amount' => 'required|numeric|min:0',
             'payment_method' => 'required|string',
+            'currency' => 'required|string|in:USD,GBP,EUR',
         ]);
 
         // Create a new payment

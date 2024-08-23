@@ -36,6 +36,15 @@
                             <x-input id="domain" class="block mt-1 w-full" type="text" name="domain" :value="old('domain')" required />
                         </div>
 
+                        <div class="mb-4">
+                            <x-label for="currency" value="{{ __('Currency') }}" />
+                            <select id="currency" class="block mt-1 w-full" name="currency" required>
+                                <option value="USD">USD</option>
+                                <option value="GBP">GBP</option>
+                                <option value="EUR">EUR</option>
+                            </select>
+                        </div>
+
                         <div class="flex items-center justify-end mt-4">
                             <x-button class="ml-4">
                                 {{ __('Place Order') }}
