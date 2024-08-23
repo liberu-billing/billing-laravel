@@ -14,6 +14,8 @@ return new class extends Migration
             $table->string('code')->unique();
             $table->decimal('commission_rate', 5, 2);
             $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->json('custom_rates')->nullable();
+            $table->decimal('total_earnings', 10, 2)->default(0);
             $table->timestamps();
         });
     }

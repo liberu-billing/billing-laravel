@@ -4,11 +4,13 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\AffiliateResource\Pages;
 use App\Models\Affiliate;
+use App\Services\AffiliateReportingService;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
 
 class AffiliateResource extends Resource
 {
@@ -38,6 +40,10 @@ class AffiliateResource extends Resource
                         'inactive' => 'Inactive',
                     ])
                     ->required(),
+                Forms\Components\TextInput::make('total_earnings')
+                    ->disabled()
+                    ->label('Total Earnings')
+                    ->formatStateUsing(fn ($state) => '$' . number_format($state, 2)),
             ]);
     }
 
@@ -49,6 +55,40 @@ class AffiliateResource extends Resource
                 Tables\Columns\TextColumn::make('code'),
                 Tables\Columns\TextColumn::make('commission_rate'),
                 Tables\Columns\TextColumn::make('status'),
+                Tables\Columns\TextColumn::make('total_earnings')
+                    ->money('usd')
+                    ->sortable(),
+            ])
+            ->filters([
+                //
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make(),
+                Action::make('generateReport')
+                    ->label('Generate Report')
+                    ->icon('heroicon-o-document-report')
+                    ->action(function (Affiliate $record, AffiliateReportingService $reportingService) {
+                        $report = $reportingService->generateReport($record, now()->subMonth(), now());
+                        // Here you can return the report data or redirect to a report view
+                        return redirect()->route('affiliate.report', $report);
+                    }),
+            ])
+            ->bulkActions([
+                Tables\Actions\DeleteBulkAction::make(),
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('user.name'),
+                Tables\Columns\TextColumn::make('code'),
+                Tables\Columns\TextColumn::make('commission_rate'),
+                Tables\Columns\TextColumn::make('status'),
+                Tables\Columns\TextColumn::make('total_earnings')
+                    ->money('usd')
+                    ->sortable(),
             ])
             ->filters([
                 //
