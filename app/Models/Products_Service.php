@@ -12,7 +12,20 @@ class Products_Service extends Model
     protected $fillable = [
         'name',
         'description',
-        'price',
+        'base_price',
         'type',
+        'pricing_model',
+        'custom_pricing_data',
     ];
+
+    protected $casts = [
+        'custom_pricing_data' => 'array',
+    ];
+
+    public function getPriceAttribute()
+    {
+        // This method can be implemented to calculate the price based on the pricing model and custom data
+        // For now, we'll return the base price
+        return $this->base_price;
+    }
 }
