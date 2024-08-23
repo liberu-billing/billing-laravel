@@ -8,7 +8,9 @@ use App\Models\HostingAccount;
 use App\Models\Subscription;
 use App\Models\Invoice;
 use App\Models\Invoice_Item;
+use App\Models\Currency;
 use App\Http\Controllers\PaymentController;
+use App\Services\BillingService;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -28,6 +30,7 @@ class OrderController extends Controller
             'domain' => 'required|string|max:255',
             'payment_method' => 'required|string|in:credit_card,paypal',
             'stripe_token' => 'required_if:payment_method,credit_card|string',
+            'currency' => 'required|string|in:USD,GBP,EUR',
         ]);
 
         // Create or update customer
@@ -39,6 +42,10 @@ class OrderController extends Controller
         // Get the selected package
         $package = Products_Service::findOrFail($request->package_id);
 
+        // Convert package price to selected currency
+        $billingService = new BillingService();
+        $convertedPrice = $billingService->convertCurrency($package->price, $package->currency, $request->currency);
+
         // Create subscription
         $subscription = Subscription::create([
             'customer_id' => $customer->id,
@@ -47,6 +54,7 @@ class OrderController extends Controller
             'end_date' => now()->addYear(),
             'renewal_period' => 'yearly',
             'status' => 'active',
+            'currency' => $request->currency,
         ]);
 
         // Create hosting account
@@ -61,7 +69,8 @@ class OrderController extends Controller
         // Create invoice
         $invoice = Invoice::create([
             'customer_id' => $customer->id,
-            'total_amount' => $package->price,
+            'total_amount' => $convertedPrice,
+            'currency' => $request->currency,
             'status' => 'pending',
         ]);
 
@@ -70,8 +79,9 @@ class OrderController extends Controller
             'invoice_id' => $invoice->id,
             'product_service_id' => $package->id,
             'quantity' => 1,
-            'unit_price' => $package->price,
-            'total_price' => $package->price,
+            'unit_price' => $convertedPrice,
+            'total_price' => $convertedPrice,
+            'currency' => $request->currency,
         ]);
 
         // Process payment
@@ -79,7 +89,8 @@ class OrderController extends Controller
         $paymentResult = $paymentController->processPayment(new Request([
             'invoice_id' => $invoice->id,
             'payment_gateway_id' => $request->payment_method === 'credit_card' ? 2 : 1, // Assuming 2 is Stripe and 1 is PayPal
-            'amount' => $package->price,
+            'amount' => $convertedPrice,
+            'currency' => $request->currency,
             'payment_method' => $request->payment_method,
             'stripe_token' => $request->stripe_token,
         ]));

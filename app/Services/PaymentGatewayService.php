@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\PaymentGateway;
 use App\Models\Payment;
+use App\Models\Currency;
 use Illuminate\Support\Facades\Log;
 
 class PaymentGatewayService
@@ -60,15 +61,24 @@ class PaymentGatewayService
     private function processPayPalPayment(Payment $payment, PaymentGateway $gateway)
     {
         // Implement PayPal payment processing logic here
+        // Include currency handling
+        $currency = Currency::where('code', $payment->currency)->firstOrFail();
+        // Use $currency->code for PayPal API calls
     }
 
     private function processStripePayment(Payment $payment, PaymentGateway $gateway)
     {
         // Implement Stripe payment processing logic here
+        // Include currency handling
+        $currency = Currency::where('code', $payment->currency)->firstOrFail();
+        // Use $currency->code for Stripe API calls
     }
 
     private function processAuthorizeNetPayment(Payment $payment, PaymentGateway $gateway)
     {
         // Implement Authorize.net payment processing logic here
+        // Include currency handling
+        $currency = Currency::where('code', $payment->currency)->firstOrFail();
+        // Use $currency->code for Authorize.net API calls
     }
 }

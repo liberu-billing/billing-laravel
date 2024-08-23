@@ -101,11 +101,19 @@ class BillingService
             return ['success' => false, 'message' => 'No default payment method found'];
         }
         
+        // Convert the invoice amount to the customer's preferred currency if different
+        $amount = $invoice->total_amount;
+        $currency = $invoice->currency;
+        if ($customer->preferred_currency && $customer->preferred_currency !== $invoice->currency) {
+            $amount = $this->convertCurrency($amount, $invoice->currency, $customer->preferred_currency);
+            $currency = $customer->preferred_currency;
+        }
+        
         $payment = new Payment([
             'invoice_id' => $invoice->id,
             'payment_gateway_id' => $paymentMethod->payment_gateway_id,
-            'amount' => $invoice->total_amount,
-            'currency' => $invoice->currency,
+            'amount' => $amount,
+            'currency' => $currency,
             'payment_method' => $paymentMethod->type,
         ]);
         
