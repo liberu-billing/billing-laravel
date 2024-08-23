@@ -4,21 +4,52 @@ namespace App\Services;
 
 use App\Models\PaymentGateway;
 use App\Models\Payment;
-use Stripe\Stripe;
-use Stripe\Charge;
-use Stripe\Exception\CardException;
+use Illuminate\Support\Facades\Log;
 
 class PaymentGatewayService
 {
-    public function processPayment(Payment $payment, $stripeToken = null)
+    private $maxRetries = 3;
+    private $retryDelay = 5; // seconds
+
+    public function processPayment(Payment $payment)
     {
         $gateway = $payment->paymentGateway;
+        $retries = 0;
 
+        while ($retries < $this->maxRetries) {
+            try {
+                $result = $this->attemptPayment($payment, $gateway);
+                Log::info('Payment processed successfully', ['payment_id' => $payment->id, 'attempt' => $retries + 1]);
+                return $result;
+            } catch (\Exception $e) {
+                $retries++;
+                Log::warning('Payment attempt failed', [
+                    'payment_id' => $payment->id,
+                    'attempt' => $retries,
+                    'error' => $e->getMessage()
+                ]);
+
+                if ($retries >= $this->maxRetries) {
+                    Log::error('Payment processing failed after max retries', [
+                        'payment_id' => $payment->id,
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString()
+                    ]);
+                    throw $e;
+                }
+
+                sleep($this->retryDelay);
+            }
+        }
+    }
+
+    private function attemptPayment(Payment $payment, PaymentGateway $gateway)
+    {
         switch ($gateway->name) {
             case 'PayPal':
                 return $this->processPayPalPayment($payment, $gateway);
             case 'Stripe':
-                return $this->processStripePayment($payment, $gateway, $stripeToken);
+                return $this->processStripePayment($payment, $gateway);
             case 'Authorize.net':
                 return $this->processAuthorizeNetPayment($payment, $gateway);
             default:
@@ -31,36 +62,9 @@ class PaymentGatewayService
         // Implement PayPal payment processing logic here
     }
 
-    private function processStripePayment(Payment $payment, PaymentGateway $gateway, $stripeToken)
+    private function processStripePayment(Payment $payment, PaymentGateway $gateway)
     {
-        if (!$stripeToken) {
-            throw new \Exception('Stripe token is required for payment processing');
-        }
-
-        Stripe::setApiKey($gateway->secret_key);
-
-        try {
-            $charge = Charge::create([
-                'amount' => $payment->amount * 100, // Amount in cents
-                'currency' => $payment->currency,
-                'source' => $stripeToken,
-                'description' => "Payment for invoice #{$payment->invoice_id}",
-            ]);
-
-            $payment->transaction_id = $charge->id;
-            $payment->save();
-
-            return [
-                'success' => true,
-                'message' => 'Payment processed successfully',
-                'transaction_id' => $charge->id,
-            ];
-        } catch (CardException $e) {
-            return [
-                'success' => false,
-                'message' => $e->getMessage(),
-            ];
-        }
+        // Implement Stripe payment processing logic here
     }
 
     private function processAuthorizeNetPayment(Payment $payment, PaymentGateway $gateway)
