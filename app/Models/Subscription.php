@@ -36,7 +36,9 @@ class Subscription extends Model
 
     public function renew()
     {
-        $this->end_date = Carbon::parse($this->end_date)->add($this->renewal_period);
+        $renewalPeriod = $this->getRenewalPeriod();
+        $this->end_date = Carbon::parse($this->end_date)->add($renewalPeriod);
+        $this->status = 'active';
         $this->save();
     }
 
@@ -48,5 +50,21 @@ class Subscription extends Model
     public function isDomainActive()
     {
         return $this->domain_name && $this->domain_expiration_date && $this->domain_expiration_date->isFuture();
+    }
+
+    private function getRenewalPeriod()
+    {
+        switch ($this->renewal_period) {
+            case 'monthly':
+                return '1 month';
+            case 'quarterly':
+                return '3 months';
+            case 'semi-annually':
+                return '6 months';
+            case 'annually':
+                return '1 year';
+            default:
+                return '1 month'; // Default to monthly if not specified
+        }
     }
 }
