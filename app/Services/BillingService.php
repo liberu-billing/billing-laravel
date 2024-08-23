@@ -6,15 +6,16 @@ use App\Models\Invoice;
 use App\Models\Subscription;
 use App\Models\Customer;
 use App\Models\HostingAccount;
+use App\Models\Invoice_Item;
 use Carbon\Carbon;
 
 class BillingService
 {
-    protected $hostingService;
+    protected $serviceProvisioningService;
 
-    public function __construct(HostingService $hostingService)
+    public function __construct(ServiceProvisioningService $serviceProvisioningService)
     {
-        $this->hostingService = $hostingService;
+        $this->serviceProvisioningService = $serviceProvisioningService;
     }
 
     public function generateInvoice(Subscription $subscription)
@@ -72,9 +73,9 @@ class BillingService
             ]);
 
             if ($invoice->status === 'paid') {
-                $this->ensureHostingAccountActive($subscription);
+                $this->serviceProvisioningService->manageService($subscription, 'unsuspend');
             } else {
-                $this->suspendHostingAccount($subscription);
+                $this->serviceProvisioningService->manageService($subscription, 'suspend');
             }
         }
     }
@@ -87,28 +88,12 @@ class BillingService
 
         foreach ($overdueInvoices as $invoice) {
             // TODO: Send overdue reminder email
-            $this->suspendHostingAccount($invoice->subscription);
+            $this->serviceProvisioningService->manageService($invoice->subscription, 'suspend');
         }
     }
 
     private function generateInvoiceNumber()
     {
         return 'INV-' . strtoupper(uniqid());
-    }
-
-    private function ensureHostingAccountActive(Subscription $subscription)
-    {
-        $hostingAccount = HostingAccount::where('subscription_id', $subscription->id)->first();
-        if ($hostingAccount && !$hostingAccount->isActive()) {
-            $this->hostingService->unsuspendAccount($hostingAccount);
-        }
-    }
-
-    private function suspendHostingAccount(Subscription $subscription)
-    {
-        $hostingAccount = HostingAccount::where('subscription_id', $subscription->id)->first();
-        if ($hostingAccount && $hostingAccount->isActive()) {
-            $this->hostingService->suspendAccount($hostingAccount);
-        }
     }
 }
