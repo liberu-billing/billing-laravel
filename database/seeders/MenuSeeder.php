@@ -16,38 +16,53 @@ class MenuSeeder extends Seeder
                 'order' => 1
             ],
             [
-                'name' => 'Properties',
-                'url' => '/properties',
-                'order' => 2,
+                'name' => 'Dashboard',
+                'url' => '/dashboard',
+                'order' => 2
+            ],
+            [
+                'name' => 'Invoices',
+                'url' => '/invoices',
+                'order' => 3,
                 'children' => [
-                    ['name' => 'For Sale', 'url' => '/properties/for-sale', 'order' => 1],
-                    ['name' => 'For Rent', 'url' => '/properties/for-rent', 'order' => 2],
+                    ['name' => 'All Invoices', 'url' => '/invoices/all', 'order' => 1],
+                    ['name' => 'Create Invoice', 'url' => '/invoices/create', 'order' => 2],
+                    ['name' => 'Recurring Invoices', 'url' => '/invoices/recurring', 'order' => 3],
                 ]
             ],
             [
-                'name' => 'Services',
-                'url' => '/services',
-                'order' => 3,
+                'name' => 'Payments',
+                'url' => '/payments',
+                'order' => 4,
                 'children' => [
-                    ['name' => 'Buying', 'url' => '/services/buying', 'order' => 1],
-                    ['name' => 'Selling', 'url' => '/services/selling', 'order' => 2],
-                    ['name' => 'Renting', 'url' => '/services/renting', 'order' => 3],
+                    ['name' => 'Payment History', 'url' => '/payments/history', 'order' => 1],
+                    ['name' => 'Make Payment', 'url' => '/payments/make', 'order' => 2],
                 ]
+            ],
+            [
+                'name' => 'Clients',
+                'url' => '/clients',
+                'order' => 5
+            ],
+            [
+                'name' => 'Reports',
+                'url' => '/reports',
+                'order' => 6
+            ],
+            [
+                'name' => 'Affiliates',
+                'url' => '/affiliates',
+                'order' => 7
             ],
             [
                 'name' => 'About',
                 'url' => '/about',
-                'order' => 4
+                'order' => 8
             ],
             [
                 'name' => 'Contact',
                 'url' => '/contact',
-                'order' => 5
-            ],
-            [
-                'name' => 'Calculators',
-                'url' => '/calculators',
-                'order' => 6
+                'order' => 9
             ],
         ];
 

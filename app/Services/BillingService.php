@@ -10,6 +10,8 @@ use App\Models\Invoice_Item;
 use App\Models\Payment;
 use App\Services\PaymentGatewayService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OverdueInvoiceReminder;
 
 class BillingService
 {
@@ -46,7 +48,9 @@ class BillingService
             'currency' => $currency,
         ]);
 
-        // TODO: Send invoice email
+        // Send invoice email
+        $invoice->sendInvoiceEmail();
+
         return $invoice;
     }
     
@@ -126,13 +130,40 @@ class BillingService
             ->get();
 
         foreach ($overdueInvoices as $invoice) {
-            // TODO: Send overdue reminder email
+            // Send overdue reminder email
+            $this->sendOverdueReminderEmail($invoice);
             $this->serviceProvisioningService->manageService($invoice->subscription, 'suspend');
         }
+    }
+
+    private function sendOverdueReminderEmail(Invoice $invoice)
+    {
+        $customer = $invoice->customer;
+        $data = [
+            'customer_name' => $customer->name,
+            'invoice_number' => $invoice->invoice_number,
+            'due_date' => $invoice->due_date->format('Y-m-d'),
+            'amount' => $invoice->total_amount,
+            'currency' => $invoice->currency,
+        ];
+
+        Mail::to($customer->email)->send(new OverdueInvoiceReminder($data));
     }
 
     private function generateInvoiceNumber()
     {
         return 'INV-' . strtoupper(uniqid());
+    }
+
+    public function handlePartialPayment(Invoice $invoice, float $amount, int $paymentGatewayId)
+    {
+        $partialPaymentService = new PartialPaymentService(new PaymentGatewayService());
+        return $partialPaymentService->processPartialPayment($invoice, $amount, $paymentGatewayId);
+    }
+
+    public function handleRefund(Payment $payment, float $amount)
+    {
+        $refundService = new RefundService(new PaymentGatewayService());
+        return $refundService->processRefund($payment, $amount);
     }
 }

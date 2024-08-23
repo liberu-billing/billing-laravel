@@ -46,7 +46,7 @@ class PaymentGatewayService
             }
         }
     }
-
+  
     private function attemptPayment(Payment $payment, PaymentGateway $gateway)
     {
         switch ($gateway->name) {
@@ -102,6 +102,10 @@ class PaymentGatewayService
             $payment->update(['status' => 'failed']);
             throw new \Exception('Payment failed: ' . $e->getMessage());
         }
+        // Implement Stripe payment processing logic here
+        // Include currency handling
+        $currency = Currency::where('code', $payment->currency)->firstOrFail();
+        // Use $currency->code for Stripe API calls
     }
 
     private function processAuthorizeNetPayment(Payment $payment, PaymentGateway $gateway)

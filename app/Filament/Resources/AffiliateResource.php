@@ -78,29 +78,6 @@ class AffiliateResource extends Resource
             ]);
     }
 
-    public static function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                Tables\Columns\TextColumn::make('user.name'),
-                Tables\Columns\TextColumn::make('code'),
-                Tables\Columns\TextColumn::make('commission_rate'),
-                Tables\Columns\TextColumn::make('status'),
-                Tables\Columns\TextColumn::make('total_earnings')
-                    ->money('usd')
-                    ->sortable(),
-            ])
-            ->filters([
-                //
-            ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
-            ]);
-    }
-
     public static function getRelations(): array
     {
         return [
