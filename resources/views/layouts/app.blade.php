@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ \App\Helpers\SiteSettingsHelper::get('name') }}</title>
+    <title>                   
+             {{ \App\Helpers\SiteSettingsHelper::get()->name }}
+    </title>
 
     @if(config('googletagmanager.id'))
         @include('googletagmanager::head')
@@ -21,13 +23,12 @@
     @endif
 
     <div class="min-h-screen bg-gray-100 flex flex-col">
-        @include('components.home-navbar')
+        <x-home-navbar/>
 
         <main class="flex-grow">
             @yield('content')
         </main>
-
-        @include('components.footer')
+        <x-footer/>
     </div>
 
     <!-- Scripts -->
