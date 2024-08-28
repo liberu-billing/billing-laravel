@@ -13,12 +13,12 @@ class RolesSeeder extends Seeder
      */
     public function run(): void
     {
-        $adminRole = Role::firstOrCreate(['name' => 'admin']);
+        $roles = ['admin', 'staff', 'client', 'free'];
         $permissions = Permission::where('guard_name', 'web')->pluck('id')->toArray();
-        $adminRole->syncPermissions($permissions);
 
-        $freeRole = Role::firstOrCreate(['name' => 'free']);
-        $freePermissions = Permission::where('guard_name', 'web')->pluck('id')->toArray();
-        $freeRole->syncPermissions($freePermissions);
+        foreach ($roles as $roleName) {
+            $role = Role::firstOrCreate(['name' => $roleName]);
+            $role->syncPermissions($permissions);
+        }
     }
 }
