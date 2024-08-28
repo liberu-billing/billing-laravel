@@ -10,5 +10,9 @@ export default {
         './app/Filament/**/*.php',
         './resources/views/filament/**/*.blade.php',
         './vendor/filament/**/*.blade.php',
+        'node_modules/preline/dist/*.js',
+    ],
+    plugins: [
+        require('preline/plugin'),
     ],
 };
