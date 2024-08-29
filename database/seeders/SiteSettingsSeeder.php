@@ -4,12 +4,13 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\SiteSettings;
+use Intelrx\Sitesettings\SiteConfig;
 
 class SiteSettingsSeeder extends Seeder
 {
     public function run()
     {
-        SiteSettings::create([
+        $data = [
             'name' => config('app.name', 'Liberu '),
             'currency' => '£',
             'default_language' => 'en',
@@ -24,6 +25,10 @@ class SiteSettingsSeeder extends Seeder
             'twitter' => 'https://twitter.com/liberusoftware',
             'github' => 'https://Github.com/liberusoftware',
             'youtube' => 'https://YouTube.com/@liberusoftware',
-        ]);
+        ];
+
+        foreach ($data as $key => $value) {
+            SiteConfig::store($key, $value);
+        }
     }
 }
