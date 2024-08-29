@@ -101,8 +101,8 @@ class AppPanelProvider extends PanelProvider
         if (Features::hasTeamFeatures()) {
             $panel
                 ->tenant(Team::class, ownershipRelationship: 'team')
-                ->tenantRegistration(Pages\CreateTeam::class)
-                ->tenantProfile(Pages\EditTeam::class)
+                // ->tenantRegistration(Pages\CreateTeam::class)
+                // ->tenantProfile(Pages\EditTeam::class)
                 ->userMenuItems([
                     MenuItem::make()
                         ->label('Team Settings')
@@ -131,10 +131,10 @@ class AppPanelProvider extends PanelProvider
         /**
          * Listen and create personal team for new accounts.
          */
-        Event::listen(
-            Registered::class,
-            CreatePersonalTeam::class,
-        );
+        // Event::listen(
+        //     Registered::class,
+        //     CreatePersonalTeam::class,
+        // );
 
         /**
          * Listen and switch team if tenant was changed.
