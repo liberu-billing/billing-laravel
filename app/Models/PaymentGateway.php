@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\HasTeam;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class PaymentGateway extends Model
 {
     use HasFactory;
+    use HasTeam;
 
     protected $fillable = [
         'name',
