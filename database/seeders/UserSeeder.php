@@ -15,6 +15,9 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        $team = Team::firstOrFail();
+        setPermissionsTeamId($team->id);
+        
         $adminUser = User::create([
             'name' => 'Admin User',
             'email' => 'admin@example.com',
@@ -24,7 +27,7 @@ class UserSeeder extends Seeder
         $adminUser->assignRole('admin');
 
         // Create teams for admin and staff users
-        $this->createTeamForUser($adminUser);
+        // $this->createTeamForUser($adminUser);
     }
 
     private function createTeamForUser($user)
