@@ -84,7 +84,7 @@ class AppPanelProvider extends PanelProvider
                 TeamsPermission::class,
             ])
             ->plugins([
-                // \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make()
+                \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make()
             ]);
 
         // if (Features::hasApiFeatures()) {
@@ -131,10 +131,10 @@ class AppPanelProvider extends PanelProvider
         /**
          * Listen and create personal team for new accounts.
          */
-        Event::listen(
-            Registered::class,
-            CreatePersonalTeam::class,
-        );
+        // Event::listen(
+        //     Registered::class,
+        //     CreatePersonalTeam::class,
+        // );
 
         /**
          * Listen and switch team if tenant was changed.

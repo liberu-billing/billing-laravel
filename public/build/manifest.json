@@ -1,6 +1,10 @@
 {
   "resources/css/app.css": {
+<<<<<<< HEAD
     "file": "assets/app-DV5gKpDM.css",
+=======
+    "file": "assets/app-Bdw4Ptjm.css",
+>>>>>>> recover
     "src": "resources/css/app.css",
     "isEntry": true
   },

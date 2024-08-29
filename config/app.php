@@ -172,7 +172,7 @@ return [
         App\Providers\Filament\AppPanelProvider::class,
         App\Providers\RouteServiceProvider::class,
 
-        App\Providers\TeamServiceProvider::class,
+        // App\Providers\TeamServiceProvider::class,
         App\Providers\JetstreamServiceProvider::class,
         App\Providers\FortifyServiceProvider::class,
     ])->toArray(),
