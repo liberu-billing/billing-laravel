@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Team;
 use App\Models\User;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -22,22 +23,8 @@ class UserSeeder extends Seeder
         ]);
         $adminUser->assignRole('admin');
 
-        // $staffUser = User::create([
-        //     'name' => 'Staff User',
-        //     'email' => 'staff@example.com',
-        //     'password' => Hash::make('password'),
-        //     'email_verified_at' => now(),
-        // ]);
-        // $staffUser->assignRole('staff');
-
         // Create teams for admin and staff users
-       $this->createTeamForUser($adminUser);
-        // $this->createTeamForUser($staffUser);
-
-        // Create additional users with teams
-   //     User::factory(8)->create()->each(function ($user) {
-   //         $this->createTeamForUser($user);
-//        });
+        $this->createTeamForUser($adminUser);
     }
 
     private function createTeamForUser($user)
