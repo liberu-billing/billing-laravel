@@ -13,12 +13,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // User::factory(10)->withPersonalTeam()->create();
+
         $this->call([
             SiteSettingsSeeder::class,
-            MenuSeeder::class,
+            PermissionsTableSeeder::class,
             RolesSeeder::class,
-            TeamSeeder::class,
+            DefaultTeamSeeder::class,
             UserSeeder::class,
+            MenuSeeder::class,
         ]);
     }
 }
