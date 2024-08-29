@@ -15,6 +15,9 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        $team = Team::firstOrFail();
+        setPermissionsTeamId($team->id);
+        
         $adminUser = User::create([
             'name' => 'Admin User',
             'email' => 'admin@example.com',

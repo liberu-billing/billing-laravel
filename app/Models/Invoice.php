@@ -5,11 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Mail\InvoiceGenerated;
+use App\Traits\HasTeam;
 use Illuminate\Support\Facades\Mail;
 
 class Invoice extends Model
 {
     use HasFactory;
+    use HasTeam;
 
     protected $fillable = [
         'customer_id',

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
+use BezhanSalleh\FilamentShield\Support\Utils;
 use Exception;
 
 class CreateNewUser implements CreatesNewUsers
@@ -41,15 +42,17 @@ class CreateNewUser implements CreatesNewUsers
 
            
             $user = DB::transaction(function () use ($input) {
+                $team = $this->configureDefaultTeamContext();
                 return tap(User::create([
                     'name'     => $input['name'],
                     'email'    => $input['email'],
                     'password' => Hash::make($input['password']),
-                ]), function (User $user) use ($input) {
-                    $team = $this->assignOrCreateTeam($user);
+                ]), function (User $user) use ($input, $team) {    
+                    $team->users()->attach($user);
                     $user->switchTeam($team);
                     setPermissionsTeamId($team->id);
-                    // $user->assignRole($input['role']);
+                    $user = User::find($user->id);
+                    $user->assignRole("panel_user");
                 });
             });
             // $user = DB::transaction(function () use ($input) {
@@ -116,15 +119,14 @@ class CreateNewUser implements CreatesNewUsers
     }
 
     /**
-     * Assign the user to the first team or create a personal team.
+     * Set the default team context.
      *
      * @throws \Exception
      */
-    protected function assignOrCreateTeam(User $user): Team
+    protected function configureDefaultTeamContext(): Team
     {
         $team = Team::first();
-    
-        $team->users()->attach($user);
+        setPermissionsTeamId($team->id);
         return $team;
     }
 }
