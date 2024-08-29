@@ -8,7 +8,7 @@ return new class extends Migration
 {
 
     protected $tables = [
-        'payments', 'affiliates', 'site_settings', 'customers', 'products_services', 'invoices',
+        'payments', 'affiliates',  'customers', 'products_services', 'invoices',
         'subscriptions', 'credits', 'currencies', 'hosting_accounts', 'menus', 'payment_gateways'
     ];
 
