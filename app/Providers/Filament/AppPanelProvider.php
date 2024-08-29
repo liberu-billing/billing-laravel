@@ -84,7 +84,7 @@ class AppPanelProvider extends PanelProvider
                 TeamsPermission::class,
             ])
             ->plugins([
-                // \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make()
+                \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make()
             ]);
 
         // if (Features::hasApiFeatures()) {
@@ -101,8 +101,8 @@ class AppPanelProvider extends PanelProvider
         if (Features::hasTeamFeatures()) {
             $panel
                 ->tenant(Team::class, ownershipRelationship: 'team')
-                // ->tenantRegistration(Pages\CreateTeam::class)
-                // ->tenantProfile(Pages\EditTeam::class)
+                ->tenantRegistration(Pages\CreateTeam::class)
+                ->tenantProfile(Pages\EditTeam::class)
                 ->userMenuItems([
                     MenuItem::make()
                         ->label('Team Settings')
