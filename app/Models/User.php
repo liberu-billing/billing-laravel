@@ -97,7 +97,7 @@ class User extends Authenticatable implements HasDefaultTenant, HasTenants, Fila
      */
     public function getTenants(Panel $panel): array|Collection
     {
-        return $this->ownedTeams;
+        return $this->teams;
     }
 
     public function canAccessTenant(Model $tenant): bool

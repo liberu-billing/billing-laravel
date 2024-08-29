@@ -27,7 +27,7 @@ class UserSeeder extends Seeder
         $adminUser->assignRole('admin');
 
         // Create teams for admin and staff users
-        // $this->createTeamForUser($adminUser);
+        $this->createTeamForUser($adminUser);
     }
 
     private function createTeamForUser($user)
