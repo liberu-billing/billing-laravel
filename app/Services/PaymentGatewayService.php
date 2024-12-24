@@ -45,6 +45,13 @@ class PaymentGatewayService
         while ($retries < $this->maxRetries) {
             try {
                 $result = $this->attemptPayment($payment, $gateway);
+                
+                // Trigger reconciliation after successful payment
+                if ($result) {
+                    app(PaymentReconciliationService::class)->reconcilePayment($payment);
+                }
+                
+                Log::info('Payment processed successfully', ['payment_id' => $payment->id, 'attempt' => $retries + 1]);
                 Log::info('Payment processed successfully', [
                     'payment_id' => $payment->id, 
                     'attempt' => $retries + 1,
