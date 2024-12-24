@@ -8,42 +8,40 @@ use Spatie\Permission\Models\Role;
 
 class RolesSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // Create roles
-        $superAdmin = Role::firstOrCreate(['name' => 'super_admin']);
-        $admin = Role::firstOrCreate(['name' => 'admin']);
-        $staff = Role::firstOrCreate(['name' => 'staff']);
-        $client = Role::firstOrCreate(['name' => 'client']);
-        $free = Role::firstOrCreate(['name' => 'free']);
+        // Create base permissions
+        $permissions = [
+            // User management
+            'view_users', 'create_users', 'edit_users', 'delete_users',
+            // Role management
+            'view_roles', 'create_roles', 'edit_roles', 'delete_roles',
+            // Permission management
+            'view_permissions', 'assign_permissions',
+            // Team management
+            'view_teams', 'create_teams', 'edit_teams', 'delete_teams',
+            // Billing
+            'view_billing', 'manage_billing',
+            // Settings
+            'view_settings', 'manage_settings',
+        ];
 
-        // Get all permissions
-        $permissions = Permission::all();
+        foreach ($permissions as $permission) {
+            Permission::firstOrCreate(['name' => $permission]);
+        }
 
-        // Assign permissions to roles
-        $superAdmin->syncPermissions($permissions);
-        
-        $adminPermissions = $permissions->filter(function ($permission) {
-            return !str_contains($permission->name, ['role', 'permission']);
-        });
-        $admin->syncPermissions($adminPermissions);
+        // Create roles and assign permissions
+        $roles = [
+            'super_admin' => $permissions,
+            'admin' => array_filter($permissions, fn($p) => !str_contains($p, ['roles', 'permissions'])),
+            'staff' => array_filter($permissions, fn($p) => str_contains($p, ['view', 'create', 'edit'])),
+            'client' => array_filter($permissions, fn($p) => str_contains($p, ['view'])),
+            'free' => ['view_billing']
+        ];
 
-        $staffPermissions = $permissions->filter(function ($permission) {
-            return str_contains($permission->name, ['view', 'create', 'update']);
-        });
-        $staff->syncPermissions($staffPermissions);
-
-        $clientPermissions = $permissions->filter(function ($permission) {
-            return str_contains($permission->name, ['view']);
-        });
-        $client->syncPermissions($clientPermissions);
-        
-        $freePermissions = $permissions->filter(function ($permission) {
-            return str_contains($permission->name, ['view']);
-        });
-        $free->syncPermissions($freePermissions);
+        foreach ($roles as $roleName => $rolePermissions) {
+            $role = Role::firstOrCreate(['name' => $roleName]);
+            $role->syncPermissions($rolePermissions);
+        }
     }
 }
