@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\HostingAccount;
 use App\Models\Invoice_Item;
 use App\Models\Payment;
+use App\Models\SubscriptionPlan;
 use App\Models\RecurringBillingConfiguration;
 use App\Models\UsageRecord;
 use App\Services\PaymentGatewayService;
@@ -21,17 +22,113 @@ class BillingService
     protected $serviceProvisioningService;
     protected $paymentPlanService;
     protected $currencyService;
+    protected $paymentGatewayService;
     protected $pricingService;
+
 
     public function __construct(
         ServiceProvisioningService $serviceProvisioningService,
         CurrencyService $currencyService,
         PaymentPlanService $paymentPlanService = null,
+        PaymentGatewayService $paymentGatewayService = null
         PricingService $pricingService = null
     ) {
         $this->serviceProvisioningService = $serviceProvisioningService;
         $this->currencyService = $currencyService;
         $this->paymentPlanService = $paymentPlanService ?? new PaymentPlanService($this);
+        $this->paymentGatewayService = $paymentGatewayService ?? new PaymentGatewayService();
+    }
+
+    public function createSubscription(Customer $customer, SubscriptionPlan $plan, string $billingCycle)
+    {
+        $subscription = new Subscription([
+            'customer_id' => $customer->id,
+            'subscription_plan_id' => $plan->id,
+            'start_date' => now(),
+            'end_date' => $this->calculateEndDate($billingCycle),
+            'renewal_period' => $billingCycle,
+            'status' => 'pending',
+            'price' => $plan->price,
+            'currency' => $plan->currency,
+            'auto_renew' => true
+        ]);
+        
+        $subscription->save();
+        
+        // Generate initial invoice
+        $invoice = $this->generateInvoice($subscription);
+        
+        return $subscription;
+    }
+
+    public function upgradeSubscription(Subscription $subscription, SubscriptionPlan $newPlan)
+    {
+        // Calculate prorated amount
+        $proratedAmount = $this->calculateProratedAmount(
+            $subscription->price,
+            $newPlan->price,
+            $subscription->end_date
+        );
+        
+        // Generate upgrade invoice
+        $invoice = $this->generateInvoice($subscription, $proratedAmount);
+        
+        $subscription->update([
+            'subscription_plan_id' => $newPlan->id,
+            'price' => $newPlan->price
+        ]);
+        
+        return $invoice;
+    }
+
+    public function cancelSubscription(Subscription $subscription)
+    {
+        $subscription->update([
+            'status' => 'cancelled',
+            'auto_renew' => false,
+            'cancelled_at' => now()
+        ]);
+        
+        // Handle any refunds if necessary
+        if ($subscription->end_date->isFuture()) {
+            $refundAmount = $this->calculateRefundAmount($subscription);
+            if ($refundAmount > 0) {
+                $this->processRefund($subscription->lastPayment, $refundAmount);
+            }
+        }
+        
+        return true;
+    }
+
+    private function calculateProratedAmount($oldPrice, $newPrice, $endDate)
+    {
+        $daysRemaining = now()->diffInDays($endDate);
+        $totalDays = 30; // Assuming monthly billing
+        
+        $oldAmount = ($oldPrice / $totalDays) * $daysRemaining;
+        $newAmount = ($newPrice / $totalDays) * $daysRemaining;
+        
+        return $newAmount - $oldAmount;
+    }
+
+    private function calculateEndDate($billingCycle)
+    {
+        return match($billingCycle) {
+            'monthly' => now()->addMonth(),
+            'quarterly' => now()->addMonths(3),
+            'semi-annually' => now()->addMonths(6),
+            'annually' => now()->addYear(),
+            default => now()->addMonth(),
+        };
+    }
+
+    private function calculateRefundAmount(Subscription $subscription)
+    {
+        $daysRemaining = now()->diffInDays($subscription->end_date);
+        $totalDays = $subscription->start_date->diffInDays($subscription->end_date);
+        
+        return ($subscription->price / $totalDays) * $daysRemaining;
+=======
         $this->pricingService = $pricingService ?? new PricingService();
     }
 
