@@ -6,19 +6,16 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\AuditLogResource\Pages;
 use App\Models\AuditLog;
-use Filament\Forms;
 use Filament\Resources\Resource;
+use Filament\Resources\Table;
 use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
+use Filament\Forms;
 
 class AuditLogResource extends Resource
 {
     protected static ?string $model = AuditLog::class;
-
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
-
-    protected static ?string $navigationGroup = 'Settings';
+    protected static ?string $navigationIcon = 'heroicon-o-clipboard-list';
+    protected static ?string $navigationGroup = 'Administration';
 
     public static function table(Table $table): Table
     {
@@ -28,44 +25,22 @@ class AuditLogResource extends Resource
                     ->dateTime()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('user.name')
-                    ->label('User')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('action')
+                Tables\Columns\TextColumn::make('event')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('entity_type')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('entity_id')
+                Tables\Columns\TextColumn::make('auditable_type')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('ip_address')
                     ->searchable(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('action')
-                    ->options(fn () => AuditLog::distinct()->pluck('action', 'action')),
+                Tables\Filters\SelectFilter::make('event'),
                 Tables\Filters\Filter::make('created_at')
                     ->form([
-                        Forms\Components\DatePicker::make('created_from'),
-                        Forms\Components\DatePicker::make('created_until'),
-                    ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query
-                            ->when(
-                                $data['created_from'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
-                            )
-                            ->when(
-                                $data['created_until'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
-                            );
-                    })
+                        Forms\Components\DatePicker::make('from'),
+                        Forms\Components\DatePicker::make('until'),
+                    ]),
             ])
             ->defaultSort('created_at', 'desc');
-    }
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => Pages\ListAuditLogs::route('/'),
-        ];
     }
 }
