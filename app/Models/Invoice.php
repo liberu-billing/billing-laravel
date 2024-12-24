@@ -232,6 +232,14 @@ class Invoice extends Model
             $this->late_fee_amount += $fee;
             $this->last_late_fee_date = now();
             $this->save();
+
+            // Log the late fee application
+            app(AuditLogService::class)->log(
+                'late_fee_applied',
+                $this,
+                ['previous_late_fee' => $this->late_fee_amount - $fee],
+                ['new_late_fee' => $this->late_fee_amount]
+            );
         }
         return $fee;
     }
@@ -244,6 +252,15 @@ class Invoice extends Model
     public function getFormattedTotalWithLateFeeAttribute()
     {
         return number_format($this->total_with_late_fee, 2) . ' ' . $this->currency;
+    }
+
+    public function getRemainingLateFeeAttribute()
+    {
+        $config = LateFeeConfiguration::where('team_id', $this->team_id)->first();
+        if (!$config || !$config->max_fee_amount) {
+            return null;
+        }
+        return max(0, $config->max_fee_amount - $this->late_fee_amount);
     }
 
     public function recurringConfiguration()

@@ -319,7 +319,21 @@ class BillingService
             ->get();
 
         foreach ($pendingInvoices as $invoice) {
-            $invoice->applyLateFee();
+            try {
+                $fee = $invoice->applyLateFee();
+                if ($fee > 0) {
+                    // Attempt automatic payment for the late fee
+                    $this->processAutomaticPayment($invoice);
+                    
+                    // Send late fee notification
+                    $this->sendLateFeeNotification($invoice, $fee);
+                }
+            } catch (\Exception $e) {
+                Log::error('Failed to process late fee', [
+                    'invoice_id' => $invoice->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
         }
     }
 
@@ -330,11 +344,25 @@ class BillingService
             'customer_name' => $customer->name,
             'invoice_number' => $invoice->invoice_number,
             'due_date' => $invoice->due_date->format('Y-m-d'),
-            'amount' => $invoice->total_amount,
+            'amount' => $invoice->total_with_late_fee,
+            'original_amount' => $invoice->total_amount,
+            'late_fee_amount' => $invoice->late_fee_amount,
             'currency' => $invoice->currency,
         ];
 
         Mail::to($customer->email)->send(new OverdueInvoiceReminder($data));
+    }
+
+    private function sendLateFeeNotification(Invoice $invoice, $feeAmount)
+    {
+        $customer = $invoice->customer;
+        Mail::to($customer->email)->send(new LateFeeNotification([
+            'customer_name' => $customer->name,
+            'invoice_number' => $invoice->invoice_number,
+            'fee_amount' => $feeAmount,
+            'total_amount' => $invoice->total_with_late_fee,
+            'currency' => $invoice->currency,
+        ]));
     }
 
     private function generateInvoiceNumber()
