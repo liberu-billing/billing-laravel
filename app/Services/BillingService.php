@@ -16,14 +16,17 @@ use App\Mail\OverdueInvoiceReminder;
 class BillingService
 {
     protected $serviceProvisioningService;
+    protected $paymentPlanService;
     protected $currencyService;
 
     public function __construct(
         ServiceProvisioningService $serviceProvisioningService,
-        CurrencyService $currencyService
+        CurrencyService $currencyService,
+       PaymentPlanService $paymentPlanService = null
     ) {
         $this->serviceProvisioningService = $serviceProvisioningService;
         $this->currencyService = $currencyService;
+       $this->paymentPlanService = $paymentPlanService ?? new PaymentPlanService($this);
     }
 
     public function convertCurrency($amount, $fromCurrency, $toCurrency)
@@ -110,6 +113,20 @@ class BillingService
         $invoice->sendInvoiceEmail();
 
         return $invoice;
+    }
+
+    public function setupPaymentPlan(Invoice $invoice, $totalInstallments, $frequency = 'monthly')
+    {
+        if ($invoice->paymentPlan) {
+            throw new \Exception('Invoice already has a payment plan');
+        }
+
+        return $invoice->createPaymentPlan($totalInstallments, $frequency);
+    }
+
+    public function processPaymentPlans()
+    {
+        $this->paymentPlanService->processPaymentPlans();
     }
     
     public function convertCurrency($amount, $fromCurrency, $toCurrency)

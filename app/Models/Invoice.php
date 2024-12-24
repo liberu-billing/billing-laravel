@@ -22,6 +22,8 @@ class Invoice extends Model
         'total_amount',
         'currency',
         'status',
+        'parent_invoice_id',
+        'is_installment',
         'discount_id',
         'discount_amount',
         'invoice_template_id',
@@ -42,6 +44,20 @@ class Invoice extends Model
         return $this->belongsTo(Customer::class);
     }
 
+    public function paymentPlan()
+    {
+        return $this->hasOne(PaymentPlan::class);
+    }
+
+    public function parentInvoice()
+    {
+        return $this->belongsTo(Invoice::class, 'parent_invoice_id');
+    }
+
+    public function installments()
+    {
+        return $this->hasMany(Invoice::class, 'parent_invoice_id');
+    }
     public function discount()
     {
         return $this->belongsTo(Discount::class);
@@ -66,6 +82,35 @@ class Invoice extends Model
         Mail::to($this->customer->email)->send(new InvoiceGenerated($this));
     }
 
+    public function createPaymentPlan($totalInstallments, $frequency = 'monthly')
+    {
+        if ($this->is_installment) {
+            throw new \Exception('Cannot create payment plan for an installment invoice');
+        }
+
+        $installmentAmount = round($this->total_amount / $totalInstallments, 2);
+        $startDate = now();
+
+        return PaymentPlan::create([
+            'invoice_id' => $this->id,
+            'total_installments' => $totalInstallments,
+            'installment_amount' => $installmentAmount,
+            'frequency' => $frequency,
+            'start_date' => $startDate,
+            'next_due_date' => $this->calculateNextDueDate($startDate, $frequency),
+            'status' => 'active',
+        ]);
+    }
+
+    private function calculateNextDueDate($date, $frequency)
+    {
+        return match($frequency) {
+            'weekly' => $date->addWeek(),
+            'monthly' => $date->addMonth(),
+            'quarterly' => $date->addMonths(3),
+            default => $date->addMonth(),
+        };
+    }
     public function convertAmountTo($targetCurrency)
     {
         $currencyService = app(CurrencyService::class);
