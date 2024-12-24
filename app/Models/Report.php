@@ -1,5 +1,3 @@
-
-
 <?php
 
 namespace App\Models;
@@ -15,7 +13,10 @@ class Report extends Model
 
     protected $fillable = [
         'name',
-        'type',
+        'type', // revenue, expense, outstanding
+        'start_date',
+        'end_date',
+        'filters',
         'format',
         'parameters',
         'schedule',
@@ -24,6 +25,9 @@ class Report extends Model
     ];
 
     protected $casts = [
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
+        'filters' => 'array'
         'parameters' => 'array',
         'schedule' => 'array',
         'last_generated_at' => 'datetime'

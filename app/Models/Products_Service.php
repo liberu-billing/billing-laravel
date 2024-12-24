@@ -30,4 +30,9 @@ class Products_Service extends Model
         // For now, we'll return the base price
         return $this->base_price;
     }
+
+    public function invoiceItems()
+    {
+        return $this->hasMany(Invoice_Item::class, 'product_service_id');
+    }
 }
