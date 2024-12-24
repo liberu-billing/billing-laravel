@@ -32,6 +32,10 @@ class InvoiceGenerated extends Mailable
     {
         return new Content(
             view: 'emails.invoice-generated',
+            with: [
+                'invoice' => $this->invoice,
+                'template' => $this->invoice->template
+            ]
         );
     }
 

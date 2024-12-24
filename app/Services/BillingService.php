@@ -26,7 +26,12 @@ class BillingService
     {
         $customer = $subscription->customer;
         $amount = $subscription->productService->price;
-        $currency = $subscription->currency ?? 'USD'; // Default to USD if not specified
+        $currency = $subscription->currency ?? 'USD';
+
+        // Get default template or first available
+        $template = InvoiceTemplate::where('team_id', $customer->team_id)
+            ->where('is_default', true)
+            ->first() ?? InvoiceTemplate::where('team_id', $customer->team_id)->first();
 
         $invoice = Invoice::create([
             'customer_id' => $customer->id,
@@ -36,6 +41,7 @@ class BillingService
             'total_amount' => $amount,
             'currency' => $currency,
             'status' => 'pending',
+            'invoice_template_id' => $template?->id,
         ]);
 
         // Create invoice item
