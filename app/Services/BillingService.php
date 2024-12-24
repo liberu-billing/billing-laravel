@@ -16,10 +16,19 @@ use App\Mail\OverdueInvoiceReminder;
 class BillingService
 {
     protected $serviceProvisioningService;
+    protected $currencyService;
 
-    public function __construct(ServiceProvisioningService $serviceProvisioningService)
-    {
+    public function __construct(
+        ServiceProvisioningService $serviceProvisioningService,
+        CurrencyService $currencyService
+    ) {
         $this->serviceProvisioningService = $serviceProvisioningService;
+        $this->currencyService = $currencyService;
+    }
+
+    public function convertCurrency($amount, $fromCurrency, $toCurrency)
+    {
+        return $this->currencyService->convert($amount, $fromCurrency, $toCurrency);
     }
 
     public function generateInvoice(Subscription $subscription)
