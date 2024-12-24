@@ -33,3 +33,17 @@ Route::get('/team-invitations/{invitation}', [TeamInvitationController::class, '
     ->name('team-invitations.accept');
 
 require __DIR__.'/socialstream.php';
+
+
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+Route::middleware(['auth', '2fa'])->prefix('admin')->group(function () {
+    // Admin routes go here
+    Route::get('/dashboard', function () {
+        return view('admin.dashboard');
+    })->name('admin.dashboard');
+});
+
+require __DIR__.'/auth.php';
