@@ -4,17 +4,23 @@ namespace App\Http\Controllers;
 
 use App\Models\Payment;
 use App\Models\Currency;
+use App\Models\Invoice;
 use App\Services\PaymentGatewayService;
+use App\Services\CurrencyService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
     protected $paymentGatewayService;
+    protected $currencyService;
 
-    public function __construct(PaymentGatewayService $paymentGatewayService)
-    {
+    public function __construct(
+        PaymentGatewayService $paymentGatewayService,
+        CurrencyService $currencyService
+    ) {
         $this->paymentGatewayService = $paymentGatewayService;
+        $this->currencyService = $currencyService;
     }
 
     public function processPayment(Request $request)
@@ -25,9 +31,20 @@ class PaymentController extends Controller
             'payment_gateway_id' => 'required|exists:payment_gateways,id',
             'amount' => 'required|numeric|min:0',
             'payment_method' => 'required|string',
-            'currency' => 'required|string|in:USD,GBP,EUR',
+            'currency' => 'required|string|exists:currencies,code',
             'stripe_token' => 'required_if:payment_method,stripe|string',
         ]);
+
+        $invoice = Invoice::findOrFail($request->invoice_id);
+
+        // Convert amount if payment currency differs from invoice currency
+        if ($request->currency !== $invoice->currency) {
+            $validatedData['amount'] = $this->currencyService->convert(
+                $validatedData['amount'],
+                $invoice->currency,
+                $request->currency
+            );
+        }
 
         // Create a new payment
         $payment = Payment::create($validatedData);
