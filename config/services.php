@@ -35,4 +35,31 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('APP_URL').'/oauth/google/callback',
+        'scopes' => [
+            'https://www.googleapis.com/auth/calendar',
+            'https://www.googleapis.com/auth/calendar.events',
+        ],
+    ],
+
+    'slack' => [
+        'client_id' => env('SLACK_CLIENT_ID'), 
+        'client_secret' => env('SLACK_CLIENT_SECRET'),
+        'redirect' => env('APP_URL').'/oauth/slack/callback',
+        'scopes' => [
+            'channels:read',
+            'chat:write',
+            'team:read',
+        ],
+    ],
+
+    'trello' => [
+        'key' => env('TRELLO_KEY'),
+        'secret' => env('TRELLO_SECRET'),
+        'redirect' => env('APP_URL').'/oauth/trello/callback',
+        'scopes' => 'read,write',
+    ],
 ];
