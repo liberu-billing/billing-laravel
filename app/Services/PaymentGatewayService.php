@@ -53,15 +53,36 @@ class PaymentGatewayService
         }
     }
   
+    private function recordPaymentHistory(Payment $payment, $status, $notes = null)
+    {
+        PaymentHistory::create([
+            'payment_id' => $payment->id,
+            'invoice_id' => $payment->invoice_id,
+            'customer_id' => $payment->invoice->customer_id,
+            'amount' => $payment->amount,
+            'currency' => $payment->currency,
+            'payment_method' => $payment->payment_method,
+            'transaction_id' => $payment->transaction_id,
+            'status' => $status,
+            'notes' => $notes
+        ]);
+    }
+
     private function attemptPayment(Payment $payment, PaymentGateway $gateway)
     {
-        switch ($gateway->name) {
-            case 'PayPal':
-                return $this->processPayPalPayment($payment, $gateway);
-            case 'Stripe':
-                return $this->processStripePayment($payment, $gateway);
-            default:
-                throw new \Exception('Unsupported payment gateway');
+        try {
+            $result = match ($gateway->name) {
+                'PayPal' => $this->processPayPalPayment($payment, $gateway),
+                'Stripe' => $this->processStripePayment($payment, $gateway),
+                'Authorize.net' => $this->processAuthorizeNetPayment($payment, $gateway),
+                default => throw new \Exception('Unsupported payment gateway'),
+            };
+            
+            $this->recordPaymentHistory($payment, 'completed');
+            return $result;
+        } catch (\Exception $e) {
+            $this->recordPaymentHistory($payment, 'failed', $e->getMessage());
+            throw $e;
         }
     }
 
