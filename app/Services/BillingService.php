@@ -205,9 +205,25 @@ class BillingService
             ->get();
 
         foreach ($overdueInvoices as $invoice) {
+            // Apply late fee
+            $invoice->applyLateFee();
+            
             // Send overdue reminder email
             $this->sendOverdueReminderEmail($invoice);
+            
+            // Suspend service if applicable
             $this->serviceProvisioningService->manageService($invoice->subscription, 'suspend');
+        }
+    }
+
+    public function processLateFees()
+    {
+        $pendingInvoices = Invoice::where('status', 'pending')
+            ->where('due_date', '<', Carbon::now())
+            ->get();
+
+        foreach ($pendingInvoices as $invoice) {
+            $invoice->applyLateFee();
         }
     }
 
