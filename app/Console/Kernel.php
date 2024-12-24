@@ -22,6 +22,31 @@ class Kernel extends ConsoleKernel
             $billingService = new BillingService();
             $billingService->sendOverdueReminders();
         })->daily();
+
+        $schedule->call(function () {
+            $reports = Report::whereNotNull('schedule')->get();
+            foreach ($reports as $report) {
+                if ($this->shouldGenerateReport($report)) {
+                    app(ReportGenerationService::class)->generateReport($report);
+                    $report->update(['last_generated_at' => now()]);
+                }
+            }
+        })->hourly();
+    }
+
+    protected function shouldGenerateReport(Report $report): bool
+    {
+        if (!$report->last_generated_at) {
+            return true;
+        }
+
+        $schedule = $report->schedule;
+        return match($schedule['frequency']) {
+            'daily' => $report->last_generated_at->diffInDays(now()) >= 1,
+            'weekly' => $report->last_generated_at->diffInWeeks(now()) >= 1,
+            'monthly' => $report->last_generated_at->diffInMonths(now()) >= 1,
+            default => false
+        };
     }
 
     /**
