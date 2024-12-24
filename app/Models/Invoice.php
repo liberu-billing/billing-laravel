@@ -21,6 +21,7 @@ class Invoice extends Model
         'total_amount',
         'currency',
         'status',
+        'invoice_template_id',
     ];
     
     public function currency()
@@ -31,6 +32,11 @@ class Invoice extends Model
     public function customer()
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function template()
+    {
+        return $this->belongsTo(InvoiceTemplate::class, 'invoice_template_id');
     }
 
     public function sendInvoiceEmail()
