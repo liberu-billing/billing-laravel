@@ -200,6 +200,43 @@ class BillingService
 
     public function sendOverdueReminders()
     {
+        $teams = Team::all();
+        
+        foreach ($teams as $team) {
+            $settings = ReminderSetting::where('team_id', $team->id)
+                ->where('is_active', true)
+                ->first();
+                
+            if (!$settings) {
+                continue;
+            }
+            
+            $overdueInvoices = Invoice::where('team_id', $team->id)
+                ->where('due_date', '<', Carbon::now())
+                ->where('status', 'pending')
+                ->where(function ($query) use ($settings) {
+                    // Only get invoices that haven't exceeded max reminders
+                    $query->whereNull('reminder_count')
+                        ->orWhere('reminder_count', '<', $settings->max_reminders);
+                })
+                ->where(function ($query) use ($settings) {
+                    // Only get invoices that are due for a reminder
+                    $query->whereNull('last_reminder_date')
+                        ->orWhere('last_reminder_date', '<=', 
+                            Carbon::now()->subDays($settings->reminder_frequency));
+                })
+                ->get();
+
+            foreach ($overdueInvoices as $invoice) {
+                $this->sendOverdueReminderEmail($invoice);
+                
+                $invoice->update([
+                    'reminder_count' => ($invoice->reminder_count ?? 0) + 1,
+                    'last_reminder_date' => Carbon::now()
+                ]);
+                
+                $this->serviceProvisioningService->manageService($invoice->subscription, 'suspend');
+            }
         $overdueInvoices = Invoice::where('due_date', '<', Carbon::now())
             ->where('status', 'pending')
             ->get();
