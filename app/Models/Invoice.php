@@ -8,6 +8,7 @@ use App\Mail\InvoiceGenerated;
 use App\Services\CurrencyService;
 use App\Traits\HasTeam;
 use Illuminate\Support\Facades\Mail;
+use Carbon\Carbon;
 
 class Invoice extends Model
 {
@@ -27,11 +28,15 @@ class Invoice extends Model
         'discount_id',
         'discount_amount',
         'invoice_template_id',
+        'late_fee_amount',
+        'last_late_fee_date',
     ];
     
     protected $casts = [
         'issue_date' => 'datetime',
         'due_date' => 'datetime',
+        'last_late_fee_date' => 'datetime',
+        'late_fee_amount' => 'decimal:2',
     ];
 
     public function currency()
@@ -124,5 +129,79 @@ class Invoice extends Model
     public function getFormattedAmount()
     {
         return number_format($this->total_amount, 2) . ' ' . $this->currency;
+    }
+
+    public function isOverdue()
+    {
+        return $this->status === 'pending' && $this->due_date->isPast();
+    }
+
+    public function calculateLateFee()
+    {
+        if (!$this->isOverdue()) {
+            return 0;
+        }
+
+        $config = LateFeeConfiguration::where('team_id', $this->team_id)->first();
+        if (!$config) {
+            return 0;
+        }
+
+        // Check grace period
+        $daysOverdue = $this->due_date->diffInDays(now());
+        if ($daysOverdue <= $config->grace_period_days) {
+            return 0;
+        }
+
+        $baseAmount = $config->is_compound ? 
+            ($this->total_amount + $this->late_fee_amount) : 
+            $this->total_amount;
+
+        $fee = $config->fee_type === 'percentage' ?
+            ($baseAmount * ($config->fee_amount / 100)) :
+            $config->fee_amount;
+
+        // Apply frequency rules
+        if ($this->last_late_fee_date) {
+            $daysSinceLastFee = $this->last_late_fee_date->diffInDays(now());
+            $fee = match($config->frequency) {
+                'one-time' => 0,
+                'daily' => $daysSinceLastFee >= 1 ? $fee : 0,
+                'weekly' => $daysSinceLastFee >= 7 ? $fee : 0,
+                'monthly' => $daysSinceLastFee >= 30 ? $fee : 0,
+                default => 0,
+            };
+        }
+
+        // Check max fee amount
+        if ($config->max_fee_amount) {
+            $totalFees = $this->late_fee_amount + $fee;
+            if ($totalFees > $config->max_fee_amount) {
+                $fee = max(0, $config->max_fee_amount - $this->late_fee_amount);
+            }
+        }
+
+        return round($fee, 2);
+    }
+
+    public function applyLateFee()
+    {
+        $fee = $this->calculateLateFee();
+        if ($fee > 0) {
+            $this->late_fee_amount += $fee;
+            $this->last_late_fee_date = now();
+            $this->save();
+        }
+        return $fee;
+    }
+
+    public function getTotalWithLateFeeAttribute()
+    {
+        return $this->final_total + $this->late_fee_amount;
+    }
+
+    public function getFormattedTotalWithLateFeeAttribute()
+    {
+        return number_format($this->total_with_late_fee, 2) . ' ' . $this->currency;
     }
 }
