@@ -31,6 +31,49 @@ class BillingService
         return $this->currencyService->convert($amount, $fromCurrency, $toCurrency);
     }
 
+    public function applyDiscount(Invoice $invoice, string $discountCode)
+    {
+        $discount = Discount::where('code', $discountCode)
+            ->where('is_active', true)
+            ->first();
+
+        if (!$discount || !$discount->isValid()) {
+            return ['success' => false, 'message' => 'Invalid or expired discount code'];
+        }
+
+        $discountAmount = $this->calculateDiscountAmount($invoice, $discount);
+        
+        $invoice->update([
+            'discount_id' => $discount->id,
+            'discount_amount' => $discountAmount,
+            'total_amount' => $invoice->subtotal - $discountAmount
+        ]);
+
+        $discount->increment('used_count');
+
+        return ['success' => true, 'discount_amount' => $discountAmount];
+    }
+
+    private function calculateDiscountAmount(Invoice $invoice, Discount $discount)
+    {
+        if ($discount->type === 'percentage') {
+            return $invoice->subtotal * ($discount->value / 100);
+        }
+
+        if ($discount->type === 'fixed') {
+            if ($discount->currency !== $invoice->currency) {
+                return $this->convertCurrency(
+                    $discount->value,
+                    $discount->currency,
+                    $invoice->currency
+                );
+            }
+            return $discount->value;
+        }
+
+        return 0;
+    }
+
     public function generateInvoice(Subscription $subscription)
     {
         $customer = $subscription->customer;

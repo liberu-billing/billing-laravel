@@ -22,9 +22,16 @@ class Invoice extends Model
         'total_amount',
         'currency',
         'status',
+        'discount_id',
+        'discount_amount',
         'invoice_template_id',
     ];
     
+    protected $casts = [
+        'issue_date' => 'datetime',
+        'due_date' => 'datetime',
+    ];
+
     public function currency()
     {
         return $this->belongsTo(Currency::class, 'currency', 'code');
@@ -35,6 +42,20 @@ class Invoice extends Model
         return $this->belongsTo(Customer::class);
     }
 
+    public function discount()
+    {
+        return $this->belongsTo(Discount::class);
+    }
+
+    public function getSubtotalAttribute()
+    {
+        return $this->items->sum('total_price');
+    }
+
+    public function getFinalTotalAttribute()
+    {
+        return $this->subtotal - ($this->discount_amount ?? 0);
+    }
     public function template()
     {
         return $this->belongsTo(InvoiceTemplate::class, 'invoice_template_id');
