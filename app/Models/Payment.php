@@ -24,6 +24,8 @@ class Payment extends Model
         'affiliate_id',
         'affiliate_commission',
         'refund_reason',
+        'reconciliation_status',
+        'reconciliation_notes',
     ];
 
     protected $casts = [
@@ -31,6 +33,17 @@ class Payment extends Model
         'refunded_amount' => 'float',
         'payment_date' => 'datetime',
     ];
+
+    public function getReconciliationStatusBadgeAttribute()
+    {
+        return match($this->reconciliation_status) {
+            'reconciled' => '<span class="badge badge-success">Reconciled</span>',
+            'unmatched' => '<span class="badge badge-warning">Unmatched</span>',
+            'discrepancy' => '<span class="badge badge-danger">Discrepancy</span>',
+            'failed' => '<span class="badge badge-danger">Failed</span>',
+            default => '<span class="badge badge-secondary">Pending</span>',
+        };
+    }
 
     public function invoice()
     {
