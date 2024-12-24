@@ -20,9 +20,15 @@ class Subscription extends Model
         'domain_name',
         'domain_registrar',
         'domain_expiration_date',
+        'scheduled_change',
     ];
 
-    protected $dates = ['start_date', 'end_date', 'domain_expiration_date'];
+    protected $casts = [
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
+        'domain_expiration_date' => 'datetime',
+        'scheduled_change' => 'array'
+    ];
 
     public function customer()
     {
