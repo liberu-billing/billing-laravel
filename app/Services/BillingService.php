@@ -110,6 +110,13 @@ class BillingService
             'currency' => $currency,
         ]);
 
+        // Calculate and add tax
+        $taxAmount = $invoice->calculateTax();
+        $invoice->update([
+            'tax_amount' => $taxAmount,
+            'total_amount' => $invoice->final_total
+        ]);
+
         // Send invoice email
         $invoice->sendInvoiceEmail();
 

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Mail\InvoiceGenerated;
 use App\Services\CurrencyService;
+use App\Services\AuditLogService;
 use App\Traits\HasTeam;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
@@ -14,6 +15,38 @@ class Invoice extends Model
 {
     use HasFactory;
     use HasTeam;
+
+    protected static function boot()
+    {
+        parent::boot();
+        
+        static::created(function ($invoice) {
+            app(AuditLogService::class)->log(
+                'invoice_created',
+                $invoice,
+                null,
+                $invoice->toArray()
+            );
+        });
+
+        static::updated(function ($invoice) {
+            app(AuditLogService::class)->log(
+                'invoice_updated',
+                $invoice,
+                $invoice->getOriginal(),
+                $invoice->getChanges()
+            );
+        });
+
+        static::deleted(function ($invoice) {
+            app(AuditLogService::class)->log(
+                'invoice_deleted',
+                $invoice,
+                $invoice->toArray(),
+                null
+            );
+        });
+    }
 
     protected $fillable = [
         'customer_id',
@@ -31,6 +64,7 @@ class Invoice extends Model
         'late_fee_amount',
         'last_late_fee_date',
         'is_recurring',
+        'tax_amount',
     ];
     
     protected $casts = [
@@ -76,7 +110,13 @@ class Invoice extends Model
 
     public function getFinalTotalAttribute()
     {
-        return $this->subtotal - ($this->discount_amount ?? 0);
+        return $this->subtotal + ($this->tax_amount ?? 0) - ($this->discount_amount ?? 0);
+    }
+
+    public function calculateTax()
+    {
+        $taxService = app(TaxService::class);
+        return $taxService->calculateTax($this);
     }
     public function template()
     {

@@ -22,6 +22,15 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('tickets', TicketController::class);
     Route::post('tickets/{ticket}/responses', [TicketResponseController::class, 'store'])
         ->name('ticket.responses.store');
+        
+    // Client Service Management Routes
+    Route::prefix('client')->name('client.')->group(function () {
+        Route::get('/services', [ServiceManagementController::class, 'index'])->name('services.index');
+        Route::get('/services/{subscription}', [ServiceManagementController::class, 'show'])->name('services.show');
+        Route::post('/services/{subscription}/upgrade', [ServiceManagementController::class, 'upgrade'])->name('services.upgrade');
+        Route::post('/services/{subscription}/downgrade', [ServiceManagementController::class, 'downgrade'])->name('services.downgrade');
+        Route::post('/services/{subscription}/cancel', [ServiceManagementController::class, 'cancel'])->name('services.cancel');
+    });
 });
 
 Route::get('/', fn () => view('welcome'));
