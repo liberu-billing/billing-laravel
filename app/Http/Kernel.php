@@ -64,5 +64,21 @@ class Kernel extends HttpKernel
         'signed' => \App\Http\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        '2fa' => \App\Http\Middleware\RequireTwoFactorEnabled::class,
+    ];
+}
+
+
+<?php
+
+namespace App\Http;
+
+use Illuminate\Foundation\Http\Kernel as HttpKernel;
+
+class Kernel extends HttpKernel
+{
+    protected $routeMiddleware = [
+        // ... other middleware
+        'role' => \App\Http\Middleware\CheckRole::class,
     ];
 }

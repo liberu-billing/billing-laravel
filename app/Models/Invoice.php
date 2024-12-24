@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Mail\InvoiceGenerated;
+use App\Services\CurrencyService;
 use App\Traits\HasTeam;
 use Illuminate\Support\Facades\Mail;
 
@@ -23,6 +24,7 @@ class Invoice extends Model
         'status',
         'discount_id',
         'discount_amount',
+        'invoice_template_id',
     ];
     
     protected $casts = [
@@ -54,9 +56,28 @@ class Invoice extends Model
     {
         return $this->subtotal - ($this->discount_amount ?? 0);
     }
+    public function template()
+    {
+        return $this->belongsTo(InvoiceTemplate::class, 'invoice_template_id');
+    }
 
     public function sendInvoiceEmail()
     {
         Mail::to($this->customer->email)->send(new InvoiceGenerated($this));
+    }
+
+    public function convertAmountTo($targetCurrency)
+    {
+        $currencyService = app(CurrencyService::class);
+        return $currencyService->convert(
+            $this->total_amount,
+            $this->currency,
+            $targetCurrency
+        );
+    }
+
+    public function getFormattedAmount()
+    {
+        return number_format($this->total_amount, 2) . ' ' . $this->currency;
     }
 }
