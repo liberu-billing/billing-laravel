@@ -3,6 +3,7 @@
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Support\Facades\Route;
 use Laravel\Jetstream\Http\Controllers\TeamInvitationController;
+use App\Http\Controllers\ClientController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,6 +17,10 @@ use Laravel\Jetstream\Http\Controllers\TeamInvitationController;
 */
 
 Route::get('/', fn () => view('welcome'));
+
+Route::middleware(['auth:sanctum', 'verified'])->group(function () {
+    Route::resource('clients', ClientController::class);
+});
 
 // Route::redirect('/login', '/app/login')->name('login');
 
