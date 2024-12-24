@@ -31,6 +31,12 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/services/{subscription}/downgrade', [ServiceManagementController::class, 'downgrade'])->name('services.downgrade');
         Route::post('/services/{subscription}/cancel', [ServiceManagementController::class, 'cancel'])->name('services.cancel');
     });
+
+    // Advanced Search Routes
+    Route::get('/api/search-suggestions', [ClientNoteController::class, 'suggestions']);
+    Route::apiResource('/api/saved-searches', SavedSearchController::class);
+    Route::post('/api/shared-searches', [SavedSearchController::class, 'share']);
+    Route::get('/api/shared-searches/{token}', [SavedSearchController::class, 'loadShared']);
 });
 
 Route::get('/', fn () => view('welcome'));
