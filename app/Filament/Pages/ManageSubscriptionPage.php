@@ -3,83 +3,115 @@
 namespace App\Filament\Pages;
 
 use Filament\Pages\Page;
-use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Card;
+use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\DatePicker;
 use Filament\Notifications\Notification;
 use App\Models\Subscription;
-use App\Models\PaymentMethod;
+use App\Models\Products_Service;
 use Illuminate\Support\Facades\Auth;
 
 class ManageSubscriptionPage extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-credit-card';
     protected static string $view = 'filament.pages.manage-subscription';
+    
     public $subscription;
-    public $card_number;
-    public $expiry_month;
-    public $expiry_year;
-    public $cvv;
+    public $selectedProduct;
+    public $renewalPeriod;
+    public $autoRenew;
+    public $startDate;
 
     public function mount()
     {
         $this->subscription = Auth::user()->subscription;
+        if ($this->subscription) {
+            $this->selectedProduct = $this->subscription->product_service_id;
+            $this->renewalPeriod = $this->subscription->renewal_period;
+            $this->autoRenew = $this->subscription->auto_renew;
+            $this->startDate = $this->subscription->start_date;
+        }
     }
 
     protected function getFormSchema(): array
     {
         return [
-            TextInput::make('card_number')
-                ->label('Card Number')
-                ->required()
-                ->maxLength(16),
-            Select::make('expiry_month')
-                ->label('Expiry Month')
-                ->options(array_combine(range(1, 12), range(1, 12)))
-                ->required(),
-            Select::make('expiry_year')
-                ->label('Expiry Year')
-                ->options(array_combine(range(date('Y'), date('Y') + 10), range(date('Y'), date('Y') + 10)))
-                ->required(),
-            TextInput::make('cvv')
-                ->label('CVV')
-                ->required()
-                ->maxLength(4),
+            Card::make()
+                ->schema([
+                    Grid::make(2)
+                        ->schema([
+                            Select::make('selectedProduct')
+                                ->label('Service')
+                                ->options(Products_Service::pluck('name', 'id'))
+                                ->required(),
+                            
+                            Select::make('renewalPeriod')
+                                ->label('Billing Cycle')
+                                ->options([
+                                    'monthly' => 'Monthly',
+                                    'quarterly' => 'Quarterly',
+                                    'semi-annually' => 'Semi-annually',
+                                    'annually' => 'Annually',
+                                ])
+                                ->required(),
+                            
+                            DatePicker::make('startDate')
+                                ->label('Start Date')
+                                ->required(),
+                            
+                            Toggle::make('autoRenew')
+                                ->label('Auto Renew')
+                                ->default(true),
+                        ]),
+                ]),
         ];
     }
 
-    public function updatePaymentMethod()
+    public function save()
     {
-        $this->validate();
-
-        // Here you would typically interact with your payment gateway to update the payment method
-        // For this example, we'll just create a new PaymentMethod record
-        PaymentMethod::create([
-            'user_id' => Auth::id(),
-            'card_last_four' => substr($this->card_number, -4),
-            'card_expiration' => $this->expiry_month . '/' . $this->expiry_year,
-            // Don't store the full card number or CVV for security reasons
+        $data = $this->validate();
+        
+        $product = Products_Service::findOrFail($this->selectedProduct);
+        
+        if (!$this->subscription) {
+            $this->subscription = new Subscription();
+        }
+        
+        $this->subscription->fill([
+            'customer_id' => Auth::user()->customer->id,
+            'product_service_id' => $this->selectedProduct,
+            'start_date' => $this->startDate,
+            'renewal_period' => $this->renewalPeriod,
+            'auto_renew' => $this->autoRenew,
+            'price' => $product->price,
+            'currency' => $product->currency,
+            'status' => 'active',
         ]);
-
+        
+        $this->subscription->save();
+        
         Notification::make()
-            ->title('Payment method updated successfully')
+            ->title('Subscription updated successfully')
             ->success()
             ->send();
     }
 
-    public function cancelSubscription()
+    public function cancel()
     {
-        $this->subscription->cancel();
-
+        $this->subscription?->cancel();
+        
         Notification::make()
             ->title('Subscription cancelled successfully')
             ->success()
             ->send();
     }
 
-    public function resumeSubscription()
+    public function resume()
     {
-        $this->subscription->resume();
-
+        $this->subscription?->resume();
+        
         Notification::make()
             ->title('Subscription resumed successfully')
             ->success()

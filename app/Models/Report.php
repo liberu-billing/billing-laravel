@@ -1,5 +1,3 @@
-
-
 <?php
 
 namespace App\Models;
@@ -19,6 +17,10 @@ class Report extends Model
         'start_date',
         'end_date',
         'filters',
+        'format',
+        'parameters',
+        'schedule',
+        'last_generated_at',
         'team_id'
     ];
 
@@ -26,6 +28,9 @@ class Report extends Model
         'start_date' => 'datetime',
         'end_date' => 'datetime',
         'filters' => 'array'
+        'parameters' => 'array',
+        'schedule' => 'array',
+        'last_generated_at' => 'datetime'
     ];
 
     public function team()
