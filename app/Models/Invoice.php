@@ -63,6 +63,7 @@ class Invoice extends Model
         'invoice_template_id',
         'late_fee_amount',
         'last_late_fee_date',
+        'tax_amount',
     ];
     
     protected $casts = [
@@ -108,7 +109,13 @@ class Invoice extends Model
 
     public function getFinalTotalAttribute()
     {
-        return $this->subtotal - ($this->discount_amount ?? 0);
+        return $this->subtotal + ($this->tax_amount ?? 0) - ($this->discount_amount ?? 0);
+    }
+
+    public function calculateTax()
+    {
+        $taxService = app(TaxService::class);
+        return $taxService->calculateTax($this);
     }
     public function template()
     {
