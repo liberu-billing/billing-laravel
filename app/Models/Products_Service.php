@@ -26,13 +26,39 @@ class Products_Service extends Model
 
     public function getPriceAttribute()
     {
-        // This method can be implemented to calculate the price based on the pricing model and custom data
-        // For now, we'll return the base price
         return $this->base_price;
     }
 
     public function invoiceItems()
     {
         return $this->hasMany(Invoice_Item::class, 'product_service_id');
+    }
+
+    public function usageRecords()
+    {
+        return $this->hasManyThrough(UsageRecord::class, Subscription::class);
+    }
+
+    public function getUsageMetrics()
+    {
+        if ($this->pricing_model !== 'usage_based') {
+            return [];
+        }
+        
+        return array_keys($this->custom_pricing_data['usage_config'] ?? []);
+    }
+
+    public function recordUsage($subscriptionId, $metric, $quantity)
+    {
+        if (!in_array($metric, $this->getUsageMetrics())) {
+            throw new \Exception("Invalid usage metric: {$metric}");
+        }
+
+        return UsageRecord::create([
+            'subscription_id' => $subscriptionId,
+            'metric_name' => $metric,
+            'quantity' => $quantity,
+            'recorded_at' => now(),
+        ]);
     }
 }

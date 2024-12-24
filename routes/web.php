@@ -31,12 +31,22 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/services/{subscription}/downgrade', [ServiceManagementController::class, 'downgrade'])->name('services.downgrade');
         Route::post('/services/{subscription}/cancel', [ServiceManagementController::class, 'cancel'])->name('services.cancel');
     });
+
+    // Advanced Search Routes
+    Route::get('/api/search-suggestions', [ClientNoteController::class, 'suggestions']);
+    Route::apiResource('/api/saved-searches', SavedSearchController::class);
+    Route::post('/api/shared-searches', [SavedSearchController::class, 'share']);
+    Route::get('/api/shared-searches/{token}', [SavedSearchController::class, 'loadShared']);
 });
 
 Route::get('/', fn () => view('welcome'));
 
 Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::resource('clients', ClientController::class);
+    Route::resource('files', FileController::class);
+    Route::resource('folders', FolderController::class);
+    Route::post('files/{file}/share', [FileShareController::class, 'store']);
+    Route::delete('files/{file}/share/{user}', [FileShareController::class, 'destroy']);
 });
 
 // Route::redirect('/login', '/app/login')->name('login');

@@ -33,10 +33,29 @@ class ReportGenerationService
 
     protected function gatherReportData(Report $report)
     {
+        $clientBillingService = new ClientBillingReportService();
+        
         return match($report->type) {
             'billing_summary' => $this->billingService->getBillingSummary($report->parameters),
             'revenue_report' => $this->billingService->getRevenueReport($report->parameters),
             'customer_activity' => $this->billingService->getCustomerActivityReport($report->parameters),
+            'client_billing' => [
+                'customer' => Customer::find($report->parameters['customer_id']),
+                'billing_history' => $clientBillingService->generateBillingHistory(
+                    Customer::find($report->parameters['customer_id']),
+                    $report->parameters['start_date'] ?? null,
+                    $report->parameters['end_date'] ?? null
+                ),
+                'payment_status' => $clientBillingService->getPaymentStatus(
+                    Customer::find($report->parameters['customer_id'])
+                ),
+                'payment_trends' => $clientBillingService->getPaymentTrends(
+                    Customer::find($report->parameters['customer_id'])
+                ),
+                'max_monthly_payment' => $clientBillingService->getPaymentTrends(
+                    Customer::find($report->parameters['customer_id'])
+                )->max('total_paid')
+            ],
             default => throw new \Exception('Unsupported report type')
         };
     }

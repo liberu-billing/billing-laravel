@@ -89,6 +89,58 @@ class Invoice extends Model
         return $this->hasOne(PaymentPlan::class);
     }
 
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    public function processPayment(string $paymentMethod, float $amount)
+    {
+        if ($amount <= 0 || $amount > $this->remaining_amount) {
+            throw new \Exception('Invalid payment amount');
+        }
+
+        $payment = new Payment([
+            'invoice_id' => $this->id,
+            'payment_method' => $paymentMethod,
+            'amount' => $amount,
+            'currency' => $this->currency,
+            'payment_date' => now(),
+        ]);
+
+        $paymentGatewayService = app(PaymentGatewayService::class);
+        $result = $paymentGatewayService->processPayment($payment);
+
+        if ($result['success']) {
+            $payment->transaction_id = $result['transaction_id'];
+            $payment->save();
+
+            $this->updateStatus();
+            
+            return true;
+        }
+
+        throw new \Exception($result['message']);
+    }
+
+    public function updateStatus()
+    {
+        $totalPaid = $this->payments()->sum('amount');
+        
+        if ($totalPaid >= $this->total_amount) {
+            $this->status = 'paid';
+        } elseif ($totalPaid > 0) {
+            $this->status = 'partially_paid';
+        }
+        
+        $this->save();
+    }
+
+    public function getRemainingAmountAttribute()
+    {
+        return $this->total_amount - $this->payments()->sum('amount');
+    }
+
     public function parentInvoice()
     {
         return $this->belongsTo(Invoice::class, 'parent_invoice_id');
@@ -232,6 +284,14 @@ class Invoice extends Model
             $this->late_fee_amount += $fee;
             $this->last_late_fee_date = now();
             $this->save();
+
+            // Log the late fee application
+            app(AuditLogService::class)->log(
+                'late_fee_applied',
+                $this,
+                ['previous_late_fee' => $this->late_fee_amount - $fee],
+                ['new_late_fee' => $this->late_fee_amount]
+            );
         }
         return $fee;
     }
@@ -244,6 +304,15 @@ class Invoice extends Model
     public function getFormattedTotalWithLateFeeAttribute()
     {
         return number_format($this->total_with_late_fee, 2) . ' ' . $this->currency;
+    }
+
+    public function getRemainingLateFeeAttribute()
+    {
+        $config = LateFeeConfiguration::where('team_id', $this->team_id)->first();
+        if (!$config || !$config->max_fee_amount) {
+            return null;
+        }
+        return max(0, $config->max_fee_amount - $this->late_fee_amount);
     }
 
     public function recurringConfiguration()
