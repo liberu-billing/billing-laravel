@@ -3,6 +3,7 @@
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Support\Facades\Route;
 use Laravel\Jetstream\Http\Controllers\TeamInvitationController;
+use App\Http\Controllers\ClientController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,6 +18,10 @@ use Laravel\Jetstream\Http\Controllers\TeamInvitationController;
 
 Route::get('/', fn () => view('welcome'));
 
+Route::middleware(['auth:sanctum', 'verified'])->group(function () {
+    Route::resource('clients', ClientController::class);
+});
+
 // Route::redirect('/login', '/app/login')->name('login');
 
 // Route::redirect('/register', '/app/register')->name('register');
@@ -28,3 +33,17 @@ Route::get('/team-invitations/{invitation}', [TeamInvitationController::class, '
     ->name('team-invitations.accept');
 
 require __DIR__.'/socialstream.php';
+
+
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+Route::middleware(['auth', '2fa'])->prefix('admin')->group(function () {
+    // Admin routes go here
+    Route::get('/dashboard', function () {
+        return view('admin.dashboard');
+    })->name('admin.dashboard');
+});
+
+require __DIR__.'/auth.php';
