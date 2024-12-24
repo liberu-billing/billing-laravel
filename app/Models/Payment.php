@@ -24,12 +24,19 @@ class Payment extends Model
         'affiliate_id',
         'affiliate_commission',
         'refund_reason',
+        'stripe_token',
+        'square_token',
+        'google_pay_token',
+        'payment_method_details',
+        'status'
     ];
 
     protected $casts = [
         'amount' => 'float',
         'refunded_amount' => 'float',
         'payment_date' => 'datetime',
+        'payment_method_details' => 'array',
+        'status' => 'string'
     ];
 
     public function invoice()
