@@ -9,7 +9,9 @@ use App\Models\HostingAccount;
 use App\Models\Invoice_Item;
 use App\Models\Payment;
 use App\Models\RecurringBillingConfiguration;
+use App\Models\UsageRecord;
 use App\Services\PaymentGatewayService;
+use App\Services\PricingService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\OverdueInvoiceReminder;
@@ -19,15 +21,65 @@ class BillingService
     protected $serviceProvisioningService;
     protected $paymentPlanService;
     protected $currencyService;
+    protected $pricingService;
 
     public function __construct(
         ServiceProvisioningService $serviceProvisioningService,
         CurrencyService $currencyService,
-       PaymentPlanService $paymentPlanService = null
+        PaymentPlanService $paymentPlanService = null,
+        PricingService $pricingService = null
     ) {
         $this->serviceProvisioningService = $serviceProvisioningService;
         $this->currencyService = $currencyService;
-       $this->paymentPlanService = $paymentPlanService ?? new PaymentPlanService($this);
+        $this->paymentPlanService = $paymentPlanService ?? new PaymentPlanService($this);
+        $this->pricingService = $pricingService ?? new PricingService();
+    }
+
+    public function recordUsage(Subscription $subscription, string $metric, float $quantity)
+    {
+        return $subscription->productService->recordUsage(
+            $subscription->id,
+            $metric,
+            $quantity
+        );
+    }
+
+    public function calculateUsageCharges(Subscription $subscription, $startDate, $endDate)
+    {
+        return $this->pricingService->calculatePrice(
+            $subscription->productService,
+            [
+                'subscription_id' => $subscription->id,
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+            ]
+        );
+    }
+
+    protected function generateInvoice(Subscription $subscription)
+    {
+        $amount = $this->calculateUsageCharges(
+            $subscription,
+            $subscription->last_billed_at ?? $subscription->start_date,
+            now()
+        );
+
+        // Mark usage records as processed
+        UsageRecord::where('subscription_id', $subscription->id)
+            ->where('processed', false)
+            ->update(['processed' => true]);
+
+        // Create invoice with calculated amount
+        $invoice = Invoice::create([
+            'customer_id' => $subscription->customer_id,
+            'subscription_id' => $subscription->id,
+            'total_amount' => $amount,
+            'currency' => $subscription->currency ?? 'USD',
+            'status' => 'pending',
+            'due_date' => now()->addDays(30),
+        ]);
+
+        return $invoice;
     }
 
     public function convertCurrency($amount, $fromCurrency, $toCurrency)
