@@ -17,18 +17,24 @@ class Subscription extends Model
         'end_date',
         'renewal_period',
         'status',
-        'price',
+        'domain_name',
+        'domain_registrar',
+        'domain_expiration_date',
+        'scheduled_change',
+    ];
+
+    protected $casts = [
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
+        'domain_expiration_date' => 'datetime',
+        'scheduled_change' => 'array'
+        'price' => 'decimal:2',
         'currency',
         'auto_renew',
         'last_billed_at',
     ];
 
     protected $dates = ['start_date', 'end_date', 'last_billed_at'];
-
-    protected $casts = [
-        'auto_renew' => 'boolean',
-        'price' => 'decimal:2',
-    ];
 
     public function customer()
     {
