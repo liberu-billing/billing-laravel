@@ -55,3 +55,10 @@ Route::middleware(['auth', '2fa'])->prefix('admin')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/reminder-settings', [ReminderSettingsController::class, 'edit'])
+        ->name('reminder-settings.edit');
+    Route::put('/reminder-settings', [ReminderSettingsController::class, 'update'])
+        ->name('reminder-settings.update');
+});
