@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\HostingAccount;
 use App\Models\Invoice_Item;
 use App\Models\Payment;
+use App\Models\RecurringBillingConfiguration;
 use App\Services\PaymentGatewayService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
@@ -150,6 +151,15 @@ class BillingService
 
     public function processRecurringBilling()
     {
+        // Process subscription-based billing
+        $this->processSubscriptionBilling();
+        
+        // Process recurring invoices
+        $this->processRecurringInvoices();
+    }
+
+    protected function processSubscriptionBilling()
+    {
         $dueSubscriptions = Subscription::where('end_date', '<=', Carbon::now())
             ->where('status', 'active')
             ->get();
@@ -169,6 +179,48 @@ class BillingService
                 // TODO: Implement logic to notify customer of failed payment
             }
         }
+    }
+
+    protected function processRecurringInvoices()
+    {
+        $configurations = RecurringBillingConfiguration::where('is_active', true)
+            ->where('next_billing_date', '<=', now())
+            ->get();
+
+        foreach ($configurations as $config) {
+            $originalInvoice = $config->invoice;
+            
+            // Create new invoice based on original
+            $newInvoice = $this->generateRecurringInvoice($originalInvoice);
+            
+            // Update next billing date
+            $config->update([
+                'next_billing_date' => $config->calculateNextBillingDate()
+            ]);
+            
+            // Process automatic payment
+            $this->processAutomaticPayment($newInvoice);
+        }
+    }
+
+    protected function generateRecurringInvoice(Invoice $originalInvoice)
+    {
+        $newInvoice = $originalInvoice->replicate();
+        $newInvoice->invoice_number = $this->generateInvoiceNumber();
+        $newInvoice->issue_date = now();
+        $newInvoice->due_date = now()->addDays(30);
+        $newInvoice->status = 'pending';
+        $newInvoice->is_recurring = true;
+        $newInvoice->save();
+
+        // Copy invoice items
+        foreach ($originalInvoice->items as $item) {
+            $newItem = $item->replicate();
+            $newItem->invoice_id = $newInvoice->id;
+            $newItem->save();
+        }
+
+        return $newInvoice;
     }
 
     public function processAutomaticPayment(Invoice $invoice)

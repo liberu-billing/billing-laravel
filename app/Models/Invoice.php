@@ -63,6 +63,7 @@ class Invoice extends Model
         'invoice_template_id',
         'late_fee_amount',
         'last_late_fee_date',
+        'is_recurring',
         'tax_amount',
     ];
     
@@ -243,5 +244,48 @@ class Invoice extends Model
     public function getFormattedTotalWithLateFeeAttribute()
     {
         return number_format($this->total_with_late_fee, 2) . ' ' . $this->currency;
+    }
+
+    public function recurringConfiguration()
+    {
+        return $this->hasOne(RecurringBillingConfiguration::class);
+    }
+
+    public function setupRecurringBilling($frequency, $billingDay = null)
+    {
+        if ($this->is_installment) {
+            throw new \Exception('Cannot set up recurring billing for an installment invoice');
+        }
+
+        $this->update(['is_recurring' => true]);
+        
+        return $this->recurringConfiguration()->create([
+            'frequency' => $frequency,
+            'billing_day' => $billingDay,
+            'next_billing_date' => $this->calculateNextBillingDate($frequency, $billingDay),
+            'is_active' => true
+        ]);
+    }
+
+    private function calculateNextBillingDate($frequency, $billingDay = null)
+    {
+        $date = now();
+        
+        if ($billingDay && $billingDay > $date->day) {
+            $date->setDay($billingDay);
+        } else {
+            $date = match($frequency) {
+                'monthly' => $date->addMonth(),
+                'quarterly' => $date->addMonths(3),
+                'yearly' => $date->addYear(),
+                default => $date->addMonth()
+            };
+            
+            if ($billingDay) {
+                $date->setDay($billingDay);
+            }
+        }
+        
+        return $date;
     }
 }
