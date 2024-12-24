@@ -12,6 +12,9 @@ use Filament\Resources\Table;
 use Filament\Tables;
 use Filament\Forms;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Card;
+use Filament\Forms\Components\Grid;
+use Filament\Tables\Actions\Action as TableAction;
 
 class InvoiceResource extends Resource
 {
@@ -23,34 +26,47 @@ class InvoiceResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('invoice_number')
-                    ->required()
-                    ->unique(ignoreRecord: true),
-                Forms\Components\DatePicker::make('issue_date')
-                    ->required(),
-                Forms\Components\DatePicker::make('due_date')
-                    ->required(),
-                Forms\Components\Select::make('customer_id')
-                    ->relationship('customer', 'name')
-                    ->required()
-                    ->searchable(),
-                Forms\Components\Select::make('currency')
-                    ->options(Currency::pluck('code', 'code'))
-                    ->required(),
-                Forms\Components\Repeater::make('items')
-                    ->relationship()
+                Card::make()
                     ->schema([
-                        Forms\Components\Select::make('product_service_id')
-                            ->relationship('productService', 'name')
+                        Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('invoice_number')
+                                    ->disabled()
+                                    ->label('Invoice Number'),
+                                Forms\Components\DatePicker::make('issue_date')
+                                    ->disabled(),
+                                Forms\Components\DatePicker::make('due_date')
+                                    ->disabled(),
+                                Forms\Components\TextInput::make('total_amount')
+                                    ->disabled()
+                                    ->prefix(fn (Invoice $record) => $record->currency),
+                                Forms\Components\TextInput::make('status')
+                                    ->disabled(),
+                                Forms\Components\TextInput::make('remaining_amount')
+                                    ->disabled()
+                                    ->prefix(fn (Invoice $record) => $record->currency)
+                                    ->visible(fn (Invoice $record) => $record->status === 'partially_paid'),
+                            ]),
+                    ]),
+                
+                Card::make()
+                    ->visible(fn (Invoice $record) => $record->status !== 'paid')
+                    ->schema([
+                        Forms\Components\Select::make('payment_method')
+                            ->options([
+                                'credit_card' => 'Credit Card',
+                                'bank_transfer' => 'Bank Transfer',
+                                'paypal' => 'PayPal',
+                            ])
                             ->required(),
-                        Forms\Components\TextInput::make('quantity')
+                        Forms\Components\TextInput::make('payment_amount')
                             ->numeric()
-                            ->required(),
-                        Forms\Components\TextInput::make('unit_price')
-                            ->numeric()
-                            ->required(),
-                    ])
-                    ->columns(3),
+                            ->required()
+                            ->rules([
+                                fn (Invoice $record) => 'max:' . $record->remaining_amount,
+                                'min:1',
+                            ]),
+                    ]),
             ]);
     }
 
@@ -62,7 +78,7 @@ class InvoiceResource extends Resource
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('total_amount')
-                    ->money('usd')
+                    ->money(fn (Invoice $record) => $record->currency)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
@@ -70,6 +86,7 @@ class InvoiceResource extends Resource
                         'warning' => 'pending',
                         'success' => 'paid',
                         'danger' => 'overdue',
+                        'info' => 'partially_paid',
                     ]),
                 Tables\Columns\TextColumn::make('due_date')
                     ->date()
@@ -81,20 +98,39 @@ class InvoiceResource extends Resource
                         'pending' => 'Pending',
                         'paid' => 'Paid',
                         'overdue' => 'Overdue',
+                        'partially_paid' => 'Partially Paid',
                     ]),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                TableAction::make('pay')
+                    ->icon('heroicon-o-credit-card')
+                    ->visible(fn (Invoice $record) => $record->status !== 'paid')
+                    ->action(function (Invoice $record, array $data) {
+                        $record->processPayment($data['payment_method'], $data['payment_amount']);
+                    })
+                    ->form([
+                        Forms\Components\Select::make('payment_method')
+                            ->options([
+                                'credit_card' => 'Credit Card',
+                                'bank_transfer' => 'Bank Transfer',
+                                'paypal' => 'PayPal',
+                            ])
+                            ->required(),
+                        Forms\Components\TextInput::make('payment_amount')
+                            ->numeric()
+                            ->required()
+                            ->rules([
+                                fn (Invoice $record) => 'max:' . $record->remaining_amount,
+                                'min:1',
+                            ]),
+                    ]),
                 Tables\Actions\Action::make('download_pdf')
                     ->icon('heroicon-o-document-download')
                     ->action(fn (Invoice $record) => response()->streamDownload(
                         fn () => print($record->generatePdf()),
                         "invoice-{$record->invoice_number}.pdf"
                     )),
-                Tables\Actions\Action::make('send_email')
-                    ->icon('heroicon-o-mail')
-                    ->action(fn (Invoice $record) => $record->sendInvoiceEmail()),
             ])
             ->defaultSort('created_at', 'desc');
     }

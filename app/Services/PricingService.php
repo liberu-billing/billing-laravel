@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\Products_Service;
+use App\Models\UsageRecord;
+use Carbon\Carbon;
 
 class PricingService
 {
@@ -24,21 +26,64 @@ class PricingService
 
     private function calculateTieredPrice(Products_Service $product, array $options)
     {
-        // Implement tiered pricing logic
-        // Example: $options['tier'] could determine which price tier to use
         $tiers = $product->custom_pricing_data['tiers'] ?? [];
-        $selectedTier = $options['tier'] ?? 'default';
+        $usage = $options['usage'] ?? 0;
 
-        return $tiers[$selectedTier] ?? $product->base_price;
+        foreach ($tiers as $tier) {
+            if ($usage <= $tier['max_usage']) {
+                return $tier['price'];
+            }
+        }
+
+        return end($tiers)['price'] ?? $product->base_price;
     }
 
     private function calculateUsageBasedPrice(Products_Service $product, array $options)
     {
-        // Implement usage-based pricing logic
-        // Example: $options['usage'] could determine the usage amount
-        $usageRate = $product->custom_pricing_data['usage_rate'] ?? 0;
-        $usage = $options['usage'] ?? 0;
+        $subscriptionId = $options['subscription_id'] ?? null;
+        $startDate = $options['start_date'] ?? null;
+        $endDate = $options['end_date'] ?? null;
 
-        return $product->base_price + ($usageRate * $usage);
+        if (!$subscriptionId || !$startDate || !$endDate) {
+            return $product->base_price;
+        }
+
+        $usageConfig = $product->custom_pricing_data['usage_config'] ?? [];
+        $basePrice = $product->base_price;
+        $totalPrice = $basePrice;
+
+        // Get usage records for the billing period
+        $usage = UsageRecord::where('subscription_id', $subscriptionId)
+            ->whereBetween('recorded_at', [$startDate, $endDate])
+            ->where('processed', false)
+            ->get();
+
+        foreach ($usageConfig as $metric => $pricing) {
+            $metricUsage = $usage->where('metric_name', $metric)->sum('quantity');
+            
+            if ($pricing['type'] === 'per_unit') {
+                $totalPrice += $metricUsage * $pricing['rate'];
+            } elseif ($pricing['type'] === 'tiered') {
+                $totalPrice += $this->calculateTieredMetricPrice($metricUsage, $pricing['tiers']);
+            }
+        }
+
+        return $totalPrice;
+    }
+
+    private function calculateTieredMetricPrice($usage, $tiers)
+    {
+        $price = 0;
+        $remainingUsage = $usage;
+
+        foreach ($tiers as $tier) {
+            $tierUsage = min($remainingUsage, $tier['max_usage']);
+            $price += $tierUsage * $tier['rate'];
+            $remainingUsage -= $tierUsage;
+
+            if ($remainingUsage <= 0) break;
+        }
+
+        return $price;
     }
 }
