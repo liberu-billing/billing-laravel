@@ -17,12 +17,18 @@ class Subscription extends Model
         'end_date',
         'renewal_period',
         'status',
-        'domain_name',
-        'domain_registrar',
-        'domain_expiration_date',
+        'price',
+        'currency',
+        'auto_renew',
+        'last_billed_at',
     ];
 
-    protected $dates = ['start_date', 'end_date', 'domain_expiration_date'];
+    protected $dates = ['start_date', 'end_date', 'last_billed_at'];
+
+    protected $casts = [
+        'auto_renew' => 'boolean',
+        'price' => 'decimal:2',
+    ];
 
     public function customer()
     {
@@ -34,12 +40,44 @@ class Subscription extends Model
         return $this->belongsTo(Products_Service::class, 'product_service_id');
     }
 
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
     public function renew()
     {
+        if (!$this->auto_renew || $this->status === 'cancelled') {
+            return false;
+        }
+
         $renewalPeriod = $this->getRenewalPeriod();
         $this->end_date = Carbon::parse($this->end_date)->add($renewalPeriod);
+        $this->last_billed_at = now();
         $this->status = 'active';
-        $this->save();
+        return $this->save();
+    }
+
+    public function cancel()
+    {
+        $this->auto_renew = false;
+        $this->status = 'cancelled';
+        return $this->save();
+    }
+
+    public function suspend()
+    {
+        $this->status = 'suspended';
+        return $this->save();
+    }
+
+    public function resume()
+    {
+        if ($this->status === 'suspended') {
+            $this->status = 'active';
+            return $this->save();
+        }
+        return false;
     }
 
     public function isActive()
@@ -47,9 +85,14 @@ class Subscription extends Model
         return $this->status === 'active' && $this->end_date->isFuture();
     }
 
-    public function isDomainActive()
+    public function needsBilling()
     {
-        return $this->domain_name && $this->domain_expiration_date && $this->domain_expiration_date->isFuture();
+        if (!$this->last_billed_at) {
+            return true;
+        }
+
+        $nextBillingDate = Carbon::parse($this->last_billed_at)->add($this->getRenewalPeriod());
+        return $nextBillingDate->isPast() && $this->isActive();
     }
 
     private function getRenewalPeriod()
@@ -64,7 +107,7 @@ class Subscription extends Model
             case 'annually':
                 return '1 year';
             default:
-                return '1 month'; // Default to monthly if not specified
+                return '1 month';
         }
     }
 }
