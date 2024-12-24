@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\TicketController;
+use App\Http\Controllers\TicketResponseController;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Support\Facades\Route;
 use Laravel\Jetstream\Http\Controllers\TeamInvitationController;
@@ -14,6 +16,12 @@ use Laravel\Jetstream\Http\Controllers\TeamInvitationController;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+
+Route::middleware(['auth'])->group(function () {
+    Route::resource('tickets', TicketController::class);
+    Route::post('tickets/{ticket}/responses', [TicketResponseController::class, 'store'])
+        ->name('ticket.responses.store');
+});
 
 Route::get('/', fn () => view('welcome'));
 
