@@ -5,40 +5,23 @@
 namespace App\Services;
 
 use App\Models\AuditLog;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
 
 class AuditLogService
 {
-    public function log(
-        string $action,
-        $entity = null,
-        array $oldValues = null,
-        array $newValues = null
-    ): void {
-        $user = Auth::user();
-        
-        $data = [
-            'user_id' => $user?->id,
-            'team_id' => $user?->currentTeam?->id,
-            'action' => $action,
+    public function log(string $event, ?Model $model = null, ?array $oldValues = null, ?array $newValues = null): void
+    {
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'event' => $event,
+            'auditable_type' => $model ? get_class($model) : null,
+            'auditable_id' => $model?->id,
+            'old_values' => $oldValues,
+            'new_values' => $newValues,
             'ip_address' => Request::ip(),
             'user_agent' => Request::userAgent(),
-        ];
-
-        if ($entity) {
-            $data['entity_type'] = get_class($entity);
-            $data['entity_id'] = $entity->id;
-        }
-
-        if ($oldValues) {
-            $data['old_values'] = $oldValues;
-        }
-
-        if ($newValues) {
-            $data['new_values'] = $newValues;
-        }
-
-        AuditLog::create($data);
+        ]);
     }
 }
