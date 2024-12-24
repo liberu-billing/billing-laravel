@@ -18,6 +18,14 @@ return [
         'api_key' => env('EXCHANGE_RATE_API_KEY'),
     ],
 
+    'tax_api' => [
+        'enabled' => env('TAX_API_ENABLED', false),
+        'url' => env('TAX_API_URL'),
+        'api_key' => env('TAX_API_KEY'),
+        'version' => env('TAX_API_VERSION', 'v1'),
+        'cache_duration' => env('TAX_API_CACHE_DURATION', 3600),
+    ],
+
     'mailgun' => [
         'domain' => env('MAILGUN_DOMAIN'),
         'secret' => env('MAILGUN_SECRET'),
