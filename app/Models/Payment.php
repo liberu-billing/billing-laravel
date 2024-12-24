@@ -23,6 +23,13 @@ class Payment extends Model
         'refunded_amount',
         'affiliate_id',
         'affiliate_commission',
+        'refund_reason',
+    ];
+
+    protected $casts = [
+        'amount' => 'float',
+        'refunded_amount' => 'float',
+        'payment_date' => 'datetime',
     ];
 
     public function invoice()
@@ -53,5 +60,43 @@ class Payment extends Model
     public function getRemainingRefundableAmount()
     {
         return $this->amount - ($this->refunded_amount ?? 0);
+    }
+
+    public function processRefund(float $amount, string $reason = null)
+    {
+        if (!$this->isRefundable()) {
+            throw new \Exception('This payment is not eligible for refund');
+        }
+
+        if ($amount > $this->getRemainingRefundableAmount()) {
+            throw new \Exception('Refund amount exceeds remaining refundable amount');
+        }
+
+        $this->refunded_amount = ($this->refunded_amount ?? 0) + $amount;
+        $this->refund_status = $this->refunded_amount >= $this->amount ? 'full' : 'partial';
+        $this->refund_reason = $reason;
+        $this->save();
+
+        return true;
+    }
+
+    public function getFormattedAmount()
+    {
+        return number_format($this->amount, 2) . ' ' . $this->currency;
+    }
+
+    public function getFormattedRefundedAmount()
+    {
+        return number_format($this->refunded_amount ?? 0, 2) . ' ' . $this->currency;
+    }
+
+    public function getRefundStatusBadgeAttribute()
+    {
+        return match($this->refund_status) {
+            'none' => '<span class="badge badge-danger">No Refund</span>',
+            'partial' => '<span class="badge badge-warning">Partial Refund</span>',
+            'full' => '<span class="badge badge-success">Full Refund</span>',
+            default => '<span class="badge badge-secondary">Unknown</span>',
+        };
     }
 }
