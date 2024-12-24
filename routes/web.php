@@ -37,6 +37,10 @@ Route::get('/', fn () => view('welcome'));
 
 Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::resource('clients', ClientController::class);
+    Route::resource('files', FileController::class);
+    Route::resource('folders', FolderController::class);
+    Route::post('files/{file}/share', [FileShareController::class, 'store']);
+    Route::delete('files/{file}/share/{user}', [FileShareController::class, 'destroy']);
 });
 
 // Route::redirect('/login', '/app/login')->name('login');
