@@ -13,9 +13,12 @@ use App\Models\RecurringBillingConfiguration;
 use App\Models\UsageRecord;
 use App\Services\PaymentGatewayService;
 use App\Services\PricingService;
+use App\Services\EmailNotificationService;
+use App\Mail\OverdueInvoiceReminder;
+use App\Mail\PaymentConfirmation;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\OverdueInvoiceReminder;
+use Illuminate\Support\Facades\Log;
 
 class BillingService
 {
@@ -26,17 +29,38 @@ class BillingService
     protected $pricingService;
 
 
+    protected $emailService;
+
     public function __construct(
         ServiceProvisioningService $serviceProvisioningService,
         CurrencyService $currencyService,
         PaymentPlanService $paymentPlanService = null,
-        PaymentGatewayService $paymentGatewayService = null
-        PricingService $pricingService = null
+        PaymentGatewayService $paymentGatewayService = null,
+        PricingService $pricingService = null,
+        EmailNotificationService $emailService = null
     ) {
         $this->serviceProvisioningService = $serviceProvisioningService;
         $this->currencyService = $currencyService;
         $this->paymentPlanService = $paymentPlanService ?? new PaymentPlanService($this);
         $this->paymentGatewayService = $paymentGatewayService ?? new PaymentGatewayService();
+        $this->pricingService = $pricingService ?? new PricingService();
+        $this->emailService = $emailService ?? new EmailNotificationService();
+    }
+
+    protected function sendOverdueReminderEmail(Invoice $invoice)
+    {
+        $customer = $invoice->customer;
+        $reminder = new OverdueInvoiceReminder($invoice);
+        
+        return $this->emailService->send($reminder, $customer->email);
+    }
+
+    protected function sendPaymentConfirmation(Payment $payment)
+    {
+        $customer = $payment->invoice->customer;
+        $confirmation = new PaymentConfirmation($payment);
+        
+        return $this->emailService->send($confirmation, $customer->email);
     }
 
     public function createSubscription(Customer $customer, SubscriptionPlan $plan, string $billingCycle)
