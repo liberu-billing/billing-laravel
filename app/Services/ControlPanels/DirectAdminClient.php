@@ -3,77 +3,135 @@
 namespace App\Services\ControlPanels;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Support\Facades\Log;
+use App\Models\HostingServer;
 
 class DirectAdminClient
 {
     protected $client;
-    protected $apiUrl;
-    protected $apiToken;
+    protected $server;
+    protected $loginKey;
 
     public function __construct()
     {
         $this->client = new Client();
-        $this->apiUrl = config('services.directadmin.api_url');
-        $this->apiToken = config('services.directadmin.api_token');
+    }
+
+    public function setServer(HostingServer $server)
+    {
+        $this->server = $server;
+        $this->loginKey = $server->api_token;
     }
 
     public function createAccount($username, $domain, $package)
     {
-        // Implement DirectAdmin API call to create account
-        // This is a placeholder and should be replaced with actual DirectAdmin API implementation
-        $response = $this->client->post($this->apiUrl . '/accounts', [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $this->apiToken,
-            ],
-            'json' => [
-                'username' => $username,
-                'domain' => $domain,
-                'package' => $package,
-            ],
-        ]);
+        $password = $this->generatePassword();
+        $params = [
+            'action' => 'create',
+            'add' => 'Submit',
+            'username' => $username,
+            'email' => $username . '@' . $domain,
+            'passwd' => $password,
+            'passwd2' => $password,
+            'domain' => $domain,
+            'package' => $package,
+            'ip' => $this->server->ip_address,
+            'notify' => 'no',
+            'ssl' => 'ON',
+            'cgi' => 'ON',
+            'php' => 'ON',
+            'spam' => 'ON',
+            'quota' => 'unlimited',
+            'bandwidth' => 'unlimited',
+            'nemailf' => 'unlimited',
+            'nemailml' => 'unlimited',
+            'nemailr' => 'unlimited',
+            'mysql' => 'ON',
+            'nsubdomains' => 'unlimited',
+            'dns' => 'ON'
+        ];
 
-        return $response->getStatusCode() == 201;
+        return $this->makeApiCall('/CMD_API_ACCOUNT_USER', $params);
     }
 
     public function suspendAccount($username)
     {
-        // Implement DirectAdmin API call to suspend account
-        // This is a placeholder and should be replaced with actual DirectAdmin API implementation
-        $response = $this->client->post($this->apiUrl . '/accounts/' . $username . '/suspend', [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $this->apiToken,
-            ],
-        ]);
+        $params = [
+            'action' => 'suspend',
+            'select0' => $username,
+            'suspend_reason' => 'Non-payment'
+        ];
 
-        return $response->getStatusCode() == 200;
+        return $this->makeApiCall('/CMD_API_SELECT_USERS', $params);
     }
 
     public function unsuspendAccount($username)
     {
-        // Implement DirectAdmin API call to unsuspend account
-        // This is a placeholder and should be replaced with actual DirectAdmin API implementation
-        $response = $this->client->post($this->apiUrl . '/accounts/' . $username . '/unsuspend', [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $this->apiToken,
-            ],
-        ]);
+        $params = [
+            'action' => 'unsuspend',
+            'select0' => $username
+        ];
 
-        return $response->getStatusCode() == 200;
+        return $this->makeApiCall('/CMD_API_SELECT_USERS', $params);
     }
 
     public function changePackage($username, $newPackage)
     {
-        // Implement DirectAdmin API call to change package
-        // This is a placeholder and should be replaced with actual DirectAdmin API implementation
-        $response = $this->client->put($this->apiUrl . '/accounts/' . $username . '/package', [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $this->apiToken,
-            ],
-            'json' => [
-                'package' => $newPackage,
-            ],
-        ]);
+        $params = [
+            'action' => 'package',
+            'user' => $username,
+            'package' => $newPackage
+        ];
 
-        return $response->getStatusCode() == 200;
+        return $this->makeApiCall('/CMD_API_MODIFY_USER', $params);
+    }
+
+    protected function makeApiCall($endpoint, $params)
+    {
+        if (!$this->server) {
+            throw new \Exception('Server not configured');
+        }
+
+        try {
+            $response = $this->client->request('POST', 'https://' . $this->server->hostname . ':2222' . $endpoint, [
+                'headers' => [
+                    'Authorization' => 'Basic ' . base64_encode($this->server->username . ':' . $this->loginKey),
+                ],
+                'form_params' => $params,
+                'verify' => false
+            ]);
+
+            $result = $response->getBody()->getContents();
+            parse_str($result, $parsed);
+
+            if (isset($parsed['error']) && $parsed['error'] === '0') {
+                Log::info("DirectAdmin API call successful", [
+                    'endpoint' => $endpoint,
+                    'server' => $this->server->hostname
+                ]);
+                return true;
+            }
+
+            Log::error("DirectAdmin API call failed", [
+                'endpoint' => $endpoint,
+                'server' => $this->server->hostname,
+                'error' => $parsed['text'] ?? $result
+            ]);
+            return false;
+
+        } catch (GuzzleException $e) {
+            Log::error("DirectAdmin API call error", [
+                'endpoint' => $endpoint,
+                'server' => $this->server->hostname,
+                'error' => $e->getMessage()
+            ]);
+            return false;
+        }
+    }
+
+    protected function generatePassword()
+    {
+        return bin2hex(random_bytes(12));
     }
 }
