@@ -4,10 +4,8 @@
 
 namespace App\Filament\Client\Pages;
 
-use App\Models\Invoice;
 use Filament\Pages\Dashboard as BaseDashboard;
-use Filament\Widgets\StatsOverviewWidget\Card;
-use Filament\Widgets\StatsOverviewWidget;
+use App\Http\Livewire\Dashboard as DashboardComponent;
 
 class Dashboard extends BaseDashboard
 {
@@ -16,10 +14,8 @@ class Dashboard extends BaseDashboard
 
     protected function getHeaderWidgets(): array
     {
-        $client = auth()->user();
-        
         return [
-            StatsOverviewWidget::class,
+            DashboardComponent::class
         ];
     }
 
