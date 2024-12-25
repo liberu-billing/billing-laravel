@@ -13,7 +13,9 @@ use App\Models\RecurringBillingConfiguration;
 use App\Models\UsageRecord;
 use App\Services\PaymentGatewayService;
 use App\Services\PricingService;
+use App\Services\SmsService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\OverdueInvoiceReminder;
 
@@ -24,19 +26,22 @@ class BillingService
     protected $currencyService;
     protected $paymentGatewayService;
     protected $pricingService;
-
+    protected $smsService;
 
     public function __construct(
         ServiceProvisioningService $serviceProvisioningService,
         CurrencyService $currencyService,
         PaymentPlanService $paymentPlanService = null,
-        PaymentGatewayService $paymentGatewayService = null
-        PricingService $pricingService = null
+        PaymentGatewayService $paymentGatewayService = null,
+        PricingService $pricingService = null,
+        SmsService $smsService = null
     ) {
         $this->serviceProvisioningService = $serviceProvisioningService;
         $this->currencyService = $currencyService;
         $this->paymentPlanService = $paymentPlanService ?? new PaymentPlanService($this);
         $this->paymentGatewayService = $paymentGatewayService ?? new PaymentGatewayService();
+        $this->pricingService = $pricingService ?? new PricingService();
+        $this->smsService = $smsService ?? new SmsService();
     }
 
     public function createSubscription(Customer $customer, SubscriptionPlan $plan, string $billingCycle)
@@ -125,11 +130,12 @@ class BillingService
     private function calculateRefundAmount(Subscription $subscription)
     {
         $daysRemaining = now()->diffInDays($subscription->end_date);
-        $totalDays = $subscription->start_date->diffInDays($subscription->end_date);
+        $totalDays = $subscription->start_date->diffInDays($subscription->end_date);#
+      
+      $this->pricingService = $pricingService ?? new PricingService();
         
         return ($subscription->price / $totalDays) * $daysRemaining;
-=======
-        $this->pricingService = $pricingService ?? new PricingService();
+        
     }
 
     public function recordUsage(Subscription $subscription, string $metric, float $quantity)
@@ -493,6 +499,7 @@ class BillingService
                 
                 // Send reminder email
                 $this->sendOverdueReminderEmail($invoice);
+                $this->sendOverdueReminderSms($invoice);
                 
                 $invoice->update([
                     'reminder_count' => ($invoice->reminder_count ?? 0) + 1,
@@ -505,8 +512,59 @@ class BillingService
                 $reminderCount++;
             }
         }
+    }
+
+    public function sendUpcomingDueReminders()
+    {
+        $upcomingInvoices = Invoice::where('status', 'pending')
+            ->where('due_date', '>', now())
+            ->where('due_date', '<=', now()->addDays(7))
+            ->get();
+
+        foreach ($upcomingInvoices as $invoice) {
+            $customer = $invoice->customer;
+            
+            if ($customer->sms_notifications_enabled && $customer->phone_number) {
+                $daysUntilDue = now()->diffInDays($invoice->due_date);
+                $message = $this->getInvoiceReminderMessage($invoice, $daysUntilDue);
+                
+                $this->smsService->send(
+                    $customer->phone_number,
+                    $message
+                );
+                
+                Log::info('Upcoming due date reminder SMS sent', [
+                    'invoice_id' => $invoice->id,
+                    'customer_id' => $customer->id,
+                    'days_until_due' => $daysUntilDue
+                ]);
+            }
+        }
+    }
+
+    protected function sendOverdueReminderSms(Invoice $invoice)
+    {
+        $customer = $invoice->customer;
+        
+        if ($customer->sms_notifications_enabled && $customer->phone_number) {
+            $message = "OVERDUE: Invoice #{$invoice->invoice_number} for " . 
+                      "{$invoice->getFormattedAmount()} was due on {$invoice->due_date->format('Y-m-d')}. " .
+                      "Please make payment ASAP to avoid additional fees.";
+            
+            $this->smsService->send(
+                $customer->phone_number,
+                $message
+            );
+        }
         
         return $reminderCount;
+    }
+
+    protected function getInvoiceReminderMessage(Invoice $invoice, int $daysUntilDue)
+    {
+        return "Reminder: Invoice #{$invoice->invoice_number} for " . 
+               "{$invoice->getFormattedAmount()} is due in {$daysUntilDue} days. " .
+               "Please ensure timely payment to avoid late fees.";
     }
 
     public function processLateFees()
