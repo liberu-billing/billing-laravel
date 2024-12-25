@@ -19,6 +19,9 @@ class Kernel extends ConsoleKernel
         })->daily();
 
         $schedule->command('invoices:send-reminders')->daily();
+        $schedule->command('invoices:process-reminders')->daily();
+      
+        $schedule->command('audit:prune')->daily();
 
         $schedule->call(function () {
             $reports = Report::whereNotNull('schedule')->get();
@@ -57,31 +60,3 @@ class Kernel extends ConsoleKernel
     }
 }
 
-
-<?php
-
-namespace App\Console;
-
-use Illuminate\Console\Scheduling\Schedule;
-use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
-
-class Kernel extends ConsoleKernel
-{
-    /**
-     * Define the application's command schedule.
-     */
-    protected function schedule(Schedule $schedule): void
-    {
-        $schedule->command('audit:prune')->daily();
-    }
-
-    /**
-     * Register the commands for the application.
-     */
-    protected function commands(): void
-    {
-        $this->load(__DIR__.'/Commands');
-
-        require base_path('routes/console.php');
-    }
-}

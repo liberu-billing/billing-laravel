@@ -8,6 +8,7 @@ use App\Mail\InvoiceGenerated;
 use App\Services\CurrencyService;
 use App\Services\AuditLogService;
 use App\Traits\HasTeam;
+use App\Events\InvoiceStatusChanged;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 
@@ -48,6 +49,21 @@ class Invoice extends Model
         });
     }
 
+    public function disputes()
+    {
+        return $this->hasMany(InvoiceDispute::class);
+    }
+
+    public function activeDispute()
+    {
+        return $this->disputes()->whereIn('status', ['open', 'under_review'])->latest()->first();
+    }
+
+    public function isDisputed()
+    {
+        return $this->activeDispute() !== null;
+    }
+
     protected $fillable = [
         'customer_id',
         'invoice_number',
@@ -65,6 +81,10 @@ class Invoice extends Model
         'last_late_fee_date',
         'is_recurring',
         'tax_amount',
+        'viewed_at',
+        'sent_at',
+        'paid_at',
+        'status_history',
     ];
     
     protected $casts = [
@@ -72,6 +92,10 @@ class Invoice extends Model
         'due_date' => 'datetime',
         'last_late_fee_date' => 'datetime',
         'late_fee_amount' => 'decimal:2',
+        'viewed_at' => 'datetime',
+        'sent_at' => 'datetime',
+        'paid_at' => 'datetime',
+        'status_history' => 'array',
     ];
 
     public function currency()
@@ -318,6 +342,53 @@ class Invoice extends Model
     public function recurringConfiguration()
     {
         return $this->hasOne(RecurringBillingConfiguration::class);
+    }
+
+    public function markAsSent()
+    {
+        $this->sent_at = now();
+        $this->addToStatusHistory('sent');
+        $this->save();
+        
+        event(new InvoiceStatusChanged($this, 'sent'));
+    }
+
+    public function markAsViewed()
+    {
+        $this->viewed_at = now();
+        $this->addToStatusHistory('viewed');
+        $this->save();
+        
+        event(new InvoiceStatusChanged($this, 'viewed'));
+    }
+
+    public function markAsPaid()
+    {
+        $this->paid_at = now();
+        $this->status = 'paid';
+        $this->addToStatusHistory('paid');
+        $this->save();
+        
+        event(new InvoiceStatusChanged($this, 'paid'));
+    }
+
+    protected function addToStatusHistory($status)
+    {
+        $history = $this->status_history ?? [];
+        $history[] = [
+            'status' => $status,
+            'timestamp' => now()->toIso8601String(),
+            'user_id' => auth()->id(),
+        ];
+        $this->status_history = $history;
+    }
+
+    public function getStatusAttribute($value)
+    {
+        if ($this->paid_at) return 'paid';
+        if ($this->viewed_at) return 'viewed';
+        if ($this->sent_at) return 'sent';
+        return $value;
     }
 
     public function setupRecurringBilling($frequency, $billingDay = null)
