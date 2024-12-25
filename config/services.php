@@ -26,6 +26,13 @@ return [
         'cache_duration' => env('TAX_API_CACHE_DURATION', 3600),
     ],
 
+    'sms' => [
+        'api_key' => env('SMS_API_KEY'),
+        'from_number' => env('SMS_FROM_NUMBER'),
+        'base_url' => env('SMS_API_BASE_URL'),
+        'enabled' => env('SMS_ENABLED', true),
+    ],
+
     'mailgun' => [
         'domain' => env('MAILGUN_DOMAIN'),
         'secret' => env('MAILGUN_SECRET'),

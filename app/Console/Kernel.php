@@ -18,10 +18,7 @@ class Kernel extends ConsoleKernel
             $billingService->processRecurringBilling();
         })->daily();
 
-        $schedule->call(function () {
-            $billingService = new BillingService();
-            $billingService->sendOverdueReminders();
-        })->daily();
+        $schedule->command('invoices:send-reminders')->daily();
 
         $schedule->call(function () {
             $reports = Report::whereNotNull('schedule')->get();
