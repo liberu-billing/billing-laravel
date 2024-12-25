@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\ClientNoteController;
+use App\Http\Controllers\InstallationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,6 +29,9 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
+
+    // Installation endpoint
+    Route::post('/install', [InstallationController::class, 'install']);
 
     // Invoice endpoints
     Route::apiResource('invoices', InvoiceController::class);
