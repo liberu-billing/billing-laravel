@@ -387,6 +387,7 @@ class BillingService
         $paymentMethod = $customer->defaultPaymentMethod;
         
         if (!$paymentMethod) {
+            $this->handleFailedPayment($invoice);
             return ['success' => false, 'message' => 'No default payment method found'];
         }
         
@@ -402,14 +403,62 @@ class BillingService
             $result = $paymentGatewayService->processPayment($payment);
             if ($result['success']) {
                 $payment->transaction_id = $result['transaction_id'];
+                $payment->status = 'completed';
                 $payment->save();
+                
+                $invoice->status = 'paid';
+                $invoice->paid_at = now();
+                $invoice->save();
+                
+                // Unsuspend any suspended hosting accounts
+                if ($invoice->subscription) {
+                    $hostingAccount = $invoice->subscription->hostingAccount;
+                    if ($hostingAccount && $hostingAccount->status === 'suspended') {
+                        $this->serviceProvisioningService->manageService(
+                            $invoice->subscription,
+                            'unsuspend'
+                        );
+                        
+                        Log::info('Hosting account unsuspended after successful payment', [
+                            'invoice_id' => $invoice->id,
+                            'hosting_account_id' => $hostingAccount->id
+                        ]);
+                    }
+                }
+                
                 return ['success' => true, 'payment' => $payment];
             } else {
+                $this->handleFailedPayment($invoice);
                 return ['success' => false, 'message' => $result['message']];
             }
         } catch (\Exception $e) {
+            $this->handleFailedPayment($invoice);
             return ['success' => false, 'message' => 'Payment processing failed: ' . $e->getMessage()];
         }
+    }
+
+    protected function handleFailedPayment(Invoice $invoice)
+    {
+        // If payment fails and grace period is over, suspend hosting
+        if ($invoice->due_date->addDays(config('billing.grace_period', 3))->isPast()) {
+            if ($invoice->subscription) {
+                $hostingAccount = $invoice->subscription->hostingAccount;
+                if ($hostingAccount && $hostingAccount->status === 'active') {
+                    $this->serviceProvisioningService->manageService(
+                        $invoice->subscription,
+                        'suspend'
+                    );
+                    
+                    Log::info('Hosting account suspended due to failed payment', [
+                        'invoice_id' => $invoice->id,
+                        'hosting_account_id' => $hostingAccount->id
+                    ]);
+                }
+            }
+        }
+        
+        $invoice->status = 'overdue';
+        $invoice->save();
     }
 
     public function sendUpcomingInvoiceReminders()

@@ -5,27 +5,47 @@ namespace App\Services\ControlPanels;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Log;
+use App\Models\HostingServer;
 
 class CpanelClient
 {
     protected $client;
-    protected $apiUrl;
+    protected $server;
     protected $apiToken;
 
     public function __construct()
     {
         $this->client = new Client();
-        $this->apiUrl = config('services.cpanel.api_url');
-        $this->apiToken = config('services.cpanel.api_token');
+    }
+
+    public function setServer(HostingServer $server)
+    {
+        $this->server = $server;
+        $this->apiToken = $server->api_token;
     }
 
     public function createAccount($username, $domain, $package)
     {
-        $endpoint = '/createacct';
+        $endpoint = '/json-api/createacct';
         $params = [
             'username' => $username,
             'domain' => $domain,
             'plan' => $package,
+            'featurelist' => $package,
+            'password' => $this->generatePassword(),
+            'contactemail' => $username . '@' . $domain,
+            'quota' => 0, // Unlimited
+            'maxftp' => 'unlimited',
+            'maxsql' => 'unlimited',
+            'maxpop' => 'unlimited',
+            'cpmod' => 'paper_lantern',
+            'maxsub' => 'unlimited',
+            'maxpark' => 'unlimited',
+            'maxaddon' => 'unlimited',
+            'bwlimit' => 0, // Unlimited
+            'customip' => $this->server->ip_address ?? '',
+            'shell' => 'n',
+            'owner' => $this->server->username
         ];
 
         return $this->makeApiCall($endpoint, $params);
@@ -33,9 +53,11 @@ class CpanelClient
 
     public function suspendAccount($username)
     {
-        $endpoint = '/suspendacct';
+        $endpoint = '/json-api/suspendacct';
         $params = [
             'user' => $username,
+            'reason' => 'Non-payment',
+            'leave-ftp' => 0
         ];
 
         return $this->makeApiCall($endpoint, $params);
@@ -43,9 +65,9 @@ class CpanelClient
 
     public function unsuspendAccount($username)
     {
-        $endpoint = '/unsuspendacct';
+        $endpoint = '/json-api/unsuspendacct';
         $params = [
-            'user' => $username,
+            'user' => $username
         ];
 
         return $this->makeApiCall($endpoint, $params);
@@ -53,10 +75,10 @@ class CpanelClient
 
     public function changePackage($username, $newPackage)
     {
-        $endpoint = '/changepackage';
+        $endpoint = '/json-api/changepackage';
         $params = [
             'user' => $username,
-            'pkg' => $newPackage,
+            'pkg' => $newPackage
         ];
 
         return $this->makeApiCall($endpoint, $params);
@@ -64,9 +86,10 @@ class CpanelClient
 
     public function terminateAccount($username)
     {
-        $endpoint = '/removeacct';
+        $endpoint = '/json-api/removeacct';
         $params = [
             'user' => $username,
+            'keepdns' => 0
         ];
 
         return $this->makeApiCall($endpoint, $params);
@@ -74,26 +97,48 @@ class CpanelClient
 
     protected function makeApiCall($endpoint, $params)
     {
+        if (!$this->server) {
+            throw new \Exception('Server not configured');
+        }
+
         try {
-            $response = $this->client->request('POST', $this->apiUrl . $endpoint, [
+            $response = $this->client->request('GET', 'https://' . $this->server->hostname . ':2087' . $endpoint, [
                 'headers' => [
-                    'Authorization' => 'WHM ' . $this->apiToken,
+                    'Authorization' => 'WHM ' . $this->server->username . ':' . $this->apiToken,
                 ],
-                'form_params' => $params,
+                'query' => $params,
+                'verify' => false // Only if using self-signed SSL
             ]);
 
             $result = json_decode($response->getBody(), true);
 
-            if (isset($result['result']) && $result['result'] === 1) {
-                Log::info("cPanel API call successful", ['endpoint' => $endpoint, 'params' => $params]);
+            if (isset($result['metadata']['result']) && $result['metadata']['result'] === 1) {
+                Log::info("cPanel API call successful", [
+                    'endpoint' => $endpoint,
+                    'server' => $this->server->hostname
+                ]);
                 return true;
-            } else {
-                Log::error("cPanel API call failed", ['endpoint' => $endpoint, 'params' => $params, 'response' => $result]);
-                return false;
             }
+            
+            Log::error("cPanel API call failed", [
+                'endpoint' => $endpoint, 
+                'server' => $this->server->hostname,
+                'error' => $result['metadata']['reason'] ?? 'Unknown error'
+            ]);
+            return false;
+
         } catch (GuzzleException $e) {
-            Log::error("cPanel API call error", ['endpoint' => $endpoint, 'params' => $params, 'error' => $e->getMessage()]);
+            Log::error("cPanel API call error", [
+                'endpoint' => $endpoint,
+                'server' => $this->server->hostname,
+                'error' => $e->getMessage()
+            ]);
             return false;
         }
+    }
+
+    protected function generatePassword()
+    {
+        return bin2hex(random_bytes(12));
     }
 }
