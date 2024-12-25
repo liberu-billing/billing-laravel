@@ -13,12 +13,9 @@ use App\Models\RecurringBillingConfiguration;
 use App\Models\UsageRecord;
 use App\Services\PaymentGatewayService;
 use App\Services\PricingService;
-use App\Services\EmailNotificationService;
-use App\Mail\OverdueInvoiceReminder;
-use App\Mail\PaymentConfirmation;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Log;
+use App\Mail\OverdueInvoiceReminder;
 
 class BillingService
 {
@@ -29,38 +26,17 @@ class BillingService
     protected $pricingService;
 
 
-    protected $emailService;
-
     public function __construct(
         ServiceProvisioningService $serviceProvisioningService,
         CurrencyService $currencyService,
         PaymentPlanService $paymentPlanService = null,
-        PaymentGatewayService $paymentGatewayService = null,
-        PricingService $pricingService = null,
-        EmailNotificationService $emailService = null
+        PaymentGatewayService $paymentGatewayService = null
+        PricingService $pricingService = null
     ) {
         $this->serviceProvisioningService = $serviceProvisioningService;
         $this->currencyService = $currencyService;
         $this->paymentPlanService = $paymentPlanService ?? new PaymentPlanService($this);
         $this->paymentGatewayService = $paymentGatewayService ?? new PaymentGatewayService();
-        $this->pricingService = $pricingService ?? new PricingService();
-        $this->emailService = $emailService ?? new EmailNotificationService();
-    }
-
-    protected function sendOverdueReminderEmail(Invoice $invoice)
-    {
-        $customer = $invoice->customer;
-        $reminder = new OverdueInvoiceReminder($invoice);
-        
-        return $this->emailService->send($reminder, $customer->email);
-    }
-
-    protected function sendPaymentConfirmation(Payment $payment)
-    {
-        $customer = $payment->invoice->customer;
-        $confirmation = new PaymentConfirmation($payment);
-        
-        return $this->emailService->send($confirmation, $customer->email);
     }
 
     public function createSubscription(Customer $customer, SubscriptionPlan $plan, string $billingCycle)
@@ -430,8 +406,62 @@ class BillingService
         }
     }
 
+    public function sendUpcomingInvoiceReminders()
+    {
+        $reminderCount = 0;
+        $teams = Team::all();
+        
+        foreach ($teams as $team) {
+            $settings = ReminderSetting::where('team_id', $team->id)
+                ->where('is_active', true)
+                ->first();
+                
+            if (!$settings) {
+                continue;
+            }
+            
+            $upcomingInvoices = Invoice::where('team_id', $team->id)
+                ->where('status', 'pending')
+                ->where('due_date', '>', Carbon::now())
+                ->where('due_date', '<=', Carbon::now()->addDays($settings->days_before_reminder))
+                ->whereNull('upcoming_reminder_sent')
+                ->get();
+
+            foreach ($upcomingInvoices as $invoice) {
+                $this->sendUpcomingInvoiceEmail($invoice);
+                $invoice->update(['upcoming_reminder_sent' => true]);
+                $reminderCount++;
+            }
+        }
+        
+        return $reminderCount;
+    }
+
+    private function sendUpcomingInvoiceEmail(Invoice $invoice)
+    {
+        $customer = $invoice->customer;
+        $template = EmailTemplate::where('type', 'upcoming_invoice')
+            ->where(function($query) use ($invoice) {
+                $query->where('team_id', $invoice->team_id)
+                      ->orWhere('is_default', true);
+            })
+            ->first();
+
+        $data = [
+            'customer_name' => $customer->name,
+            'invoice_number' => $invoice->invoice_number,
+            'due_date' => $invoice->due_date->format('Y-m-d'),
+            'amount' => $invoice->total_amount,
+            'currency' => $invoice->currency,
+        ];
+
+        Mail::to($customer->email)
+            ->queue(new UpcomingInvoiceReminder($data, $template));
+    }
+
     public function sendOverdueReminders()
     {
+        $reminderCount = 0;
         $teams = Team::all();
         
         foreach ($teams as $team) {
@@ -447,12 +477,10 @@ class BillingService
                 ->where('due_date', '<', Carbon::now())
                 ->where('status', 'pending')
                 ->where(function ($query) use ($settings) {
-                    // Only get invoices that haven't exceeded max reminders
                     $query->whereNull('reminder_count')
                         ->orWhere('reminder_count', '<', $settings->max_reminders);
                 })
                 ->where(function ($query) use ($settings) {
-                    // Only get invoices that are due for a reminder
                     $query->whereNull('last_reminder_date')
                         ->orWhere('last_reminder_date', '<=', 
                             Carbon::now()->subDays($settings->reminder_frequency));
@@ -460,6 +488,10 @@ class BillingService
                 ->get();
 
             foreach ($overdueInvoices as $invoice) {
+                // Apply late fee
+                $invoice->applyLateFee();
+                
+                // Send reminder email
                 $this->sendOverdueReminderEmail($invoice);
                 
                 $invoice->update([
@@ -467,22 +499,14 @@ class BillingService
                     'last_reminder_date' => Carbon::now()
                 ]);
                 
+                // Suspend service if applicable
                 $this->serviceProvisioningService->manageService($invoice->subscription, 'suspend');
+                
+                $reminderCount++;
             }
-        $overdueInvoices = Invoice::where('due_date', '<', Carbon::now())
-            ->where('status', 'pending')
-            ->get();
-
-        foreach ($overdueInvoices as $invoice) {
-            // Apply late fee
-            $invoice->applyLateFee();
-            
-            // Send overdue reminder email
-            $this->sendOverdueReminderEmail($invoice);
-            
-            // Suspend service if applicable
-            $this->serviceProvisioningService->manageService($invoice->subscription, 'suspend');
         }
+        
+        return $reminderCount;
     }
 
     public function processLateFees()
