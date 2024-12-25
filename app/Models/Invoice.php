@@ -48,6 +48,21 @@ class Invoice extends Model
         });
     }
 
+    public function disputes()
+    {
+        return $this->hasMany(InvoiceDispute::class);
+    }
+
+    public function activeDispute()
+    {
+        return $this->disputes()->whereIn('status', ['open', 'under_review'])->latest()->first();
+    }
+
+    public function isDisputed()
+    {
+        return $this->activeDispute() !== null;
+    }
+
     protected $fillable = [
         'customer_id',
         'invoice_number',
