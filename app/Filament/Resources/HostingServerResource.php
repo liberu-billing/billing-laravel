@@ -1,5 +1,3 @@
-
-
 <?php
 
 namespace App\Filament\Resources;
@@ -7,20 +5,19 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\HostingServerResource\Pages;
 use App\Models\HostingServer;
 use Filament\Forms;
-use Filament\Resources\Form;
 use Filament\Resources\Resource;
-use Filament\Resources\Table;
+use Filament\Tables\Table;
 use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
 
 class HostingServerResource extends Resource
 {
-    protected static ?string $model = HostingServer::class;
+    // protected static ?string $model = HostingServer::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-server';
     protected static ?string $navigationGroup = 'Hosting';
 
-    public static function form(Form $form): Form
+    public static function form(Forms\Form $form): Forms\Form
     {
         return $form
             ->schema([
@@ -105,9 +102,9 @@ class HostingServerResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListHostingServers::route('/'),
-            'create' => Pages\CreateHostingServer::route('/create'),
-            'edit' => Pages\EditHostingServer::route('/{record}/edit'),
+            // 'index' => Pages\ListHostingServers::route('/'),
+            // 'create' => Pages\CreateHostingServer::route('/create'),
+            // 'edit' => Pages\EditHostingServer::route('/{record}/edit'),
         ];
     }
 }

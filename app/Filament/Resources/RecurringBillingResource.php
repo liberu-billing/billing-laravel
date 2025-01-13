@@ -1,5 +1,3 @@
-
-
 <?php
 
 namespace App\Filament\Resources;
@@ -7,10 +5,11 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\RecurringBillingResource\Pages;
 use App\Models\RecurringBillingConfiguration;
 use Filament\Forms;
-use Filament\Resources\Form;
+
 use Filament\Resources\Resource;
-use Filament\Resources\Table;
+use Filament\Tables\Table;
 use Filament\Tables;
+use Filament\Tables\Filters\Filter;
 
 class RecurringBillingResource extends Resource
 {
@@ -20,7 +19,7 @@ class RecurringBillingResource extends Resource
     protected static ?string $navigationLabel = 'Recurring Billing';
     protected static ?string $navigationGroup = 'Billing';
 
-    public static function form(Form $form): Form
+    public static function form(Forms\Form $form): Forms\Form
     {
         return $form
             ->schema([
@@ -75,7 +74,7 @@ class RecurringBillingResource extends Resource
                         'quarterly' => 'Quarterly',
                         'yearly' => 'Yearly',
                     ]),
-                Tables\Filters\BooleanFilter::make('is_active'),
+                Filter::make('is_active'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -96,9 +95,9 @@ class RecurringBillingResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListRecurringBillings::route('/'),
-            'create' => Pages\CreateRecurringBilling::route('/create'),
-            'edit' => Pages\EditRecurringBilling::route('/{record}/edit'),
+            // 'index' => Pages\ListRecurringBillings::route('/'),
+            // 'create' => Pages\CreateRecurringBilling::route('/create'),
+            // 'edit' => Pages\EditRecurringBilling::route('/{record}/edit'),
         ];
     }    
 }
