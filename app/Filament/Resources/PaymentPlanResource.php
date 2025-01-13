@@ -1,5 +1,3 @@
-
-
 <?php
 
 namespace App\Filament\Resources;
@@ -68,9 +66,9 @@ class PaymentPlanResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPaymentPlans::route('/'),
-            'create' => Pages\CreatePaymentPlan::route('/create'),
-            'edit' => Pages\EditPaymentPlan::route('/{record}/edit'),
+            // 'index' => Pages\ListPaymentPlans::route('/'),
+            // 'create' => Pages\CreatePaymentPlan::route('/create'),
+            // 'edit' => Pages\EditPaymentPlan::route('/{record}/edit'),
         ];
     }
 }

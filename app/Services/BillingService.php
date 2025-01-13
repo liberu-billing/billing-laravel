@@ -98,7 +98,7 @@ class BillingService
         if ($subscription->end_date->isFuture()) {
             $refundAmount = $this->calculateRefundAmount($subscription);
             if ($refundAmount > 0) {
-                $this->processRefund($subscription->lastPayment, $refundAmount);
+                // $this->processRefund($subscription->lastPayment, $refundAmount);
             }
         }
         
@@ -185,16 +185,17 @@ class BillingService
         return $invoice;
     }
 
-    public function convertCurrency($amount, $fromCurrency, $toCurrency)
-    {
-        return $this->currencyService->convert($amount, $fromCurrency, $toCurrency);
-    }
+    // public function convertCurrency($amount, $fromCurrency, $toCurrency)
+    // {
+    //     return $this->currencyService->convert($amount, $fromCurrency, $toCurrency);
+    // }
 
     public function applyDiscount(Invoice $invoice, string $discountCode)
     {
-        $discount = Discount::where('code', $discountCode)
-            ->where('is_active', true)
-            ->first();
+        // $discount = Discount::where('code', $discountCode)
+        //     ->where('is_active', true)
+        //     ->first();
+        $discount = null;
 
         if (!$discount || !$discount->isValid()) {
             return ['success' => false, 'message' => 'Invalid or expired discount code'];
@@ -213,7 +214,7 @@ class BillingService
         return ['success' => true, 'discount_amount' => $discountAmount];
     }
 
-    private function calculateDiscountAmount(Invoice $invoice, Discount $discount)
+    private function calculateDiscountAmount(Invoice $invoice, $discount)
     {
         if ($discount->type === 'percentage') {
             return $invoice->subtotal * ($discount->value / 100);
@@ -233,50 +234,50 @@ class BillingService
         return 0;
     }
 
-    public function generateInvoice(Subscription $subscription)
-    {
-        $customer = $subscription->customer;
-        $amount = $subscription->productService->price;
-        $currency = $subscription->currency ?? 'USD';
+    // public function generateInvoice(Subscription $subscription)
+    // {
+    //     $customer = $subscription->customer;
+    //     $amount = $subscription->productService->price;
+    //     $currency = $subscription->currency ?? 'USD';
 
-        // Get default template or first available
-        $template = InvoiceTemplate::where('team_id', $customer->team_id)
-            ->where('is_default', true)
-            ->first() ?? InvoiceTemplate::where('team_id', $customer->team_id)->first();
+    //     // Get default template or first available
+    //     $template = InvoiceTemplate::where('team_id', $customer->team_id)
+    //         ->where('is_default', true)
+    //         ->first() ?? InvoiceTemplate::where('team_id', $customer->team_id)->first();
 
-        $invoice = Invoice::create([
-            'customer_id' => $customer->id,
-            'invoice_number' => $this->generateInvoiceNumber(),
-            'issue_date' => Carbon::now(),
-            'due_date' => Carbon::now()->addDays(30),
-            'total_amount' => $amount,
-            'currency' => $currency,
-            'status' => 'pending',
-            'invoice_template_id' => $template?->id,
-        ]);
+    //     $invoice = Invoice::create([
+    //         'customer_id' => $customer->id,
+    //         'invoice_number' => $this->generateInvoiceNumber(),
+    //         'issue_date' => Carbon::now(),
+    //         'due_date' => Carbon::now()->addDays(30),
+    //         'total_amount' => $amount,
+    //         'currency' => $currency,
+    //         'status' => 'pending',
+    //         'invoice_template_id' => $template?->id,
+    //     ]);
 
-        // Create invoice item
-        Invoice_Item::create([
-            'invoice_id' => $invoice->id,
-            'product_service_id' => $subscription->productService->id,
-            'quantity' => 1,
-            'unit_price' => $amount,
-            'total_price' => $amount,
-            'currency' => $currency,
-        ]);
+    //     // Create invoice item
+    //     Invoice_Item::create([
+    //         'invoice_id' => $invoice->id,
+    //         'product_service_id' => $subscription->productService->id,
+    //         'quantity' => 1,
+    //         'unit_price' => $amount,
+    //         'total_price' => $amount,
+    //         'currency' => $currency,
+    //     ]);
 
-        // Calculate and add tax
-        $taxAmount = $invoice->calculateTax();
-        $invoice->update([
-            'tax_amount' => $taxAmount,
-            'total_amount' => $invoice->final_total
-        ]);
+    //     // Calculate and add tax
+    //     $taxAmount = $invoice->calculateTax();
+    //     $invoice->update([
+    //         'tax_amount' => $taxAmount,
+    //         'total_amount' => $invoice->final_total
+    //     ]);
 
-        // Send invoice email
-        $invoice->sendInvoiceEmail();
+    //     // Send invoice email
+    //     $invoice->sendInvoiceEmail();
 
-        return $invoice;
-    }
+    //     return $invoice;
+    // }
 
     public function setupPaymentPlan(Invoice $invoice, $totalInstallments, $frequency = 'monthly')
     {
@@ -298,8 +299,10 @@ class BillingService
             return $amount;
         }
     
-        $fromRate = Currency::where('code', $fromCurrency)->first()->exchange_rate;
-        $toRate = Currency::where('code', $toCurrency)->first()->exchange_rate;
+        // $fromRate = Currency::where('code', $fromCurrency)->first()->exchange_rate;
+        // $toRate = Currency::where('code', $toCurrency)->first()->exchange_rate;
+        $fromRate = 1;
+        $toRate = 1;
     
         return ($amount / $fromRate) * $toRate;
     }
@@ -461,107 +464,107 @@ class BillingService
         $invoice->save();
     }
 
-    public function sendUpcomingInvoiceReminders()
-    {
-        $reminderCount = 0;
-        $teams = Team::all();
+    // public function sendUpcomingInvoiceReminders()
+    // {
+    //     $reminderCount = 0;
+    //     $teams = Team::all();
         
-        foreach ($teams as $team) {
-            $settings = ReminderSetting::where('team_id', $team->id)
-                ->where('is_active', true)
-                ->first();
+    //     foreach ($teams as $team) {
+    //         $settings = ReminderSetting::where('team_id', $team->id)
+    //             ->where('is_active', true)
+    //             ->first();
                 
-            if (!$settings) {
-                continue;
-            }
+    //         if (!$settings) {
+    //             continue;
+    //         }
             
-            $upcomingInvoices = Invoice::where('team_id', $team->id)
-                ->where('status', 'pending')
-                ->where('due_date', '>', Carbon::now())
-                ->where('due_date', '<=', Carbon::now()->addDays($settings->days_before_reminder))
-                ->whereNull('upcoming_reminder_sent')
-                ->get();
+    //         $upcomingInvoices = Invoice::where('team_id', $team->id)
+    //             ->where('status', 'pending')
+    //             ->where('due_date', '>', Carbon::now())
+    //             ->where('due_date', '<=', Carbon::now()->addDays($settings->days_before_reminder))
+    //             ->whereNull('upcoming_reminder_sent')
+    //             ->get();
 
-            foreach ($upcomingInvoices as $invoice) {
-                $this->sendUpcomingInvoiceEmail($invoice);
-                $invoice->update(['upcoming_reminder_sent' => true]);
-                $reminderCount++;
-            }
-        }
+    //         foreach ($upcomingInvoices as $invoice) {
+    //             $this->sendUpcomingInvoiceEmail($invoice);
+    //             $invoice->update(['upcoming_reminder_sent' => true]);
+    //             $reminderCount++;
+    //         }
+    //     }
         
-        return $reminderCount;
-    }
+    //     return $reminderCount;
+    // }
 
-    private function sendUpcomingInvoiceEmail(Invoice $invoice)
-    {
-        $customer = $invoice->customer;
-        $template = EmailTemplate::where('type', 'upcoming_invoice')
-            ->where(function($query) use ($invoice) {
-                $query->where('team_id', $invoice->team_id)
-                      ->orWhere('is_default', true);
-            })
-            ->first();
+    // private function sendUpcomingInvoiceEmail(Invoice $invoice)
+    // {
+    //     $customer = $invoice->customer;
+    //     $template = EmailTemplate::where('type', 'upcoming_invoice')
+    //         ->where(function($query) use ($invoice) {
+    //             $query->where('team_id', $invoice->team_id)
+    //                   ->orWhere('is_default', true);
+    //         })
+    //         ->first();
 
-        $data = [
-            'customer_name' => $customer->name,
-            'invoice_number' => $invoice->invoice_number,
-            'due_date' => $invoice->due_date->format('Y-m-d'),
-            'amount' => $invoice->total_amount,
-            'currency' => $invoice->currency,
-        ];
+    //     $data = [
+    //         'customer_name' => $customer->name,
+    //         'invoice_number' => $invoice->invoice_number,
+    //         'due_date' => $invoice->due_date->format('Y-m-d'),
+    //         'amount' => $invoice->total_amount,
+    //         'currency' => $invoice->currency,
+    //     ];
 
-        Mail::to($customer->email)
-            ->queue(new UpcomingInvoiceReminder($data, $template));
-    }
+    //     Mail::to($customer->email)
+    //         ->queue(new UpcomingInvoiceReminder($data, $template));
+    // }
 
-    public function sendOverdueReminders()
-    {
-        $reminderCount = 0;
-        $teams = Team::all();
+    // public function sendOverdueReminders()
+    // {
+    //     $reminderCount = 0;
+    //     $teams = Team::all();
         
-        foreach ($teams as $team) {
-            $settings = ReminderSetting::where('team_id', $team->id)
-                ->where('is_active', true)
-                ->first();
+    //     foreach ($teams as $team) {
+    //         $settings = ReminderSetting::where('team_id', $team->id)
+    //             ->where('is_active', true)
+    //             ->first();
                 
-            if (!$settings) {
-                continue;
-            }
+    //         if (!$settings) {
+    //             continue;
+    //         }
             
-            $overdueInvoices = Invoice::where('team_id', $team->id)
-                ->where('due_date', '<', Carbon::now())
-                ->where('status', 'pending')
-                ->where(function ($query) use ($settings) {
-                    $query->whereNull('reminder_count')
-                        ->orWhere('reminder_count', '<', $settings->max_reminders);
-                })
-                ->where(function ($query) use ($settings) {
-                    $query->whereNull('last_reminder_date')
-                        ->orWhere('last_reminder_date', '<=', 
-                            Carbon::now()->subDays($settings->reminder_frequency));
-                })
-                ->get();
+    //         $overdueInvoices = Invoice::where('team_id', $team->id)
+    //             ->where('due_date', '<', Carbon::now())
+    //             ->where('status', 'pending')
+    //             ->where(function ($query) use ($settings) {
+    //                 $query->whereNull('reminder_count')
+    //                     ->orWhere('reminder_count', '<', $settings->max_reminders);
+    //             })
+    //             ->where(function ($query) use ($settings) {
+    //                 $query->whereNull('last_reminder_date')
+    //                     ->orWhere('last_reminder_date', '<=', 
+    //                         Carbon::now()->subDays($settings->reminder_frequency));
+    //             })
+    //             ->get();
 
-            foreach ($overdueInvoices as $invoice) {
-                // Apply late fee
-                $invoice->applyLateFee();
+    //         foreach ($overdueInvoices as $invoice) {
+    //             // Apply late fee
+    //             $invoice->applyLateFee();
                 
-                // Send reminder email
-                $this->sendOverdueReminderEmail($invoice);
-                $this->sendOverdueReminderSms($invoice);
+    //             // Send reminder email
+    //             $this->sendOverdueReminderEmail($invoice);
+    //             $this->sendOverdueReminderSms($invoice);
                 
-                $invoice->update([
-                    'reminder_count' => ($invoice->reminder_count ?? 0) + 1,
-                    'last_reminder_date' => Carbon::now()
-                ]);
+    //             $invoice->update([
+    //                 'reminder_count' => ($invoice->reminder_count ?? 0) + 1,
+    //                 'last_reminder_date' => Carbon::now()
+    //             ]);
                 
-                // Suspend service if applicable
-                $this->serviceProvisioningService->manageService($invoice->subscription, 'suspend');
+    //             // Suspend service if applicable
+    //             $this->serviceProvisioningService->manageService($invoice->subscription, 'suspend');
                 
-                $reminderCount++;
-            }
-        }
-    }
+    //             $reminderCount++;
+    //         }
+    //     }
+    // }
 
     public function sendUpcomingDueReminders()
     {
@@ -591,23 +594,23 @@ class BillingService
         }
     }
 
-    protected function sendOverdueReminderSms(Invoice $invoice)
-    {
-        $customer = $invoice->customer;
+    // protected function sendOverdueReminderSms(Invoice $invoice)
+    // {
+    //     $customer = $invoice->customer;
         
-        if ($customer->sms_notifications_enabled && $customer->phone_number) {
-            $message = "OVERDUE: Invoice #{$invoice->invoice_number} for " . 
-                      "{$invoice->getFormattedAmount()} was due on {$invoice->due_date->format('Y-m-d')}. " .
-                      "Please make payment ASAP to avoid additional fees.";
+    //     if ($customer->sms_notifications_enabled && $customer->phone_number) {
+    //         $message = "OVERDUE: Invoice #{$invoice->invoice_number} for " . 
+    //                   "{$invoice->getFormattedAmount()} was due on {$invoice->due_date->format('Y-m-d')}. " .
+    //                   "Please make payment ASAP to avoid additional fees.";
             
-            $this->smsService->send(
-                $customer->phone_number,
-                $message
-            );
-        }
+    //         $this->smsService->send(
+    //             $customer->phone_number,
+    //             $message
+    //         );
+    //     }
         
-        return $reminderCount;
-    }
+    //     return $reminderCount;
+    // }
 
     protected function getInvoiceReminderMessage(Invoice $invoice, int $daysUntilDue)
     {
@@ -630,7 +633,7 @@ class BillingService
                     $this->processAutomaticPayment($invoice);
                     
                     // Send late fee notification
-                    $this->sendLateFeeNotification($invoice, $fee);
+                    // $this->sendLateFeeNotification($invoice, $fee);
                 }
             } catch (\Exception $e) {
                 Log::error('Failed to process late fee', [
@@ -654,20 +657,20 @@ class BillingService
             'currency' => $invoice->currency,
         ];
 
-        Mail::to($customer->email)->send(new OverdueInvoiceReminder($data));
+        // Mail::to($customer->email)->send(new OverdueInvoiceReminder($data));
     }
 
-    private function sendLateFeeNotification(Invoice $invoice, $feeAmount)
-    {
-        $customer = $invoice->customer;
-        Mail::to($customer->email)->send(new LateFeeNotification([
-            'customer_name' => $customer->name,
-            'invoice_number' => $invoice->invoice_number,
-            'fee_amount' => $feeAmount,
-            'total_amount' => $invoice->total_with_late_fee,
-            'currency' => $invoice->currency,
-        ]));
-    }
+    // private function sendLateFeeNotification(Invoice $invoice, $feeAmount)
+    // {
+    //     $customer = $invoice->customer;
+    //     Mail::to($customer->email)->send(new LateFeeNotification([
+    //         'customer_name' => $customer->name,
+    //         'invoice_number' => $invoice->invoice_number,
+    //         'fee_amount' => $feeAmount,
+    //         'total_amount' => $invoice->total_with_late_fee,
+    //         'currency' => $invoice->currency,
+    //     ]));
+    // }
 
     private function generateInvoiceNumber()
     {

@@ -1,5 +1,3 @@
-
-
 <?php
 
 namespace App\Filament\Resources;
@@ -7,9 +5,8 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\SubscriptionResource\Pages;
 use App\Models\Subscription;
 use Filament\Forms;
-use Filament\Resources\Form;
 use Filament\Resources\Resource;
-use Filament\Resources\Table;
+use Filament\Tables\Table;
 use Filament\Tables;
 
 class SubscriptionResource extends Resource
@@ -18,7 +15,7 @@ class SubscriptionResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-collection';
 
-    public static function form(Form $form): Form
+    public static function form(Forms\Form $form): Forms\Form
     {
         return $form
             ->schema([
@@ -81,9 +78,9 @@ class SubscriptionResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListSubscriptions::route('/'),
-            'create' => Pages\CreateSubscription::route('/create'),
-            'edit' => Pages\EditSubscription::route('/{record}/edit'),
+            // 'index' => Pages\ListSubscriptions::route('/'),
+            // 'create' => Pages\CreateSubscription::route('/create'),
+            // 'edit' => Pages\EditSubscription::route('/{record}/edit'),
         ];
     }    
 }

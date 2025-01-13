@@ -1,5 +1,3 @@
-
-
 <?php
 
 namespace App\Filament\Resources;
@@ -83,9 +81,9 @@ class RoleResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListRoles::route('/'),
-            'create' => Pages\CreateRole::route('/create'),
-            'edit' => Pages\EditRole::route('/{record}/edit'),
+            // 'index' => Pages\ListRoles::route('/'),
+            // 'create' => Pages\CreateRole::route('/create'),
+            // 'edit' => Pages\EditRole::route('/{record}/edit'),
         ];
     }
 }

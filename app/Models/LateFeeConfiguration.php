@@ -1,5 +1,3 @@
-
-
 <?php
 
 namespace App\Models;
@@ -47,9 +45,7 @@ class LateFeeConfiguration extends Model
             'fixed' => 'Fixed Amount'
         ];
     }
-}
-
-<?php
+}<?php
 
 namespace App\Models;
 
