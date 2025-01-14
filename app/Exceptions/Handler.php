@@ -14,17 +14,15 @@ class Handler extends ExceptionHandler
     ];
 
     public function register(): void
-    {
-        $this->reportable(function (Throwable $e) {
-            if ($e instanceof \Error && str_contains($e->getMessage(), 'Maximum call stack size')) {
-                // Log the error with stack trace
-                logger()->error('Stack overflow detected', [
-                    'message' => $e->getMessage(),
-                    'file' => $e->getFile(),
-                    'line' => $e->getLine(),
-                    'trace' => $e->getTraceAsString()
-                ]);
-            }
-        });
-    }
+{
+    $this->reportable(function (Throwable $e) {
+        if ($e instanceof \Illuminate\Contracts\Container\BindingResolutionException) {
+            logger()->error('Container resolution error', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+        }
+    });
 }
