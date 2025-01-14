@@ -4,49 +4,22 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
-use App\Services\BillingService;
+use Illuminate\Support\Facades\Cache;
 
 class Kernel extends ConsoleKernel
 {
+    private const MAX_COMMAND_DEPTH = 5;
+    private array $runningCommands = [];
+
     /**
      * Define the application's command schedule.
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->call(function () {
-            $billingService = new BillingService();
-            $billingService->processRecurringBilling();
-        })->daily();
-
-        $schedule->command('invoices:send-reminders')->daily();
-        $schedule->command('invoices:process-reminders')->daily();
-      
-        $schedule->command('audit:prune')->daily();
-
-        $schedule->call(function () {
-            $reports = Report::whereNotNull('schedule')->get();
-            foreach ($reports as $report) {
-                if ($this->shouldGenerateReport($report)) {
-                    app(ReportGenerationService::class)->generateReport($report);
-                    $report->update(['last_generated_at' => now()]);
-                }
-            }
-        })->hourly();
-    }
-
-    protected function shouldGenerateReport(Report $report): bool
-    {
-        if (!$report->last_generated_at) {
-            return true;
-        }
-
-        $schedule = $report->schedule;
-        return match($schedule['frequency']) {
-            'daily' => $report->last_generated_at->diffInDays(now()) >= 1,
-            'weekly' => $report->last_generated_at->diffInWeeks(now()) >= 1,
-            'monthly' => $report->last_generated_at->diffInMonths(now()) >= 1,
-            default => false
-        };
+        // Prevent recursive command execution
+        $this->preventRecursiveScheduling(function() use ($schedule) {
+            // Add your scheduled commands here
+        });
     }
 
     /**
@@ -55,8 +28,49 @@ class Kernel extends ConsoleKernel
     protected function commands(): void
     {
         $this->load(__DIR__.'/Commands');
+    }
 
-        require base_path('routes/console.php');
+    /**
+     * Prevent recursive scheduling of commands
+     */
+    private function preventRecursiveScheduling(callable $callback): void
+    {
+        $lockKey = 'console_kernel_scheduling_lock';
+        
+        if (Cache::has($lockKey)) {
+            return;
+        }
+
+        try {
+            Cache::put($lockKey, true, 60); // 60 seconds lock
+            $callback();
+        } finally {
+            Cache::forget($lockKey);
+        }
+    }
+
+    /**
+     * Track command execution depth
+     */
+    protected function runCommand($command, array $parameters = [], $output = null)
+    {
+        $commandKey = get_class($command);
+        
+        if (!isset($this->runningCommands[$commandKey])) {
+            $this->runningCommands[$commandKey] = 0;
+        }
+        
+        $this->runningCommands[$commandKey]++;
+        
+        if ($this->runningCommands[$commandKey] > self::MAX_COMMAND_DEPTH) {
+            throw new \RuntimeException("Maximum command execution depth reached for {$commandKey}");
+        }
+        
+        try {
+            return parent::runCommand($command, $parameters, $output);
+        } finally {
+            $this->runningCommands[$commandKey]--;
+        }
     }
 }
 
