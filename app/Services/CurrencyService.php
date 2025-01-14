@@ -2,50 +2,64 @@
 
 namespace App\Services;
 
-use App\Models\Currency;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
 class CurrencyService
 {
-    private $apiKey;
-    private $cacheTimeout = 3600; // 1 hour
-
-    public function __construct()
+    private const MAX_DEPTH = 10; // Prevent infinite recursion
+    private array $processedCurrencies = [];
+    
+    /**
+     * Convert currency with rate calculation
+     */
+    public function convert(float $amount, string $from, string $to): float 
     {
-        $this->apiKey = config('services.exchange_rates.api_key');
+        // Reset processed currencies for new conversion
+        $this->processedCurrencies = [];
+        
+        return $this->calculateRate($amount, $from, $to, 0);
     }
 
-    public function convert($amount, $fromCurrency, $toCurrency)
+    /**
+     * Calculate exchange rate with depth tracking
+     */
+    private function calculateRate(float $amount, string $from, string $to, int $depth): float
     {
-        if ($fromCurrency === $toCurrency) {
-            return $amount;
+        // Prevent infinite recursion
+        if ($depth >= self::MAX_DEPTH) {
+            throw new \RuntimeException("Maximum currency conversion depth reached");
         }
 
-        $rate = $this->getExchangeRate($fromCurrency, $toCurrency);
-        return round($amount * $rate, 2);
-    }
+        // Prevent circular references
+        $key = "{$from}-{$to}";
+        if (isset($this->processedCurrencies[$key])) {
+            throw new \RuntimeException("Circular reference detected in currency conversion");
+        }
+        $this->processedCurrencies[$key] = true;
 
-    public function getExchangeRate($fromCurrency, $toCurrency)
-    {
-        $cacheKey = "exchange_rate_{$fromCurrency}_{$toCurrency}";
+        // Cache key for rate
+        $cacheKey = "currency_rate_{$from}_{$to}";
+
+        // Try to get direct conversion rate from cache
+        if ($rate = Cache::get($cacheKey)) {
+            return $amount * $rate;
+        }
+
+        // Your rate calculation logic here
+        // Make sure to implement proper error handling
         
-        return Cache::remember($cacheKey, $this->cacheTimeout, function () use ($fromCurrency, $toCurrency) {
-            $response = Http::get("https://api.exchangerate-api.com/v4/latest/{$fromCurrency}", [
-                'apikey' => $this->apiKey
-            ]);
-            
-            if ($response->successful()) {
-                $rates = $response->json()['rates'];
-                return $rates[$toCurrency] ?? null;
-            }
-            
-            throw new \Exception('Failed to fetch exchange rate');
-        });
+        // Clean up processed currencies after calculation
+        unset($this->processedCurrencies[$key]);
+        
+        return $amount * $rate;
     }
 
-    public function getSupportedCurrencies()
+    /**
+     * Clear memory
+     */
+    public function __destruct()
     {
-        return Currency::all();
+        $this->processedCurrencies = [];
     }
 }

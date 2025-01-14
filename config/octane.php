@@ -80,7 +80,9 @@ return [
         ],
 
         RequestTerminated::class => [
-            // FlushUploadedFiles::class,
+            FlushUploadedFiles::class,
+            DisconnectFromDatabases::class,
+            CollectGarbage::class,
         ],
 
         TaskReceived::class => [
@@ -205,7 +207,7 @@ return [
     |
     */
 
-    'garbage' => 50,
+    'garbage' => 100,
 
     /*
     |--------------------------------------------------------------------------
