@@ -15,7 +15,7 @@
 [![Docker](https://github.com/liberu-billing/billing-laravel/actions/workflows/main.yml/badge.svg)](https://github.com/liberu-billing/billing-laravel/actions/workflows/main.yml)
 
 
-## [Hosted application packages](https://liberu.co.uk/order/main/packages/applications/?group_id=3)
+## [Hosted application packages](https://liberu.co.uk)
 
 
 ## Overview
