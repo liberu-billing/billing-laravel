@@ -51,3 +51,43 @@ class DomainPricingService
         return '.' . end($parts);
     }
 }
+
+<?php
+
+namespace App\Services;
+
+use App\Traits\PreventRecursion;
+use Illuminate\Support\Facades\Log;
+
+class DomainPricingService
+{
+    use PreventRecursion;
+
+    public function syncTldsFromEnom()
+    {
+        if (!$this->preventRecursion('sync_tlds_enom')) {
+            Log::warning('TLD sync from Enom already in progress');
+            return false;
+        }
+
+        try {
+            return true;
+        } finally {
+            $this->releaseRecursionLock('sync_tlds_enom');
+        }
+    }
+
+    public function updatePricing($tld)
+    {
+        if (!$this->preventRecursion('update_pricing_' . $tld)) {
+            Log::warning('Pricing update already in progress for TLD: ' . $tld);
+            return false;
+        }
+
+        try {
+            return true;
+        } finally {
+            $this->releaseRecursionLock('update_pricing_' . $tld);
+        }
+    }
+}
