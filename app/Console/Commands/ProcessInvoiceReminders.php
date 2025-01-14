@@ -44,3 +44,4 @@ class ProcessInvoiceReminders extends Command
         return Command::FAILURE;
     }
 }
+}
