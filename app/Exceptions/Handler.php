@@ -7,38 +7,49 @@ use Throwable;
 
 class Handler extends ExceptionHandler
 {
+    private $handlingError = false;
+    private $recursionDepth = 0;
+    private const MAX_RECURSION_DEPTH = 3;
+
     protected $dontFlash = [
         'current_password',
         'password',
         'password_confirmation',
     ];
 
-    private $handlingError = false;
-
     public function register(): void
     {
         $this->reportable(function (Throwable $e) {
-            // Prevent recursive error handling
-            if ($this->handlingError) {
+            if ($this->recursionDepth >= self::MAX_RECURSION_DEPTH) {
                 return;
             }
-            
-            $this->handlingError = true;
+
+            $this->recursionDepth++;
             
             try {
-                if ($e instanceof \Error) {
-                    if (str_contains($e->getMessage(), 'Maximum call stack size') || 
-                        str_contains($e->getMessage(), 'Container.php line 1048')) {
-                        logger()->error('Recursion or stack overflow detected', [
-                            'message' => $e->getMessage(),
-                            'file' => $e->getFile(),
-                            'line' => $e->getLine(),
-                            'trace' => $e->getTraceAsString()
+                if ($e instanceof \Error || $e instanceof \Exception) {
+                    $message = $e->getMessage();
+                    $trace = $e->getTraceAsString();
+                    
+                    // Log detailed information about the error
+                    logger()->error('Error detected', [
+                        'message' => $message,
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine(),
+                        'trace' => $trace,
+                        'previous' => $e->getPrevious() ? get_class($e->getPrevious()) : null,
+                        'recursion_depth' => $this->recursionDepth
+                    ]);
+
+                    // Check for common container binding issues
+                    if (str_contains($trace, 'Container.php')) {
+                        logger()->error('Possible container binding issue detected', [
+                            'bindings' => app()->getBindings()
                         ]);
                     }
                 }
             } finally {
-                $this->handlingError = false;
+                $this->recursionDepth--;
             }
         });
     }
