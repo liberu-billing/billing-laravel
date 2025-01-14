@@ -689,3 +689,54 @@ class BillingService
         return $refundService->processRefund($payment, $amount);
     }
 }
+
+<?php
+
+namespace App\Services;
+
+use App\Traits\PreventRecursion;
+use Illuminate\Support\Facades\Log;
+
+class BillingService
+{
+    use PreventRecursion;
+
+    public function processRecurringBilling()
+    {
+        if (!$this->preventRecursion('recurring_billing')) {
+            Log::warning('Recurring billing process is already running');
+            return;
+        }
+
+        try {
+        } finally {
+            $this->releaseRecursionLock('recurring_billing');
+        }
+    }
+
+    public function sendUpcomingInvoiceReminders()
+    {
+        if (!$this->preventRecursion('upcoming_reminders')) {
+            Log::warning('Upcoming reminders process is already running');
+            return 0;
+        }
+
+        try {
+        } finally {
+            $this->releaseRecursionLock('upcoming_reminders');
+        }
+    }
+
+    public function sendOverdueReminders()
+    {
+        if (!$this->preventRecursion('overdue_reminders')) {
+            Log::warning('Overdue reminders process is already running');
+            return 0;
+        }
+
+        try {
+        } finally {
+            $this->releaseRecursionLock('overdue_reminders');
+        }
+    }
+}

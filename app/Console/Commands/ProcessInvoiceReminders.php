@@ -44,3 +44,38 @@ class ProcessInvoiceReminders extends Command
         return Command::FAILURE;
     }
 }
+
+<?php
+
+namespace App\Console\Commands;
+
+use App\Services\BillingService;
+
+class ProcessInvoiceReminders extends BaseCommand
+{
+    protected $signature = 'invoices:process-reminders';
+    protected $description = 'Process invoice reminders for upcoming and overdue invoices';
+
+    protected $billingService;
+
+    public function __construct(BillingService $billingService)
+    {
+        parent::__construct();
+        $this->billingService = $billingService;
+    }
+
+    public function handle()
+    {
+        return $this->executeWithLock('process_invoice_reminders', function() {
+            $this->info('Processing invoice reminders...');
+            
+            $upcomingCount = $this->billingService->sendUpcomingInvoiceReminders();
+            $this->info("Sent {$upcomingCount} upcoming invoice reminders");
+            
+            $overdueCount = $this->billingService->sendOverdueReminders();
+            $this->info("Sent {$overdueCount} overdue invoice reminders");
+            
+            return self::SUCCESS;
+        });
+    }
+}
