@@ -4,10 +4,15 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
-use App\Services\BillingService;
+use Illuminate\Support\Facades\Cache;
 
 class Kernel extends ConsoleKernel
 {
+    /**
+     * The maximum number of times package discovery can run recursively.
+     */
+    protected $maxDiscoveryAttempts = 3;
+
     /**
      * Define the application's command schedule.
      */
@@ -86,9 +91,23 @@ class Kernel extends ConsoleKernel
      */
     protected function commands(): void
     {
-        $this->load(__DIR__.'/Commands');
+        // Add discovery loop protection
+        $attemptKey = 'package_discovery_attempts';
+        $attempts = Cache::get($attemptKey, 0);
 
-        require base_path('routes/console.php');
+        if ($attempts >= $this->maxDiscoveryAttempts) {
+            Cache::forget($attemptKey);
+            throw new \RuntimeException('Package discovery maximum attempts exceeded. Possible circular dependency detected.');
+        }
+
+        Cache::put($attemptKey, $attempts + 1, 60);
+
+        try {
+            $this->load(__DIR__.'/Commands');
+            require base_path('routes/console.php');
+        } finally {
+            Cache::forget($attemptKey);
+        }
     }
 }
 
