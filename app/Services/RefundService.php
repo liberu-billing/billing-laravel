@@ -2,12 +2,13 @@
 
 namespace App\Services;
 
-use App\Models\Payment;
-use App\Services\PaymentGatewayService;
-use Illuminate\Support\Facades\DB;
+use App\Traits\PreventRecursion;
+use Illuminate\Support\Facades\Log;
 
 class RefundService
 {
+    use PreventRecursion;
+
     protected $paymentGatewayService;
 
     public function __construct(PaymentGatewayService $paymentGatewayService)
@@ -15,17 +16,12 @@ class RefundService
         $this->paymentGatewayService = $paymentGatewayService;
     }
 
-    public function processRefund(Payment $payment, float $amount)
+    public function processRefund($payment, $amount)
     {
-        if (!$payment->isRefundable()) {
-            throw new \Exception('This payment is not refundable.');
+        if (!$this->preventRecursion('process_refund_' . $payment->id)) {
+            Log::warning('Refund already being processed for payment ' . $payment->id);
+            return false;
         }
-
-        if ($amount > $payment->amount) {
-            throw new \Exception('Refund amount cannot exceed the original payment amount.');
-        }
-
-        DB::beginTransaction();
 
         try {
             $refundResult = $this->paymentGatewayService->refundPayment($payment, $amount);
