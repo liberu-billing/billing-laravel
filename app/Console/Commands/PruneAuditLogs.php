@@ -3,18 +3,25 @@
 namespace App\Console\Commands;
 
 use App\Models\AuditLog;
-use Illuminate\Console\Command;
 
-class PruneAuditLogs extends Command
+class PruneAuditLogs extends BaseCommand
 {
     protected $signature = 'audit:prune {--days=90}';
     protected $description = 'Prune old audit logs';
 
-    public function handle(): void
+    public function handle(): int
     {
-        $days = $this->option('days');
-        $count = AuditLog::where('created_at', '<', now()->subDays($days))->delete();
-        
-        $this->info("Deleted {$count} audit logs older than {$days} days.");
+        return $this->executeWithLock('prune_audit_logs', function() {
+            try {
+                $days = $this->option('days');
+                $count = AuditLog::where('created_at', '<', now()->subDays($days))->delete();
+                
+                $this->info("Deleted {$count} audit logs older than {$days} days.");
+                return self::SUCCESS;
+            } catch (\Exception $e) {
+                $this->error('Error pruning audit logs: ' . $e->getMessage());
+                return self::FAILURE;
+            }
+        });
     }
 }
