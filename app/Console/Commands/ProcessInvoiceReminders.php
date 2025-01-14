@@ -19,17 +19,28 @@ class ProcessInvoiceReminders extends Command
     }
 
     public function handle()
-    {
+{
+    if (cache()->get('processing_invoice_reminders')) {
+        $this->warn('Invoice reminder processing is already running');
+        return Command::FAILURE;
+    }
+
+    cache()->put('processing_invoice_reminders', true, 60); // Lock for 60 minutes
+
+    try {
         $this->info('Processing invoice reminders...');
         
-        // Process upcoming invoice reminders
         $upcomingCount = $this->billingService->sendUpcomingInvoiceReminders();
         $this->info("Sent {$upcomingCount} upcoming invoice reminders");
         
-        // Process overdue invoice reminders
         $overdueCount = $this->billingService->sendOverdueReminders();
         $this->info("Sent {$overdueCount} overdue invoice reminders");
         
+        cache()->forget('processing_invoice_reminders');
         return Command::SUCCESS;
+    } catch (\Exception $e) {
+        cache()->forget('processing_invoice_reminders');
+        $this->error("Error processing reminders: " . $e->getMessage());
+        return Command::FAILURE;
     }
 }
