@@ -7,18 +7,24 @@ use Illuminate\Support\Facades\Cache;
 
 class CurrencyService
 {
-    private const MAX_DEPTH = 10; // Prevent infinite recursion
+    private const MAX_DEPTH = 5; // Reduced from 10 to be more conservative
     private array $processedCurrencies = [];
+    private static $isProcessing = false;
     
-    /**
-     * Convert currency with rate calculation
-     */
     public function convert(float $amount, string $from, string $to): float 
     {
-        // Reset processed currencies for new conversion
-        $this->processedCurrencies = [];
+        if (self::$isProcessing) {
+            throw new \RuntimeException("Recursive currency conversion detected");
+        }
         
-        return $this->calculateRate($amount, $from, $to, 0);
+        try {
+            self::$isProcessing = true;
+            $this->processedCurrencies = [];
+            
+            return $this->calculateRate($amount, $from, $to, 0);
+        } finally {
+            self::$isProcessing = false;
+        }
     }
 
     /**
