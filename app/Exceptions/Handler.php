@@ -13,17 +13,32 @@ class Handler extends ExceptionHandler
         'password_confirmation',
     ];
 
+    private $handlingError = false;
+
     public function register(): void
     {
         $this->reportable(function (Throwable $e) {
-            if ($e instanceof \Error && str_contains($e->getMessage(), 'Maximum call stack size')) {
-                // Log the error with stack trace
-                logger()->error('Stack overflow detected', [
-                    'message' => $e->getMessage(),
-                    'file' => $e->getFile(),
-                    'line' => $e->getLine(),
-                    'trace' => $e->getTraceAsString()
-                ]);
+            // Prevent recursive error handling
+            if ($this->handlingError) {
+                return;
+            }
+            
+            $this->handlingError = true;
+            
+            try {
+                if ($e instanceof \Error) {
+                    if (str_contains($e->getMessage(), 'Maximum call stack size') || 
+                        str_contains($e->getMessage(), 'Container.php line 1048')) {
+                        logger()->error('Recursion or stack overflow detected', [
+                            'message' => $e->getMessage(),
+                            'file' => $e->getFile(),
+                            'line' => $e->getLine(),
+                            'trace' => $e->getTraceAsString()
+                        ]);
+                    }
+                }
+            } finally {
+                $this->handlingError = false;
             }
         });
     }
