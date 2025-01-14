@@ -313,3 +313,43 @@ class PaymentGatewayService
         ];
     }
 }
+
+<?php
+
+namespace App\Services;
+
+use App\Traits\PreventRecursion;
+use Illuminate\Support\Facades\Log;
+
+class PaymentGatewayService
+{
+    use PreventRecursion;
+
+    public function processPayment($payment)
+    {
+        if (!$this->preventRecursion('process_payment_' . $payment->id)) {
+            Log::warning('Payment processing already in progress for payment ' . $payment->id);
+            return false;
+        }
+
+        try {
+            return $result;
+        } finally {
+            $this->releaseRecursionLock('process_payment_' . $payment->id);
+        }
+    }
+
+    public function refundPayment($payment, $amount)
+    {
+        if (!$this->preventRecursion('refund_payment_' . $payment->id)) {
+            Log::warning('Refund processing already in progress for payment ' . $payment->id);
+            return false;
+        }
+
+        try {
+            return $result;
+        } finally {
+            $this->releaseRecursionLock('refund_payment_' . $payment->id);
+        }
+    }
+}

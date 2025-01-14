@@ -102,3 +102,29 @@ class ReportGenerationService
         return $filename;
     }
 }
+
+<?php
+
+namespace App\Services;
+
+use App\Traits\PreventRecursion;
+use Illuminate\Support\Facades\Log;
+
+class ReportGenerationService
+{
+    use PreventRecursion;
+
+    public function generateReport($report)
+    {
+        if (!$this->preventRecursion('generate_report_' . $report->id)) {
+            Log::warning('Report generation already in progress for report ' . $report->id);
+            return false;
+        }
+
+        try {
+            return $result;
+        } finally {
+            $this->releaseRecursionLock('generate_report_' . $report->id);
+        }
+    }
+}
