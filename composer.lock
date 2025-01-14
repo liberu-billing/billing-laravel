@@ -2685,16 +2685,16 @@
         },
         {
             "name": "laravel/framework",
-            "version": "v11.37.0",
+            "version": "v11.38.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "6cb103d2024b087eae207654b3f4b26646119ba5"
+                "reference": "5d964a15efc8fffcb175aed3976796c0420bcf99"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/6cb103d2024b087eae207654b3f4b26646119ba5",
-                "reference": "6cb103d2024b087eae207654b3f4b26646119ba5",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/5d964a15efc8fffcb175aed3976796c0420bcf99",
+                "reference": "5d964a15efc8fffcb175aed3976796c0420bcf99",
                 "shasum": ""
             },
             "require": {
@@ -2895,7 +2895,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2025-01-02T20:10:21+00:00"
+            "time": "2025-01-14T14:53:42+00:00"
         },
         {
             "name": "laravel/jetstream",
@@ -6077,16 +6077,16 @@
         },
         {
             "name": "roadrunner-php/roadrunner-api-dto",
-            "version": "v1.9.0",
+            "version": "v1.10.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/roadrunner-php/roadrunner-api-dto.git",
-                "reference": "84ccecbd7a1daeaadda3eb0767001deb2dd13739"
+                "reference": "dfab9cdba2c6f73223cd0d9e159c39b6b995cff9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/roadrunner-php/roadrunner-api-dto/zipball/84ccecbd7a1daeaadda3eb0767001deb2dd13739",
-                "reference": "84ccecbd7a1daeaadda3eb0767001deb2dd13739",
+                "url": "https://api.github.com/repos/roadrunner-php/roadrunner-api-dto/zipball/dfab9cdba2c6f73223cd0d9e159c39b6b995cff9",
+                "reference": "dfab9cdba2c6f73223cd0d9e159c39b6b995cff9",
                 "shasum": ""
             },
             "require": {
@@ -6132,7 +6132,7 @@
                 "docs": "https://docs.roadrunner.dev",
                 "forum": "https://forum.roadrunner.dev",
                 "issues": "https://github.com/roadrunner-server/roadrunner/issues",
-                "source": "https://github.com/roadrunner-php/roadrunner-api-dto/tree/v1.9.0"
+                "source": "https://github.com/roadrunner-php/roadrunner-api-dto/tree/v1.10.0"
             },
             "funding": [
                 {
@@ -6140,7 +6140,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-08-06T12:07:48+00:00"
+            "time": "2025-01-14T10:10:32+00:00"
         },
         {
             "name": "ryangjchandler/blade-capture-directive",
@@ -13030,12 +13030,12 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": "^8.3"
     },
-    "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "platform-dev": {},
+    "plugin-api-version": "2.6.0"
 }

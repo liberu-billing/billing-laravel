@@ -1,6 +1,6 @@
 <?php
 
-namespace tests;
+namespace tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Session;
