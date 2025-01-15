@@ -10,9 +10,9 @@ return new class extends Migration
     {
         Schema::create('payment_histories', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('payment_id')->constrained()->onDelete('cascade');
-            $table->foreignId('invoice_id')->constrained()->onDelete('cascade');
-            $table->foreignId('customer_id')->constrained()->onDelete('cascade');
+            $table->integer('payment_id')->nullable();
+            $table->integer('invoice_id')->nullable();
+            $table->integer('customer_id')->nullable();
             $table->decimal('amount', 10, 2);
             $table->string('currency');
             $table->string('payment_method');

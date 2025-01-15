@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('usage_records', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('subscription_id')->constrained()->onDelete('cascade');
+            $table->integer('subscription_id')->nullable();
             $table->string('metric_name');
             $table->decimal('quantity', 10, 2);
             $table->timestamp('recorded_at');

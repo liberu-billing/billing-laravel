@@ -10,14 +10,14 @@ return new class extends Migration
     {
         Schema::create('invoice_disputes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('invoice_id')->constrained()->onDelete('cascade');
-            $table->foreignId('customer_id')->constrained();
+            $table->integer('invoice_id')->nullable();
+            $table->integer('customer_id')->constrained();
             $table->string('status')->default('open');
             $table->string('reason');
             $table->text('description');
             $table->text('resolution_notes')->nullable();
             $table->timestamp('resolved_at')->nullable();
-            $table->foreignId('resolved_by')->nullable()->constrained('users');
+            $table->integer('resolved_by')->nullable()->constrained('users');
             $table->timestamps();
         });
     }

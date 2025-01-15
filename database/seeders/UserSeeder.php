@@ -24,7 +24,7 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
         ]);
-        $adminUser->assignRole('admin');
+        // $adminUser->assignRole('admin');
 
         // Create teams for admin and staff users
         $this->createTeamForUser($adminUser);

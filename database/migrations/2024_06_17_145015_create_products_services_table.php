@@ -16,6 +16,10 @@ return new class extends Migration
             $table->text('description');
             $table->decimal('price', 8, 2);
             $table->enum('type', ['product', 'service']);
+            $table->integer('product_type_id')->nullable()->constrained();
+            $table->integer('hosting_server_id')->nullable()->constrained();
+            $table->integer('trial_days')->default(0);
+            $table->boolean('trial_enabled')->default(false);
             $table->timestamps();
         });
     }
