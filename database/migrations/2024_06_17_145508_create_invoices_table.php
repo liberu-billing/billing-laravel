@@ -20,6 +20,19 @@ return new class extends Migration
             $table->decimal('total_amount', 10, 2);
             $table->string('currency', 3);
             $table->enum('status', ['pending', 'paid', 'overdue']);
+            $table->timestamp('sent_at')->nullable();
+            $table->timestamp('viewed_at')->nullable();
+            $table->timestamp('paid_at')->nullable();
+            $table->json('status_history')->nullable();
+            $table->decimal('late_fee_amount', 10, 2)->default(0);
+            $table->timestamp('last_late_fee_date')->nullable();
+            $table->boolean('upcoming_reminder_sent')->nullable();
+            $table->integer('reminder_count')->nullable();
+            $table->timestamp('last_reminder_date')->nullable();
+            $table->integer('discount_id')->nullable();
+            $table->decimal('discount_amount', 10, 2)->nullable();
+            $table->integer('parent_invoice_id')->nullable();
+            $table->boolean('is_installment')->default(false);
             $table->timestamps();
         });
     }

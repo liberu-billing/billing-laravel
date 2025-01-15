@@ -14,9 +14,9 @@ return new class extends Migration
             $table->string('path');
             $table->string('mime_type');
             $table->integer('size');
-            $table->foreignId('folder_id')->nullable()->constrained()->onDelete('cascade');
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('team_id')->nullable()->constrained()->onDelete('cascade');
+            $table->integer('folder_id')->nullable();
+            $table->integer('user_id')->nullable();
+            $table->integer('team_id')->nullable();
             $table->timestamps();
         });
     }

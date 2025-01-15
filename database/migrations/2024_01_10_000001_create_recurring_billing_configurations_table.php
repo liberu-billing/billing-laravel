@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('recurring_billing_configurations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('invoice_id')->constrained()->onDelete('cascade');
+            $table->integer('invoice_id')->nullable();
             $table->string('frequency'); // monthly, quarterly, yearly
             $table->integer('billing_day')->nullable();
             $table->date('next_billing_date');

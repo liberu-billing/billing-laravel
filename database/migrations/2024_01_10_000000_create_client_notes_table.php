@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::create('client_notes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('client_id')->constrained()->onDelete('cascade');
-            $table->foreignId('user_id')->constrained()->onDelete('cascade'); 
+            $table->integer('client_id')->nullable();
+            $table->integer('user_id')->nullable(); 
             $table->text('content');
             $table->timestamps();
         });

@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('tax_exemptions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('customer_id')->constrained()->onDelete('cascade');
+            $table->integer('customer_id')->nullable();
             $table->string('exemption_number')->nullable();
             $table->text('reason');
             $table->date('expiry_date')->nullable();

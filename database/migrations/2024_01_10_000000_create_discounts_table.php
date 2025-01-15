@@ -16,26 +16,17 @@ return new class extends Migration
             $table->enum('type', ['percentage', 'fixed']);
             $table->decimal('value', 10, 2);
             $table->string('currency')->nullable();
-            $table->timestamp('start_date');
-            $table->timestamp('end_date');
+            $table->timestamp('start_date')->nullable();
+            $table->timestamp('end_date')->nullable();
             $table->integer('max_uses')->nullable();
             $table->integer('used_count')->default(0);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
-
-        Schema::table('invoices', function (Blueprint $table) {
-            $table->foreignId('discount_id')->nullable()->constrained()->onDelete('set null');
-            $table->decimal('discount_amount', 10, 2)->nullable();
-        });
     }
 
     public function down()
     {
-        Schema::table('invoices', function (Blueprint $table) {
-            $table->dropForeign(['discount_id']);
-            $table->dropColumn(['discount_id', 'discount_amount']);
-        });
         Schema::dropIfExists('discounts');
     }
 };
