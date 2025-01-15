@@ -48,7 +48,7 @@
 
 ## Setup
 
-1. Ensure your environment is set up with PHP 8.3 and Composer installed.
+1. Ensure your environment is set up with PHP 8.3 and composer install --no-scriptsed.
 2. Download the project files from this GitHub repository.
 3. Open a terminal in the project folder. If you are on Windows and have Git Bash installed, you can use it for the following steps.
 4. Run the following command:
@@ -63,7 +63,7 @@ NOTE 1: The script will ask you if you want to have your .env be overwritten by 
 
 NOTE 2: This script will run seeders, please make sure you are aware of this and don't run this script if you don't want this to happen.
 ```bash
-composer install
+composer install --no-scripts
 php artisan key:generate
 php artisan migrate --seed
 ```

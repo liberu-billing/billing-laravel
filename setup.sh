@@ -46,8 +46,8 @@ echo "=================================="
 echo ""
 echo ""
 # Install laravel dependencies with composer
-echo "🎬 DEV ---> COMPOSER INSTALL"
-composer install
+echo "🎬 DEV ---> composer install --no-scripts"
+composer install --no-scripts
 echo ""
 echo "=================================="
 echo ""
