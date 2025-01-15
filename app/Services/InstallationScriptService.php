@@ -42,7 +42,7 @@ class InstallationScriptService
             "git clone {$this->gitRepo} .",
             '',
             '# Install composer dependencies',
-            'composer install --no-dev --optimize-autoloader',
+            'composer install --no-scripts --no-dev --optimize-autoloader',
             '',
             '# Install npm dependencies and build assets',
             'npm install',

@@ -24,7 +24,7 @@ jobs:
           php-version: '8.3'
       - name: 'Run Phpcpd'
         run: |
-          sudo composer install
+          sudo composer install --no-scripts
           sudo test -f phpcpd.phar || curl -L https://phar.phpunit.de/phpcpd.phar -o phpcpd.phar
           sudo php phpcpd.phar app/
 
@@ -37,7 +37,7 @@ jobs:
           php-version: '8.3'
       - name: 'Run php-insight'
         run: |
-          sudo composer install
+          sudo composer install --no-scripts
           sudo php artisan insights --min-quality=90 --min-complexity=90 --min-architecture=80 --min-style=90 --no-interaction
 
   security:

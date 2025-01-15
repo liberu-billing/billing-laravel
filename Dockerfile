@@ -102,7 +102,7 @@ USER ${USER}
 COPY  --chown=${USER}:${USER} --from=vendor /usr/bin/composer /usr/bin/composer
 COPY  --chown=${USER}:${USER} composer.json composer.lock ./
 
-RUN composer install \
+RUN composer install --no-scripts \
     --no-dev \
     --no-interaction \
     --no-autoloader \
@@ -126,7 +126,7 @@ COPY  --chown=${USER}:${USER} .docker/supervisord.*.conf /etc/supervisor/conf.d/
 COPY  --chown=${USER}:${USER} .docker/php.ini ${PHP_INI_DIR}/conf.d/99-octane.ini
 COPY  --chown=${USER}:${USER} .docker/start-container /usr/local/bin/start-container
 
-RUN composer install \
+RUN composer install --no-scripts \
     --classmap-authoritative \
     --no-interaction \
     --no-ansi \
