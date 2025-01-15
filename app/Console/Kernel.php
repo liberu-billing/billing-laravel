@@ -20,7 +20,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('invoices:send-reminders')->daily();
         $schedule->command('invoices:process-reminders')->daily();
-      
+
         $schedule->command('audit:prune')->daily();
 
         $schedule->call(function () {
@@ -72,7 +72,7 @@ class Kernel extends ConsoleKernel
         $schedule = $report->schedule;
         $lastGenerated = $report->last_generated_at;
 
-        return match($schedule['frequency']) {
+        return match ($schedule['frequency']) {
             'daily' => $lastGenerated->diffInDays(now()) >= 1,
             'weekly' => $lastGenerated->diffInWeeks(now()) >= 1,
             'monthly' => $lastGenerated->diffInMonths(now()) >= 1,
@@ -86,9 +86,8 @@ class Kernel extends ConsoleKernel
      */
     protected function commands(): void
     {
-        $this->load(__DIR__.'/Commands');
+        $this->load(__DIR__ . '/Commands');
 
         require base_path('routes/console.php');
     }
 }
-
