@@ -40,8 +40,8 @@ class RolesSeeder extends Seeder
         ];
 
         foreach ($roles as $roleName => $rolePermissions) {
-            // $role = Role::firstOrCreate(['name' => $roleName]);
-            // $role->syncPermissions($rolePermissions);
+            $role = Role::firstOrCreate(['name' => $roleName]);
+            $role->syncPermissions($rolePermissions);
         }
     }
 }
