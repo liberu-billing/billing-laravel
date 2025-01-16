@@ -15,9 +15,9 @@ class Role extends SpatieRole
         return $this->belongsTo(Team::class);
     }
 
-    public function hasPermissionTo($permission): bool 
+    public function hasPermissionTo($permission, $guardName = null): bool 
     {
-        return $this->permissions()->where('name', $permission)->exists();
+        return $this->permissions()->where('name', $permission)->exists() ?? false;
     }
 
     public static function defaultRoles(): array
