@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ecbf38c220edd15789d3f46a467e06a3",
+    "content-hash": "03d1c26b791da6d794ec671ab9e363a3",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -2342,32 +2342,32 @@
         },
         {
             "name": "intelrx/sitesettings",
-            "version": "2.0.0",
+            "version": "3.0.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/Raza9798/Site-Settings.git",
-                "reference": "64c23056e410b52af75487d4a9c6f2935c1098ab"
+                "url": "https://github.com/Raza9798/siteconfig.git",
+                "reference": "9a67d8f36dca3571095f62537ff34eed42076141"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Raza9798/Site-Settings/zipball/64c23056e410b52af75487d4a9c6f2935c1098ab",
-                "reference": "64c23056e410b52af75487d4a9c6f2935c1098ab",
+                "url": "https://api.github.com/repos/Raza9798/siteconfig/zipball/9a67d8f36dca3571095f62537ff34eed42076141",
+                "reference": "9a67d8f36dca3571095f62537ff34eed42076141",
                 "shasum": ""
             },
             "require": {
-                "php": "^8.3"
+                "php": "^8.2"
             },
             "type": "library",
             "extra": {
                 "laravel": {
                     "providers": [
-                        "Intelrx\\Sitesettings\\SitesettingsProvider"
+                        "Core\\Siteconfig\\SiteconfigServiceProvider"
                     ]
                 }
             },
             "autoload": {
                 "psr-4": {
-                    "Intelrx\\Sitesettings\\": "src/"
+                    "Core\\Siteconfig\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -2380,12 +2380,23 @@
                     "email": "m.raza9798@gmail.com"
                 }
             ],
-            "description": "Application global properties",
+            "description": "A Laravel package for managing site configurations.",
+            "keywords": [
+                "Settings",
+                "application",
+                "configuration",
+                "environment",
+                "laravel",
+                "package",
+                "php",
+                "siteconfig"
+            ],
             "support": {
-                "issues": "https://github.com/Raza9798/Site-Settings/issues",
-                "source": "https://github.com/Raza9798/Site-Settings/tree/2.0.0"
+                "issues": "https://github.com/Raza9798/siteconfig/issues",
+                "source": "https://github.com/Raza9798/siteconfig/tree/3.0.0"
             },
-            "time": "2024-09-30T20:53:46+00:00"
+            "abandoned": "raza9798/siteconfig",
+            "time": "2025-05-12T11:02:00+00:00"
         },
         {
             "name": "joelbutcher/socialstream",
@@ -13048,5 +13059,5 @@
         "php": "^8.3"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.3.0"
 }
