@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Exception;
 use App\Traits\HasTeam;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -51,7 +52,7 @@ class Products_Service extends Model
     public function recordUsage($subscriptionId, $metric, $quantity)
     {
         if (!in_array($metric, $this->getUsageMetrics())) {
-            throw new \Exception("Invalid usage metric: {$metric}");
+            throw new Exception("Invalid usage metric: {$metric}");
         }
 
         return UsageRecord::create([

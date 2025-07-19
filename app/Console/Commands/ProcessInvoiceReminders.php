@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Exception;
 use Illuminate\Console\Command;
 use App\Services\BillingService;
 
@@ -43,7 +44,7 @@ class ProcessInvoiceReminders extends Command
 
             cache()->forget('processing_invoice_reminders');
             return Command::SUCCESS;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             cache()->forget('processing_invoice_reminders');
             $this->error("Error processing reminders: " . $e->getMessage());
             return Command::FAILURE;

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use App\Models\Payment;
 use App\Models\Invoice;
 use App\Services\PaymentGatewayService;
@@ -19,7 +20,7 @@ class PartialPaymentService
     public function processPartialPayment(Invoice $invoice, float $amount, int $paymentGatewayId)
     {
         if ($amount <= 0 || $amount > $invoice->remaining_amount) {
-            throw new \Exception('Invalid partial payment amount.');
+            throw new Exception('Invalid partial payment amount.');
         }
 
         DB::beginTransaction();
@@ -44,9 +45,9 @@ class PartialPaymentService
                 DB::commit();
                 return ['success' => true, 'message' => 'Partial payment processed successfully.', 'payment' => $payment];
             } else {
-                throw new \Exception($paymentResult['message']);
+                throw new Exception($paymentResult['message']);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             return ['success' => false, 'message' => 'Partial payment failed: ' . $e->getMessage()];
         }

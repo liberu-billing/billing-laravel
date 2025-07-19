@@ -2,9 +2,9 @@
 
 namespace App\Filament\Pages;
 
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Grid;
 use Filament\Pages\Page;
-use Filament\Forms\Components\Card;
-use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\DatePicker;
@@ -15,8 +15,8 @@ use Illuminate\Support\Facades\Auth;
 
 class ManageSubscriptionPage extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-credit-card';
-    protected static string $view = 'filament.pages.manage-subscription';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-credit-card';
+    protected string $view = 'filament.pages.manage-subscription';
     
     public $subscription;
     public $selectedProduct;
@@ -38,7 +38,7 @@ class ManageSubscriptionPage extends Page
     protected function getFormSchema(): array
     {
         return [
-            Card::make()
+            Section::make()
                 ->schema([
                     Grid::make(2)
                         ->schema([

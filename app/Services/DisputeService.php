@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use App\Models\Invoice;
 use App\Models\InvoiceDispute;
 use App\Models\DisputeMessage;
@@ -16,7 +17,7 @@ class DisputeService
     public function createDispute(Invoice $invoice, array $data)
     {
         if ($invoice->isDisputed()) {
-            throw new \Exception('Invoice already has an active dispute');
+            throw new Exception('Invoice already has an active dispute');
         }
 
         $dispute = InvoiceDispute::create([

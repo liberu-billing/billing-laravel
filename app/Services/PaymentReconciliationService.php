@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use App\Models\Payment;
 use App\Models\Invoice;
 use App\Models\PaymentHistory;
@@ -28,7 +29,7 @@ class PaymentReconciliationService
             $this->logReconciliationHistory($payment, null, 'unmatched');
             
             return false;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Payment reconciliation failed', [
                 'payment_id' => $payment->id,
                 'error' => $e->getMessage()

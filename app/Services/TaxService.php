@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use App\Models\TaxRate;
 use App\Models\Invoice;
 use App\Models\TaxExemption;
@@ -51,7 +52,7 @@ class TaxService
         if ($this->taxApiConfig['enabled']) {
             try {
                 return $this->getTaxRatesFromApi($customer);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 Log::error('Tax API error: ' . $e->getMessage());
                 // Fallback to database rates if API fails
             }
@@ -83,7 +84,7 @@ class TaxService
             return $this->formatApiResponse($response->json());
         }
 
-        throw new \Exception('Failed to fetch tax rates from API');
+        throw new Exception('Failed to fetch tax rates from API');
     }
 
     protected function isExempt($customer)

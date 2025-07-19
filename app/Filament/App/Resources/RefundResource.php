@@ -2,10 +2,22 @@
 
 namespace App\Filament\App\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Hidden;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Actions\Action;
+use Exception;
+use App\Filament\App\Resources\RefundResource\Pages\ListRefunds;
+use App\Filament\App\Resources\RefundResource\Pages\CreateRefund;
+use App\Filament\App\Resources\RefundResource\Pages\EditRefund;
 use App\Filament\App\Resources\RefundResource\Pages;
 use App\Models\Payment;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Filament\Tables;
@@ -19,17 +31,17 @@ class RefundResource extends Resource
 {
     protected static ?string $model = Payment::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-arrow-path';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-arrow-path';
     
     protected static ?string $navigationLabel = 'Refunds';
 
     protected static ?string $modelLabel = 'Refund';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Select::make('payment_id')
+        return $schema
+            ->components([
+                Select::make('payment_id')
                     ->label('Payment')
                     ->options(function () {
                         return Payment::whereIn('refund_status', ['none', 'partial'])
@@ -52,7 +64,7 @@ class RefundResource extends Resource
                         }
                     }),
                 
-                Forms\Components\TextInput::make('amount')
+                TextInput::make('amount')
                     ->required()
                     ->numeric()
                     ->label('Refund Amount')
@@ -69,12 +81,12 @@ class RefundResource extends Resource
                         },
                     ]),
                 
-                Forms\Components\Textarea::make('reason')
+                Textarea::make('reason')
                     ->label('Refund Reason')
                     ->required()
                     ->maxLength(1000),
                     
-                Forms\Components\Hidden::make('currency'),
+                Hidden::make('currency'),
             ]);
     }
 
@@ -82,45 +94,45 @@ class RefundResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id')
+                TextColumn::make('id')
                     ->label('Payment ID')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('invoice.invoice_number')
+                TextColumn::make('invoice.invoice_number')
                     ->label('Invoice Number')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('amount')
+                TextColumn::make('amount')
                     ->label('Original Amount')
                     ->money(fn ($record) => $record->currency)
                     ->sortable(),
-                Tables\Columns\TextColumn::make('refunded_amount')
+                TextColumn::make('refunded_amount')
                     ->label('Refunded Amount')
                     ->money(fn ($record) => $record->currency)
                     ->sortable(),
-                Tables\Columns\BadgeColumn::make('refund_status')
+                BadgeColumn::make('refund_status')
                     ->colors([
                         'danger' => 'none',
                         'warning' => 'partial',
                         'success' => 'full',
                     ]),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->label('Payment Date')
                     ->dateTime()
                     ->sortable(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('refund_status')
+                SelectFilter::make('refund_status')
                     ->options([
                         'none' => 'No Refund',
                         'partial' => 'Partially Refunded',
                         'full' => 'Fully Refunded',
                     ]),
             ])
-            ->actions([
-                Tables\Actions\Action::make('refund')
+            ->recordActions([
+                Action::make('refund')
                     ->visible(fn (Payment $record) => $record->isRefundable())
-                    ->form([
-                        Forms\Components\TextInput::make('amount')
+                    ->schema([
+                        TextInput::make('amount')
                             ->required()
                             ->numeric()
                             ->label('Refund Amount')
@@ -134,7 +146,7 @@ class RefundResource extends Resource
                                     }
                                 },
                             ]),
-                        Forms\Components\Textarea::make('reason')
+                        Textarea::make('reason')
                             ->required()
                             ->label('Refund Reason'),
                     ])
@@ -156,7 +168,7 @@ class RefundResource extends Resource
                                     ->danger()
                                     ->send();
                             }
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             Notification::make()
                                 ->title('Error processing refund')
                                 ->body($e->getMessage())
@@ -165,7 +177,7 @@ class RefundResource extends Resource
                         }
                     }),
             ])
-            ->bulkActions([])
+            ->toolbarActions([])
             ->defaultSort('created_at', 'desc');
     }
     
@@ -177,9 +189,9 @@ class RefundResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListRefunds::route('/'),
-            'create' => Pages\CreateRefund::route('/create'),
-            'edit' => Pages\EditRefund::route('/{record}/edit'),
+            'index' => ListRefunds::route('/'),
+            'create' => CreateRefund::route('/create'),
+            'edit' => EditRefund::route('/{record}/edit'),
         ];
     }    
 

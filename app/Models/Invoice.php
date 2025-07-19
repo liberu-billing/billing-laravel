@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Mail\InvoiceGenerated;
@@ -121,7 +122,7 @@ class Invoice extends Model
     public function processPayment(string $paymentMethod, float $amount)
     {
         if ($amount <= 0 || $amount > $this->remaining_amount) {
-            throw new \Exception('Invalid payment amount');
+            throw new Exception('Invalid payment amount');
         }
 
         $payment = new Payment([
@@ -144,7 +145,7 @@ class Invoice extends Model
             return true;
         }
 
-        throw new \Exception($result['message']);
+        throw new Exception($result['message']);
     }
 
     public function updateStatus()
@@ -207,7 +208,7 @@ class Invoice extends Model
     public function createPaymentPlan($totalInstallments, $frequency = 'monthly')
     {
         if ($this->is_installment) {
-            throw new \Exception('Cannot create payment plan for an installment invoice');
+            throw new Exception('Cannot create payment plan for an installment invoice');
         }
 
         $installmentAmount = round($this->total_amount / $totalInstallments, 2);
@@ -394,7 +395,7 @@ class Invoice extends Model
     public function setupRecurringBilling($frequency, $billingDay = null)
     {
         if ($this->is_installment) {
-            throw new \Exception('Cannot set up recurring billing for an installment invoice');
+            throw new Exception('Cannot set up recurring billing for an installment invoice');
         }
 
         $this->update(['is_recurring' => true]);

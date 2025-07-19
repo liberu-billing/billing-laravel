@@ -2,6 +2,17 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Toggle;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\BooleanColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
 use App\Filament\Resources\RecurringBillingResource\Pages;
 use App\Models\RecurringBillingConfiguration;
 use Filament\Forms;
@@ -15,33 +26,33 @@ class RecurringBillingResource extends Resource
 {
     protected static ?string $model = RecurringBillingConfiguration::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-refresh';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-refresh';
     protected static ?string $navigationLabel = 'Recurring Billing';
-    protected static ?string $navigationGroup = 'Billing';
+    protected static string | \UnitEnum | null $navigationGroup = 'Billing';
 
-    public static function form(Forms\Form $form): Forms\Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Select::make('invoice_id')
+        return $schema
+            ->components([
+                Select::make('invoice_id')
                     ->relationship('invoice', 'invoice_number')
                     ->required()
                     ->searchable(),
-                Forms\Components\Select::make('frequency')
+                Select::make('frequency')
                     ->options([
                         'monthly' => 'Monthly',
                         'quarterly' => 'Quarterly',
                         'yearly' => 'Yearly',
                     ])
                     ->required(),
-                Forms\Components\TextInput::make('billing_day')
+                TextInput::make('billing_day')
                     ->numeric()
                     ->minValue(1)
                     ->maxValue(31)
                     ->helperText('Day of the month when billing should occur'),
-                Forms\Components\DatePicker::make('next_billing_date')
+                DatePicker::make('next_billing_date')
                     ->required(),
-                Forms\Components\Toggle::make('is_active')
+                Toggle::make('is_active')
                     ->required()
                     ->default(true),
             ]);
@@ -51,24 +62,24 @@ class RecurringBillingResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('invoice.invoice_number')
+                TextColumn::make('invoice.invoice_number')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('frequency')
+                TextColumn::make('frequency')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('billing_day')
+                TextColumn::make('billing_day')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('next_billing_date')
+                TextColumn::make('next_billing_date')
                     ->date()
                     ->sortable(),
-                Tables\Columns\BooleanColumn::make('is_active')
+                BooleanColumn::make('is_active')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('frequency')
+                SelectFilter::make('frequency')
                     ->options([
                         'monthly' => 'Monthly',
                         'quarterly' => 'Quarterly',
@@ -76,12 +87,12 @@ class RecurringBillingResource extends Resource
                     ]),
                 Filter::make('is_active'),
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+            ->recordActions([
+                EditAction::make(),
+                DeleteAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                DeleteBulkAction::make(),
             ]);
     }
     

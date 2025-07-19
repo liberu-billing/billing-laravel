@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Exception;
 use App\Traits\HasTeam;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -85,11 +86,11 @@ class Payment extends Model
     public function processRefund(float $amount, string $reason = null)
     {
         if (!$this->isRefundable()) {
-            throw new \Exception('This payment is not eligible for refund');
+            throw new Exception('This payment is not eligible for refund');
         }
 
         if ($amount > $this->getRemainingRefundableAmount()) {
-            throw new \Exception('Refund amount exceeds remaining refundable amount');
+            throw new Exception('Refund amount exceeds remaining refundable amount');
         }
 
         $this->refunded_amount = ($this->refunded_amount ?? 0) + $amount;

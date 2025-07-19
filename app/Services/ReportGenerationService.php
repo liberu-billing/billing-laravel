@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use App\Models\Report;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -25,7 +26,7 @@ class ReportGenerationService
             'pdf' => $this->generatePdfReport($data, $report),
             'csv' => $this->generateCsvReport($data, $report),
             'excel' => $this->generateExcelReport($data, $report),
-            default => throw new \Exception('Unsupported report format')
+            default => throw new Exception('Unsupported report format')
         };
     }
 
@@ -54,7 +55,7 @@ class ReportGenerationService
                     Customer::find($report->parameters['customer_id'])
                 )->max('total_paid')
             ],
-            default => throw new \Exception('Unsupported report type')
+            default => throw new Exception('Unsupported report type')
         };
     }
 

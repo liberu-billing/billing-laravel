@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use App\Models\HostingAccount;
 use App\Models\Products_Service;
 use App\Models\HostingServer;
@@ -40,7 +41,7 @@ class HostingService
         $server = $this->selectServer($product->hosting_server_id);
         
         if (!$server) {
-            throw new \Exception('No available servers found');
+            throw new Exception('No available servers found');
         }
 
         $client = $this->getClientForControlPanel($server->control_panel);
@@ -147,7 +148,7 @@ class HostingService
             'plesk' => $this->pleskClient,
             'directadmin' => $this->directAdminClient,
             'virtualmin' => $this->virtualminClient,
-            default => throw new \Exception("Unsupported control panel: $controlPanel"),
+            default => throw new Exception("Unsupported control panel: $controlPanel"),
         };
     }
 }

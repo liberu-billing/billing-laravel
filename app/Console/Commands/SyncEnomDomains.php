@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Exception;
 use Illuminate\Console\Command;
 use App\Services\DomainPricingService;
 
@@ -26,7 +27,7 @@ class SyncEnomDomains extends Command
         try {
             $this->domainPricingService->syncTldsFromEnom();
             $this->info('Enom domain synchronization completed successfully.');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->error('An error occurred during Enom domain synchronization: ' . $e->getMessage());
         }
     }

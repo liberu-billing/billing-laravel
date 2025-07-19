@@ -2,3 +2,9 @@
 [09-Apr-2025 23:47:30 UTC] PHP Warning:  PHP Startup: session.gc_divisor must be greater than 0 in Unknown on line 0
 [09-Apr-2025 23:47:31 UTC] PHP Warning:  PHP Startup: session.gc_divisor must be greater than 0 in Unknown on line 0
 [09-Apr-2025 23:47:31 UTC] PHP Warning:  PHP Startup: session.gc_divisor must be greater than 0 in Unknown on line 0
+[19-Jul-2025 18:03:38 UTC] PHP Fatal error:  Type of App\Filament\Resources\AuditLogResource::$navigationGroup must be ?string (as in class Filament\Resources\Resource) in /home/liberu/projects/billing-laravel/app/Filament/Resources/AuditLogResource.php on line 15
+[19-Jul-2025 18:03:49 UTC] PHP Fatal error:  Type of App\Filament\Resources\AuditLogResource::$navigationGroup must be ?string (as in class Filament\Resources\Resource) in /home/liberu/projects/billing-laravel/app/Filament/Resources/AuditLogResource.php on line 15
+[19-Jul-2025 18:03:57 UTC] PHP Fatal error:  Type of App\Filament\Resources\AuditLogResource::$navigationGroup must be ?string (as in class Filament\Resources\Resource) in /home/liberu/projects/billing-laravel/app/Filament/Resources/AuditLogResource.php on line 15
+[19-Jul-2025 18:04:01 UTC] PHP Fatal error:  Type of App\Filament\Resources\AuditLogResource::$navigationGroup must be ?string (as in class Filament\Resources\Resource) in /home/liberu/projects/billing-laravel/app/Filament/Resources/AuditLogResource.php on line 15
+[19-Jul-2025 18:04:07 UTC] PHP Fatal error:  Type of App\Filament\Resources\AuditLogResource::$navigationGroup must be ?string (as in class Filament\Resources\Resource) in /home/liberu/projects/billing-laravel/app/Filament/Resources/AuditLogResource.php on line 15
+[19-Jul-2025 18:04:12 UTC] PHP Fatal error:  Type of App\Filament\Resources\AuditLogResource::$navigationGroup must be ?string (as in class Filament\Resources\Resource) in /home/liberu/projects/billing-laravel/app/Filament/Resources/AuditLogResource.php on line 15

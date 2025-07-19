@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use App\Models\Subscription;
 use App\Services\ServiceProvisioningService;
 use Illuminate\Http\Request;
@@ -26,7 +27,7 @@ class ServiceManagementController extends Controller
         try {
             $result = $this->serviceProvisioningService->provisionService($subscription);
             return response()->json(['message' => 'Service provisioned successfully', 'result' => $result]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['message' => 'Service provisioning failed', 'error' => $e->getMessage()], 400);
         }
     }
@@ -43,7 +44,7 @@ class ServiceManagementController extends Controller
         try {
             $result = $this->serviceProvisioningService->manageService($subscription, $validatedData['action']);
             return response()->json(['message' => 'Service managed successfully', 'result' => $result]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['message' => 'Service management failed', 'error' => $e->getMessage()], 400);
         }
     }

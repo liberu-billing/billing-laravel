@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use App\Models\Tld;
 use App\Services\Registrars\EnomClient;
 
@@ -20,7 +21,7 @@ class DomainPricingService
         $tldModel = Tld::where('name', $tld)->first();
 
         if (!$tldModel) {
-            throw new \Exception("TLD not supported: $tld");
+            throw new Exception("TLD not supported: $tld");
         }
 
         return $tldModel->calculatePrice();

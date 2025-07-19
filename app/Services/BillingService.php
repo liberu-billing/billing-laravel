@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use App\Models\Invoice;
 use App\Models\Subscription;
 use App\Models\Customer;
@@ -282,7 +283,7 @@ class BillingService
     public function setupPaymentPlan(Invoice $invoice, $totalInstallments, $frequency = 'monthly')
     {
         if ($invoice->paymentPlan) {
-            throw new \Exception('Invoice already has a payment plan');
+            throw new Exception('Invoice already has a payment plan');
         }
 
         return $invoice->createPaymentPlan($totalInstallments, $frequency);
@@ -434,7 +435,7 @@ class BillingService
                 $this->handleFailedPayment($invoice);
                 return ['success' => false, 'message' => $result['message']];
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->handleFailedPayment($invoice);
             return ['success' => false, 'message' => 'Payment processing failed: ' . $e->getMessage()];
         }
@@ -631,11 +632,11 @@ class BillingService
                 if ($fee > 0) {
                     // Attempt automatic payment for the late fee
                     $this->processAutomaticPayment($invoice);
-                    
+
                     // Send late fee notification
                     // $this->sendLateFeeNotification($invoice, $fee);
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 Log::error('Failed to process late fee', [
                     'invoice_id' => $invoice->id,
                     'error' => $e->getMessage()

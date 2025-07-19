@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use App\Services\InstallationScriptService;
 use Illuminate\Http\Request;
 
@@ -30,7 +31,7 @@ class InstallationController extends Controller
         try {
             $installer->execute();
             return response()->json(['message' => 'Installation completed successfully']);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }

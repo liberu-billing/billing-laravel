@@ -2,6 +2,19 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
 use App\Filament\Resources\HostingServerResource\Pages;
 use App\Models\HostingServer;
 use Filament\Forms;
@@ -14,22 +27,22 @@ class HostingServerResource extends Resource
 {
     // protected static ?string $model = HostingServer::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-server';
-    protected static ?string $navigationGroup = 'Hosting';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-server';
+    protected static string | \UnitEnum | null $navigationGroup = 'Hosting';
 
-    public static function form(Forms\Form $form): Forms\Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Card::make()
+        return $schema
+            ->components([
+                Section::make()
                     ->schema([
-                        Forms\Components\TextInput::make('name')
+                        TextInput::make('name')
                             ->required()
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('hostname')
+                        TextInput::make('hostname')
                             ->required()
                             ->maxLength(255),
-                        Forms\Components\Select::make('control_panel')
+                        Select::make('control_panel')
                             ->options([
                                 'cpanel' => 'cPanel',
                                 'plesk' => 'Plesk',
@@ -37,16 +50,16 @@ class HostingServerResource extends Resource
                                 'virtualmin' => 'Virtualmin',
                             ])
                             ->required(),
-                        Forms\Components\TextInput::make('api_token')
+                        TextInput::make('api_token')
                             ->required()
                             ->password()
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('api_url')
+                        TextInput::make('api_url')
                             ->required()
                             ->maxLength(255),
-                        Forms\Components\Toggle::make('is_active')
+                        Toggle::make('is_active')
                             ->default(true),
-                        Forms\Components\TextInput::make('max_accounts')
+                        TextInput::make('max_accounts')
                             ->numeric()
                             ->default(0)
                             ->minValue(0),
@@ -58,44 +71,44 @@ class HostingServerResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('hostname')
+                TextColumn::make('hostname')
                     ->searchable(),
-                Tables\Columns\BadgeColumn::make('control_panel')
+                BadgeColumn::make('control_panel')
                     ->colors([
                         'primary' => 'cpanel',
                         'success' => 'plesk',
                         'warning' => 'directadmin',
                         'danger' => 'virtualmin',
                     ]),
-                Tables\Columns\IconColumn::make('is_active')
+                IconColumn::make('is_active')
                     ->boolean(),
-                Tables\Columns\TextColumn::make('active_accounts')
+                TextColumn::make('active_accounts')
                     ->label('Active/Max Accounts')
                     ->formatStateUsing(fn ($record) => "{$record->active_accounts}/{$record->max_accounts}"),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('control_panel')
+                SelectFilter::make('control_panel')
                     ->options([
                         'cpanel' => 'cPanel',
                         'plesk' => 'Plesk',
                         'directadmin' => 'DirectAdmin',
                         'virtualmin' => 'Virtualmin',
                     ]),
-                Tables\Filters\TernaryFilter::make('is_active')
+                TernaryFilter::make('is_active')
                     ->label('Active Status'),
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+            ->recordActions([
+                EditAction::make(),
+                DeleteAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                DeleteBulkAction::make(),
             ]);
     }
 

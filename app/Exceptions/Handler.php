@@ -2,6 +2,7 @@
 
 namespace App\Exceptions;
 
+use Error;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 
@@ -26,7 +27,7 @@ class Handler extends ExceptionHandler
             $this->handlingError = true;
             
             try {
-                if ($e instanceof \Error) {
+                if ($e instanceof Error) {
                     if (str_contains($e->getMessage(), 'Maximum call stack size') || 
                         str_contains($e->getMessage(), 'Container.php line 1048')) {
                         logger()->error('Recursion or stack overflow detected', [

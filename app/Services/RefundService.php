@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use App\Models\Payment;
 use App\Services\PaymentGatewayService;
 use Illuminate\Support\Facades\DB;
@@ -18,11 +19,11 @@ class RefundService
     public function processRefund(Payment $payment, float $amount)
     {
         if (!$payment->isRefundable()) {
-            throw new \Exception('This payment is not refundable.');
+            throw new Exception('This payment is not refundable.');
         }
 
         if ($amount > $payment->amount) {
-            throw new \Exception('Refund amount cannot exceed the original payment amount.');
+            throw new Exception('Refund amount cannot exceed the original payment amount.');
         }
 
         DB::beginTransaction();
@@ -41,9 +42,9 @@ class RefundService
                 DB::commit();
                 return ['success' => true, 'message' => 'Refund processed successfully.'];
             } else {
-                throw new \Exception($refundResult['message']);
+                throw new Exception($refundResult['message']);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             return ['success' => false, 'message' => 'Refund failed: ' . $e->getMessage()];
         }

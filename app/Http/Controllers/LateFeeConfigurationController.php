@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use InvalidArgumentException;
+use Exception;
 use App\Models\LateFeeConfiguration;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -39,7 +41,7 @@ class LateFeeConfigurationController extends Controller
 
             return redirect()->route('late-fees.index')
                 ->with('success', 'Late fee configuration updated successfully');
-        } catch (\InvalidArgumentException $e) {
+        } catch (InvalidArgumentException $e) {
             return redirect()->back()
                 ->withInput()
                 ->withErrors(['error' => $e->getMessage()]);
@@ -60,7 +62,7 @@ class LateFeeConfigurationController extends Controller
                 'preview_amount' => $previewAmount,
                 'formatted_amount' => number_format($previewAmount, 2) . ' ' . $invoice->currency
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'success' => false,
                 'error' => $e->getMessage()

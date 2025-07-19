@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use RuntimeException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
@@ -14,7 +15,7 @@ class CurrencyService
     public function convert(float $amount, string $from, string $to): float 
     {
         if (self::$isProcessing) {
-            throw new \RuntimeException("Recursive currency conversion detected");
+            throw new RuntimeException("Recursive currency conversion detected");
         }
         
         try {
@@ -34,13 +35,13 @@ class CurrencyService
     {
         // Prevent infinite recursion
         if ($depth >= self::MAX_DEPTH) {
-            throw new \RuntimeException("Maximum currency conversion depth reached");
+            throw new RuntimeException("Maximum currency conversion depth reached");
         }
 
         // Prevent circular references
         $key = "{$from}-{$to}";
         if (isset($this->processedCurrencies[$key])) {
-            throw new \RuntimeException("Circular reference detected in currency conversion");
+            throw new RuntimeException("Circular reference detected in currency conversion");
         }
         $this->processedCurrencies[$key] = true;
 

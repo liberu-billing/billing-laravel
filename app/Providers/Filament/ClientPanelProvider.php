@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Client\Pages\Dashboard;
+use App\Filament\Client\Pages\Profile;
 use App\Filament\Client\Pages;
 use App\Models\Client;
 use Filament\Http\Middleware\Authenticate;
@@ -32,8 +34,8 @@ class ClientPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Client/Resources'), for: 'App\\Filament\\Client\\Resources')
             ->discoverPages(in: app_path('Filament/Client/Pages'), for: 'App\\Filament\\Client\\Pages')
             ->pages([
-                Pages\Dashboard::class,
-                Pages\Profile::class,
+                Dashboard::class,
+                Profile::class,
             ])
             ->middleware([
                 EncryptCookies::class,

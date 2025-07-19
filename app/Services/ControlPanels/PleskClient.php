@@ -2,6 +2,7 @@
 
 namespace App\Services\ControlPanels;
 
+use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Log;
@@ -98,7 +99,7 @@ class PleskClient
     protected function makeApiCall($xml)
     {
         if (!$this->server) {
-            throw new \Exception('Server not configured');
+            throw new Exception('Server not configured');
         }
 
         try {

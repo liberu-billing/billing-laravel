@@ -2,6 +2,14 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\DatePicker;
+use Filament\Tables\Table;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
 use App\Filament\Resources\PaymentPlanResource\Pages;
 use App\Models\PaymentPlan;
 use Filament\Forms;
@@ -12,47 +20,47 @@ class PaymentPlanResource extends Resource
 {
     protected static ?string $model = PaymentPlan::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-calendar';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-calendar';
 
-    public static function form(Forms\Form $form): Forms\Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Select::make('invoice_id')
+        return $schema
+            ->components([
+                Select::make('invoice_id')
                     ->relationship('invoice', 'invoice_number')
                     ->required(),
-                Forms\Components\TextInput::make('total_installments')
+                TextInput::make('total_installments')
                     ->required()
                     ->numeric()
                     ->minValue(2),
-                Forms\Components\Select::make('frequency')
+                Select::make('frequency')
                     ->options([
                         'weekly' => 'Weekly',
                         'monthly' => 'Monthly',
                         'quarterly' => 'Quarterly',
                     ])
                     ->required(),
-                Forms\Components\DatePicker::make('start_date')
+                DatePicker::make('start_date')
                     ->required(),
             ]);
     }
 
-    public static function table(Tables\Table $table): Tables\Table
+    public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('invoice.invoice_number'),
-                Tables\Columns\TextColumn::make('total_installments'),
-                Tables\Columns\TextColumn::make('installment_amount'),
-                Tables\Columns\TextColumn::make('frequency'),
-                Tables\Columns\TextColumn::make('status'),
+                TextColumn::make('invoice.invoice_number'),
+                TextColumn::make('total_installments'),
+                TextColumn::make('installment_amount'),
+                TextColumn::make('frequency'),
+                TextColumn::make('status'),
             ])
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+            ->recordActions([
+                EditAction::make(),
+                DeleteAction::make(),
             ]);
     }
 

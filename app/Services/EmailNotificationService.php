@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Mail\Mailable;
@@ -24,7 +25,7 @@ class EmailNotificationService
             ]);
             
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Failed to queue email notification', [
                 'recipient' => $recipient,
                 'mailable_class' => get_class($mailable),
@@ -50,7 +51,7 @@ class EmailNotificationService
                 ]);
                 
                 return true;
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $attempts++;
                 
                 Log::warning('Email sending failed, retrying...', [

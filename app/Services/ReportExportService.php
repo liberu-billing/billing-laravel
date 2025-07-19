@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use InvalidArgumentException;
 use App\Models\Report;
 use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -70,7 +71,7 @@ class ReportExportService
                 $report->end_date,
                 $report->filters
             ),
-            default => throw new \InvalidArgumentException('Invalid report type')
+            default => throw new InvalidArgumentException('Invalid report type')
         };
     }
 }

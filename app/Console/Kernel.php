@@ -2,6 +2,8 @@
 
 namespace App\Console;
 
+use Exception;
+use Log;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Services\BillingService;
@@ -42,8 +44,8 @@ class Kernel extends ConsoleKernel
                                 'last_generation_status' => 'success'
                             ]);
                         }
-                    } catch (\Exception $e) {
-                        \Log::error('Failed to generate report: ' . $e->getMessage(), [
+                    } catch (Exception $e) {
+                        Log::error('Failed to generate report: ' . $e->getMessage(), [
                             'report_id' => $report->id,
                             'error' => $e->getMessage()
                         ]);
@@ -53,8 +55,8 @@ class Kernel extends ConsoleKernel
                         ]);
                     }
                 }
-            } catch (\Exception $e) {
-                \Log::error('Failed to process report generation schedule: ' . $e->getMessage());
+            } catch (Exception $e) {
+                Log::error('Failed to process report generation schedule: ' . $e->getMessage());
             }
         })->hourly();
     }

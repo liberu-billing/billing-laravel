@@ -2,16 +2,20 @@
 
 namespace App\Filament\Components;
 
-use Filament\Forms\Components\Component;
+use Filament\Schemas\Components\Component;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Grid;
 use Filament\Forms;
 
 class PaymentForm extends Component
 {
-    public static function make(): Forms\Components\Card
+    public static function make(): Section
     {
-        return Forms\Components\Card::make()
+        return Section::make()
             ->schema([
-                Forms\Components\Select::make('payment_method')
+                Select::make('payment_method')
                     ->options([
                         'stripe' => 'Credit Card (Stripe)',
                         'paypal' => 'PayPal',
@@ -19,23 +23,23 @@ class PaymentForm extends Component
                     ->required()
                     ->reactive(),
                 
-                Forms\Components\TextInput::make('card_number')
+                TextInput::make('card_number')
                     ->label('Card Number')
                     ->numeric()
                     ->maxLength(16)
                     ->hidden(fn ($get) => $get('payment_method') !== 'stripe'),
                 
-                Forms\Components\Grid::make(3)
+                Grid::make(3)
                     ->schema([
-                        Forms\Components\TextInput::make('expiry_month')
+                        TextInput::make('expiry_month')
                             ->label('Month')
                             ->numeric()
                             ->maxLength(2),
-                        Forms\Components\TextInput::make('expiry_year')
+                        TextInput::make('expiry_year')
                             ->label('Year')
                             ->numeric()
                             ->maxLength(4),
-                        Forms\Components\TextInput::make('cvv')
+                        TextInput::make('cvv')
                             ->label('CVV')
                             ->numeric()
                             ->maxLength(4),

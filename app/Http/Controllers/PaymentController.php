@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use App\Models\Payment;
 use App\Models\Currency;
 use App\Models\Invoice;
@@ -75,7 +76,7 @@ class PaymentController extends Controller
                 'result' => $result
             ]);
             return response()->json(['message' => 'Payment processed successfully', 'result' => $result]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Payment processing failed', [
                 'payment_id' => $payment->id,
                 'method' => $payment->payment_method,

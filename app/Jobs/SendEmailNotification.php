@@ -2,6 +2,8 @@
 
 namespace App\Jobs;
 
+use Exception;
+use Throwable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -36,7 +38,7 @@ class SendEmailNotification implements ShouldQueue
                 'recipient' => $this->recipient,
                 'mailable_class' => get_class($this->mailable)
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Failed to send queued email', [
                 'recipient' => $this->recipient,
                 'mailable_class' => get_class($this->mailable),
@@ -48,7 +50,7 @@ class SendEmailNotification implements ShouldQueue
         }
     }
 
-    public function failed(\Throwable $exception)
+    public function failed(Throwable $exception)
     {
         Log::error('Email job failed permanently', [
             'recipient' => $this->recipient,

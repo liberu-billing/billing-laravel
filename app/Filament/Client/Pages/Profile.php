@@ -2,16 +2,16 @@
 
 namespace App\Filament\Client\Pages;
 
+use Filament\Schemas\Schema;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
 class Profile extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-user';
-    protected static string $view = 'filament.client.pages.profile';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user';
+    protected string $view = 'filament.client.pages.profile';
     
     public ?array $data = [];
     
@@ -25,10 +25,10 @@ class Profile extends Page
         ]);
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('name')
                     ->required()
                     ->maxLength(255),

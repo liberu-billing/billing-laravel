@@ -2,6 +2,15 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Toggle;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\BooleanColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
 use App\Filament\Resources\SubscriptionResource\Pages;
 use App\Models\Subscription;
 use Filament\Forms;
@@ -13,23 +22,23 @@ class SubscriptionResource extends Resource
 {
     protected static ?string $model = Subscription::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-collection';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-collection';
 
-    public static function form(Forms\Form $form): Forms\Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Select::make('customer_id')
+        return $schema
+            ->components([
+                Select::make('customer_id')
                     ->relationship('customer', 'name')
                     ->required(),
-                Forms\Components\Select::make('subscription_plan_id')
+                Select::make('subscription_plan_id')
                     ->relationship('subscriptionPlan', 'name')
                     ->required(),
-                Forms\Components\DatePicker::make('start_date')
+                DatePicker::make('start_date')
                     ->required(),
-                Forms\Components\DatePicker::make('end_date')
+                DatePicker::make('end_date')
                     ->required(),
-                Forms\Components\Select::make('status')
+                Select::make('status')
                     ->options([
                         'active' => 'Active',
                         'pending' => 'Pending',
@@ -37,7 +46,7 @@ class SubscriptionResource extends Resource
                         'suspended' => 'Suspended'
                     ])
                     ->required(),
-                Forms\Components\Toggle::make('auto_renew')
+                Toggle::make('auto_renew')
                     ->required(),
             ]);
     }
@@ -46,15 +55,15 @@ class SubscriptionResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('customer.name'),
-                Tables\Columns\TextColumn::make('subscriptionPlan.name'),
-                Tables\Columns\TextColumn::make('status'),
-                Tables\Columns\TextColumn::make('start_date'),
-                Tables\Columns\TextColumn::make('end_date'),
-                Tables\Columns\BooleanColumn::make('auto_renew'),
+                TextColumn::make('customer.name'),
+                TextColumn::make('subscriptionPlan.name'),
+                TextColumn::make('status'),
+                TextColumn::make('start_date'),
+                TextColumn::make('end_date'),
+                BooleanColumn::make('auto_renew'),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('status')
+                SelectFilter::make('status')
                     ->options([
                         'active' => 'Active',
                         'pending' => 'Pending',
@@ -62,9 +71,9 @@ class SubscriptionResource extends Resource
                         'suspended' => 'Suspended'
                     ]),
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+            ->recordActions([
+                EditAction::make(),
+                DeleteAction::make(),
             ]);
     }
 

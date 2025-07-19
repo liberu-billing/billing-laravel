@@ -2,11 +2,23 @@
 
 namespace App\Filament\App\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\KeyValue;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\App\Resources\ProductsServiceResource\Pages\ListProductsServices;
+use App\Filament\App\Resources\ProductsServiceResource\Pages\CreateProductsService;
+use App\Filament\App\Resources\ProductsServiceResource\Pages\EditProductsService;
 use App\Filament\App\Resources\ProductsServiceResource\Pages;
 use App\Models\Products_Service;
 use App\Models\Tld;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -15,23 +27,23 @@ class ProductsServiceResource extends Resource
 {
     protected static ?string $model = Products_Service::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('name')
+        return $schema
+            ->components([
+                TextInput::make('name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\Textarea::make('description')
+                Textarea::make('description')
                     ->maxLength(65535)
                     ->columnSpanFull(),
-                Forms\Components\TextInput::make('base_price')
+                TextInput::make('base_price')
                     ->required()
                     ->numeric()
                     ->prefix('$'),
-                Forms\Components\Select::make('type')
+                Select::make('type')
                     ->required()
                     ->options([
                         'hosting' => 'Hosting',
@@ -39,7 +51,7 @@ class ProductsServiceResource extends Resource
                         'addon' => 'Add-on',
                     ])
                     ->reactive(),
-                Forms\Components\Select::make('pricing_model')
+                Select::make('pricing_model')
                     ->required()
                     ->options([
                         'fixed' => 'Fixed',
@@ -47,29 +59,29 @@ class ProductsServiceResource extends Resource
                         'usage_based' => 'Usage-based',
                     ])
                     ->reactive(),
-                Forms\Components\KeyValue::make('custom_pricing_data')
+                KeyValue::make('custom_pricing_data')
                     ->keyLabel('Tier/Usage')
                     ->valueLabel('Price')
-                    ->visible(fn (Forms\Get $get) => in_array($get('pricing_model'), ['tiered', 'usage_based']))
+                    ->visible(fn (Get $get) => in_array($get('pricing_model'), ['tiered', 'usage_based']))
                     ->columnSpanFull(),
-                Forms\Components\Select::make('tld_id')
+                Select::make('tld_id')
                     ->label('TLD')
                     ->options(Tld::all()->pluck('name', 'id'))
-                    ->visible(fn (Forms\Get $get) => $get('type') === 'domain')
-                    ->required(fn (Forms\Get $get) => $get('type') === 'domain'),
-                Forms\Components\Select::make('markup_type')
+                    ->visible(fn (Get $get) => $get('type') === 'domain')
+                    ->required(fn (Get $get) => $get('type') === 'domain'),
+                Select::make('markup_type')
                     ->label('Markup Type')
                     ->options([
                         'percentage' => 'Percentage',
                         'fixed' => 'Fixed Amount',
                     ])
-                    ->visible(fn (Forms\Get $get) => $get('type') === 'domain')
-                    ->required(fn (Forms\Get $get) => $get('type') === 'domain'),
-                Forms\Components\TextInput::make('markup_value')
+                    ->visible(fn (Get $get) => $get('type') === 'domain')
+                    ->required(fn (Get $get) => $get('type') === 'domain'),
+                TextInput::make('markup_value')
                     ->label('Markup Value')
                     ->numeric()
-                    ->visible(fn (Forms\Get $get) => $get('type') === 'domain')
-                    ->required(fn (Forms\Get $get) => $get('type') === 'domain'),
+                    ->visible(fn (Get $get) => $get('type') === 'domain')
+                    ->required(fn (Get $get) => $get('type') === 'domain'),
             ]);
     }
 
@@ -77,25 +89,25 @@ class ProductsServiceResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('type'),
-                Tables\Columns\TextColumn::make('base_price')
+                TextColumn::make('type'),
+                TextColumn::make('base_price')
                     ->money('USD')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('pricing_model'),
-                Tables\Columns\TextColumn::make('tld.name')
+                TextColumn::make('pricing_model'),
+                TextColumn::make('tld.name')
                     ->label('TLD')
                     ->visible(fn ($record) => $record->type === 'domain'),
-                Tables\Columns\TextColumn::make('markup_type')
+                TextColumn::make('markup_type')
                     ->visible(fn ($record) => $record->type === 'domain'),
-                Tables\Columns\TextColumn::make('markup_value')
+                TextColumn::make('markup_value')
                     ->visible(fn ($record) => $record->type === 'domain'),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -103,12 +115,12 @@ class ProductsServiceResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -123,9 +135,9 @@ class ProductsServiceResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListProductsServices::route('/'),
-            'create' => Pages\CreateProductsService::route('/create'),
-            'edit' => Pages\EditProductsService::route('/{record}/edit'),
+            'index' => ListProductsServices::route('/'),
+            'create' => CreateProductsService::route('/create'),
+            'edit' => EditProductsService::route('/{record}/edit'),
         ];
     }
 }

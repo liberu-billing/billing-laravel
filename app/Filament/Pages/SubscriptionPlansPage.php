@@ -2,9 +2,10 @@
 
 namespace App\Filament\Pages;
 
+use Filament\Schemas\Components\Section;
+use Exception;
 use Filament\Pages\Page;
 use App\Models\SubscriptionPlan;
-use Filament\Forms\Components\Card;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
@@ -12,8 +13,8 @@ use App\Services\BillingService;
 
 class SubscriptionPlansPage extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-collection';
-    protected static string $view = 'filament.pages.subscription-plans';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-collection';
+    protected string $view = 'filament.pages.subscription-plans';
     
     public $selectedPlan;
     public $billingCycle = 'monthly';
@@ -34,7 +35,7 @@ class SubscriptionPlansPage extends Page
     protected function getFormSchema(): array
     {
         return [
-            Card::make()
+            Section::make()
                 ->schema([
                     Select::make('selectedPlan')
                         ->label('Select Plan')
@@ -67,7 +68,7 @@ class SubscriptionPlansPage extends Page
             return redirect()->route('filament.pages.checkout', [
                 'subscription' => $subscription->id
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Notification::make()
                 ->title('Error creating subscription')
                 ->danger()

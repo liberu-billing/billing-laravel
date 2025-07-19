@@ -2,45 +2,53 @@
 
 namespace App\Filament\App\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\EditAction;
+use Filament\Actions\Action;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\App\Resources\AffiliateResource\Pages\ListAffiliates;
+use App\Filament\App\Resources\AffiliateResource\Pages\CreateAffiliate;
+use App\Filament\App\Resources\AffiliateResource\Pages\EditAffiliate;
 use App\Filament\App\Resources\AffiliateResource\Pages;
 use App\Models\Affiliate;
 use App\Services\AffiliateReportingService;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Filament\Tables;
-use Filament\Tables\Actions\Action;
 
 class AffiliateResource extends Resource
 {
     protected static ?string $model = Affiliate::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-user-group';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user-group';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Select::make('user_id')
+        return $schema
+            ->components([
+                Select::make('user_id')
                     ->relationship('user', 'name')
                     ->required(),
-                Forms\Components\TextInput::make('code')
+                TextInput::make('code')
                     ->required()
                     ->unique(ignoreRecord: true),
-                Forms\Components\TextInput::make('commission_rate')
+                TextInput::make('commission_rate')
                     ->required()
                     ->numeric()
                     ->step(0.01)
                     ->min(0)
                     ->max(100),
-                Forms\Components\Select::make('status')
+                Select::make('status')
                     ->options([
                         'active' => 'Active',
                         'inactive' => 'Inactive',
                     ])
                     ->required(),
-                Forms\Components\TextInput::make('total_earnings')
+                TextInput::make('total_earnings')
                     ->disabled()
                     ->label('Total Earnings')
                     ->formatStateUsing(fn ($state) => '$' . number_format($state, 2)),
@@ -51,19 +59,19 @@ class AffiliateResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('user.name'),
-                Tables\Columns\TextColumn::make('code'),
-                Tables\Columns\TextColumn::make('commission_rate'),
-                Tables\Columns\TextColumn::make('status'),
-                Tables\Columns\TextColumn::make('total_earnings')
+                TextColumn::make('user.name'),
+                TextColumn::make('code'),
+                TextColumn::make('commission_rate'),
+                TextColumn::make('status'),
+                TextColumn::make('total_earnings')
                     ->money('usd')
                     ->sortable(),
             ])
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                EditAction::make(),
                 Action::make('generateReport')
                     ->label('Generate Report')
                     ->icon('heroicon-o-document-report')
@@ -73,8 +81,8 @@ class AffiliateResource extends Resource
                         return redirect()->route('affiliate.report', $report);
                     }),
             ])
-            ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                DeleteBulkAction::make(),
             ]);
     }
 
@@ -88,9 +96,9 @@ class AffiliateResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListAffiliates::route('/'),
-            'create' => Pages\CreateAffiliate::route('/create'),
-            'edit' => Pages\EditAffiliate::route('/{record}/edit'),
+            'index' => ListAffiliates::route('/'),
+            'create' => CreateAffiliate::route('/create'),
+            'edit' => EditAffiliate::route('/{record}/edit'),
         ];
     }
 }

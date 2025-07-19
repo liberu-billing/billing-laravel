@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use App\Services\Registrars\EnomClient;
 use App\Services\Registrars\ResellerClubClient;
 use App\Models\Subscription;
@@ -82,7 +83,7 @@ class DomainService
             case 'resellerclub':
                 return $this->resellerClubClient;
             default:
-                throw new \Exception("Unsupported domain registrar: $registrar");
+                throw new Exception("Unsupported domain registrar: $registrar");
         }
     }
 }

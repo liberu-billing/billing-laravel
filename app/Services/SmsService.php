@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -43,7 +44,7 @@ class SmsService
             ]);
             return false;
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('SMS sending failed', [
                 'to' => $to,
                 'error' => $e->getMessage()
