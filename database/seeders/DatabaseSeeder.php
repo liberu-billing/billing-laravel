@@ -16,7 +16,7 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->withPersonalTeam()->create();
 
         $this->call([
-            SiteSettingsSeeder::class,
+//            SiteSettingsSeeder::class,
             PermissionsTableSeeder::class,
             RolesSeeder::class,
             DefaultTeamSeeder::class,
