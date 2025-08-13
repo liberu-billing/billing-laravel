@@ -1,18 +1,15 @@
-import preset from './vendor/filament/filament/tailwind.config.preset';
-
 export default {
-    presets: [preset],
-    content: [
-        './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
-        './vendor/laravel/jetstream/**/*.blade.php',
-        './storage/framework/views/*.php',
-        './resources/views/**/*.blade.php',
-        './app/Filament/**/*.php',
-        './resources/views/filament/**/*.blade.php',
-        './vendor/filament/**/*.blade.php',
-        'node_modules/preline/dist/*.js',
-    ],
-    plugins: [
-        require('preline/plugin'),
-    ],
-};
+  content: [
+    "./resources/**/*.blade.php",
+    "./resources/**/*.js",
+    "./resources/**/*.vue",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/typography'),
+    require('preline/plugin')
+  ],
+}
