@@ -27,11 +27,11 @@ class Subscription extends Model
         'start_date' => 'datetime',
         'end_date' => 'datetime',
         'domain_expiration_date' => 'datetime',
-        'scheduled_change' => 'array'
+        'scheduled_change' => 'array',
         'price' => 'decimal:2',
-        'currency',
-        'auto_renew',
-        'last_billed_at',
+        'currency' => 'string',
+        'auto_renew' => 'boolean',
+        'last_billed_at' => 'datetime',
     ];
 
     protected $dates = ['start_date', 'end_date', 'last_billed_at'];
