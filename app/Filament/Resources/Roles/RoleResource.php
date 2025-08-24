@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\Roles;
 
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\App\Resources\PartialPaymentResource\Pages;
+namespace App\Filament\App\Resources\PartialPayments\Pages;
 
-use App\Filament\App\Resources\PartialPaymentResource;
+use App\Filament\App\Resources\PartialPayments\PartialPaymentResource;
 use Filament\Pages\Actions;
 use Filament\Resources\Pages\CreateRecord;
 

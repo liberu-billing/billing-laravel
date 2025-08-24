@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\App\Resources;
+namespace App\Filament\App\Resources\Users;
 
 use Filament\Schemas\Schema;
 use Filament\Actions\EditAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use App\Filament\App\Resources\UserResource\Pages\ListUsers;
-use App\Filament\App\Resources\UserResource\Pages\CreateUser;
-use App\Filament\App\Resources\UserResource\Pages\EditUser;
+use App\Filament\App\Resources\Users\Pages\ListUsers;
+use App\Filament\App\Resources\Users\Pages\CreateUser;
+use App\Filament\App\Resources\Users\Pages\EditUser;
 use App\Filament\App\Resources\UserResource\Pages;
 use App\Filament\App\Resources\UserResource\RelationManagers;
 use App\Models\User;

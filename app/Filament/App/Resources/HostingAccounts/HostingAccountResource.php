@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\App\Resources;
+namespace App\Filament\App\Resources\HostingAccounts;
 
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\Select;
@@ -8,9 +8,9 @@ use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteBulkAction;
-use App\Filament\App\Resources\HostingAccountResource\Pages\ListHostingAccounts;
-use App\Filament\App\Resources\HostingAccountResource\Pages\CreateHostingAccount;
-use App\Filament\App\Resources\HostingAccountResource\Pages\EditHostingAccount;
+use App\Filament\App\Resources\HostingAccounts\Pages\ListHostingAccounts;
+use App\Filament\App\Resources\HostingAccounts\Pages\CreateHostingAccount;
+use App\Filament\App\Resources\HostingAccounts\Pages\EditHostingAccount;
 use App\Filament\App\Resources\HostingAccountResource\Pages;
 use App\Models\HostingAccount;
 use Filament\Forms;

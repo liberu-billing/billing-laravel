@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Filament\App\Resources\ProductsServiceResource\Pages;
+namespace App\Filament\App\Resources\ProductsServices\Pages;
 
 use Filament\Actions\CreateAction;
-use App\Filament\App\Resources\ProductsServiceResource;
+use App\Filament\App\Resources\ProductsServices\ProductsServiceResource;
 use Filament\Pages\Actions;
 use Filament\Resources\Pages\ListRecords;
 

@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Filament\App\Resources\RefundResource\Pages;
+namespace App\Filament\App\Resources\Refunds\Pages;
 
 use Filament\Actions\DeleteAction;
-use App\Filament\App\Resources\RefundResource;
+use App\Filament\App\Resources\Refunds\RefundResource;
 use Filament\Pages\Actions;
 use Filament\Resources\Pages\EditRecord;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\App\Resources;
+namespace App\Filament\App\Resources\ProductsServices;
 
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\TextInput;
@@ -12,9 +12,9 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\EditAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use App\Filament\App\Resources\ProductsServiceResource\Pages\ListProductsServices;
-use App\Filament\App\Resources\ProductsServiceResource\Pages\CreateProductsService;
-use App\Filament\App\Resources\ProductsServiceResource\Pages\EditProductsService;
+use App\Filament\App\Resources\ProductsServices\Pages\ListProductsServices;
+use App\Filament\App\Resources\ProductsServices\Pages\CreateProductsService;
+use App\Filament\App\Resources\ProductsServices\Pages\EditProductsService;
 use App\Filament\App\Resources\ProductsServiceResource\Pages;
 use App\Models\Products_Service;
 use App\Models\Tld;

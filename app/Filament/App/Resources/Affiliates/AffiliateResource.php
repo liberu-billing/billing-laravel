@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\App\Resources;
+namespace App\Filament\App\Resources\Affiliates;
 
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\Select;
@@ -9,9 +9,9 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\EditAction;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteBulkAction;
-use App\Filament\App\Resources\AffiliateResource\Pages\ListAffiliates;
-use App\Filament\App\Resources\AffiliateResource\Pages\CreateAffiliate;
-use App\Filament\App\Resources\AffiliateResource\Pages\EditAffiliate;
+use App\Filament\App\Resources\Affiliates\Pages\ListAffiliates;
+use App\Filament\App\Resources\Affiliates\Pages\CreateAffiliate;
+use App\Filament\App\Resources\Affiliates\Pages\EditAffiliate;
 use App\Filament\App\Resources\AffiliateResource\Pages;
 use App\Models\Affiliate;
 use App\Services\AffiliateReportingService;

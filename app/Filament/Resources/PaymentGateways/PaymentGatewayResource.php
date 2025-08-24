@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\PaymentGateways;
 
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;

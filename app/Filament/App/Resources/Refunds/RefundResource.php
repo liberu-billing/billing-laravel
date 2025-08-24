@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\App\Resources;
+namespace App\Filament\App\Resources\Refunds;
 
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\Select;
@@ -12,9 +12,9 @@ use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Actions\Action;
 use Exception;
-use App\Filament\App\Resources\RefundResource\Pages\ListRefunds;
-use App\Filament\App\Resources\RefundResource\Pages\CreateRefund;
-use App\Filament\App\Resources\RefundResource\Pages\EditRefund;
+use App\Filament\App\Resources\Refunds\Pages\ListRefunds;
+use App\Filament\App\Resources\Refunds\Pages\CreateRefund;
+use App\Filament\App\Resources\Refunds\Pages\EditRefund;
 use App\Filament\App\Resources\RefundResource\Pages;
 use App\Models\Payment;
 use Filament\Forms;

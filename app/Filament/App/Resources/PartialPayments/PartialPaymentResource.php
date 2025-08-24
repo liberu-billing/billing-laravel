@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\App\Resources;
+namespace App\Filament\App\Resources\PartialPayments;
 
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\Select;
@@ -8,9 +8,9 @@ use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteBulkAction;
-use App\Filament\App\Resources\PartialPaymentResource\Pages\ListPartialPayments;
-use App\Filament\App\Resources\PartialPaymentResource\Pages\CreatePartialPayment;
-use App\Filament\App\Resources\PartialPaymentResource\Pages\EditPartialPayment;
+use App\Filament\App\Resources\PartialPayments\Pages\ListPartialPayments;
+use App\Filament\App\Resources\PartialPayments\Pages\CreatePartialPayment;
+use App\Filament\App\Resources\PartialPayments\Pages\EditPartialPayment;
 use App\Filament\App\Resources\PartialPaymentResource\Pages;
 use App\Models\Invoice;
 use App\Models\PaymentGateway;
