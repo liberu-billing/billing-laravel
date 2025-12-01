@@ -112,6 +112,11 @@ class User extends Authenticatable implements HasDefaultTenant, HasTenants, Fila
         return true;
     }
 
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return true; // TODO: Check panel and role
+    }
+
     public function getDefaultTenant(Panel $panel): ?Model
     {
         return $this->latestTeam;

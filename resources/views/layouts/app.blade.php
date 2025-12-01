@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>                   
-             {{ SiteConfig::get('name') }}
+             {{ app(\App\Settings\GeneralSettings::class)->site_name }}
     </title>
 
     @if(config('googletagmanager.id'))
