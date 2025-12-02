@@ -1,77 +1,48 @@
 <?php
 
-namespace App\Filament\Resources\PaymentGateways;
+namespace App\Filament\Admin\Resources\PaymentGateways;
 
-use Filament\Schemas\Schema;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use App\Filament\Resources\PaymentGatewayResource\Pages;
+use App\Filament\Admin\Resources\PaymentGateways\Pages\CreatePaymentGateway;
+use App\Filament\Admin\Resources\PaymentGateways\Pages\EditPaymentGateway;
+use App\Filament\Admin\Resources\PaymentGateways\Pages\ListPaymentGateways;
+use App\Filament\Admin\Resources\PaymentGateways\Schemas\PaymentGatewayForm;
+use App\Filament\Admin\Resources\PaymentGateways\Tables\PaymentGatewaysTable;
 use App\Models\PaymentGateway;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
+use BackedEnum;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use Filament\Tables;
 
 class PaymentGatewayResource extends Resource
 {
     protected static ?string $model = PaymentGateway::class;
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-credit-card';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCreditCard;
     protected static string | \UnitEnum | null $navigationGroup = 'Settings';
 
     public static function form(Schema $schema): Schema
     {
-        return $schema
-            ->components([
-                TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-                TextInput::make('api_key')
-                    ->required()
-                    ->maxLength(255),
-                TextInput::make('secret_key')
-                    ->required()
-                    ->password()
-                    ->maxLength(255),
-                Toggle::make('is_active')
-                    ->required(),
-            ]);
+        return PaymentGatewayForm::configure($schema);
     }
 
     public static function table(Table $table): Table
     {
-        return $table
-            ->columns([
-                TextColumn::make('name'),
-                IconColumn::make('is_active')
-                    ->boolean(),
-                TextColumn::make('created_at')
-                    ->dateTime(),
-            ])
-            ->filters([])
-            ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
-            ])
-            ->toolbarActions([
-                DeleteBulkAction::make(),
-            ]);
+        return PaymentGatewaysTable::configure($table);
     }
 
     public static function getRelations(): array
     {
-        return [];
+        return [
+            //
+        ];
     }
 
     public static function getPages(): array
     {
         return [
-            // 'index' => Pages\ListPaymentGateways::route('/'),
-            // 'create' => Pages\CreatePaymentGateway::route('/create'),
-            // 'edit' => Pages\EditPaymentGateway::route('/{record}/edit'),
+            'index' => ListPaymentGateways::route('/'),
+            'create' => CreatePaymentGateway::route('/create'),
+            'edit' => EditPaymentGateway::route('/{record}/edit'),
         ];
     }
 }
