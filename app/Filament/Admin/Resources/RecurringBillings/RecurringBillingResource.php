@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\RecurringBillings;
+namespace App\Filament\Admin\Resources\RecurringBillings;
 
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\Select;

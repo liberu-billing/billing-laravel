@@ -2,6 +2,8 @@
 
 namespace App\Filament\Admin\Resources;
 
+use App\Filament\Admin\Resources\ModuleResource\Pages\ListModules;
+use App\Filament\Admin\Resources\ModuleResource\Pages\ViewModule;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
@@ -13,8 +15,6 @@ use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\BulkAction;
-use App\Filament\Admin\Resources\Pages\ListModules;
-use App\Filament\Admin\Resources\Pages\ViewModule;
 use App\Modules\ModuleManager;
 use Filament\Forms;
 use Filament\Resources\Resource;

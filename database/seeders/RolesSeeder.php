@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Team;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -10,6 +11,8 @@ class RolesSeeder extends Seeder
 {
     public function run(): void
     {
+        $team = Team::firstOrFail();
+        $defaultTeamId = $team->id;
         // Create base permissions
         $permissions = [
             // User management
@@ -39,9 +42,16 @@ class RolesSeeder extends Seeder
             'free' => ['view_billing']
         ];
 
-        foreach ($roles as $roleName => $rolePermissions) {
-            $role = Role::firstOrCreate(['name' => $roleName]);
-            $role->syncPermissions($rolePermissions);
+        foreach ($roles as $roleName => $rolePermissionNames) {
+            $role = Role::firstOrCreate(
+                ['name' => $roleName, 'team_id' => $defaultTeamId]
+            );
+        
+            // Fetch permission models for this team
+            $permissionsModels = Permission::whereIn('name', $rolePermissionNames)
+                                           ->get();
+        
+            $role->syncPermissions($permissionsModels);
         }
     }
 }

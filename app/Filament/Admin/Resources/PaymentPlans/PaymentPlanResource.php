@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\PaymentPlans;
+namespace App\Filament\Admin\Resources\PaymentPlans;
 
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\Select;

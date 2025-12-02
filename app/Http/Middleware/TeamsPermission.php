@@ -13,6 +13,9 @@ class TeamsPermission
     {
         if (!empty($user = auth()->user()) && !empty($user->current_team_id)) {
             app(PermissionRegistrar::class)->setPermissionsTeamId($user->current_team_id);
+            auth()->setUser(
+                auth()->user()->fresh()
+            );
         }
 
         return $next($request);

@@ -19,40 +19,40 @@ class EventServiceProvider extends ServiceProvider
      * @var array<class-string, array<int, class-string>>
      */
     protected $listen = [
-        Registered::class => [
-            SendEmailVerificationNotification::class,
-            [self::class, 'logRegistration'],
-        ],
-        Login::class => [
-            [self::class, 'logLogin'],
-        ],
-        Logout::class => [
-            [self::class, 'logLogout'],
-        ],
-        Failed::class => [
-            [self::class, 'logFailedLogin'],
-        ],
+        // Registered::class => [
+        //     SendEmailVerificationNotification::class,
+        //     [self::class, 'logRegistration'],
+        // ],
+        // Login::class => [
+        //     [self::class, 'logLogin'],
+        // ],
+        // Logout::class => [
+        //     [self::class, 'logLogout'],
+        // ],
+        // Failed::class => [
+        //     [self::class, 'logFailedLogin'],
+        // ],
     ];
 
-    public static function logRegistration($event): void
-    {
-        app(AuditLogService::class)->log('registration', $event->user);
-    }
+    // public static function logRegistration($event): void
+    // {
+    //     app(AuditLogService::class)->log('registration', $event->user);
+    // }
 
-    public static function logLogin($event): void
-    {
-        app(AuditLogService::class)->log('login', $event->user);
-    }
+    // public static function logLogin($event): void
+    // {
+        // app(AuditLogService::class)->log('login', $event->user);
+    // }
 
-    public static function logLogout($event): void
-    {
-        app(AuditLogService::class)->log('logout', $event->user);
-    }
+    // public static function logLogout($event): void
+    // {
+        // app(AuditLogService::class)->log('logout', $event->user);
+    // }
 
-    public static function logFailedLogin($event): void
-    {
-        app(AuditLogService::class)->log('failed_login', null, ['email' => $event->credentials['email']]);
-    }
+    // public static function logFailedLogin($event): void
+    // {
+    //     app(AuditLogService::class)->log('failed_login', null, ['email' => $event->credentials['email']]);
+    // }
 
     /**
      * Register any events for your application.

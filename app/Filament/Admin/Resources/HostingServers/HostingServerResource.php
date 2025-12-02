@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\HostingServers;
+namespace App\Filament\Admin\Resources\HostingServers;
 
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;

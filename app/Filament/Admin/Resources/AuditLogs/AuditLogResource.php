@@ -1,5 +1,5 @@
 <?php
-namespace App\Filament\Resources\AuditLogs;
+namespace App\Filament\Admin\Resources\AuditLogs;
 
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;

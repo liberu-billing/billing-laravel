@@ -27,6 +27,7 @@ use App\Http\Middleware\ValidateSignature;
 use Illuminate\Auth\Middleware\EnsureEmailIsVerified;
 use App\Http\Middleware\RequireTwoFactorEnabled;
 use App\Http\Middleware\CheckRole;
+use App\Http\Middleware\TeamsPermission;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -47,7 +48,7 @@ class Kernel extends HttpKernel
         TrimStrings::class,
         ConvertEmptyStringsToNull::class,
     ];
-
+    
     /**
      * The application's route middleware groups.
      *
@@ -61,6 +62,7 @@ class Kernel extends HttpKernel
             ShareErrorsFromSession::class,
             VerifyCsrfToken::class,
             SubstituteBindings::class,
+            TeamsPermission::class,
         ],
 
         'api' => [

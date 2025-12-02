@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Subscriptions;
+namespace App\Filament\Admin\Resources\Subscriptions;
 
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\Select;
