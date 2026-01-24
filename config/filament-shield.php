@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     /*
@@ -81,7 +83,7 @@ return [
     */
 
     'panel_user' => [
-        'enabled' => false,
+        'enabled' => true,
         'name' => 'panel_user',
     ],
 
@@ -146,7 +148,7 @@ return [
 
     'localization' => [
         'enabled' => false,
-        'key' => 'filament-shield::filament-shield',
+        'key' => 'filament-shield::filament-shield.resource_permission_prefixes_labels',
     ],
 
     /*
