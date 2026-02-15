@@ -243,7 +243,9 @@ class HostingService
             'cpanel' => $this->cpanelClient,
             'plesk' => $this->pleskClient,
             'directadmin' => $this->directAdminClient,
-            'virtualmin', 'virtualmin-gpl', 'virtualmin-pro' => $this->virtualminClient,
+            'virtualmin' => $this->virtualminClient,
+            'virtualmin-gpl' => $this->virtualminClient,
+            'virtualmin-pro' => $this->virtualminClient,
             'liberu' => $this->liberuControlPanelClient,
             default => throw new Exception("Unsupported control panel: $controlPanel"),
         };
