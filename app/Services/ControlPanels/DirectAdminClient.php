@@ -88,6 +88,39 @@ class DirectAdminClient
         return $this->makeApiCall('/CMD_API_MODIFY_USER', $params);
     }
 
+    public function terminateAccount($username)
+    {
+        $params = [
+            'confirmed' => 'yes',
+            'delete' => 'yes',
+            'select0' => $username
+        ];
+
+        return $this->makeApiCall('/CMD_API_SELECT_USERS', $params);
+    }
+
+    public function addAddon($username, $addon)
+    {
+        $params = [
+            'action' => 'customize',
+            'user' => $username,
+            'add' => $addon
+        ];
+
+        return $this->makeApiCall('/CMD_API_MODIFY_USER', $params);
+    }
+
+    public function removeAddon($username, $addon)
+    {
+        $params = [
+            'action' => 'customize',
+            'user' => $username,
+            'remove' => $addon
+        ];
+
+        return $this->makeApiCall('/CMD_API_MODIFY_USER', $params);
+    }
+
     protected function makeApiCall($endpoint, $params)
     {
         if (!$this->server) {

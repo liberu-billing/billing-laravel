@@ -96,6 +96,30 @@ class CpanelClient
         return $this->makeApiCall($endpoint, $params);
     }
 
+    public function addAddon($username, $addon)
+    {
+        // cPanel addons are typically features added to an account
+        // This can be done by modifying account features
+        $endpoint = '/json-api/modifyacct';
+        $params = [
+            'user' => $username,
+            'FEATURE-' . strtoupper($addon) => 1
+        ];
+
+        return $this->makeApiCall($endpoint, $params);
+    }
+
+    public function removeAddon($username, $addon)
+    {
+        $endpoint = '/json-api/modifyacct';
+        $params = [
+            'user' => $username,
+            'FEATURE-' . strtoupper($addon) => 0
+        ];
+
+        return $this->makeApiCall($endpoint, $params);
+    }
+
     protected function makeApiCall($endpoint, $params)
     {
         if (!$this->server) {

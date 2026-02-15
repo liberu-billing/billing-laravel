@@ -12,7 +12,9 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('hostname');
-            $table->enum('control_panel', ['cpanel', 'plesk', 'directadmin', 'virtualmin']);
+            $table->string('username')->nullable();
+            $table->string('ip_address')->nullable();
+            $table->enum('control_panel', ['cpanel', 'plesk', 'directadmin', 'virtualmin', 'virtualmin-gpl', 'virtualmin-pro', 'liberu']);
             $table->string('api_token');
             $table->string('api_url');
             $table->boolean('is_active')->default(true);

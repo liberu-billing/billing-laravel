@@ -12,11 +12,14 @@ return new class extends Migration
             $table->id();
             $table->foreignId('customer_id')->constrained()->onDelete('cascade');
             $table->foreignId('subscription_id')->constrained()->onDelete('cascade');
+            $table->foreignId('hosting_server_id')->nullable()->constrained()->onDelete('set null');
             $table->string('control_panel');
             $table->string('username');
             $table->string('domain');
             $table->string('package');
             $table->string('status');
+            $table->decimal('price', 10, 2)->nullable();
+            $table->json('addons')->nullable();
             $table->timestamps();
         });
     }

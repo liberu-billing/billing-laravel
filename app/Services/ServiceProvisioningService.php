@@ -9,6 +9,13 @@ use Exception;
 
 class ServiceProvisioningService
 {
+    protected $hostingService;
+
+    public function __construct(HostingService $hostingService)
+    {
+        $this->hostingService = $hostingService;
+    }
+
     public function provisionService(Subscription $subscription)
     {
         $service = $subscription->productService;
@@ -27,23 +34,29 @@ class ServiceProvisioningService
 
     private function provisionHosting(Subscription $subscription)
     {
-        // Implement hosting provisioning logic
+        $service = $subscription->productService;
+        
+        // Create hosting account record
         $hostingAccount = new HostingAccount([
             'customer_id' => $subscription->customer_id,
             'subscription_id' => $subscription->id,
-            'control_panel' => 'cpanel', // Default value, can be made dynamic
             'username' => $this->generateUsername($subscription->customer),
             'domain' => $subscription->domain ?? '',
-            'package' => $subscription->productService->name,
-            'status' => 'active',
+            'package' => $service->name,
+            'status' => 'pending',
         ]);
-
+        
         $hostingAccount->save();
 
-        // Here you would typically interact with your hosting provider's API
-        // to create the actual hosting account
-
-        return $hostingAccount;
+        // Provision the account on the control panel
+        try {
+            $this->hostingService->provisionAccount($hostingAccount, $service);
+            return $hostingAccount;
+        } catch (Exception $e) {
+            $hostingAccount->status = 'failed';
+            $hostingAccount->save();
+            throw $e;
+        }
     }
 
     private function provisionDomain(Subscription $subscription)
@@ -65,16 +78,18 @@ class ServiceProvisioningService
     private function generateUsername($customer)
     {
         // Implement logic to generate a unique username
-        return strtolower($customer->name . rand(100, 999));
+        $baseName = strtolower(preg_replace('/[^a-z0-9]/i', '', $customer->name));
+        $baseName = substr($baseName, 0, 8);
+        return $baseName . rand(100, 999);
     }
 
-    public function manageService(Subscription $subscription, $action)
+    public function manageService(Subscription $subscription, $action, $options = [])
     {
         $service = $subscription->productService;
 
         switch ($service->type) {
             case 'hosting':
-                return $this->manageHosting($subscription, $action);
+                return $this->manageHosting($subscription, $action, $options);
             case 'domain':
                 return $this->manageDomain($subscription, $action);
             case 'email':
@@ -84,7 +99,7 @@ class ServiceProvisioningService
         }
     }
 
-    private function manageHosting(Subscription $subscription, $action)
+    private function manageHosting(Subscription $subscription, $action, $options = [])
     {
         $hostingAccount = HostingAccount::where('subscription_id', $subscription->id)->first();
 
@@ -94,27 +109,34 @@ class ServiceProvisioningService
 
         switch ($action) {
             case 'suspend':
-                $hostingAccount->status = 'suspended';
-                // Here you would typically interact with your hosting provider's API
-                // to suspend the actual hosting account
-                break;
+                return $this->hostingService->suspendAccount($hostingAccount);
             case 'unsuspend':
-                $hostingAccount->status = 'active';
-                // Here you would typically interact with your hosting provider's API
-                // to unsuspend the actual hosting account
-                break;
+                return $this->hostingService->unsuspendAccount($hostingAccount);
             case 'terminate':
-                $hostingAccount->status = 'terminated';
-                // Here you would typically interact with your hosting provider's API
-                // to terminate the actual hosting account
-                break;
+                return $this->hostingService->terminateAccount($hostingAccount);
+            case 'upgrade':
+                if (!isset($options['new_product'])) {
+                    throw new Exception('New product required for upgrade');
+                }
+                return $this->hostingService->upgradeAccount($hostingAccount, $options['new_product'], $options);
+            case 'downgrade':
+                if (!isset($options['new_product'])) {
+                    throw new Exception('New product required for downgrade');
+                }
+                return $this->hostingService->downgradeAccount($hostingAccount, $options['new_product'], $options);
+            case 'add_addon':
+                if (!isset($options['addon'])) {
+                    throw new Exception('Addon name required');
+                }
+                return $this->hostingService->addAddon($hostingAccount, $options['addon']);
+            case 'remove_addon':
+                if (!isset($options['addon'])) {
+                    throw new Exception('Addon name required');
+                }
+                return $this->hostingService->removeAddon($hostingAccount, $options['addon']);
             default:
                 throw new Exception('Unsupported action for hosting account');
         }
-
-        $hostingAccount->save();
-
-        return $hostingAccount;
     }
 
     private function manageDomain(Subscription $subscription, $action)
