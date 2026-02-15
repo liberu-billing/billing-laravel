@@ -186,10 +186,10 @@ class HostingService
         $result = $client->addAddon($account->username, $addon);
         
         if ($result) {
-            $addons = json_decode($account->addons ?? '[]', true);
+            $addons = $account->addons ?? [];
             if (!in_array($addon, $addons)) {
                 $addons[] = $addon;
-                $account->addons = json_encode($addons);
+                $account->addons = $addons;
                 $account->save();
             }
             
@@ -211,9 +211,9 @@ class HostingService
         $result = $client->removeAddon($account->username, $addon);
         
         if ($result) {
-            $addons = json_decode($account->addons ?? '[]', true);
+            $addons = $account->addons ?? [];
             $addons = array_filter($addons, fn($a) => $a !== $addon);
-            $account->addons = json_encode(array_values($addons));
+            $account->addons = array_values($addons);
             $account->save();
             
             Log::info("Removed addon from hosting account", [
