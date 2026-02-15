@@ -96,6 +96,35 @@ class PleskClient
         return $this->makeApiCall($xml);
     }
 
+    public function terminateAccount($username)
+    {
+        $xml = $this->buildXmlRequest('webspace.del', [
+            'filter' => ['owner-login' => $username]
+        ]);
+
+        return $this->makeApiCall($xml);
+    }
+
+    public function addAddon($username, $addon)
+    {
+        $xml = $this->buildXmlRequest('site-addon.add', [
+            'filter' => ['owner-login' => $username],
+            'addon' => ['name' => $addon]
+        ]);
+
+        return $this->makeApiCall($xml);
+    }
+
+    public function removeAddon($username, $addon)
+    {
+        $xml = $this->buildXmlRequest('site-addon.del', [
+            'filter' => ['owner-login' => $username],
+            'addon' => ['name' => $addon]
+        ]);
+
+        return $this->makeApiCall($xml);
+    }
+
     protected function makeApiCall($xml)
     {
         if (!$this->server) {
