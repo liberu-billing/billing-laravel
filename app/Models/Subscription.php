@@ -51,6 +51,18 @@ class Subscription extends Model
         return $this->hasMany(Invoice::class);
     }
 
+    public function suspensions()
+    {
+        return $this->hasMany(ServiceSuspension::class);
+    }
+
+    public function activeSuspension()
+    {
+        return $this->hasOne(ServiceSuspension::class)
+            ->where('is_active', true)
+            ->whereNull('unsuspended_at');
+    }
+
     public function renew()
     {
         if (!$this->auto_renew || $this->status === 'cancelled') {
