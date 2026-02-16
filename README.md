@@ -15,6 +15,11 @@ Key features
 - Admin UI with Filament
 - Invoice generation, reminders and payment handling
 - Seedable demo data and automated tests
+- **Webhooks & Automation** - Real-time event notifications and integrations
+- **Knowledge Base** - Self-service help articles and documentation
+- **Canned Responses** - Quick reply templates with variable replacement
+- **Bulk Operations** - Mass invoice generation, email campaigns, data import/export
+- **Service Automation** - Auto-suspension for overdue payments, service lifecycle management
 
 Quick start
 
@@ -69,6 +74,12 @@ docker run -p 8000:8000 billing-laravel
 ```powershell
 ./vendor/bin/sail up
 ```
+
+Documentation
+
+For detailed information about the extended WHMCS-compatible features:
+- [WHMCS Features Documentation](docs/WHMCS_FEATURES.md) - Webhooks, Knowledge Base, Canned Responses, Bulk Operations
+- [Modular Architecture](docs/MODULAR_ARCHITECTURE.md) - Module system and extensions
 
 Related projects
 
