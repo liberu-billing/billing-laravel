@@ -9,6 +9,9 @@ use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\WebhookController;
 use App\Http\Controllers\Api\KnowledgeBaseController;
 use App\Http\Controllers\Api\CannedResponseController;
+use App\Http\Controllers\Api\QuoteController;
+use App\Http\Controllers\Api\ClientContactController;
+use App\Http\Controllers\Api\PackageGroupController;
 use App\Http\Controllers\ClientNoteController;
 use App\Http\Controllers\InstallationController;
 
@@ -70,6 +73,28 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::get('canned-responses/variables', [CannedResponseController::class, 'variables']);
     Route::get('canned-responses/{shortcode}', [CannedResponseController::class, 'show']);
     Route::post('canned-responses/{shortcode}/use', [CannedResponseController::class, 'use']);
+
+    // Quote/Proposal endpoints (Blesta)
+    Route::apiResource('quotes', QuoteController::class);
+    Route::post('quotes/{quote}/send', [QuoteController::class, 'send']);
+    Route::post('quotes/{quote}/accept', [QuoteController::class, 'accept']);
+    Route::post('quotes/{quote}/decline', [QuoteController::class, 'decline']);
+    Route::post('quotes/{quote}/convert', [QuoteController::class, 'convert']);
+    Route::get('quotes-statistics', [QuoteController::class, 'statistics']);
+
+    // Client Contact endpoints (Blesta)
+    Route::get('customers/{customer}/contacts', [ClientContactController::class, 'index']);
+    Route::post('customers/{customer}/contacts', [ClientContactController::class, 'store']);
+    Route::get('customers/{customer}/contacts/{contact}', [ClientContactController::class, 'show']);
+    Route::put('customers/{customer}/contacts/{contact}', [ClientContactController::class, 'update']);
+    Route::delete('customers/{customer}/contacts/{contact}', [ClientContactController::class, 'destroy']);
+    Route::post('customers/{customer}/contacts/{contact}/make-primary', [ClientContactController::class, 'makePrimary']);
+
+    // Package Group endpoints (Blesta)
+    Route::apiResource('package-groups', PackageGroupController::class);
+    Route::post('package-groups/{packageGroup}/packages', [PackageGroupController::class, 'addPackage']);
+    Route::delete('package-groups/{packageGroup}/packages/{plan}', [PackageGroupController::class, 'removePackage']);
+    Route::post('package-groups/{packageGroup}/reorder', [PackageGroupController::class, 'reorder']);
 });
 
 // Public Knowledge Base endpoints (no auth required)
