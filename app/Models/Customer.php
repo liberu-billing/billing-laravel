@@ -24,4 +24,14 @@ class Customer extends Model
     {
         return $this->hasMany(Credit::class);
     }
+
+    public function contacts()
+    {
+        return $this->hasMany(ClientContact::class);
+    }
+
+    public function quotes()
+    {
+        return $this->hasMany(Quote::class);
+    }
 }
