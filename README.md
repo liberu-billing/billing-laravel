@@ -1,112 +1,142 @@
 # Liberu Billing
 
-[Managed web hosting and billing for Laravel applications — liberu.co.uk](https://www.liberu.co.uk)
+### Open-source billing, invoicing and subscription management — built with Laravel 12, Filament 5 and Livewire 4
 
-[![Install](https://github.com/liberu-billing/billing-laravel/actions/workflows/install.yml/badge.svg)](https://github.com/liberu-billing/billing-laravel/actions/workflows/install.yml) [![Tests](https://github.com/liberu-billing/billing-laravel/actions/workflows/tests.yml/badge.svg)](https://github.com/liberu-billing/billing-laravel/actions/workflows/tests.yml) [![Docker](https://github.com/liberu-billing/billing-laravel/actions/workflows/main.yml/badge.svg)](https://github.com/liberu-billing/billing-laravel/actions/workflows/main.yml) [![Codecov](https://codecov.io/gh/liberu-billing/billing-laravel/branch/main/graph/badge.svg)](https://codecov.io/gh/liberu-billing/billing-laravel)
+[![Install](https://github.com/liberu-billing/billing-laravel/actions/workflows/install.yml/badge.svg)](https://github.com/liberu-billing/billing-laravel/actions/workflows/install.yml) [![Tests](https://github.com/liberu-billing/billing-laravel/actions/workflows/tests.yml/badge.svg)](https://github.com/liberu-billing/billing-laravel/actions/workflows/tests.yml) [![Docker](https://github.com/liberu-billing/billing-laravel/actions/workflows/main.yml/badge.svg)](https://github.com/liberu-billing/billing-laravel/actions/workflows/main.yml) [![Codecov](https://codecov.io/gh/liberu-billing/billing-laravel/branch/main/graph/badge.svg)](https://codecov.io/gh/liberu-billing/billing-laravel) [![GitHub release](https://img.shields.io/github/release/liberu-billing/billing-laravel.svg)](https://github.com/liberu-billing/billing-laravel/releases) [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
 
-![](https://img.shields.io/badge/PHP-8.4-informational?style=flat&logo=php&color=4f5b93) ![](https://img.shields.io/badge/Laravel-12-informational?style=flat&logo=laravel&color=ef3b2d) ![](https://img.shields.io/badge/Filament-4.0-informational?style=flat&color=fdae4b) ![](https://img.shields.io/badge/Jetstream-5-purple.svg) ![](https://img.shields.io/badge/Livewire-3.5-informational?style=flat&color=fb70a9) ![](https://img.shields.io/badge/JavaScript-ECMA2020-informational?style=flat&color=F7DF1E) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+![](https://img.shields.io/badge/PHP-8.5-informational?style=flat&logo=php&color=4f5b93) ![](https://img.shields.io/badge/Laravel-12-informational?style=flat&logo=laravel&color=ef3b2d) ![](https://img.shields.io/badge/Filament-5-informational?style=flat&color=fdae4b) ![](https://img.shields.io/badge/Livewire-4-informational?style=flat&color=fb70a9) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A modular, production-ready billing and invoicing application built on Laravel and Filament. It provides extensible billing features, secure authentication, and an admin panel for managing customers, invoices, and payments.
+**Liberu Billing** is a modular, production-ready billing and invoicing platform for web hosting providers, SaaS businesses and digital agencies. Built on the latest Laravel, Filament and Livewire stack, it covers the full customer lifecycle — from onboarding and subscription management through to automated invoicing, payment collection and service provisioning. Whether you are running a small agency or a large hosting operation, Liberu Billing gives you a solid, extensible foundation that is easy to customise and maintain.
 
-Key features
+## ✨ Main Features
 
-- Secure authentication (Jetstream)
-- Modular architecture for extensions and integrations
-- Admin UI with Filament
-- Invoice generation, reminders and payment handling
-- Seedable demo data and automated tests
-- **Webhooks & Automation** - Real-time event notifications and integrations
-- **Knowledge Base** - Self-service help articles and documentation
-- **Canned Responses** - Quick reply templates with variable replacement
-- **Bulk Operations** - Mass invoice generation, email campaigns, data import/export
-- **Service Automation** - Auto-suspension for overdue payments, service lifecycle management
+| Feature | Description |
+|---|---|
+| **Secure Authentication** | Powered by Laravel Jetstream with two-factor authentication, API tokens and team management |
+| **Customer Management** | Full client portal with profile, contact management and service overview |
+| **Invoice Generation** | Automated invoice creation with customisable templates, PDF export and email delivery |
+| **Payment Collection** | Integrated payment gateway support with automatic reminders and late-fee rules |
+| **Subscription Management** | Recurring billing cycles, upgrades, downgrades and pro-rata calculations |
+| **Service Provisioning** | Integration with cPanel, Plesk and other control panels for automated account setup |
+| **Webhooks & Automation** | Real-time event notifications (19+ event types) with HMAC-SHA256 signature verification and retry logic |
+| **Knowledge Base** | Hierarchical self-service help centre with full-text search and article feedback |
+| **Canned Responses** | Quick-reply templates with variable substitution for support tickets |
+| **Bulk Operations** | Mass invoice generation, email campaigns, and data import/export |
+| **Service Automation** | Auto-suspension for overdue accounts and full service lifecycle management |
+| **Admin Panel** | Beautiful Filament 5 admin UI with real-time Livewire components |
+| **Modular Architecture** | Plugin-style module system making it easy to add integrations and extend functionality |
+| **Demo Data & Tests** | Seedable demo dataset and a comprehensive automated test suite |
 
-Quick start
+## 🚀 Installation
 
-1. Copy environment file and configure your database and mail settings:
+### Option 1 — Automated installer (recommended)
 
-```powershell
-copy .env.example .env
+Run the interactive shell installer, which guides you through environment setup, dependencies, migrations and seeding:
+
+```bash
+bash install.sh
 ```
 
-2. Install PHP dependencies, generate app key and run migrations:
+On Linux or macOS you can also launch the **graphical installer** (if available on your system) by running the script through a file manager or a desktop shortcut that executes `bash install.sh` in a terminal.
 
-```powershell
+### Option 2 — Manual setup
+
+1. **Copy the environment file** and configure your database, mail and app settings:
+
+```bash
+cp .env.example .env
+# Edit .env with your database credentials and mail settings
+```
+
+2. **Install PHP dependencies**, generate the application key and run migrations:
+
+```bash
 composer install --no-scripts
 php artisan key:generate
 php artisan migrate --seed
 ```
 
-3. Frontend (optional):
+3. **Install and build frontend assets** (optional for admin-only use):
 
-```powershell
+```bash
 npm install
 npm run build
 ```
 
-4. Run locally (built-in server):
+4. **Start the development server**:
 
-```powershell
+```bash
 php artisan serve --host=127.0.0.1 --port=8000
 ```
 
-Notes
+### Option 3 — Docker / Laravel Sail
 
-- The included `setup.sh` automates these steps on Unix-like systems; on Windows run the commands above.
-- Review `.env.example` before overwriting an existing `.env` file.
+Build and run with Docker:
 
-Using Docker / Sail
-
-- Build the Docker image:
-
-```powershell
+```bash
 docker build -t billing-laravel .
-```
-
-- Run the container:
-
-```powershell
 docker run -p 8000:8000 billing-laravel
 ```
 
-- Or use Laravel Sail:
+Or use Laravel Sail for a full local environment:
 
-```powershell
+```bash
 ./vendor/bin/sail up
 ```
 
-Documentation
+> **Tip:** Review `.env.example` carefully before overwriting an existing `.env` file. The `install.sh` script handles this interactively.
 
-For detailed information about the extended WHMCS-compatible features:
-- [WHMCS Features Documentation](docs/WHMCS_FEATURES.md) - Webhooks, Knowledge Base, Canned Responses, Bulk Operations
-- [Modular Architecture](docs/MODULAR_ARCHITECTURE.md) - Module system and extensions
+## 📖 Documentation
 
-Related projects
+- [WHMCS Features Documentation](docs/WHMCS_FEATURES.md) — Webhooks, Knowledge Base, Canned Responses, Bulk Operations
+- [Modular Architecture](docs/MODULAR_ARCHITECTURE.md) — Module system and how to write extensions
+- [Control Panel Provisioning](docs/CONTROL_PANEL_PROVISIONING.md) — cPanel/Plesk integration guide
+
+## 🔗 Related Projects
 
 | Project | Description |
 |---|---|
 | [accounting-laravel](https://github.com/liberu-accounting/accounting-laravel) | Accounting tools compatible with Liberu apps |
 | [automation-laravel](https://github.com/liberu-automation/automation-laravel) | Automation workflows and background jobs |
-| [liberu-billing/billing-laravel](https://github.com/liberu-billing/billing-laravel) | This repository — billing and invoicing for Laravel |
-| [boilerplate](https://github.com/liberusoftware/boilerplate) | Base Laravel starter used across projects |
-| [browser-game-laravel](https://github.com/liberu-browser-game/browser-game-laravel) | Example game project built on Laravel |
+| [billing-laravel](https://github.com/liberu-billing/billing-laravel) | This repository — billing and invoicing for Laravel |
+| [boilerplate](https://github.com/liberusoftware/boilerplate) | Base Laravel starter used across Liberu projects |
+| [browser-game-laravel](https://github.com/liberu-browser-game/browser-game-laravel) | Example browser game built on Laravel |
 | [cms-laravel](https://github.com/liberu-cms/cms-laravel) | Content management system |
-| [control-panel-laravel](https://github.com/liberu-control-panel/control-panel-laravel) | Admin/control panel components |
-| [crm-laravel](https://github.com/liberu-crm/crm-laravel) | CRM features and integrations |
-| [ecommerce-laravel](https://github.com/liberu-ecommerce/ecommerce-laravel) | E‑commerce storefront and checkout |
+| [control-panel-laravel](https://github.com/liberu-control-panel/control-panel-laravel) | Hosting control panel components |
+| [crm-laravel](https://github.com/liberu-crm/crm-laravel) | CRM features and customer relationship tools |
+| [ecommerce-laravel](https://github.com/liberu-ecommerce/ecommerce-laravel) | E-commerce storefront and checkout |
 | [genealogy-laravel](https://github.com/liberu-genealogy/genealogy-laravel) | Family-tree and genealogy tools |
-| [maintenance-laravel](https://github.com/liberu-maintenance/maintenance-laravel) | Maintenance and status utilities |
-| [real-estate-laravel](https://github.com/liberu-real-estate/real-estate-laravel) | Real-estate listings and management |
-| [social-network-laravel](https://github.com/liberu-social-network/social-network-laravel) | Social network features and examples |
+| [maintenance-laravel](https://github.com/liberu-maintenance/maintenance-laravel) | Maintenance scheduling and status utilities |
+| [real-estate-laravel](https://github.com/liberu-real-estate/real-estate-laravel) | Real-estate listings and property management |
+| [social-network-laravel](https://github.com/liberu-social-network/social-network-laravel) | Social network features and activity feeds |
 
-Contributing
+## 🤝 Contributing
 
-Contributions are welcome. Please open issues for discussion or submit pull requests with tests and clear descriptions of changes.
+Contributions are very welcome! Here is how to get involved:
 
-License
+1. **Fork** the repository and create your branch from `main`.
+2. **Make your changes** — please include tests for new functionality and ensure existing tests still pass (`./vendor/bin/phpunit`).
+3. **Follow the coding style** — run `./vendor/bin/pint` to auto-format PHP code before committing.
+4. **Open a Pull Request** with a clear title and description explaining *what* changed and *why*.
+5. A maintainer will review your PR and may request changes or ask questions before merging.
 
-This project is licensed under the MIT License — see the LICENSE file for details.
+Please open an issue first for larger changes so we can discuss the approach before you invest time writing code.
 
-Contributors
+📱 **WhatsApp**: [+44 1793 200950](https://wa.me/441793200950) — feel free to reach out with questions or ideas.
+
+## 📄 License
+
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for the full text.
+
+**What the MIT license means for you:**
+
+- ✅ **Free to use** — use Liberu Billing in personal, commercial or enterprise projects at no cost.
+- ✅ **Free to modify** — adapt the source code to suit your exact requirements.
+- ✅ **Free to distribute** — share or resell your modified version, provided the original copyright notice is retained.
+- ✅ **No warranty** — the software is provided "as is"; the authors are not liable for any issues arising from its use.
+
+The MIT license is one of the most permissive open-source licenses available. It maximises freedom for users and contributors while protecting authors from liability, making it ideal for projects that want broad adoption and a healthy contributor ecosystem.
+
+## 👥 Contributors
 
 <a href="https://github.com/liberu-billing/billing-laravel/graphs/contributors"><img src="https://contrib.rocks/image?repo=liberu-billing/billing-laravel" alt="Contributors"/></a>
