@@ -17,6 +17,12 @@ class Subscription extends Model
         'end_date',
         'renewal_period',
         'status',
+        'price',
+        'currency',
+        'auto_renew',
+        'last_billed_at',
+        'ends_at',
+        'domain',
         'domain_name',
         'domain_registrar',
         'domain_expiration_date',
@@ -32,6 +38,7 @@ class Subscription extends Model
         'currency' => 'string',
         'auto_renew' => 'boolean',
         'last_billed_at' => 'datetime',
+        'ends_at' => 'datetime',
     ];
 
     protected $dates = ['start_date', 'end_date', 'last_billed_at'];

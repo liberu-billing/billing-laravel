@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId('customer_id')->constrained()->onDelete('cascade');
             $table->foreignId('subscription_id')->constrained()->onDelete('cascade');
             $table->foreignId('hosting_server_id')->nullable()->constrained()->onDelete('set null');
-            $table->string('control_panel');
+            $table->string('control_panel')->nullable();
             $table->string('username');
             $table->string('domain');
             $table->string('package');

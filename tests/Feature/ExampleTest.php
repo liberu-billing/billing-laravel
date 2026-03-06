@@ -2,11 +2,14 @@
 
 namespace Tests\Feature;
 
-// use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ExampleTest extends TestCase
 {
+    use RefreshDatabase;
+
     /**
      * Test the root route ("/") returns a successful response.
      */
@@ -17,20 +20,20 @@ class ExampleTest extends TestCase
     }
 
     /**
-     * Test the "/app" route returns a successful response.
+     * Test the "/app" route redirects to login when unauthenticated.
      */
     public function test_the_app_route_returns_a_successful_response(): void
     {
         $response = $this->get('/app');
-        $response->assertStatus(200);
+        $response->assertRedirect();
     }
 
     /**
-     * Test the "/admin" route returns a successful response.
+     * Test the "/admin" route redirects to login when unauthenticated.
      */
     public function test_the_admin_route_returns_a_successful_response(): void
     {
         $response = $this->get('/admin');
-        $response->assertStatus(200);
+        $response->assertRedirect();
     }
 }
