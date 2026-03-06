@@ -20,13 +20,13 @@ class BillingServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->billingService = new BillingService();
+        $this->billingService = app(BillingService::class);
     }
 
     public function testGenerateInvoice()
     {
         $customer = Customer::factory()->create();
-        $productService = Products_Service::factory()->create(['price' => 100]);
+        $productService = Products_Service::factory()->create(['base_price' => 100]);
         $subscription = Subscription::factory()->create([
             'customer_id' => $customer->id,
             'product_service_id' => $productService->id,

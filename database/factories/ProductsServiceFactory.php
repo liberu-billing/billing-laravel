@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class ProductsServiceFactory extends Factory
 {
+    protected $model = \App\Models\Products_Service::class;
+
     /**
      * Define the model's default state.
      *
@@ -19,8 +21,8 @@ class ProductsServiceFactory extends Factory
         return [
             'name' => $this->faker->word,
             'description' => $this->faker->paragraph,
-            'price' => $this->faker->randomFloat(2, 1, 1000),
-            'type' => $this->faker->randomElement(['product', 'service']),
+            'base_price' => $this->faker->randomFloat(2, 1, 1000),
+            'type' => $this->faker->randomElement(['product', 'service', 'hosting']),
         ];
     }
 }

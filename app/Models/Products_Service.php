@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Exception;
 use App\Traits\HasTeam;
+use Database\Factories\ProductsServiceFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -11,6 +12,13 @@ class Products_Service extends Model
 {
     use HasFactory;
     use HasTeam;
+
+    protected $table = 'products_services';
+
+    protected static function newFactory(): ProductsServiceFactory
+    {
+        return ProductsServiceFactory::new();
+    }
 
     protected $fillable = [
         'name',

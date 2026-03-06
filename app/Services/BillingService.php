@@ -160,7 +160,7 @@ class BillingService
         );
     }
 
-    protected function generateInvoice(Subscription $subscription)
+    public function generateInvoice(Subscription $subscription)
     {
         $amount = $this->calculateUsageCharges(
             $subscription,
@@ -177,6 +177,8 @@ class BillingService
         $invoice = Invoice::create([
             'customer_id' => $subscription->customer_id,
             'subscription_id' => $subscription->id,
+            'invoice_number' => $this->generateInvoiceNumber(),
+            'issue_date' => now(),
             'total_amount' => $amount,
             'currency' => $subscription->currency ?? 'USD',
             'status' => 'pending',
@@ -324,18 +326,29 @@ class BillingService
             ->get();
 
         foreach ($dueSubscriptions as $subscription) {
-            $invoice = $this->generateInvoice($subscription);
-            
-            // Process automatic payment
-            $paymentResult = $this->processAutomaticPayment($invoice);
-            
-            if ($paymentResult['success']) {
-                $invoice->update(['status' => 'paid']);
-                $subscription->renew();
-                $this->serviceProvisioningService->manageService($subscription, 'unsuspend');
-            } else {
-                $this->serviceProvisioningService->manageService($subscription, 'suspend');
-                // TODO: Implement logic to notify customer of failed payment
+            try {
+                $invoice = $this->generateInvoice($subscription);
+                
+                // Process automatic payment
+                $paymentResult = $this->processAutomaticPayment($invoice);
+                
+                if ($paymentResult['success']) {
+                    $invoice->update(['status' => 'paid']);
+                    $subscription->renew();
+                    try {
+                        $this->serviceProvisioningService->manageService($subscription, 'unsuspend');
+                    } catch (\Exception $e) {
+                        Log::warning("Could not unsuspend service for subscription {$subscription->id}: " . $e->getMessage());
+                    }
+                } else {
+                    try {
+                        $this->serviceProvisioningService->manageService($subscription, 'suspend');
+                    } catch (\Exception $e) {
+                        Log::warning("Could not suspend service for subscription {$subscription->id}: " . $e->getMessage());
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::error("Failed to process billing for subscription {$subscription->id}: " . $e->getMessage());
             }
         }
     }
@@ -566,6 +579,25 @@ class BillingService
     //         }
     //     }
     // }
+
+    public function sendOverdueReminders(): void
+    {
+        $overdueInvoices = Invoice::where('status', 'pending')
+            ->where('due_date', '<', Carbon::now())
+            ->get();
+
+        foreach ($overdueInvoices as $invoice) {
+            try {
+                $this->sendOverdueReminderEmail($invoice);
+                $invoice->update([
+                    'reminder_count' => ($invoice->reminder_count ?? 0) + 1,
+                    'last_reminder_date' => Carbon::now(),
+                ]);
+            } catch (\Exception $e) {
+                Log::error("Failed to send overdue reminder for invoice {$invoice->id}: " . $e->getMessage());
+            }
+        }
+    }
 
     public function sendUpcomingDueReminders()
     {

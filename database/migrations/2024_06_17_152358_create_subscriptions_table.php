@@ -17,12 +17,18 @@ return new class extends Migration
             $table->foreignId('product_service_id')->constrained('products_services')->onDelete('cascade');
             $table->date('start_date');
             $table->date('end_date')->nullable();
-            $table->enum('renewal_period', ['monthly', 'quarterly', 'semi-annually', 'annually']);
-            $table->enum('status', ['active', 'suspended', 'cancelled', 'expired']);
-            $table->decimal('price', 10, 2);
+            $table->string('renewal_period')->default('monthly');
+            $table->string('status')->default('active');
+            $table->decimal('price', 10, 2)->default(0);
             $table->string('currency', 3)->default('USD');
             $table->boolean('auto_renew')->default(true);
             $table->timestamp('last_billed_at')->nullable();
+            $table->timestamp('ends_at')->nullable();
+            $table->string('domain')->nullable();
+            $table->string('domain_name')->nullable();
+            $table->string('domain_registrar')->nullable();
+            $table->timestamp('domain_expiration_date')->nullable();
+            $table->json('scheduled_change')->nullable();
             $table->timestamps();
         });
     }

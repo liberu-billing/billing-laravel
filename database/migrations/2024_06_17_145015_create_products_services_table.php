@@ -13,9 +13,11 @@ return new class extends Migration
         Schema::create('products_services', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->text('description');
-            $table->decimal('price', 8, 2);
-            $table->enum('type', ['product', 'service']);
+            $table->text('description')->nullable();
+            $table->decimal('base_price', 8, 2)->default(0);
+            $table->string('type')->default('service');
+            $table->string('pricing_model')->nullable();
+            $table->json('custom_pricing_data')->nullable();
             $table->integer('product_type_id')->nullable()->constrained();
             $table->integer('hosting_server_id')->nullable()->constrained();
             $table->integer('trial_days')->default(0);

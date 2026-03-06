@@ -12,16 +12,16 @@ return new class extends Migration
             $table->id();
             $table->integer('team_id')->nullable();
             $table->integer('user_id')->nullable();
-            $table->string('action');
-            $table->string('entity_type')->nullable();
-            $table->integer('entity_id')->nullable();
+            $table->string('event');
+            $table->string('auditable_type')->nullable();
+            $table->integer('auditable_id')->nullable();
             $table->json('old_values')->nullable();
             $table->json('new_values')->nullable();
             $table->string('ip_address')->nullable();
             $table->string('user_agent')->nullable();
             $table->timestamps();
             
-            $table->index(['entity_type', 'entity_id']);
+            $table->index(['auditable_type', 'auditable_id']);
         });
     }
 

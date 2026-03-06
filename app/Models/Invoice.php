@@ -67,6 +67,7 @@ class Invoice extends Model
 
     protected $fillable = [
         'customer_id',
+        'subscription_id',
         'invoice_number',
         'issue_date',
         'due_date',
@@ -86,6 +87,9 @@ class Invoice extends Model
         'sent_at',
         'paid_at',
         'status_history',
+        'reminder_count',
+        'last_reminder_date',
+        'upcoming_reminder_sent',
     ];
     
     protected $casts = [
@@ -102,6 +106,11 @@ class Invoice extends Model
     public function currency()
     {
         return $this->belongsTo(Currency::class, 'currency', 'code');
+    }
+
+    public function subscription()
+    {
+        return $this->belongsTo(Subscription::class);
     }
 
     public function customer()
