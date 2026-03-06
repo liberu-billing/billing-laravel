@@ -17,8 +17,10 @@ class KnowledgeBaseService
         $queryBuilder = KnowledgeBaseArticle::query()
             ->where('is_published', true)
             ->where(function ($q) use ($query) {
-                $q->whereFullText(['title', 'content'], $query)
-                  ->orWhere('title', 'like', "%{$query}%")
+                if (config('database.default') !== 'sqlite') {
+                    $q->whereFullText(['title', 'content'], $query);
+                }
+                $q->orWhere('title', 'like', "%{$query}%")
                   ->orWhere('content', 'like', "%{$query}%");
             });
 

@@ -54,7 +54,7 @@ class HostingService
         // Configure client with server details
         $client->setServer($server);
         
-        $result = $client->createAccount($account->username, $account->domain, $account->package);
+        $result = $client->createAccount($account->username, $account->domain, $product->name);
         
         if ($result) {
             $account->status = 'active';

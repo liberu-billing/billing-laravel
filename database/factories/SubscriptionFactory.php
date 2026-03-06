@@ -23,8 +23,9 @@ class SubscriptionFactory extends Factory
             'product_service_id' => Products_Service::factory(),
             'start_date' => $this->faker->date(),
             'end_date' => $this->faker->optional()->date(),
-            'renewal_period' => $this->faker->randomElement(['monthly', 'yearly']),
-            'status' => $this->faker->randomElement(['active', 'cancelled', 'expired']),
+            'renewal_period' => $this->faker->randomElement(['monthly', 'quarterly', 'semi-annually', 'annually']),
+            'status' => $this->faker->randomElement(['active', 'suspended', 'cancelled', 'expired']),
+            'price' => $this->faker->randomFloat(2, 1, 1000),
         ];
     }
 }

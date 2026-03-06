@@ -19,7 +19,7 @@ return new class extends Migration
             $table->date('end_date')->nullable();
             $table->enum('renewal_period', ['monthly', 'quarterly', 'semi-annually', 'annually']);
             $table->enum('status', ['active', 'suspended', 'cancelled', 'expired']);
-            $table->decimal('price', 10, 2);
+            $table->decimal('price', 10, 2)->default(0);
             $table->string('currency', 3)->default('USD');
             $table->boolean('auto_renew')->default(true);
             $table->timestamp('last_billed_at')->nullable();

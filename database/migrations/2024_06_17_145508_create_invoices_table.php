@@ -18,7 +18,7 @@ return new class extends Migration
             $table->date('issue_date');
             $table->date('due_date');
             $table->decimal('total_amount', 10, 2);
-            $table->string('currency', 3);
+            $table->string('currency', 3)->default('USD');
             $table->enum('status', ['pending', 'paid', 'overdue']);
             $table->timestamp('sent_at')->nullable();
             $table->timestamp('viewed_at')->nullable();
