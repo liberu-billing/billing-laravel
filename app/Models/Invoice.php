@@ -128,6 +128,11 @@ class Invoice extends Model
         return $this->hasMany(Payment::class);
     }
 
+    public function items()
+    {
+        return $this->hasMany(Invoice_Item::class);
+    }
+
     public function processPayment(string $paymentMethod, float $amount)
     {
         if ($amount <= 0 || $amount > $this->remaining_amount) {

@@ -9,15 +9,14 @@ use Laravel\Fortify\Features as FortifyFeatures;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User;
 use Mockery;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class SocialstreamRegistrationTest extends TestCase
 {
     use RefreshDatabase;
 
-    /**
-     * @dataProvider socialiteProvidersDataProvider
-     */
+    #[DataProvider('socialiteProvidersDataProvider')]
     public function test_users_get_redirected_correctly(string $provider): void
     {
         if (! Providers::enabled($provider)) {
@@ -34,9 +33,7 @@ class SocialstreamRegistrationTest extends TestCase
         $response->assertRedirectContains($provider);
     }
 
-    /**
-     * @dataProvider socialiteProvidersDataProvider
-     */
+    #[DataProvider('socialiteProvidersDataProvider')]
     public function test_users_can_register_using_socialite_providers(string $socialiteProvider)
     {
         if (! FortifyFeatures::enabled(FortifyFeatures::registration())) {

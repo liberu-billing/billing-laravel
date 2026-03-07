@@ -115,6 +115,7 @@ class QuoteService
         return DB::transaction(function () use ($quote) {
             $invoice = Invoice::create([
                 'customer_id' => $quote->customer_id,
+                'invoice_number' => 'INV-' . strtoupper(uniqid()),
                 'issue_date' => now()->toDateString(),
                 'due_date' => now()->addDays(30)->toDateString(),
                 'status' => 'pending',

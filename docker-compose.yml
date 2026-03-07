@@ -1,0 +1,126 @@
+services:
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+                PHP_VERSION: '8.3'
+                NODE_VERSION: '20-alpine'
+        image: liberu/billing:local
+        container_name: billing_app
+        restart: unless-stopped
+        environment:
+            CONTAINER_MODE: http
+            OCTANE_SERVER: swoole
+            APP_ENV: local
+            APP_DEBUG: 'true'
+            APP_URL: http://localhost:8000
+            DB_CONNECTION: mysql
+            DB_HOST: mysql
+            DB_PORT: 3306
+            DB_DATABASE: ${DB_DATABASE:-liberu}
+            DB_USERNAME: ${DB_USERNAME:-liberu}
+            DB_PASSWORD: ${DB_PASSWORD:-secret}
+            REDIS_HOST: redis
+            REDIS_PORT: 6379
+            WITH_HORIZON: 'false'
+            WITH_SCHEDULER: 'true'
+            RUNNING_MIGRATIONS_AND_SEEDERS: 'false'
+        volumes:
+            - .:/var/www/html
+            - /var/www/html/vendor
+        ports:
+            - '8000:8000'
+        depends_on:
+            mysql:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+        networks:
+            - billing
+
+    horizon:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+                PHP_VERSION: '8.3'
+        image: liberu/billing:local
+        container_name: billing_horizon
+        restart: unless-stopped
+        environment:
+            CONTAINER_MODE: horizon
+            APP_ENV: local
+            DB_HOST: mysql
+            DB_DATABASE: ${DB_DATABASE:-liberu}
+            DB_USERNAME: ${DB_USERNAME:-liberu}
+            DB_PASSWORD: ${DB_PASSWORD:-secret}
+            REDIS_HOST: redis
+        depends_on:
+            mysql:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+        networks:
+            - billing
+        profiles:
+            - horizon
+
+    mysql:
+        image: mysql:8.0
+        container_name: billing_mysql
+        restart: unless-stopped
+        environment:
+            MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+            MYSQL_DATABASE: ${DB_DATABASE:-liberu}
+            MYSQL_USER: ${DB_USERNAME:-liberu}
+            MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+        volumes:
+            - billing_mysql_data:/var/lib/mysql
+        ports:
+            - '3306:3306'
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        networks:
+            - billing
+
+    redis:
+        image: redis:7-alpine
+        container_name: billing_redis
+        restart: unless-stopped
+        ports:
+            - '6379:6379'
+        volumes:
+            - billing_redis_data:/data
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        networks:
+            - billing
+
+    mailpit:
+        image: axllent/mailpit:latest
+        container_name: billing_mailpit
+        restart: unless-stopped
+        ports:
+            - '1025:1025'
+            - '8025:8025'
+        networks:
+            - billing
+        profiles:
+            - mail
+
+networks:
+    billing:
+        driver: bridge
+
+volumes:
+    billing_mysql_data:
+        driver: local
+    billing_redis_data:
+        driver: local
