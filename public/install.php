@@ -60,9 +60,7 @@ if (!check_key()) {
         // redirect with key in query for convenient requests (short-lived)
         $key = urlencode($_POST['key']);
         $uri = strtok($_SERVER["REQUEST_URI"], '?');
-        header("Location: {
-$uri}?key={
-$key}");
+        header("Location: {$uri}?key={$key}");
         exit;
     }
     echo '<!doctype html><html><body style="font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif">';

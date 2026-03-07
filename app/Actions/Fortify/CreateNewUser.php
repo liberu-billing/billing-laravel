@@ -50,13 +50,17 @@ class CreateNewUser implements CreatesNewUsers
                     'name'     => $input['name'],
                     'email'    => $input['email'],
                     'password' => Hash::make($input['password']),
-                ]), function (User $user) use ($input, $team) {    
+                ]), function (User $user) use ($input, $team) {
                     $team->users()->attach($user);
                     $team = $this->createTeam($user);
                     $user->switchTeam($team);
                     setPermissionsTeamId($team->id);
                     $user = User::find($user->id);
-                    $user->assignRole("panel_user");
+                    try {
+                        $user->assignRole("panel_user");
+                    } catch (RoleDoesNotExist $e) {
+                        Log::warning('Role panel_user does not exist, skipping role assignment for user ' . $user->id);
+                    }
                 });
             });
             // $user = DB::transaction(function () use ($input) {
@@ -130,6 +134,14 @@ class CreateNewUser implements CreatesNewUsers
     protected function configureDefaultTeamContext(): Team
     {
         $team = Team::first();
+        if (!$team) {
+            // Create a default team if none exists (e.g., in a fresh installation)
+            $team = Team::forceCreate([
+                'user_id'       => 0,
+                'name'          => 'Default Team',
+                'personal_team' => false,
+            ]);
+        }
         setPermissionsTeamId($team->id);
         return $team;
     }
