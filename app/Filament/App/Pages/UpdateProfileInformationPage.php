@@ -4,6 +4,7 @@ namespace App\Filament\App\Pages;
 
 use Filament\Forms\Components\TextInput;
 use Filament\Pages\Page;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
 
 class UpdateProfileInformationPage extends Page
@@ -30,30 +31,30 @@ class UpdateProfileInformationPage extends Page
         ]);
     }
 
-    protected function getFormSchema(): array
+    public function form(Schema $schema): Schema
     {
-        return [
-            TextInput::make('name')
-                ->label('Name')
-                ->required(),
-            TextInput::make('email')
-                ->label('Email Address')
-                ->required(),
-        ];
+        return $schema
+            ->components([
+                TextInput::make('name')
+                    ->label('Name')
+                    ->required(),
+                TextInput::make('email')
+                    ->label('Email Address')
+                    ->email()
+                    ->required(),
+            ]);
     }
 
     public function submit(): void
     {
-        $this->form->getState();
-
-        $state = array_filter([
-            'name'  => $this->name,
-            'email' => $this->email,
-        ]);
+        $state = $this->form->getState();
 
         $user = Auth::user();
 
-        $user->forceFill($state)->save();
+        $user->forceFill([
+            'name'  => $state['name'],
+            'email' => $state['email'],
+        ])->save();
 
         session()->flash('status', 'Your profile has been updated.');
     }
@@ -65,6 +66,6 @@ class UpdateProfileInformationPage extends Page
 
     public static function shouldRegisterNavigation(): bool
     {
-        return true; //config('filament-jetstream.show_update_profile_information_page');
+        return true;
     }
 }

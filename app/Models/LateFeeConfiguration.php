@@ -28,72 +28,25 @@ class LateFeeConfiguration extends Model
         'grace_period_days' => 'integer',
     ];
 
-    public static function getFrequencyOptions()
+    public static function getFrequencyOptions(): array
     {
         return [
             'one-time' => 'One Time',
-            'daily' => 'Daily',
-            'weekly' => 'Weekly',
-            'monthly' => 'Monthly'
+            'daily'    => 'Daily',
+            'weekly'   => 'Weekly',
+            'monthly'  => 'Monthly',
         ];
     }
 
-    public static function getFeeTypeOptions()
+    public static function getFeeTypeOptions(): array
     {
         return [
             'percentage' => 'Percentage',
-            'fixed' => 'Fixed Amount'
-        ];
-    }
-}<?php
-
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use App\Traits\HasTeam;
-
-class LateFeeConfiguration extends Model
-{
-    use HasFactory;
-    use HasTeam;
-
-    protected $fillable = [
-        'team_id',
-        'fee_type',
-        'fee_amount',
-        'grace_period_days',
-        'max_fee_amount',
-        'is_compound',
-        'frequency',
-    ];
-
-    protected $casts = [
-        'is_compound' => 'boolean',
-        'fee_amount' => 'decimal:2',
-        'max_fee_amount' => 'decimal:2',
-        'grace_period_days' => 'integer',
-    ];
-
-    public static function getFrequencyOptions()
-    {
-        return [
-            'one-time' => 'One Time',
-            'daily' => 'Daily',
-            'weekly' => 'Weekly',
-            'monthly' => 'Monthly'
+            'fixed'      => 'Fixed Amount',
         ];
     }
 
-    public static function getFeeTypeOptions()
-    {
-        return [
-            'percentage' => 'Percentage',
-            'fixed' => 'Fixed Amount'
-        ];
-    }
-
-    public function validate()
+    public function validate(): void
     {
         if ($this->fee_type === 'percentage' && $this->fee_amount > 100) {
             throw new \InvalidArgumentException('Percentage fee cannot exceed 100%');
@@ -108,10 +61,10 @@ class LateFeeConfiguration extends Model
         }
     }
 
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
-        
+
         static::saving(function ($config) {
             $config->validate();
         });

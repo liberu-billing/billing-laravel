@@ -15,11 +15,9 @@ use App\Filament\Client\Resources\InvoiceResource\Pages\ViewInvoice;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Client\Resources\InvoiceResource\Pages;
 use App\Models\Invoice;
-use App\Models\Currency;
 use Filament\Resources\Resource;
-use Filament\Resources\Table;
-use Filament\Tables;
-use Filament\Forms;
+use Filament\Tables\Table;
+use Filament\Schemas\Schema;
 use Filament\Actions\Action;
 
 class InvoiceResource extends Resource
@@ -28,10 +26,10 @@ class InvoiceResource extends Resource
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
     protected static ?string $navigationLabel = 'Invoices';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Section::make()
                     ->schema([
                         Grid::make(2)
@@ -54,7 +52,7 @@ class InvoiceResource extends Resource
                                     ->visible(fn (Invoice $record) => $record->status === 'partially_paid'),
                             ]),
                     ]),
-                
+
                 Section::make()
                     ->visible(fn (Invoice $record) => $record->status !== 'paid')
                     ->schema([
@@ -88,12 +86,13 @@ class InvoiceResource extends Resource
                     ->sortable(),
                 TextColumn::make('status')
                     ->badge()
-                    ->colors([
-                        'warning' => 'pending',
-                        'success' => 'paid',
-                        'danger' => 'overdue',
-                        'info' => 'partially_paid',
-                    ]),
+                    ->color(fn (string $state): string => match ($state) {
+                        'pending'  => 'warning',
+                        'paid'     => 'success',
+                        'overdue'  => 'danger',
+                        'partially_paid' => 'info',
+                        default    => 'gray',
+                    }),
                 TextColumn::make('due_date')
                     ->date()
                     ->sortable(),
@@ -107,7 +106,7 @@ class InvoiceResource extends Resource
                         'partially_paid' => 'Partially Paid',
                     ]),
             ])
-            ->actions([
+            ->recordActions([
                 ViewAction::make(),
                 Action::make('pay')
                     ->icon('heroicon-o-credit-card')
@@ -132,7 +131,7 @@ class InvoiceResource extends Resource
                             ]),
                     ]),
                 Action::make('download_pdf')
-                    ->icon('heroicon-o-document-download')
+                    ->icon('heroicon-o-arrow-down-tray')
                     ->action(fn (Invoice $record) => response()->streamDownload(
                         fn () => print($record->generatePdf()),
                         "invoice-{$record->invoice_number}.pdf"

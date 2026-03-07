@@ -8,7 +8,6 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Hidden;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Actions\Action;
 use Exception;
@@ -109,12 +108,14 @@ class RefundResource extends Resource
                     ->label('Refunded Amount')
                     ->money(fn ($record) => $record->currency)
                     ->sortable(),
-                BadgeColumn::make('refund_status')
-                    ->colors([
-                        'danger' => 'none',
-                        'warning' => 'partial',
-                        'success' => 'full',
-                    ]),
+                TextColumn::make('refund_status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'none'    => 'danger',
+                        'partial' => 'warning',
+                        'full'    => 'success',
+                        default   => 'gray',
+                    }),
                 TextColumn::make('created_at')
                     ->label('Payment Date')
                     ->dateTime()
