@@ -2,62 +2,63 @@
 
 namespace App\Filament\Pages;
 
-use Filament\Schemas\Components\Section;
 use Exception;
 use Filament\Pages\Page;
-use App\Models\SubscriptionPlan;
-use Filament\Forms\Components\Grid;
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
+use App\Models\SubscriptionPlan;
 use App\Services\BillingService;
 
 class SubscriptionPlansPage extends Page
 {
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-collection';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
     protected string $view = 'filament.pages.subscription-plans';
-    
+
     public $selectedPlan;
     public $billingCycle = 'monthly';
-    
-    protected $billingService;
-    
-    public function __construct(BillingService $billingService)
+    public $plans;
+
+    protected BillingService $billingService;
+
+    public function boot(BillingService $billingService): void
     {
-        parent::__construct();
         $this->billingService = $billingService;
     }
 
-    public function mount()
+    public function mount(): void
     {
         $this->plans = SubscriptionPlan::where('is_active', true)->get();
     }
 
-    protected function getFormSchema(): array
+    public function form(Schema $schema): Schema
     {
-        return [
-            Section::make()
-                ->schema([
-                    Select::make('selectedPlan')
-                        ->label('Select Plan')
-                        ->options($this->plans->pluck('name', 'id'))
-                        ->required(),
-                    Select::make('billingCycle')
-                        ->label('Billing Cycle')
-                        ->options([
-                            'monthly' => 'Monthly',
-                            'quarterly' => 'Quarterly',
-                            'semi-annually' => 'Semi-annually',
-                            'annually' => 'Annually',
-                        ])
-                        ->required(),
-                ]),
-        ];
+        return $schema
+            ->components([
+                Section::make()
+                    ->schema([
+                        Select::make('selectedPlan')
+                            ->label('Select Plan')
+                            ->options($this->plans?->pluck('name', 'id') ?? [])
+                            ->required(),
+                        Select::make('billingCycle')
+                            ->label('Billing Cycle')
+                            ->options([
+                                'monthly'       => 'Monthly',
+                                'quarterly'     => 'Quarterly',
+                                'semi-annually' => 'Semi-annually',
+                                'annually'      => 'Annually',
+                            ])
+                            ->required(),
+                    ]),
+            ]);
     }
 
-    public function subscribe()
+    public function subscribe(): mixed
     {
         $plan = SubscriptionPlan::findOrFail($this->selectedPlan);
-        
+
         try {
             $subscription = $this->billingService->createSubscription(
                 auth()->user()->customer,
@@ -66,13 +67,15 @@ class SubscriptionPlansPage extends Page
             );
 
             return redirect()->route('filament.pages.checkout', [
-                'subscription' => $subscription->id
+                'subscription' => $subscription->id,
             ]);
         } catch (Exception $e) {
             Notification::make()
                 ->title('Error creating subscription')
                 ->danger()
                 ->send();
+
+            return null;
         }
     }
 }

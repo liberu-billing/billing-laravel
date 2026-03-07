@@ -7,7 +7,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Toggle;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\BooleanColumn;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
@@ -60,7 +60,8 @@ class SubscriptionResource extends Resource
                 TextColumn::make('status'),
                 TextColumn::make('start_date'),
                 TextColumn::make('end_date'),
-                BooleanColumn::make('auto_renew'),
+                IconColumn::make('auto_renew')
+                    ->boolean(),
             ])
             ->filters([
                 SelectFilter::make('status')

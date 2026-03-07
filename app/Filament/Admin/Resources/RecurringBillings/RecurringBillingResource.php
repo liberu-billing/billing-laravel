@@ -8,7 +8,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Toggle;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\BooleanColumn;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
@@ -72,7 +72,8 @@ class RecurringBillingResource extends Resource
                 TextColumn::make('next_billing_date')
                     ->date()
                     ->sortable(),
-                BooleanColumn::make('is_active')
+                IconColumn::make('is_active')
+                    ->boolean()
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()

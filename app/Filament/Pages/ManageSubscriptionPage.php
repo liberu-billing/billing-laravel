@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Schema;
 use Filament\Pages\Page;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
@@ -17,14 +18,14 @@ class ManageSubscriptionPage extends Page
 {
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-credit-card';
     protected string $view = 'filament.pages.manage-subscription';
-    
+
     public $subscription;
     public $selectedProduct;
     public $renewalPeriod;
     public $autoRenew;
     public $startDate;
 
-    public function mount()
+    public function mount(): void
     {
         $this->subscription = Auth::user()->subscription;
         if ($this->subscription) {
@@ -35,83 +36,82 @@ class ManageSubscriptionPage extends Page
         }
     }
 
-    protected function getFormSchema(): array
+    public function form(Schema $schema): Schema
     {
-        return [
-            Section::make()
-                ->schema([
-                    Grid::make(2)
-                        ->schema([
-                            Select::make('selectedProduct')
-                                ->label('Service')
-                                ->options(Products_Service::pluck('name', 'id'))
-                                ->required(),
-                            
-                            Select::make('renewalPeriod')
-                                ->label('Billing Cycle')
-                                ->options([
-                                    'monthly' => 'Monthly',
-                                    'quarterly' => 'Quarterly',
-                                    'semi-annually' => 'Semi-annually',
-                                    'annually' => 'Annually',
-                                ])
-                                ->required(),
-                            
-                            DatePicker::make('startDate')
-                                ->label('Start Date')
-                                ->required(),
-                            
-                            Toggle::make('autoRenew')
-                                ->label('Auto Renew')
-                                ->default(true),
-                        ]),
-                ]),
-        ];
+        return $schema
+            ->components([
+                Section::make()
+                    ->schema([
+                        Grid::make(2)
+                            ->schema([
+                                Select::make('selectedProduct')
+                                    ->label('Service')
+                                    ->options(Products_Service::pluck('name', 'id'))
+                                    ->required(),
+
+                                Select::make('renewalPeriod')
+                                    ->label('Billing Cycle')
+                                    ->options([
+                                        'monthly'        => 'Monthly',
+                                        'quarterly'      => 'Quarterly',
+                                        'semi-annually'  => 'Semi-annually',
+                                        'annually'       => 'Annually',
+                                    ])
+                                    ->required(),
+
+                                DatePicker::make('startDate')
+                                    ->label('Start Date')
+                                    ->required(),
+
+                                Toggle::make('autoRenew')
+                                    ->label('Auto Renew')
+                                    ->default(true),
+                            ]),
+                    ]),
+            ]);
     }
 
-    public function save()
+    public function save(): void
     {
-        $data = $this->validate();
-        
         $product = Products_Service::findOrFail($this->selectedProduct);
-        
-        if (!$this->subscription) {
+
+        if (! $this->subscription) {
             $this->subscription = new Subscription();
         }
-        
+
         $this->subscription->fill([
-            'customer_id' => Auth::user()->customer->id,
+            'customer_id'        => Auth::user()->customer->id,
             'product_service_id' => $this->selectedProduct,
-            'start_date' => $this->startDate,
-            'renewal_period' => $this->renewalPeriod,
-            'auto_renew' => $this->autoRenew,
-            'price' => $product->price,
-            'currency' => $product->currency,
-            'status' => 'active',
+            'start_date'         => $this->startDate,
+            'renewal_period'     => $this->renewalPeriod,
+            'auto_renew'         => $this->autoRenew,
+            'price'              => $product->price,
+            'currency'           => $product->currency,
+            'status'             => 'active',
         ]);
-        
+
         $this->subscription->save();
-        
+
         Notification::make()
             ->title('Subscription updated successfully')
             ->success()
             ->send();
     }
 
-    public function cancel()
+    public function cancel(): void
     {
         $this->subscription?->cancel();
-        
+
         Notification::make()
             ->title('Subscription cancelled successfully')
             ->success()
             ->send();
     }
 
-    public function resume()
+    public function resume(): void
     {
         $this->subscription?->resume();
-        
+
         Notification::make()
             ->title('Subscription resumed successfully')
             ->success()

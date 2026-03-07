@@ -4,6 +4,7 @@ namespace App\Filament\Client\Pages;
 
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -12,9 +13,9 @@ class Profile extends Page
 {
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user';
     protected string $view = 'filament.client.pages.profile';
-    
+
     public ?array $data = [];
-    
+
     public function mount(): void
     {
         $this->form->fill([
@@ -62,20 +63,24 @@ class Profile extends Page
     public function submit(): void
     {
         $data = $this->form->getState();
-        
+
         $user = auth()->user();
-        
+
         if (isset($data['password'])) {
-            if (!Hash::check($data['current_password'], $user->password)) {
+            if (! Hash::check($data['current_password'], $user->password)) {
                 $this->addError('current_password', 'The provided password is incorrect.');
+
                 return;
             }
             $data['password'] = Hash::make($data['password']);
         }
-        
+
         $user->update($data);
-        
-        $this->notify('success', 'Profile updated successfully');
+
+        Notification::make()
+            ->title('Profile updated successfully')
+            ->success()
+            ->send();
     }
 
     protected static function shouldRegisterNavigation(): bool
