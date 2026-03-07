@@ -50,7 +50,7 @@ class ServiceAutomationServiceTest extends TestCase
             'issue_date' => now()->subDays(10),
             'due_date' => now()->subDays(8),
             'total_amount' => 100,
-            'status' => 'unpaid',
+            'status' => 'pending',
         ]);
 
         $suspended = $this->automationService->suspendOverdueServices(7);

@@ -21,7 +21,7 @@ class ServiceAutomationService
         $suspended = 0;
         $overdueDate = now()->subDays($daysOverdue);
 
-        $overdueInvoices = Invoice::where('status', 'unpaid')
+        $overdueInvoices = Invoice::whereIn('status', ['pending', 'overdue'])
             ->where('due_date', '<=', $overdueDate)
             ->whereDoesntHave('subscription.activeSuspension')
             ->with('subscription')
