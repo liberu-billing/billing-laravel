@@ -20,13 +20,6 @@ class SubscriptionPlansPage extends Page
     public $billingCycle = 'monthly';
     public $plans;
 
-    protected BillingService $billingService;
-
-    public function boot(BillingService $billingService): void
-    {
-        $this->billingService = $billingService;
-    }
-
     public function mount(): void
     {
         $this->plans = SubscriptionPlan::where('is_active', true)->get();
@@ -60,7 +53,9 @@ class SubscriptionPlansPage extends Page
         $plan = SubscriptionPlan::findOrFail($this->selectedPlan);
 
         try {
-            $subscription = $this->billingService->createSubscription(
+            $billingService = app(BillingService::class);
+
+            $subscription = $billingService->createSubscription(
                 auth()->user()->customer,
                 $plan,
                 $this->billingCycle
