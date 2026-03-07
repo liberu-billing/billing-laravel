@@ -27,7 +27,7 @@ class Report extends Model
     protected $casts = [
         'start_date' => 'datetime',
         'end_date' => 'datetime',
-        'filters' => 'array'
+        'filters' => 'array',
         'parameters' => 'array',
         'schedule' => 'array',
         'last_generated_at' => 'datetime'
