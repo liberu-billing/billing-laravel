@@ -1,126 +1,110 @@
 services:
-    app:
-        build:
-            context: .
-            dockerfile: Dockerfile
-            args:
-                PHP_VERSION: '8.3'
-                NODE_VERSION: '20-alpine'
-        image: liberu/billing:local
-        container_name: billing_app
-        restart: unless-stopped
-        environment:
-            CONTAINER_MODE: http
-            OCTANE_SERVER: swoole
-            APP_ENV: local
-            APP_DEBUG: 'true'
-            APP_URL: http://localhost:8000
-            DB_CONNECTION: mysql
-            DB_HOST: mysql
-            DB_PORT: 3306
-            DB_DATABASE: ${DB_DATABASE:-liberu}
-            DB_USERNAME: ${DB_USERNAME:-liberu}
-            DB_PASSWORD: ${DB_PASSWORD:-secret}
-            REDIS_HOST: redis
-            REDIS_PORT: 6379
-            WITH_HORIZON: 'false'
-            WITH_SCHEDULER: 'true'
-            RUNNING_MIGRATIONS_AND_SEEDERS: 'false'
-        volumes:
-            - .:/var/www/html
-            - /var/www/html/vendor
-        ports:
-            - '8000:8000'
-        depends_on:
-            mysql:
-                condition: service_healthy
-            redis:
-                condition: service_healthy
-        networks:
-            - billing
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PHP_VERSION: '8.3'
+        WWWUSER: '${WWWUSER:-1000}'
+        WWWGROUP: '${WWWGROUP:-1000}'
+    image: boilerplate-laravel:latest
+    ports:
+      - '${APP_PORT:-8000}:80'
+    environment:
+      CONTAINER_MODE: http
+      OCTANE_SERVER: roadrunner
+      WITH_SCHEDULER: 'true'
+      WITH_HORIZON: 'false'
+      RUNNING_MIGRATIONS_AND_SEEDERS: '${RUNNING_MIGRATIONS_AND_SEEDERS:-false}'
+    env_file:
+      - .env
+    volumes:
+      - storage:/var/www/html/storage/app
+      - logs:/var/www/html/storage/logs
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - appnet
 
-    horizon:
-        build:
-            context: .
-            dockerfile: Dockerfile
-            args:
-                PHP_VERSION: '8.3'
-        image: liberu/billing:local
-        container_name: billing_horizon
-        restart: unless-stopped
-        environment:
-            CONTAINER_MODE: horizon
-            APP_ENV: local
-            DB_HOST: mysql
-            DB_DATABASE: ${DB_DATABASE:-liberu}
-            DB_USERNAME: ${DB_USERNAME:-liberu}
-            DB_PASSWORD: ${DB_PASSWORD:-secret}
-            REDIS_HOST: redis
-        depends_on:
-            mysql:
-                condition: service_healthy
-            redis:
-                condition: service_healthy
-        networks:
-            - billing
-        profiles:
-            - horizon
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PHP_VERSION: '8.3'
+    image: boilerplate-laravel:latest
+    environment:
+      CONTAINER_MODE: worker
+      WORKER_COMMAND: 'php /var/www/html/artisan queue:work --sleep=3 --tries=3 --max-time=3600'
+    env_file:
+      - .env
+    volumes:
+      - storage:/var/www/html/storage/app
+      - logs:/var/www/html/storage/logs
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - appnet
+    profiles:
+      - worker
 
-    mysql:
-        image: mysql:8.0
-        container_name: billing_mysql
-        restart: unless-stopped
-        environment:
-            MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
-            MYSQL_DATABASE: ${DB_DATABASE:-liberu}
-            MYSQL_USER: ${DB_USERNAME:-liberu}
-            MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
-        volumes:
-            - billing_mysql_data:/var/lib/mysql
-        ports:
-            - '3306:3306'
-        healthcheck:
-            test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-            interval: 10s
-            timeout: 5s
-            retries: 5
-        networks:
-            - billing
+  mysql:
+    image: mysql:8.0
+    ports:
+      - '${FORWARD_DB_PORT:-3306}:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: '${DB_PASSWORD:-secret}'
+      MYSQL_DATABASE: '${DB_DATABASE:-liberu}'
+      MYSQL_USER: '${DB_USERNAME:-liberu}'
+      MYSQL_PASSWORD: '${DB_PASSWORD:-secret}'
+    volumes:
+      - mysql:/var/lib/mysql
+    networks:
+      - appnet
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-    redis:
-        image: redis:7-alpine
-        container_name: billing_redis
-        restart: unless-stopped
-        ports:
-            - '6379:6379'
-        volumes:
-            - billing_redis_data:/data
-        healthcheck:
-            test: ["CMD", "redis-cli", "ping"]
-            interval: 10s
-            timeout: 5s
-            retries: 5
-        networks:
-            - billing
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '${FORWARD_REDIS_PORT:-6379}:6379'
+    volumes:
+      - redis:/data
+    networks:
+      - appnet
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-    mailpit:
-        image: axllent/mailpit:latest
-        container_name: billing_mailpit
-        restart: unless-stopped
-        ports:
-            - '1025:1025'
-            - '8025:8025'
-        networks:
-            - billing
-        profiles:
-            - mail
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - '${FORWARD_MAIL_PORT:-1025}:1025'
+      - '${FORWARD_MAILPIT_DASHBOARD_PORT:-8025}:8025'
+    networks:
+      - appnet
 
 networks:
-    billing:
-        driver: bridge
+  appnet:
+    driver: bridge
 
 volumes:
-    billing_mysql_data:
-        driver: local
-    billing_redis_data:
-        driver: local
+  mysql:
+    driver: local
+  redis:
+    driver: local
+  storage:
+    driver: local
+  logs:
+    driver: local
