@@ -5,20 +5,40 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-  deployment:
+  deployment_status:
   workflow_dispatch:
 
 env:
   DB_DATABASE: liberu
-  DB_USERNAME: liberu
-  DB_PASSWORD: secret
+  DB_USERNAME: root
+  DB_PASSWORD: root
 
 jobs:
   docker:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: liberu
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
     steps:
+<<<<<<< HEAD
       - name: Checkout code
+=======
+      -
+        name: Checkout
+>>>>>>> 6e4ab5069a434a52b132e4330c30b7699e4b54ef
         uses: actions/checkout@v4
 
       - name: Login to Docker Hub
@@ -29,7 +49,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e4288.5
+        uses: docker/metadata-action@v5
         with:
           images: liberu/billing
 
@@ -45,7 +65,7 @@ jobs:
             ${{ runner.os }}-buildx-
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198.562a7d2c83
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: Dockerfile

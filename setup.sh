@@ -1,5 +1,9 @@
 #!/bin/bash
+<<<<<<< HEAD
 # Setup script for the control-panel-laravel project.
+=======
+# Setup script for the Liberu billing project.
+>>>>>>> 6e4ab5069a434a52b132e4330c30b7699e4b54ef
 #
 # This script provides installation options for Standalone, Docker, or Kubernetes deployments.
 # It handles composer and npm installations with fallback logic and error checking.
@@ -452,7 +456,11 @@ install_kubernetes() {
 # Main installation menu
 main() {
     clear
+<<<<<<< HEAD
     print_header "LIBERU CONTROL PANEL - INSTALLER"
+=======
+    print_header "LIBERU BILLING - INSTALLER"
+>>>>>>> 6e4ab5069a434a52b132e4330c30b7699e4b54ef
 
     echo "Please select installation type:"
     echo ""
