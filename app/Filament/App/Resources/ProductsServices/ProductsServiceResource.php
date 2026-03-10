@@ -97,12 +97,12 @@ class ProductsServiceResource extends Resource
                     ->sortable(),
                 TextColumn::make('pricing_model'),
                 TextColumn::make('tld.name')
-                    ->label('TLD')
-                    ->visible(fn ($record) => $record->type === 'domain'),
-                TextColumn::make('markup_type')
-                    ->visible(fn ($record) => $record->type === 'domain'),
-                TextColumn::make('markup_value')
-                    ->visible(fn ($record) => $record->type === 'domain'),
+                    ->label('TLD'),
+                    // ->visible(fn ($record) => $record->type === 'domain'),
+                TextColumn::make('markup_type'),
+                    // ->visible(fn ($record) => $record->type === 'domain'),
+                TextColumn::make('markup_value'),
+                    // ->visible(fn ($record) => $record->type === 'domain'),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
