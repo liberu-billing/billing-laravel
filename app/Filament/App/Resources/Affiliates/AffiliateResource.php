@@ -40,8 +40,8 @@ class AffiliateResource extends Resource
                     ->required()
                     ->numeric()
                     ->step(0.01)
-                    ->min(0)
-                    ->max(100),
+                    ->minValue(0)
+                    ->maxValue(100),
                 Select::make('status')
                     ->options([
                         'active' => 'Active',

@@ -102,7 +102,7 @@ return [
 
     'permissions' => [
         'separator' => ':',
-        'case' => 'pascal',
+        'case' => 'snake',
         'generate' => true,
     ],
 

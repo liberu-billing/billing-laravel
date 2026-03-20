@@ -137,7 +137,7 @@ class RefundResource extends Resource
                             ->required()
                             ->numeric()
                             ->label('Refund Amount')
-                            ->rules([
+                            ->rules(fn (Payment $record): array => [
                                 'required',
                                 'numeric',
                                 'min:0.01',
