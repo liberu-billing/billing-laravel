@@ -16,9 +16,15 @@ class PackageGroup extends Model
         'is_active',
     ];
 
-    protected $casts = [
+    protected function casts(): array
+
+    {
+
+        return [
         'is_active' => 'boolean',
     ];
+
+    }
 
     public function team(): BelongsTo
     {

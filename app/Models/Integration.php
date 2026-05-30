@@ -17,11 +17,17 @@ class Integration extends Model
         'settings',
     ];
 
-    protected $casts = [
+    protected function casts(): array
+
+    {
+
+        return [
         'expires_at' => 'datetime',
         'settings' => 'array',
         'scopes' => 'array',
     ];
+
+    }
 
     protected $hidden = [
         'token',

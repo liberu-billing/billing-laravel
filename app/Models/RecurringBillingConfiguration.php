@@ -19,10 +19,16 @@ class RecurringBillingConfiguration extends Model
         'is_active'
     ];
 
-    protected $casts = [
+    protected function casts(): array
+
+    {
+
+        return [
         'next_billing_date' => 'date',
         'is_active' => 'boolean'
     ];
+
+    }
 
     public function invoice()
     {

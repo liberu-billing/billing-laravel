@@ -50,7 +50,6 @@ class ClientPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ])
-            ->authGuard('client');
+            ]);
     }
 }

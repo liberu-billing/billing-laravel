@@ -1,19 +1,75 @@
 <?php
 
+use App\Models\Report;
+use App\Services\BillingService;
+use App\Services\ReportGenerationService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
-
-/*
-|--------------------------------------------------------------------------
-| Console Routes
-|--------------------------------------------------------------------------
-|
-| This file is where you may define all of your Closure based console
-| commands. Each Closure is bound to a command instance allowing a
-| simple approach to interacting with each command's IO methods.
-|
-*/
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schedule;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
+
+Schedule::call(function () {
+    app(BillingService::class)->processRecurringBilling();
+})->daily();
+
+Schedule::command('invoices:send-reminders')->daily();
+Schedule::command('invoices:process-reminders')->daily();
+Schedule::command('audit:prune')->daily();
+
+Schedule::call(function () {
+    $reports = Report::query()
+        ->whereNotNull('schedule')
+        ->where(function ($query) {
+            $query->whereNull('last_generated_at')
+                ->orWhere('last_generated_at', '<=', now()->subHour());
+        })
+        ->get();
+
+    foreach ($reports as $report) {
+        try {
+            if (shouldGenerateReport($report)) {
+                app(ReportGenerationService::class)->generateReport($report);
+                $report->update([
+                    'last_generated_at'      => now(),
+                    'last_generation_status' => 'success',
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to generate report: '.$e->getMessage(), [
+                'report_id' => $report->id,
+                'error'     => $e->getMessage(),
+            ]);
+            $report->update([
+                'last_generation_status' => 'failed',
+                'last_error'             => $e->getMessage(),
+            ]);
+        }
+    }
+})->hourly();
+
+function shouldGenerateReport(Report $report): bool
+{
+    if (! $report->last_generated_at) {
+        return true;
+    }
+
+    $schedule = $report->schedule;
+
+    if (! isset($schedule['frequency'])) {
+        return false;
+    }
+
+    $lastGenerated = $report->last_generated_at;
+
+    return match ($schedule['frequency']) {
+        'daily'   => $lastGenerated->diffInDays(now()) >= 1,
+        'weekly'  => $lastGenerated->diffInWeeks(now()) >= 1,
+        'monthly' => $lastGenerated->diffInMonths(now()) >= 1,
+        'hourly'  => $lastGenerated->diffInHours(now()) >= 1,
+        default   => false,
+    };
+}

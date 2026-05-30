@@ -29,7 +29,11 @@ class Subscription extends Model
         'scheduled_change',
     ];
 
-    protected $casts = [
+    protected function casts(): array
+
+    {
+
+        return [
         'start_date' => 'datetime',
         'end_date' => 'datetime',
         'domain_expiration_date' => 'datetime',
@@ -40,6 +44,8 @@ class Subscription extends Model
         'last_billed_at' => 'datetime',
         'ends_at' => 'datetime',
     ];
+
+    }
 
     protected $dates = ['start_date', 'end_date', 'last_billed_at'];
 

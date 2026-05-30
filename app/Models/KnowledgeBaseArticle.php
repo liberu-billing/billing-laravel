@@ -24,11 +24,17 @@ class KnowledgeBaseArticle extends Model
         'published_at',
     ];
 
-    protected $casts = [
+    protected function casts(): array
+
+    {
+
+        return [
         'is_published' => 'boolean',
         'is_featured' => 'boolean',
         'published_at' => 'datetime',
     ];
+
+    }
 
     protected static function boot()
     {

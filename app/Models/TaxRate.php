@@ -27,7 +27,11 @@ class TaxRate extends Model
         'description'
     ];
 
-    protected $casts = [
+    protected function casts(): array
+
+    {
+
+        return [
         'rate' => 'decimal:2',
         'threshold_amount' => 'decimal:2',
         'threshold_rate' => 'decimal:2',
@@ -35,6 +39,8 @@ class TaxRate extends Model
         'effective_date' => 'date',
         'expiry_date' => 'date'
     ];
+
+    }
 
     public function team()
     {

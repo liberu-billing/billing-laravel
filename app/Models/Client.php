@@ -17,17 +17,19 @@ class Client extends Model
         'address',
         'company',
         'notes',
-        'status'
+        'status',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
 
     public function notes(): HasMany
     {
         return $this->hasMany(ClientNote::class);
     }
-
-
-    protected $casts = [
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
 }

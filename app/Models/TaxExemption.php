@@ -18,10 +18,16 @@ class TaxExemption extends Model
         'documentation_path'
     ];
 
-    protected $casts = [
+    protected function casts(): array
+
+    {
+
+        return [
         'expiry_date' => 'date',
         'is_active' => 'boolean'
     ];
+
+    }
 
     public function customer()
     {

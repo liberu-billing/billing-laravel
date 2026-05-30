@@ -24,7 +24,11 @@ class Report extends Model
         'team_id'
     ];
 
-    protected $casts = [
+    protected function casts(): array
+
+    {
+
+        return [
         'start_date' => 'datetime',
         'end_date' => 'datetime',
         'filters' => 'array',
@@ -32,6 +36,8 @@ class Report extends Model
         'schedule' => 'array',
         'last_generated_at' => 'datetime'
     ];
+
+    }
 
     public function team()
     {

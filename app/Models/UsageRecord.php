@@ -17,11 +17,17 @@ class UsageRecord extends Model
         'processed',
     ];
 
-    protected $casts = [
+    protected function casts(): array
+
+    {
+
+        return [
         'recorded_at' => 'datetime',
         'processed' => 'boolean',
         'quantity' => 'decimal:2'
     ];
+
+    }
 
     public function subscription()
     {

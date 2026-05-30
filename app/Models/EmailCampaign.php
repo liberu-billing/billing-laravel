@@ -23,12 +23,18 @@ class EmailCampaign extends Model
         'completed_at',
     ];
 
-    protected $casts = [
+    protected function casts(): array
+
+    {
+
+        return [
         'recipient_filters' => 'array',
         'scheduled_at' => 'datetime',
         'started_sending_at' => 'datetime',
         'completed_at' => 'datetime',
     ];
+
+    }
 
     public function team(): BelongsTo
     {

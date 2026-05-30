@@ -21,10 +21,16 @@ class PaymentPlan extends Model
         'status',
     ];
 
-    protected $casts = [
+    protected function casts(): array
+
+    {
+
+        return [
         'start_date' => 'datetime',
         'next_due_date' => 'datetime',
     ];
+
+    }
 
     public function invoice()
     {

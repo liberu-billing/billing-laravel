@@ -25,11 +25,17 @@ class Discount extends Model
         'is_active'
     ];
 
-    protected $casts = [
+    protected function casts(): array
+
+    {
+
+        return [
         'start_date' => 'datetime',
         'end_date' => 'datetime',
         'is_active' => 'boolean'
     ];
+
+    }
 
     public function invoices()
     {

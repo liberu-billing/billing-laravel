@@ -22,9 +22,15 @@ class InvoiceDispute extends Model
         'resolved_by'
     ];
 
-    protected $casts = [
+    protected function casts(): array
+
+    {
+
+        return [
         'resolved_at' => 'datetime'
     ];
+
+    }
 
     public function invoice()
     {

@@ -18,11 +18,17 @@ class WebhookEvent extends Model
         'next_retry_at',
     ];
 
-    protected $casts = [
+    protected function casts(): array
+
+    {
+
+        return [
         'payload' => 'array',
         'sent_at' => 'datetime',
         'next_retry_at' => 'datetime',
     ];
+
+    }
 
     public function webhookEndpoint(): BelongsTo
     {

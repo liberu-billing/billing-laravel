@@ -19,9 +19,15 @@ class Affiliate extends Model
         'custom_rates',
     ];
 
-    protected $casts = [
+    protected function casts(): array
+
+    {
+
+        return [
         'custom_rates' => 'array',
     ];
+
+    }
 
     public function user()
     {

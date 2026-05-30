@@ -34,13 +34,19 @@ class Payment extends Model
         'status'
     ];
 
-    protected $casts = [
+    protected function casts(): array
+
+    {
+
+        return [
         'amount' => 'float',
         'refunded_amount' => 'float',
         'payment_date' => 'datetime',
         'payment_method_details' => 'array',
         'status' => 'string'
     ];
+
+    }
 
     public function getReconciliationStatusBadgeAttribute()
     {

@@ -24,10 +24,16 @@ class HostingAccount extends Model
         'addons',
     ];
 
-    protected $casts = [
+    protected function casts(): array
+
+    {
+
+        return [
         'addons' => 'array',
         'price' => 'decimal:2',
     ];
+
+    }
 
     public function customer()
     {

@@ -17,11 +17,17 @@ class Tld extends Model
         'enom_cost',
     ];
 
-    protected $casts = [
+    protected function casts(): array
+
+    {
+
+        return [
         'base_price' => 'float',
         'markup_value' => 'float',
         'enom_cost' => 'float',
     ];
+
+    }
 
     public function calculatePrice()
     {

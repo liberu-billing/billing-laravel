@@ -15,34 +15,25 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use JoelButcher\Socialstream\HasConnectedAccounts;
-use JoelButcher\Socialstream\SetsProfilePhotoFromUrl;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Jetstream\HasTeams;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable implements HasDefaultTenant, HasTenants, FilamentUser
+class User extends Authenticatable implements FilamentUser, HasDefaultTenant, HasTenants
 {
     use HasApiTokens;
-    // use HasConnectedAccounts;
-    use HasRoles;
     use HasFactory;
+    use HasPanelShield;
     use HasProfilePhoto {
         HasProfilePhoto::profilePhotoUrl as getPhotoUrl;
     }
-    use Notifiable;
-    // use SetsProfilePhotoFromUrl;
-    use TwoFactorAuthenticatable;
+    use HasRoles;
     use HasTeams;
-    use HasPanelShield;
+    use Notifiable;
+    use TwoFactorAuthenticatable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'name',
         'email',
@@ -50,11 +41,6 @@ class User extends Authenticatable implements HasDefaultTenant, HasTenants, Fila
         'referred_by',
     ];
 
-    /**
-     * The attributes that should be hidden for arrays.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
@@ -62,40 +48,26 @@ class User extends Authenticatable implements HasDefaultTenant, HasTenants, Fila
         'two_factor_secret',
     ];
 
-    /**
-     * The accessors to append to the model's array form.
-     *
-     * @var array<int, string>
-     */
     protected $appends = [
         'profile_photo_url',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
+            'password'          => 'hashed',
         ];
     }
 
-    /**
-     * Get the URL to the user's profile photo.
-     */
-    public function profilePhotoUrl(): Attribute
+    protected function profilePhotoUrl(): Attribute
     {
         return filter_var($this->profile_photo_path, FILTER_VALIDATE_URL)
             ? Attribute::get(fn () => $this->profile_photo_path)
             : $this->getPhotoUrl();
     }
 
-    /**
-     * @return array<Model> | Collection
-     */
+    /** @return array<Model>|Collection */
     public function getTenants(Panel $panel): array|Collection
     {
         return $this->teams;
@@ -103,18 +75,12 @@ class User extends Authenticatable implements HasDefaultTenant, HasTenants, Fila
 
     public function canAccessTenant(Model $tenant): bool
     {
-        return true; //$this->ownedTeams->contains($tenant);
-    }
-
-    public function canAccessFilament(): bool
-    {
-        //        return $this->hasVerifiedEmail();
         return true;
     }
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return true; // TODO: Check panel and role
+        return true;
     }
 
     public function getDefaultTenant(Panel $panel): ?Model
@@ -127,12 +93,12 @@ class User extends Authenticatable implements HasDefaultTenant, HasTenants, Fila
         return $this->belongsTo(Team::class, 'current_team_id');
     }
 
-    public function affiliate()
+    public function affiliate(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(Affiliate::class);
     }
 
-    public function referrer()
+    public function referrer(): BelongsTo
     {
         return $this->belongsTo(Affiliate::class, 'referred_by');
     }
@@ -142,7 +108,7 @@ class User extends Authenticatable implements HasDefaultTenant, HasTenants, Fila
         return $this->hasMany(Integration::class);
     }
 
-    public function hasIntegration(string $provider): bool 
+    public function hasIntegration(string $provider): bool
     {
         return $this->integrations()->where('provider', $provider)->exists();
     }

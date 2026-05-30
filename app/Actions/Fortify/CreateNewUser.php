@@ -115,7 +115,7 @@ class CreateNewUser implements CreatesNewUsers
         $errorCode = $e->getCode();
         $errorMessage = $e->getMessage();
     
-        if (strpos($errorMessage, 'Duplicate entry') !== false) {
+        if (str_contains($errorMessage, 'Duplicate entry')) {
             return 'A user with this email already exists. Please use a different email address.';
         } elseif ($errorCode == 1045) {
             return 'Database access denied. Please contact the administrator.';

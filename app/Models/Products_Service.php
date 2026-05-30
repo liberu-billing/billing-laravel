@@ -29,9 +29,15 @@ class Products_Service extends Model
         'custom_pricing_data',
     ];
 
-    protected $casts = [
+    protected function casts(): array
+
+    {
+
+        return [
         'custom_pricing_data' => 'array',
     ];
+
+    }
 
     public function getPriceAttribute()
     {

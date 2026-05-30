@@ -22,11 +22,17 @@ class BulkOperation extends Model
         'completed_at',
     ];
 
-    protected $casts = [
+    protected function casts(): array
+
+    {
+
+        return [
         'parameters' => 'array',
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
     ];
+
+    }
 
     public function user(): BelongsTo
     {

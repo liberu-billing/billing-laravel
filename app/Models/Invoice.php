@@ -92,7 +92,11 @@ class Invoice extends Model
         'upcoming_reminder_sent',
     ];
     
-    protected $casts = [
+    protected function casts(): array
+    
+    {
+    
+        return [
         'issue_date' => 'datetime',
         'due_date' => 'datetime',
         'last_late_fee_date' => 'datetime',
@@ -102,6 +106,8 @@ class Invoice extends Model
         'paid_at' => 'datetime',
         'status_history' => 'array',
     ];
+    
+    }
 
     public function currency()
     {

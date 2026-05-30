@@ -28,7 +28,11 @@ class Quote extends Model
         'declined_at',
     ];
 
-    protected $casts = [
+    protected function casts(): array
+
+    {
+
+        return [
         'valid_until' => 'date',
         'subtotal' => 'decimal:2',
         'tax_amount' => 'decimal:2',
@@ -38,6 +42,8 @@ class Quote extends Model
         'accepted_at' => 'datetime',
         'declined_at' => 'datetime',
     ];
+
+    }
 
     protected static function boot(): void
     {

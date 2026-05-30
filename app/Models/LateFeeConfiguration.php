@@ -21,12 +21,18 @@ class LateFeeConfiguration extends Model
         'frequency',
     ];
 
-    protected $casts = [
+    protected function casts(): array
+
+    {
+
+        return [
         'is_compound' => 'boolean',
         'fee_amount' => 'decimal:2',
         'max_fee_amount' => 'decimal:2',
         'grace_period_days' => 'integer',
     ];
+
+    }
 
     public static function getFrequencyOptions(): array
     {

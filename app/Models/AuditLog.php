@@ -19,10 +19,16 @@ class AuditLog extends Model
         'user_agent',
     ];
 
-    protected $casts = [
+    protected function casts(): array
+
+    {
+
+        return [
         'old_values' => 'array',
         'new_values' => 'array',
     ];
+
+    }
 
     public function user(): BelongsTo
     {

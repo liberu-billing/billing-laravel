@@ -20,12 +20,18 @@ class ClientContact extends Model
         'can_manage_services',
     ];
 
-    protected $casts = [
+    protected function casts(): array
+
+    {
+
+        return [
         'is_primary' => 'boolean',
         'can_view_invoices' => 'boolean',
         'can_make_payments' => 'boolean',
         'can_manage_services' => 'boolean',
     ];
+
+    }
 
     public function customer(): BelongsTo
     {

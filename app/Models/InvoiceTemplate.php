@@ -26,9 +26,15 @@ class InvoiceTemplate extends Model
         'team_id'
     ];
 
-    protected $casts = [
+    protected function casts(): array
+
+    {
+
+        return [
         'is_default' => 'boolean',
     ];
+
+    }
 
     public function invoices()
     {

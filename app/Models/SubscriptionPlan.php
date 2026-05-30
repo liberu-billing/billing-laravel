@@ -20,12 +20,18 @@ class SubscriptionPlan extends Model
         'trial_days'
     ];
 
-    protected $casts = [
+    protected function casts(): array
+
+    {
+
+        return [
         'features' => 'array',
         'is_active' => 'boolean',
         'trial_days' => 'integer',
         'price' => 'decimal:2'
     ];
+
+    }
 
     public function subscriptions()
     {

@@ -14,9 +14,15 @@ class SavedSearch extends Model
         'share_token'
     ];
 
-    protected $casts = [
+    protected function casts(): array
+
+    {
+
+        return [
         'criteria' => 'array'
     ];
+
+    }
 
     public function user(): BelongsTo
     {

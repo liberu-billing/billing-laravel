@@ -20,11 +20,17 @@ class WebhookEndpoint extends Model
         'last_triggered_at',
     ];
 
-    protected $casts = [
+    protected function casts(): array
+
+    {
+
+        return [
         'events' => 'array',
         'is_active' => 'boolean',
         'last_triggered_at' => 'datetime',
     ];
+
+    }
 
     public function team(): BelongsTo
     {

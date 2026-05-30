@@ -24,11 +24,17 @@ class HostingServer extends Model
         'active_accounts',
     ];
 
-    protected $casts = [
+    protected function casts(): array
+
+    {
+
+        return [
         'is_active' => 'boolean',
         'max_accounts' => 'integer',
         'active_accounts' => 'integer',
     ];
+
+    }
 
     public function hostingAccounts()
     {
