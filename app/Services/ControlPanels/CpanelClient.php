@@ -126,13 +126,15 @@ class CpanelClient
             throw new Exception('Server not configured');
         }
 
+        $this->validateHostname($this->server->hostname);
+
         try {
             $response = $this->client->request('GET', 'https://' . $this->server->hostname . ':2087' . $endpoint, [
                 'headers' => [
                     'Authorization' => 'WHM ' . $this->server->username . ':' . $this->apiToken,
                 ],
                 'query' => $params,
-                'verify' => false // Only if using self-signed SSL
+                'verify' => config('services.cpanel.ssl_verify', true),
             ]);
 
             $result = json_decode($response->getBody(), true);
@@ -159,6 +161,23 @@ class CpanelClient
                 'error' => $e->getMessage()
             ]);
             return false;
+        }
+    }
+
+    protected function validateHostname(string $hostname): void
+    {
+        // Reject private/loopback IPs to prevent SSRF
+        if (filter_var($hostname, FILTER_VALIDATE_IP)) {
+            $isPrivate = !filter_var(
+                $hostname,
+                FILTER_VALIDATE_IP,
+                FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
+            );
+            if ($isPrivate) {
+                throw new Exception('Private or reserved IP addresses are not allowed as cPanel hostnames');
+            }
+        } elseif (!filter_var($hostname, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME)) {
+            throw new Exception('Invalid cPanel hostname');
         }
     }
 
