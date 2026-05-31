@@ -24,25 +24,23 @@ class ClientBillingReportService
             $query->where('created_at', '<=', $endDate);
         }
         
-        return $query->get()->map(function ($invoice) {
-            return [
-                'invoice_number' => $invoice->invoice_number,
-                'date' => $invoice->created_at->format('Y-m-d'),
-                'due_date' => $invoice->due_date->format('Y-m-d'),
-                'amount' => $invoice->total_amount,
-                'status' => $invoice->status,
-                'paid_amount' => $invoice->payments->sum('amount'),
-                'balance' => $invoice->total_amount - $invoice->payments->sum('amount'),
-                'currency' => $invoice->currency
-            ];
-        });
+        return $query->get()->map(fn($invoice) => [
+            'invoice_number' => $invoice->invoice_number,
+            'date' => $invoice->created_at->format('Y-m-d'),
+            'due_date' => $invoice->due_date->format('Y-m-d'),
+            'amount' => $invoice->total_amount,
+            'status' => $invoice->status,
+            'paid_amount' => $invoice->payments->sum('amount'),
+            'balance' => $invoice->total_amount - $invoice->payments->sum('amount'),
+            'currency' => $invoice->currency
+        ]);
     }
 
-    public function getPaymentStatus(Customer $customer)
+    public function getPaymentStatus(Customer $customer): array
     {
         return [
             'total_invoiced' => Invoice::where('customer_id', $customer->id)->sum('total_amount'),
-            'total_paid' => Payment::whereHas('invoice', function($q) use ($customer) {
+            'total_paid' => Payment::whereHas('invoice', function($q) use ($customer): void {
                 $q->where('customer_id', $customer->id);
             })->sum('amount'),
             'total_outstanding' => Invoice::where('customer_id', $customer->id)
@@ -57,7 +55,7 @@ class ClientBillingReportService
 
     public function getPaymentTrends(Customer $customer)
     {
-        return Payment::whereHas('invoice', function($q) use ($customer) {
+        return Payment::whereHas('invoice', function($q) use ($customer): void {
             $q->where('customer_id', $customer->id);
         })
         ->select(

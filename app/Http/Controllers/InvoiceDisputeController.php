@@ -9,11 +9,8 @@ use Illuminate\Http\Request;
 
 class InvoiceDisputeController extends Controller
 {
-    protected $disputeService;
-
-    public function __construct(DisputeService $disputeService)
+    public function __construct(protected \App\Services\DisputeService $disputeService)
     {
-        $this->disputeService = $disputeService;
     }
 
     public function store(Request $request, Invoice $invoice)

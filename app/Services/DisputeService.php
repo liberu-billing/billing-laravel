@@ -34,7 +34,7 @@ class DisputeService
         return $dispute;
     }
 
-    public function updateDisputeStatus(InvoiceDispute $dispute, string $status, string $notes = null)
+    public function updateDisputeStatus(InvoiceDispute $dispute, string $status, ?string $notes = null): InvoiceDispute
     {
         $dispute->update([
             'status' => $status,
@@ -69,7 +69,7 @@ class DisputeService
     {
         $customer = $dispute->customer;
         $adminUsers = User::where('team_id', $customer->team_id)
-            ->whereHas('roles', function($q) {
+            ->whereHas('roles', function($q): void {
                 $q->where('name', 'admin');
             })->get();
 

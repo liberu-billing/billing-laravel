@@ -12,16 +12,12 @@ class PricingService
     {
         $basePrice = $product->base_price;
 
-        switch ($product->pricing_model) {
-            case 'fixed':
-                return $basePrice;
-            case 'tiered':
-                return $this->calculateTieredPrice($product, $options);
-            case 'usage_based':
-                return $this->calculateUsageBasedPrice($product, $options);
-            default:
-                return $basePrice;
-        }
+        return match ($product->pricing_model) {
+            'fixed' => $basePrice,
+            'tiered' => $this->calculateTieredPrice($product, $options),
+            'usage_based' => $this->calculateUsageBasedPrice($product, $options),
+            default => $basePrice,
+        };
     }
 
     private function calculateTieredPrice(Products_Service $product, array $options)
@@ -71,7 +67,7 @@ class PricingService
         return $totalPrice;
     }
 
-    private function calculateTieredMetricPrice($usage, $tiers)
+    private function calculateTieredMetricPrice($usage, $tiers): float|int
     {
         $price = 0;
         $remainingUsage = $usage;
@@ -81,7 +77,9 @@ class PricingService
             $price += $tierUsage * $tier['rate'];
             $remainingUsage -= $tierUsage;
 
-            if ($remainingUsage <= 0) break;
+            if ($remainingUsage <= 0) {
+                break;
+            }
         }
 
         return $price;

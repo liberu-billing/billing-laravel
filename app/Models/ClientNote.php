@@ -5,10 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable(['client_id', 'user_id', 'content'])]
 class ClientNote extends Model
 {
-    protected $fillable = ['client_id', 'user_id', 'content'];
-
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);

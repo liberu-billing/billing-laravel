@@ -16,7 +16,7 @@ class KnowledgeBaseService
     {
         $queryBuilder = KnowledgeBaseArticle::query()
             ->where('is_published', true)
-            ->where(function ($q) use ($query) {
+            ->where(function ($q) use ($query): void {
                 if (config('database.default') !== 'sqlite') {
                     $q->whereFullText(['title', 'content'], $query);
                 }
@@ -87,7 +87,7 @@ class KnowledgeBaseService
     {
         return KnowledgeBaseCategory::where('is_active', true)
             ->whereNull('parent_id')
-            ->with(['children' => function ($query) {
+            ->with(['children' => function ($query): void {
                 $query->where('is_active', true)
                     ->orderBy('sort_order');
             }])

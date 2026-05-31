@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 
 class SoftaculousClient
 {
-    protected $client;
+    protected \GuzzleHttp\Client $client;
     protected $apiUrl;
     protected $apiToken;
 
@@ -31,7 +31,7 @@ class SoftaculousClient
         return $this->makeApiCall($endpoint, $params);
     }
 
-    protected function makeApiCall($endpoint, $params)
+    protected function makeApiCall(string $endpoint, $params): bool
     {
         try {
             $response = $this->client->request('POST', $this->apiUrl . $endpoint, [
@@ -41,7 +41,7 @@ class SoftaculousClient
                 'form_params' => $params,
             ]);
 
-            $result = json_decode($response->getBody(), true);
+            $result = json_decode((string) $response->getBody(), true);
 
             if (isset($result['success']) && $result['success'] === true) {
                 Log::info("Softaculous API call successful", ['endpoint' => $endpoint, 'params' => $params]);

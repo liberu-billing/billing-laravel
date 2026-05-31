@@ -6,18 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'name',
+    'path',
+    'mime_type',
+    'size',
+    'folder_id',
+    'user_id',
+    'team_id',
+])]
 class File extends Model
 {
-    protected $fillable = [
-        'name',
-        'path',
-        'mime_type',
-        'size',
-        'folder_id',
-        'user_id',
-        'team_id',
-    ];
-
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

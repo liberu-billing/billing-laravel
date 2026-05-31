@@ -6,20 +6,20 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'name',
+    'email',
+    'phone',
+    'address',
+    'company',
+    'notes',
+    'status',
+])]
 class Client extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'name',
-        'email',
-        'phone',
-        'address',
-        'company',
-        'notes',
-        'status',
-    ];
-
+    #[\Override]
     protected function casts(): array
     {
         return [

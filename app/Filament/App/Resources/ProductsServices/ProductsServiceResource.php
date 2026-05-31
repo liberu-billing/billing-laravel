@@ -25,10 +25,13 @@ use Filament\Tables\Table;
 
 class ProductsServiceResource extends Resource
 {
+    #[\Override]
     protected static ?string $model = Products_Service::class;
 
+    #[\Override]
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -62,29 +65,30 @@ class ProductsServiceResource extends Resource
                 KeyValue::make('custom_pricing_data')
                     ->keyLabel('Tier/Usage')
                     ->valueLabel('Price')
-                    ->visible(fn (Get $get) => in_array($get('pricing_model'), ['tiered', 'usage_based']))
+                    ->visible(fn (Get $get): bool => in_array($get('pricing_model'), ['tiered', 'usage_based']))
                     ->columnSpanFull(),
                 Select::make('tld_id')
                     ->label('TLD')
                     ->options(Tld::all()->pluck('name', 'id'))
-                    ->visible(fn (Get $get) => $get('type') === 'domain')
-                    ->required(fn (Get $get) => $get('type') === 'domain'),
+                    ->visible(fn (Get $get): bool => $get('type') === 'domain')
+                    ->required(fn (Get $get): bool => $get('type') === 'domain'),
                 Select::make('markup_type')
                     ->label('Markup Type')
                     ->options([
                         'percentage' => 'Percentage',
                         'fixed' => 'Fixed Amount',
                     ])
-                    ->visible(fn (Get $get) => $get('type') === 'domain')
-                    ->required(fn (Get $get) => $get('type') === 'domain'),
+                    ->visible(fn (Get $get): bool => $get('type') === 'domain')
+                    ->required(fn (Get $get): bool => $get('type') === 'domain'),
                 TextInput::make('markup_value')
                     ->label('Markup Value')
                     ->numeric()
-                    ->visible(fn (Get $get) => $get('type') === 'domain')
-                    ->required(fn (Get $get) => $get('type') === 'domain'),
+                    ->visible(fn (Get $get): bool => $get('type') === 'domain')
+                    ->required(fn (Get $get): bool => $get('type') === 'domain'),
             ]);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -125,6 +129,7 @@ class ProductsServiceResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function getRelations(): array
     {
         return [
@@ -132,6 +137,7 @@ class ProductsServiceResource extends Resource
         ];
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [

@@ -88,7 +88,7 @@ class WebhookService
 
             // Add signature if secret is configured
             if ($endpoint->secret) {
-                $signature = hash_hmac('sha256', json_encode($payload), $endpoint->secret);
+                $signature = hash_hmac('sha256', json_encode($payload), (string) $endpoint->secret);
                 $headers['X-Webhook-Signature'] = $signature;
             }
 
@@ -131,7 +131,7 @@ class WebhookService
     {
         $processed = 0;
         $events = WebhookEvent::where('status', 'pending')
-            ->orWhere(function ($query) {
+            ->orWhere(function ($query): void {
                 $query->where('status', 'failed')
                     ->whereNotNull('next_retry_at')
                     ->where('next_retry_at', '<=', now());

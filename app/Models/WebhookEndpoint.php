@@ -6,30 +6,27 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'team_id',
+    'url',
+    'secret',
+    'events',
+    'is_active',
+    'description',
+    'max_retries',
+    'retry_interval',
+    'last_triggered_at',
+])]
 class WebhookEndpoint extends Model
 {
-    protected $fillable = [
-        'team_id',
-        'url',
-        'secret',
-        'events',
-        'is_active',
-        'description',
-        'max_retries',
-        'retry_interval',
-        'last_triggered_at',
-    ];
-
+    #[\Override]
     protected function casts(): array
-
     {
-
         return [
-        'events' => 'array',
-        'is_active' => 'boolean',
-        'last_triggered_at' => 'datetime',
-    ];
-
+            'events' => 'array',
+            'is_active' => 'boolean',
+            'last_triggered_at' => 'datetime',
+        ];
     }
 
     public function team(): BelongsTo

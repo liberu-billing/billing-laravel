@@ -20,6 +20,7 @@ class EditTeam extends EditTenantProfile
         return 'Edit Team';
     }
 
+    #[\Override]
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -47,6 +48,7 @@ class EditTeam extends EditTenantProfile
         return redirect()->route('filament.pages.edit-team', ['team' => $team]);
     }
 
+    #[\Override]
     public function getBreadcrumbs(): array
     {
         return [

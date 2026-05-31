@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\SiteSettingsResource\Pages\CreateSiteSettings;
@@ -18,12 +20,16 @@ use Filament\Tables\Table;
 
 class SiteSettingsResource extends Resource
 {
+    #[\Override]
     protected static ?string $model = SiteSettings::class;
 
+    #[\Override]
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-cog-8-tooth';
 
+    #[\Override]
     protected static string | \UnitEnum | null $navigationGroup = 'Settings';
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -67,6 +73,7 @@ class SiteSettingsResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -90,11 +97,13 @@ class SiteSettingsResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function getRelations(): array
     {
         return [];
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [

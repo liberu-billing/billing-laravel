@@ -9,14 +9,11 @@ use Illuminate\Support\Facades\DB;
 
 class RefundService
 {
-    protected $paymentGatewayService;
-
-    public function __construct(PaymentGatewayService $paymentGatewayService)
+    public function __construct(protected \App\Services\PaymentGatewayService $paymentGatewayService)
     {
-        $this->paymentGatewayService = $paymentGatewayService;
     }
 
-    public function processRefund(Payment $payment, float $amount)
+    public function processRefund(Payment $payment, float $amount): array
     {
         if (!$payment->isRefundable()) {
             throw new Exception('This payment is not refundable.');
@@ -50,7 +47,7 @@ class RefundService
         }
     }
 
-    private function updateInvoiceStatus($invoice)
+    private function updateInvoiceStatus($invoice): void
     {
         $totalPaid = $invoice->payments->sum('amount');
         $totalRefunded = $invoice->payments->sum('refunded_amount');

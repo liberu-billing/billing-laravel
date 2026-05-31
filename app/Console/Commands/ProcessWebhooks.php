@@ -6,11 +6,10 @@ use App\Services\WebhookService;
 use Exception;
 use Illuminate\Console\Command;
 
+#[\Illuminate\Console\Attributes\Description('Process pending webhook events')]
+#[\Illuminate\Console\Attributes\Signature('webhooks:process')]
 class ProcessWebhooks extends Command
 {
-    protected $signature = 'webhooks:process';
-    protected $description = 'Process pending webhook events';
-
     public function __construct(
         protected ?WebhookService $webhookService = null
     ) {
@@ -18,7 +17,7 @@ class ProcessWebhooks extends Command
         $this->webhookService = $webhookService ?? app(WebhookService::class);
     }
 
-    public function handle()
+    public function handle(): int
     {
         if (cache()->get('processing_webhooks')) {
             $this->warn('Webhook processing is already running');

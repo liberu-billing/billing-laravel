@@ -5,20 +5,20 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'subscription_id',
+    'invoice_id',
+    'reason',
+    'notes',
+    'suspended_at',
+    'unsuspended_at',
+    'suspended_by',
+    'unsuspended_by',
+    'is_active',
+])]
 class ServiceSuspension extends Model
 {
-    protected $fillable = [
-        'subscription_id',
-        'invoice_id',
-        'reason',
-        'notes',
-        'suspended_at',
-        'unsuspended_at',
-        'suspended_by',
-        'unsuspended_by',
-        'is_active',
-    ];
-
+    #[\Override]
     protected function casts(): array
 
     {

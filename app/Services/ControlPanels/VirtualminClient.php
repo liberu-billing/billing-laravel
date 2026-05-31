@@ -10,7 +10,7 @@ use App\Models\HostingServer;
 
 class VirtualminClient
 {
-    protected $client;
+    protected \GuzzleHttp\Client $client;
     protected $server;
     protected $apiKey;
 
@@ -19,13 +19,13 @@ class VirtualminClient
         $this->client = new Client();
     }
 
-    public function setServer(HostingServer $server)
+    public function setServer(HostingServer $server): void
     {
         $this->server = $server;
         $this->apiKey = $server->api_token;
     }
 
-    public function createAccount($username, $domain, $package)
+    public function createAccount(string $username, string $domain, $package)
     {
         $password = $this->generatePassword();
         $params = [
@@ -109,7 +109,7 @@ class VirtualminClient
         return $this->makeApiCall($params);
     }
 
-    protected function makeApiCall($params)
+    protected function makeApiCall(array $params): bool
     {
         if (!$this->server) {
             throw new Exception('Server not configured');
@@ -126,7 +126,7 @@ class VirtualminClient
                 'verify' => false
             ]);
 
-            $result = json_decode($response->getBody()->getContents(), true);
+            $result = json_decode((string) $response->getBody()->getContents(), true);
 
             if (isset($result['status']) && $result['status'] === 'success') {
                 Log::info("Virtualmin API call successful", [
@@ -153,7 +153,7 @@ class VirtualminClient
         }
     }
 
-    protected function generatePassword()
+    protected function generatePassword(): string
     {
         return bin2hex(random_bytes(12));
     }

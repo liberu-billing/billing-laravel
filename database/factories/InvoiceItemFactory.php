@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Models\Invoice;
@@ -18,8 +20,8 @@ class InvoiceItemFactory extends Factory
      */
     public function definition(): array
     {
-        $unitPrice = $this->faker->randomFloat(2, 1, 1000);
-        $quantity = $this->faker->numberBetween(1, 10);
+        $unitPrice = fake()->randomFloat(2, 1, 1000);
+        $quantity = fake()->numberBetween(1, 10);
         $totalPrice = $unitPrice * $quantity;
 
         return [

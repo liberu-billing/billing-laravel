@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\MenuResource\Pages\CreateMenu;
@@ -18,12 +20,16 @@ use Filament\Tables\Table;
 
 class MenuResource extends Resource
 {
+    #[\Override]
     protected static ?string $model = Menu::class;
 
+    #[\Override]
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-bars-3';
 
+    #[\Override]
     protected static string | \UnitEnum | null $navigationGroup = 'Administration';
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -45,6 +51,7 @@ class MenuResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -71,11 +78,13 @@ class MenuResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function getRelations(): array
     {
         return [];
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [

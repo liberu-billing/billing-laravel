@@ -6,9 +6,9 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
+    public function up(): void
     {
-        Schema::create('usage_records', function (Blueprint $table) {
+        Schema::create('usage_records', function (Blueprint $table): void {
             $table->id();
             $table->integer('subscription_id')->nullable();
             $table->string('metric_name');
@@ -19,7 +19,7 @@ return new class extends Migration
         });
     }
 
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('usage_records');
     }

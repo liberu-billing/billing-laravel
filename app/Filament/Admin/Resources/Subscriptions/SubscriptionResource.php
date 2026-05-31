@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Admin\Resources\Subscriptions;
 
 use Filament\Schemas\Schema;
@@ -20,10 +22,13 @@ use Filament\Tables;
 
 class SubscriptionResource extends Resource
 {
+    #[\Override]
     protected static ?string $model = Subscription::class;
 
+    #[\Override]
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-collection';
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -51,6 +56,7 @@ class SubscriptionResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -78,6 +84,7 @@ class SubscriptionResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function getRelations(): array
     {
         return [
@@ -85,6 +92,7 @@ class SubscriptionResource extends Resource
         ];
     }
     
+    #[\Override]
     public static function getPages(): array
     {
         return [

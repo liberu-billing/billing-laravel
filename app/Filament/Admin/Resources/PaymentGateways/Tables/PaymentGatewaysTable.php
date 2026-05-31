@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Admin\Resources\PaymentGateways\Tables;
 
 use Filament\Actions\BulkActionGroup;
@@ -36,6 +38,3 @@ class PaymentGatewaysTable
             ]);
     }
 }
-
-
-  

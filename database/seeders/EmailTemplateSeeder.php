@@ -7,7 +7,7 @@ use App\Models\EmailTemplate;
 
 class EmailTemplateSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
         EmailTemplate::create([
             'name' => 'Default Invoice Generated',

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Models\Customer;
@@ -19,11 +21,11 @@ class InvoiceFactory extends Factory
     {
         return [
             'customer_id' => Customer::factory(),
-            'invoice_number' => $this->faker->unique()->numerify('INV-#####'),
-            'issue_date' => $this->faker->date(),
-            'due_date' => $this->faker->date(),
-            'total_amount' => $this->faker->randomFloat(2, 100, 10000),
-            'status' => $this->faker->randomElement(['pending', 'paid', 'overdue']),
+            'invoice_number' => fake()->unique()->numerify('INV-#####'),
+            'issue_date' => fake()->date(),
+            'due_date' => fake()->date(),
+            'total_amount' => fake()->randomFloat(2, 100, 10000),
+            'status' => fake()->randomElement(['pending', 'paid', 'overdue']),
         ];
     }
 }

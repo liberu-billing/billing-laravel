@@ -12,13 +12,14 @@ use JoelButcher\Socialstream\Providers;
  */
 class ConnectedAccountFactory extends Factory
 {
+    #[\Override]
     protected $model = ConnectedAccount::class;
 
     public function definition(): array
     {
         return [
-            'provider' => $this->faker->randomElement(Providers::all()),
-            'provider_id' => $this->faker->numerify('########'),
+            'provider' => fake()->randomElement(Providers::all()),
+            'provider_id' => fake()->numerify('########'),
             'token' => Str::random(432),
             'refresh_token' => Str::random(432),
         ];

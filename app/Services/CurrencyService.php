@@ -8,9 +8,9 @@ use Illuminate\Support\Facades\Cache;
 
 class CurrencyService
 {
-    private const MAX_DEPTH = 5; // Reduced from 10 to be more conservative
+    private const int MAX_DEPTH = 5; // Reduced from 10 to be more conservative
     private array $processedCurrencies = [];
-    private static $isProcessing = false;
+    private static bool $isProcessing = false;
     
     public function convert(float $amount, string $from, string $to): float 
     {

@@ -34,7 +34,7 @@ class ServiceProvisioningServiceTest extends TestCase
         parent::tearDown();
     }
 
-    public function testProvisionHostingService()
+    public function testProvisionHostingService(): void
     {
         $customer = Customer::factory()->create();
         $product = Products_Service::factory()->create([
@@ -51,15 +51,15 @@ class ServiceProvisioningServiceTest extends TestCase
             ->shouldReceive('provisionAccount')
             ->once()
             ->with(
-                Mockery::on(fn($account) => 
+                Mockery::on(fn($account): bool => 
                     $account instanceof HostingAccount &&
                     $account->customer_id === $customer->id &&
                     $account->subscription_id === $subscription->id &&
                     $account->status === 'pending'
                 ),
-                Mockery::on(fn($prod) => $prod->id === $product->id)
+                Mockery::on(fn($prod): bool => $prod->id === $product->id)
             )
-            ->andReturnUsing(function ($account) {
+            ->andReturnUsing(function ($account): true {
                 $account->status = 'active';
                 $account->save();
                 return true;
@@ -72,7 +72,7 @@ class ServiceProvisioningServiceTest extends TestCase
         $this->assertEquals('example.com', $result->domain);
     }
 
-    public function testManageHostingSuspend()
+    public function testManageHostingSuspend(): void
     {
         $customer = Customer::factory()->create();
         $product = Products_Service::factory()->create(['type' => 'hosting']);
@@ -88,7 +88,7 @@ class ServiceProvisioningServiceTest extends TestCase
         $this->hostingService
             ->shouldReceive('suspendAccount')
             ->once()
-            ->with(Mockery::on(fn($acc) => $acc->id === $account->id))
+            ->with(Mockery::on(fn($acc): bool => $acc->id === $account->id))
             ->andReturn(true);
 
         $result = $this->provisioningService->manageService($subscription, 'suspend');
@@ -96,7 +96,7 @@ class ServiceProvisioningServiceTest extends TestCase
         $this->assertTrue($result);
     }
 
-    public function testManageHostingUnsuspend()
+    public function testManageHostingUnsuspend(): void
     {
         $customer = Customer::factory()->create();
         $product = Products_Service::factory()->create(['type' => 'hosting']);
@@ -112,7 +112,7 @@ class ServiceProvisioningServiceTest extends TestCase
         $this->hostingService
             ->shouldReceive('unsuspendAccount')
             ->once()
-            ->with(Mockery::on(fn($acc) => $acc->id === $account->id))
+            ->with(Mockery::on(fn($acc): bool => $acc->id === $account->id))
             ->andReturn(true);
 
         $result = $this->provisioningService->manageService($subscription, 'unsuspend');
@@ -120,7 +120,7 @@ class ServiceProvisioningServiceTest extends TestCase
         $this->assertTrue($result);
     }
 
-    public function testManageHostingTerminate()
+    public function testManageHostingTerminate(): void
     {
         $customer = Customer::factory()->create();
         $product = Products_Service::factory()->create(['type' => 'hosting']);
@@ -136,7 +136,7 @@ class ServiceProvisioningServiceTest extends TestCase
         $this->hostingService
             ->shouldReceive('terminateAccount')
             ->once()
-            ->with(Mockery::on(fn($acc) => $acc->id === $account->id))
+            ->with(Mockery::on(fn($acc): bool => $acc->id === $account->id))
             ->andReturn(true);
 
         $result = $this->provisioningService->manageService($subscription, 'terminate');
@@ -144,7 +144,7 @@ class ServiceProvisioningServiceTest extends TestCase
         $this->assertTrue($result);
     }
 
-    public function testManageHostingUpgrade()
+    public function testManageHostingUpgrade(): void
     {
         $customer = Customer::factory()->create();
         $product = Products_Service::factory()->create(['type' => 'hosting']);
@@ -165,8 +165,8 @@ class ServiceProvisioningServiceTest extends TestCase
             ->shouldReceive('upgradeAccount')
             ->once()
             ->with(
-                Mockery::on(fn($acc) => $acc->id === $account->id),
-                Mockery::on(fn($prod) => $prod->id === $newProduct->id),
+                Mockery::on(fn($acc): bool => $acc->id === $account->id),
+                Mockery::on(fn($prod): bool => $prod->id === $newProduct->id),
                 Mockery::any()
             )
             ->andReturn(true);
@@ -178,7 +178,7 @@ class ServiceProvisioningServiceTest extends TestCase
         $this->assertTrue($result);
     }
 
-    public function testManageHostingDowngrade()
+    public function testManageHostingDowngrade(): void
     {
         $customer = Customer::factory()->create();
         $product = Products_Service::factory()->create(['type' => 'hosting']);
@@ -199,8 +199,8 @@ class ServiceProvisioningServiceTest extends TestCase
             ->shouldReceive('downgradeAccount')
             ->once()
             ->with(
-                Mockery::on(fn($acc) => $acc->id === $account->id),
-                Mockery::on(fn($prod) => $prod->id === $newProduct->id),
+                Mockery::on(fn($acc): bool => $acc->id === $account->id),
+                Mockery::on(fn($prod): bool => $prod->id === $newProduct->id),
                 Mockery::any()
             )
             ->andReturn(true);
@@ -212,7 +212,7 @@ class ServiceProvisioningServiceTest extends TestCase
         $this->assertTrue($result);
     }
 
-    public function testManageHostingAddAddon()
+    public function testManageHostingAddAddon(): void
     {
         $customer = Customer::factory()->create();
         $product = Products_Service::factory()->create(['type' => 'hosting']);
@@ -229,7 +229,7 @@ class ServiceProvisioningServiceTest extends TestCase
             ->shouldReceive('addAddon')
             ->once()
             ->with(
-                Mockery::on(fn($acc) => $acc->id === $account->id),
+                Mockery::on(fn($acc): bool => $acc->id === $account->id),
                 'ssl-certificate'
             )
             ->andReturn(true);
@@ -241,7 +241,7 @@ class ServiceProvisioningServiceTest extends TestCase
         $this->assertTrue($result);
     }
 
-    public function testManageHostingRemoveAddon()
+    public function testManageHostingRemoveAddon(): void
     {
         $customer = Customer::factory()->create();
         $product = Products_Service::factory()->create(['type' => 'hosting']);
@@ -259,7 +259,7 @@ class ServiceProvisioningServiceTest extends TestCase
             ->shouldReceive('removeAddon')
             ->once()
             ->with(
-                Mockery::on(fn($acc) => $acc->id === $account->id),
+                Mockery::on(fn($acc): bool => $acc->id === $account->id),
                 'ssl-certificate'
             )
             ->andReturn(true);
@@ -271,7 +271,7 @@ class ServiceProvisioningServiceTest extends TestCase
         $this->assertTrue($result);
     }
 
-    public function testProvisionServiceThrowsExceptionForUnsupportedType()
+    public function testProvisionServiceThrowsExceptionForUnsupportedType(): void
     {
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Unsupported service type');
@@ -284,7 +284,7 @@ class ServiceProvisioningServiceTest extends TestCase
         $this->provisioningService->provisionService($subscription);
     }
 
-    public function testManageServiceThrowsExceptionForMissingHostingAccount()
+    public function testManageServiceThrowsExceptionForMissingHostingAccount(): void
     {
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Hosting account not found');

@@ -10,7 +10,7 @@ use App\Models\HostingServer;
 
 class CpanelClient
 {
-    protected $client;
+    protected \GuzzleHttp\Client $client;
     protected $server;
     protected $apiToken;
 
@@ -19,13 +19,13 @@ class CpanelClient
         $this->client = new Client();
     }
 
-    public function setServer(HostingServer $server)
+    public function setServer(HostingServer $server): void
     {
         $this->server = $server;
         $this->apiToken = $server->api_token;
     }
 
-    public function createAccount($username, $domain, $package)
+    public function createAccount(string $username, string $domain, $package)
     {
         $endpoint = '/json-api/createacct';
         $params = [
@@ -103,7 +103,7 @@ class CpanelClient
         $endpoint = '/json-api/modifyacct';
         $params = [
             'user' => $username,
-            'FEATURE-' . strtoupper($addon) => 1
+            'FEATURE-' . strtoupper((string) $addon) => 1
         ];
 
         return $this->makeApiCall($endpoint, $params);
@@ -114,13 +114,13 @@ class CpanelClient
         $endpoint = '/json-api/modifyacct';
         $params = [
             'user' => $username,
-            'FEATURE-' . strtoupper($addon) => 0
+            'FEATURE-' . strtoupper((string) $addon) => 0
         ];
 
         return $this->makeApiCall($endpoint, $params);
     }
 
-    protected function makeApiCall($endpoint, $params)
+    protected function makeApiCall(string $endpoint, $params): bool
     {
         if (!$this->server) {
             throw new Exception('Server not configured');
@@ -135,7 +135,7 @@ class CpanelClient
                 'verify' => false // Only if using self-signed SSL
             ]);
 
-            $result = json_decode($response->getBody(), true);
+            $result = json_decode((string) $response->getBody(), true);
 
             if (isset($result['metadata']['result']) && $result['metadata']['result'] === 1) {
                 Log::info("cPanel API call successful", [
@@ -162,7 +162,7 @@ class CpanelClient
         }
     }
 
-    protected function generatePassword()
+    protected function generatePassword(): string
     {
         return bin2hex(random_bytes(12));
     }

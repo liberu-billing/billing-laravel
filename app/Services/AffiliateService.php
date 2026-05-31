@@ -7,7 +7,7 @@ use App\Models\Affiliate;
 
 class AffiliateService
 {
-    public function processAffiliateReward(Payment $payment)
+    public function processAffiliateReward(Payment $payment): void
     {
         $user = $payment->invoice->customer->user;
         $referrer = $user->referrer;

@@ -6,12 +6,11 @@ use Exception;
 use Illuminate\Console\Command;
 use App\Services\BillingService;
 
+#[\Illuminate\Console\Attributes\Description('Process invoice reminders for upcoming and overdue invoices')]
+#[\Illuminate\Console\Attributes\Signature('invoices:process-reminders')]
 class ProcessInvoiceReminders extends Command
 {
-    protected $signature = 'invoices:process-reminders';
-    protected $description = 'Process invoice reminders for upcoming and overdue invoices';
-
-    protected $billingService;
+    protected ?\App\Services\BillingService $billingService;
 
     public function __construct($serviceProvisioningService = null, $currencyService = null)
     {
@@ -24,7 +23,7 @@ class ProcessInvoiceReminders extends Command
         }
     }
 
-    public function handle()
+    public function handle(): int
     {
         if (cache()->get('processing_invoice_reminders')) {
             $this->warn('Invoice reminder processing is already running');

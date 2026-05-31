@@ -10,7 +10,7 @@ class TeamManagementService
 {
     public function assignUserToDefaultTeam(User $user): void
     {
-        DB::transaction(function () use ($user) {
+        DB::transaction(function () use ($user): void {
             $team = Team::firstOrCreate(
                 ['name' => $user->name."'s Team"],
                 [

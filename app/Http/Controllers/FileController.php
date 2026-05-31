@@ -13,7 +13,7 @@ class FileController extends Controller
     {
         $files = File::query()
             ->where('user_id', auth()->id())
-            ->when($request->folder_id, function ($query, $folderId) {
+            ->when($request->folder_id, function ($query, $folderId): void {
                 $query->where('folder_id', $folderId);
             })
             ->paginate();

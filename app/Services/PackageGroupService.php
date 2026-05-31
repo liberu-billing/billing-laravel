@@ -75,7 +75,7 @@ class PackageGroupService
      */
     public function reorderPackages(PackageGroup $group, array $orderedPlanIds): void
     {
-        DB::transaction(function () use ($group, $orderedPlanIds) {
+        DB::transaction(function () use ($group, $orderedPlanIds): void {
             foreach ($orderedPlanIds as $index => $planId) {
                 $group->packages()->updateExistingPivot($planId, ['sort_order' => $index]);
             }

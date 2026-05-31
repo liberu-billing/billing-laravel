@@ -11,7 +11,9 @@ use Illuminate\Validation\Rules\Password;
 
 class Profile extends Page
 {
+    #[\Override]
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user';
+    #[\Override]
     protected string $view = 'filament.client.pages.profile';
 
     public ?array $data = [];
@@ -47,7 +49,7 @@ class Profile extends Page
                     ->password()
                     ->label('Current Password')
                     ->required()
-                    ->visible(fn ($get) => (bool) $get('password')),
+                    ->visible(fn ($get): bool => (bool) $get('password')),
                 TextInput::make('password')
                     ->password()
                     ->label('New Password')
@@ -55,7 +57,7 @@ class Profile extends Page
                 TextInput::make('password_confirmation')
                     ->password()
                     ->label('Confirm Password')
-                    ->visible(fn ($get) => (bool) $get('password'))
+                    ->visible(fn ($get): bool => (bool) $get('password'))
                     ->same('password'),
             ]);
     }
@@ -83,7 +85,8 @@ class Profile extends Page
             ->send();
     }
 
-    protected static function shouldRegisterNavigation(): bool
+    #[\Override]
+    public static function shouldRegisterNavigation(): bool
     {
         return true;
     }

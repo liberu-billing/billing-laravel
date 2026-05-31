@@ -1,24 +1,25 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'name',
+    'email',
+    'phone_number',
+    'address',
+    'city',
+    'state',
+    'postal_code',
+    'country',
+])]
 class Customer extends Model
 {
     use HasFactory;
-
-    protected $fillable = [
-        'name',
-        'email',
-        'phone_number',
-        'address',
-        'city',
-        'state',
-        'postal_code',
-        'country',
-    ];
 
     public function credits()
     {

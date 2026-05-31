@@ -9,11 +9,8 @@ use Illuminate\Http\Request;
 
 class ServiceManagementController extends Controller
 {
-    protected $serviceProvisioningService;
-
-    public function __construct(ServiceProvisioningService $serviceProvisioningService)
+    public function __construct(protected \App\Services\ServiceProvisioningService $serviceProvisioningService)
     {
-        $this->serviceProvisioningService = $serviceProvisioningService;
     }
 
     public function provisionService(Request $request)

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -9,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class ProductsServiceFactory extends Factory
 {
+    #[\Override]
     protected $model = \App\Models\Products_Service::class;
 
     /**
@@ -19,10 +22,10 @@ class ProductsServiceFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->word,
-            'description' => $this->faker->paragraph,
-            'base_price' => $this->faker->randomFloat(2, 1, 1000),
-            'type' => $this->faker->randomElement(['product', 'service', 'hosting']),
+            'name' => fake()->word,
+            'description' => fake()->paragraph,
+            'base_price' => fake()->randomFloat(2, 1, 1000),
+            'type' => fake()->randomElement(['product', 'service', 'hosting']),
         ];
     }
 }

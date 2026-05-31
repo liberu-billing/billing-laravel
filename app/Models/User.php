@@ -21,6 +21,21 @@ use Laravel\Jetstream\HasTeams;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
+#[\Illuminate\Database\Eloquent\Attributes\Appends([
+    'profile_photo_url',
+])]
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'name',
+    'email',
+    'password',
+    'referred_by',
+])]
+#[\Illuminate\Database\Eloquent\Attributes\Hidden([
+    'password',
+    'remember_token',
+    'two_factor_recovery_codes',
+    'two_factor_secret',
+])]
 class User extends Authenticatable implements FilamentUser, HasDefaultTenant, HasTenants
 {
     use HasApiTokens;
@@ -29,29 +44,14 @@ class User extends Authenticatable implements FilamentUser, HasDefaultTenant, Ha
     use HasProfilePhoto {
         HasProfilePhoto::profilePhotoUrl as getPhotoUrl;
     }
-    use HasRoles;
-    use HasTeams;
+    use HasRoles, HasTeams {
+        HasTeams::teams insteadof HasRoles;
+        HasRoles::teams as rolesTeams;
+    }
     use Notifiable;
     use TwoFactorAuthenticatable;
 
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'referred_by',
-    ];
-
-    protected $hidden = [
-        'password',
-        'remember_token',
-        'two_factor_recovery_codes',
-        'two_factor_secret',
-    ];
-
-    protected $appends = [
-        'profile_photo_url',
-    ];
-
+    #[\Override]
     protected function casts(): array
     {
         return [

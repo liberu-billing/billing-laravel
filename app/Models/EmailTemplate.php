@@ -6,23 +6,22 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasTeam;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'name',
+    'type',
+    'subject',
+    'body',
+    'team_id',
+    'is_default'
+])]
 class EmailTemplate extends Model
 {
     use HasFactory, HasTeam;
 
-    protected $fillable = [
-        'name',
-        'type',
-        'subject',
-        'body',
-        'team_id',
-        'is_default'
-    ];
-
     public static function getTemplate($type, $teamId = null)
     {
         return static::where('type', $type)
-            ->where(function ($query) use ($teamId) {
+            ->where(function ($query) use ($teamId): void {
                 $query->where('team_id', $teamId)
                     ->orWhere('is_default', true);
             })

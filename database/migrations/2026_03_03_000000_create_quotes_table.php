@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('quotes', function (Blueprint $table) {
+        Schema::create('quotes', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('team_id')->nullable()->constrained('teams')->onDelete('cascade');
             $table->foreignId('customer_id')->constrained('customers')->onDelete('cascade');
@@ -36,7 +36,7 @@ return new class extends Migration
             $table->index(['customer_id', 'status']);
         });
 
-        Schema::create('quote_items', function (Blueprint $table) {
+        Schema::create('quote_items', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('quote_id')->constrained('quotes')->onDelete('cascade');
             $table->string('description');

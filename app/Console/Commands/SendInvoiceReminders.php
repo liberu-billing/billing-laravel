@@ -1,17 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use Exception;
 use App\Services\BillingService;
 use Illuminate\Console\Command;
 
+#[\Illuminate\Console\Attributes\Description('Send SMS reminders for upcoming invoice due dates')]
+#[\Illuminate\Console\Attributes\Signature('invoices:send-reminders')]
 class SendInvoiceReminders extends Command
 {
-    protected $signature = 'invoices:send-reminders';
-    protected $description = 'Send SMS reminders for upcoming invoice due dates';
-
-    public function handle(BillingService $billingService)
+    public function handle(BillingService $billingService): int
     {
         $this->info('Sending invoice reminders...');
         

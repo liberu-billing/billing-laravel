@@ -6,22 +6,22 @@ use App\Traits\HasTeam;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'invoice_id',
+    'customer_id', 
+    'status',
+    'reason',
+    'description',
+    'resolution_notes',
+    'resolved_at',
+    'resolved_by'
+])]
 class InvoiceDispute extends Model
 {
     use HasFactory;
     use HasTeam;
 
-    protected $fillable = [
-        'invoice_id',
-        'customer_id', 
-        'status',
-        'reason',
-        'description',
-        'resolution_notes',
-        'resolved_at',
-        'resolved_by'
-    ];
-
+    #[\Override]
     protected function casts(): array
 
     {

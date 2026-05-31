@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Laravel\Jetstream\Features;
 use Laravel\Jetstream\Http\Middleware\AuthenticateSession;
 
@@ -61,7 +63,7 @@ return [
         // Features::termsAndPrivacyPolicy(),
         // Features::profilePhotos(),
         // Features::api(),
-        // Features::teams(['invitations' => true]),
+        Features::teams(['invitations' => true]),
         Features::accountDeletion(),
         // Features::twoFactorAuthentication(),
     ],

@@ -10,14 +10,11 @@ use Illuminate\Support\Facades\DB;
 
 class PartialPaymentService
 {
-    protected $paymentGatewayService;
-
-    public function __construct(PaymentGatewayService $paymentGatewayService)
+    public function __construct(protected \App\Services\PaymentGatewayService $paymentGatewayService)
     {
-        $this->paymentGatewayService = $paymentGatewayService;
     }
 
-    public function processPartialPayment(Invoice $invoice, float $amount, int $paymentGatewayId)
+    public function processPartialPayment(Invoice $invoice, float $amount, int $paymentGatewayId): array
     {
         if ($amount <= 0 || $amount > $invoice->remaining_amount) {
             throw new Exception('Invalid partial payment amount.');
@@ -53,7 +50,7 @@ class PartialPaymentService
         }
     }
 
-    private function updateInvoiceStatus(Invoice $invoice)
+    private function updateInvoiceStatus(Invoice $invoice): void
     {
         $totalPaid = $invoice->payments->sum('amount');
 

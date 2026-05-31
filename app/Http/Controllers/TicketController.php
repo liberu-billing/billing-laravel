@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Notification;
 
 class TicketController extends Controller
 {
-    public function index()
+    public function index(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         $user = auth()->user();
 
@@ -21,7 +21,7 @@ class TicketController extends Controller
         return view('tickets.index', compact('tickets'));
     }
 
-    public function create()
+    public function create(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         return view('tickets.create');
     }
@@ -48,7 +48,7 @@ class TicketController extends Controller
             ->with('success', 'Ticket created successfully.');
     }
 
-    public function show(Ticket $ticket)
+    public function show(Ticket $ticket): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         $this->authorize('view', $ticket);
         $ticket->load(['responses.user', 'user']);

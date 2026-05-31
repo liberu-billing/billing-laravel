@@ -23,12 +23,12 @@ class InvoiceController extends Controller
         return InvoiceResource::collection($invoices);
     }
     
-    public function show(Invoice $invoice)
+    public function show(Invoice $invoice): \App\Http\Resources\Api\InvoiceResource
     {
         return new InvoiceResource($invoice->load(['customer', 'items']));
     }
     
-    public function store(Request $request)
+    public function store(Request $request): \App\Http\Resources\Api\InvoiceResource
     {
         $validated = $request->validate([
             'customer_id' => 'required|exists:customers,id',

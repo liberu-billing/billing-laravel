@@ -9,14 +9,11 @@ use Illuminate\Http\Request;
 
 class PaymentReconciliationController extends Controller
 {
-    protected $reconciliationService;
-
-    public function __construct(PaymentReconciliationService $reconciliationService)
+    public function __construct(protected \App\Services\PaymentReconciliationService $reconciliationService)
     {
-        $this->reconciliationService = $reconciliationService;
     }
 
-    public function index()
+    public function index(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         $payments = Payment::with(['invoice', 'customer'])
             ->whereIn('reconciliation_status', ['unmatched', 'discrepancy', 'failed'])
@@ -26,7 +23,7 @@ class PaymentReconciliationController extends Controller
         return view('payment-reconciliation.index', compact('payments'));
     }
 
-    public function show(Payment $payment)
+    public function show(Payment $payment): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         $payment->load(['invoice', 'customer', 'paymentGateway']);
         $suggestedInvoices = Invoice::where('customer_id', $payment->customer_id)

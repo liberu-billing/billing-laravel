@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
@@ -30,11 +32,9 @@ use App\Http\Controllers\InstallationController;
 Route::post('auth/token', [AuthController::class, 'token']);
 
 // Protected routes
-Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
     // User endpoint
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
+    Route::get('/user', fn(Request $request) => $request->user());
 
     // Installation endpoint
     Route::post('/install', [InstallationController::class, 'install']);
@@ -42,12 +42,12 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     // Invoice endpoints
     Route::apiResource('invoices', InvoiceController::class);
     Route::get('invoices/{invoice}/download', [InvoiceController::class, 'download']);
-    
+
     // Subscription endpoints
     Route::apiResource('subscriptions', SubscriptionController::class);
     Route::post('subscriptions/{subscription}/cancel', [SubscriptionController::class, 'cancel']);
     Route::post('subscriptions/{subscription}/renew', [SubscriptionController::class, 'renew']);
-    
+
     // Customer endpoints
     Route::apiResource('customers', CustomerController::class);
     Route::get('customers/{customer}/invoices', [CustomerController::class, 'invoices']);
@@ -98,7 +98,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
 });
 
 // Public Knowledge Base endpoints (no auth required)
-Route::prefix('knowledge-base')->group(function () {
+Route::prefix('knowledge-base')->group(function (): void {
     Route::get('categories', [KnowledgeBaseController::class, 'categories']);
     Route::get('search', [KnowledgeBaseController::class, 'search']);
     Route::get('featured', [KnowledgeBaseController::class, 'featured']);

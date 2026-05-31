@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-    public function create()
+    public function create(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         $packages = Products_Service::where('type', 'hosting')->get();
         return view('orders.create', compact('packages'));
@@ -114,7 +114,7 @@ class OrderController extends Controller
         }
     }
 
-    public function confirmation($invoiceId)
+    public function confirmation($invoiceId): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         $invoice = Invoice::findOrFail($invoiceId);
         return view('orders.confirmation', compact('invoice'));

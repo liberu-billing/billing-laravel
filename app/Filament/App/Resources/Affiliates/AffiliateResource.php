@@ -22,10 +22,13 @@ use Filament\Tables;
 
 class AffiliateResource extends Resource
 {
+    #[\Override]
     protected static ?string $model = Affiliate::class;
 
+    #[\Override]
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user-group';
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -51,10 +54,11 @@ class AffiliateResource extends Resource
                 TextInput::make('total_earnings')
                     ->disabled()
                     ->label('Total Earnings')
-                    ->formatStateUsing(fn ($state) => '$' . number_format($state, 2)),
+                    ->formatStateUsing(fn ($state): string => '$' . number_format($state, 2)),
             ]);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -86,6 +90,7 @@ class AffiliateResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function getRelations(): array
     {
         return [
@@ -93,6 +98,7 @@ class AffiliateResource extends Resource
         ];
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [

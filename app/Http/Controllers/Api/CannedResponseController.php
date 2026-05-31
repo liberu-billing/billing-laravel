@@ -36,7 +36,7 @@ class CannedResponseController extends Controller
         $teamId = $request->user()?->current_team_id;
         $response = $this->cannedResponseService->getByShortcode($shortcode, $teamId);
 
-        if (!$response) {
+        if (!$response instanceof \App\Models\CannedResponse) {
             return response()->json([
                 'message' => 'Canned response not found',
             ], 404);
@@ -59,7 +59,7 @@ class CannedResponseController extends Controller
         $teamId = $request->user()?->current_team_id;
         $response = $this->cannedResponseService->getByShortcode($shortcode, $teamId);
 
-        if (!$response) {
+        if (!$response instanceof \App\Models\CannedResponse) {
             return response()->json([
                 'message' => 'Canned response not found',
             ], 404);

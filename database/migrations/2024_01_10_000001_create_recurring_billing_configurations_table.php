@@ -6,9 +6,9 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
+    public function up(): void
     {
-        Schema::create('recurring_billing_configurations', function (Blueprint $table) {
+        Schema::create('recurring_billing_configurations', function (Blueprint $table): void {
             $table->id();
             $table->integer('invoice_id')->nullable();
             $table->string('frequency'); // monthly, quarterly, yearly
@@ -19,7 +19,7 @@ return new class extends Migration
         });
     }
 
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('recurring_billing_configurations');
     }

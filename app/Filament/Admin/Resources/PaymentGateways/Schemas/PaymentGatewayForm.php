@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Admin\Resources\PaymentGateways\Schemas;
 
 use Filament\Forms\Components\TextInput;
@@ -27,4 +29,3 @@ class PaymentGatewayForm
             ]);
     }
 }
-   

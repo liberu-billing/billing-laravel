@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('package_groups', function (Blueprint $table) {
+        Schema::create('package_groups', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('team_id')->nullable()->constrained('teams')->onDelete('cascade');
             $table->string('name');
@@ -23,7 +23,7 @@ return new class extends Migration
             $table->index(['team_id', 'is_active']);
         });
 
-        Schema::create('package_group_items', function (Blueprint $table) {
+        Schema::create('package_group_items', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('package_group_id')->constrained('package_groups')->onDelete('cascade');
             $table->foreignId('subscription_plan_id')->constrained('subscription_plans')->onDelete('cascade');

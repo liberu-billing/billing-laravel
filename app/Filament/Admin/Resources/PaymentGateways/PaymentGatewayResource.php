@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Admin\Resources\PaymentGateways;
 
 use App\Filament\Admin\Resources\PaymentGateways\Pages\CreatePaymentGateway;
@@ -16,20 +18,26 @@ use Filament\Tables\Table;
 
 class PaymentGatewayResource extends Resource
 {
+    #[\Override]
     protected static ?string $model = PaymentGateway::class;
+    #[\Override]
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCreditCard;
+    #[\Override]
     protected static string | \UnitEnum | null $navigationGroup = 'Settings';
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return PaymentGatewayForm::configure($schema);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return PaymentGatewaysTable::configure($table);
     }
 
+    #[\Override]
     public static function getRelations(): array
     {
         return [
@@ -37,6 +45,7 @@ class PaymentGatewayResource extends Resource
         ];
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [

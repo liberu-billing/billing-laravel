@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
 use App\Models\User;
@@ -10,27 +12,27 @@ class InvoiceTemplatePolicy
 {
     use HandlesAuthorization;
 
-    public function viewAny(User $user)
+    public function viewAny(User $user): bool
     {
         return true;
     }
 
-    public function view(User $user, InvoiceTemplate $template)
+    public function view(User $user, InvoiceTemplate $template): bool
     {
         return $user->currentTeam->id === $template->team_id;
     }
 
-    public function create(User $user)
+    public function create(User $user): bool
     {
         return true;
     }
 
-    public function update(User $user, InvoiceTemplate $template)
+    public function update(User $user, InvoiceTemplate $template): bool
     {
         return $user->currentTeam->id === $template->team_id;
     }
 
-    public function delete(User $user, InvoiceTemplate $template)
+    public function delete(User $user, InvoiceTemplate $template): bool
     {
         return $user->currentTeam->id === $template->team_id;
     }

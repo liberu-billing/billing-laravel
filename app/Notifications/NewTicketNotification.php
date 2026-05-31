@@ -12,11 +12,8 @@ class NewTicketNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    private $ticket;
-
-    public function __construct(Ticket $ticket)
+    public function __construct(private Ticket $ticket)
     {
-        $this->ticket = $ticket;
     }
 
     public function via($notifiable): array

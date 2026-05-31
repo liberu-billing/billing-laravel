@@ -5,18 +5,22 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'user_id',
+    'provider',
+    'token',
+    'refresh_token',
+    'expires_at',
+    'scopes',
+    'settings',
+])]
+#[\Illuminate\Database\Eloquent\Attributes\Hidden([
+    'token',
+    'refresh_token',
+])]
 class Integration extends Model
 {
-    protected $fillable = [
-        'user_id',
-        'provider',
-        'token',
-        'refresh_token',
-        'expires_at',
-        'scopes',
-        'settings',
-    ];
-
+    #[\Override]
     protected function casts(): array
 
     {
@@ -28,11 +32,6 @@ class Integration extends Model
     ];
 
     }
-
-    protected $hidden = [
-        'token',
-        'refresh_token',
-    ];
 
     public function user(): BelongsTo
     {

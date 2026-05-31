@@ -7,13 +7,13 @@ use Illuminate\Http\Request;
 
 class DiscountController extends Controller
 {
-    public function index()
+    public function index(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         $discounts = Discount::paginate(10);
         return view('discounts.index', compact('discounts'));
     }
 
-    public function create()
+    public function create(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         return view('discounts.create');
     }
@@ -38,7 +38,7 @@ class DiscountController extends Controller
             ->with('success', 'Discount created successfully');
     }
 
-    public function edit(Discount $discount)
+    public function edit(Discount $discount): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         return view('discounts.edit', compact('discount'));
     }

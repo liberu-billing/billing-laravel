@@ -13,27 +13,17 @@ use Carbon\Carbon;
 
 class ServiceManagementController extends Controller
 {
-    protected $billingService;
-    protected $hostingService;
-    protected $domainService;
-
-    public function __construct(
-        BillingService $billingService,
-        HostingService $hostingService,
-        DomainService $domainService
-    ) {
-        $this->billingService = $billingService;
-        $this->hostingService = $hostingService;
-        $this->domainService = $domainService;
+    public function __construct(protected \App\Services\BillingService $billingService, protected \App\Services\HostingService $hostingService, protected \App\Services\DomainService $domainService)
+    {
     }
 
-    public function index()
+    public function index(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         $subscriptions = auth()->user()->customer->subscriptions;
         return view('client.services.index', compact('subscriptions'));
     }
 
-    public function show(Subscription $subscription)
+    public function show(Subscription $subscription): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         $availableUpgrades = Products_Service::where('type', $subscription->productService->type)
             ->where('price', '>', $subscription->productService->price)
@@ -107,7 +97,7 @@ class ServiceManagementController extends Controller
             ->with('success', 'Service scheduled for cancellation at end of billing period');
     }
 
-    private function calculateProration($subscription, $newService)
+    private function calculateProration(\App\Models\Subscription $subscription, $newService): float
     {
         $daysRemaining = now()->diffInDays($subscription->end_date);
         $totalDays = $subscription->start_date->diffInDays($subscription->end_date);

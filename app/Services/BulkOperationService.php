@@ -48,7 +48,7 @@ class BulkOperationService
                     ]));
 
                     $operation->incrementProcessed();
-                } catch (\Exception $e) {
+                } catch (\Exception) {
                     $operation->incrementFailed();
                 }
             }
@@ -111,7 +111,7 @@ class BulkOperationService
                 $file = fopen($path, 'w');
                 
                 // Headers
-                fputcsv($file, ['ID', 'Name', 'Email', 'Phone', 'Created At']);
+                fputcsv($file, ['ID', 'Name', 'Email', 'Phone', 'Created At'], escape: '\\');
 
                 foreach ($clients as $client) {
                     fputcsv($file, [
@@ -120,7 +120,8 @@ class BulkOperationService
                         $client->email,
                         $client->phone ?? '',
                         $client->created_at,
-                    ]);
+                    ],
+                    escape: '\\');
                     $operation->incrementProcessed();
                 }
 
@@ -164,19 +165,19 @@ class BulkOperationService
             $file = fopen($filePath, 'r');
             
             // Skip header row
-            $headers = fgetcsv($file);
+            $headers = fgetcsv($file, escape: '\\');
             
             // Count total rows
             $totalRows = 0;
-            while (fgetcsv($file) !== false) {
+            while (fgetcsv($file, escape: '\\') !== false) {
                 $totalRows++;
             }
             rewind($file);
-            fgetcsv($file); // Skip header again
+            fgetcsv($file, escape: '\\'); // Skip header again
             
             $operation->update(['total_items' => $totalRows]);
 
-            while (($row = fgetcsv($file)) !== false) {
+            while (($row = fgetcsv($file, escape: '\\')) !== false) {
                 try {
                     Client::create([
                         'name' => $row[0] ?? '',
@@ -185,7 +186,7 @@ class BulkOperationService
                         'team_id' => $operation->team_id,
                     ]);
                     $operation->incrementProcessed();
-                } catch (\Exception $e) {
+                } catch (\Exception) {
                     $operation->incrementFailed();
                 }
             }
@@ -237,13 +238,13 @@ class BulkOperationService
                     // Mail::to($recipient->email)->send(new CampaignEmail($campaign));
                     
                     $campaign->incrementSent();
-                } catch (\Exception $e) {
+                } catch (\Exception) {
                     $campaign->incrementFailed();
                 }
             }
 
             $campaign->markAsSent();
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             // Log error
         }
     }

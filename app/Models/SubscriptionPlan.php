@@ -5,21 +5,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'name',
+    'code',
+    'description', 
+    'price',
+    'currency',
+    'features',
+    'is_active',
+    'trial_days'
+])]
 class SubscriptionPlan extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'name',
-        'code',
-        'description', 
-        'price',
-        'currency',
-        'features',
-        'is_active',
-        'trial_days'
-    ];
-
+    #[\Override]
     protected function casts(): array
 
     {
@@ -38,8 +38,8 @@ class SubscriptionPlan extends Model
         return $this->hasMany(Subscription::class);
     }
 
-    public function getFormattedPriceAttribute()
+    protected function formattedPrice(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        return number_format($this->price, 2) . ' ' . $this->currency;
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): string => number_format($this->price, 2) . ' ' . $this->currency);
     }
 }

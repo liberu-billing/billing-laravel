@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class ReminderSettingsController extends Controller
 {
-    public function edit()
+    public function edit(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         $settings = ReminderSetting::firstOrCreate(
             ['team_id' => auth()->user()->currentTeam->id],

@@ -30,22 +30,20 @@ class CreateUserWithTeamsFromProvider implements CreatesUserFromProvider
      */
     public function create(string $provider, ProviderUserContract $providerUser): User
     {
-        return DB::transaction(function () use ($provider, $providerUser) {
-            return tap(User::create([
-                'name' => $providerUser->getName(),
-                'email' => $providerUser->getEmail(),
-            ]), function (User $user) use ($provider, $providerUser) {
-                $user->markEmailAsVerified();
+        return DB::transaction(fn() => tap(User::create([
+            'name' => $providerUser->getName(),
+            'email' => $providerUser->getEmail(),
+        ]), function (User $user) use ($provider, $providerUser): void {
+            $user->markEmailAsVerified();
 
-                if (Socialstream::hasProviderAvatarsFeature() && $providerUser->getAvatar()) {
-                    $user->setProfilePhotoFromUrl($providerUser->getAvatar());
-                }
+            if (Socialstream::hasProviderAvatarsFeature() && $providerUser->getAvatar()) {
+                $user->setProfilePhotoFromUrl($providerUser->getAvatar());
+            }
 
-                $this->createsConnectedAccounts->create($user, $provider, $providerUser);
+            $this->createsConnectedAccounts->create($user, $provider, $providerUser);
 
-                $this->createTeam($user);
-            });
-        });
+            $this->createTeam($user);
+        }));
     }
 
     /**

@@ -6,15 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'name',
+    'parent_id',
+    'user_id',
+    'team_id',
+])]
 class Folder extends Model
 {
-    protected $fillable = [
-        'name',
-        'parent_id',
-        'user_id',
-        'team_id',
-    ];
-
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

@@ -6,19 +6,19 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'user_id',
+    'event',
+    'auditable_type',
+    'auditable_id',
+    'old_values',
+    'new_values',
+    'ip_address',
+    'user_agent',
+])]
 class AuditLog extends Model
 {
-    protected $fillable = [
-        'user_id',
-        'event',
-        'auditable_type',
-        'auditable_id',
-        'old_values',
-        'new_values',
-        'ip_address',
-        'user_agent',
-    ];
-
+    #[\Override]
     protected function casts(): array
 
     {

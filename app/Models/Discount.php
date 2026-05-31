@@ -1,30 +1,32 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasTeam;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'code',
+    'name',
+    'description',
+    'type', // percentage or fixed
+    'value',
+    'currency',
+    'start_date',
+    'end_date',
+    'max_uses',
+    'used_count',
+    'is_active'
+])]
 class Discount extends Model
 {
     use HasFactory;
     use HasTeam;
 
-    protected $fillable = [
-        'code',
-        'name',
-        'description',
-        'type', // percentage or fixed
-        'value',
-        'currency',
-        'start_date',
-        'end_date',
-        'max_uses',
-        'used_count',
-        'is_active'
-    ];
-
+    #[\Override]
     protected function casts(): array
 
     {
@@ -42,7 +44,7 @@ class Discount extends Model
         return $this->hasMany(Invoice::class);
     }
 
-    public function isValid()
+    public function isValid(): bool
     {
         return $this->is_active &&
             $this->start_date <= now() &&

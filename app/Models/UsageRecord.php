@@ -1,22 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'subscription_id',
+    'metric_name',
+    'quantity',
+    'recorded_at',
+    'processed',
+])]
 class UsageRecord extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'subscription_id',
-        'metric_name',
-        'quantity',
-        'recorded_at',
-        'processed',
-    ];
-
+    #[\Override]
     protected function casts(): array
 
     {

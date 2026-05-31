@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\TicketResponseController;
 use Illuminate\Session\Middleware\AuthenticateSession;
@@ -18,13 +20,13 @@ use App\Http\Controllers\ClientController;
 |
 */
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth'])->group(function (): void {
     Route::resource('tickets', TicketController::class);
     // Route::post('tickets/{ticket}/responses', [TicketResponseController::class, 'store'])
     //     ->name('ticket.responses.store');
-        
+
     // Client Service Management Routes
-    Route::prefix('client')->name('client.')->group(function () {
+    Route::prefix('client')->name('client.')->group(function (): void {
         // Route::get('/services', [ServiceManagementController::class, 'index'])->name('services.index');
         // Route::get('/services/{subscription}', [ServiceManagementController::class, 'show'])->name('services.show');
         // Route::post('/services/{subscription}/upgrade', [ServiceManagementController::class, 'upgrade'])->name('services.upgrade');
@@ -39,9 +41,9 @@ Route::middleware(['auth'])->group(function () {
     // Route::get('/api/shared-searches/{token}', [SavedSearchController::class, 'loadShared']);
 });
 
-Route::get('/', fn () => view('welcome'));
+Route::get('/', fn (): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View => view('welcome'));
 
-Route::middleware(['auth:sanctum', 'verified'])->group(function () {
+Route::middleware(['auth:sanctum', 'verified'])->group(function (): void {
     Route::resource('clients', ClientController::class);
     // Route::resource('files', FileController::class);
     // Route::resource('folders', FolderController::class);

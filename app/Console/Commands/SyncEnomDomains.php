@@ -6,21 +6,16 @@ use Exception;
 use Illuminate\Console\Command;
 use App\Services\DomainPricingService;
 
+#[\Illuminate\Console\Attributes\Description('Synchronize domain pricing and TLDs from Enom')]
+#[\Illuminate\Console\Attributes\Signature('enom:sync-domains')]
 class SyncEnomDomains extends Command
 {
-    protected $signature = 'enom:sync-domains';
-
-    protected $description = 'Synchronize domain pricing and TLDs from Enom';
-
-    protected $domainPricingService;
-
-    public function __construct(DomainPricingService $domainPricingService)
+    public function __construct(protected \App\Services\DomainPricingService $domainPricingService)
     {
         parent::__construct();
-        $this->domainPricingService = $domainPricingService;
     }
 
-    public function handle()
+    public function handle(): void
     {
         $this->info('Starting Enom domain synchronization...');
 

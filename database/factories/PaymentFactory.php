@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Models\Invoice;
@@ -19,10 +21,10 @@ class PaymentFactory extends Factory
     {
         return [
             'invoice_id' => Invoice::factory(),
-            'payment_date' => $this->faker->date(),
-            'amount' => $this->faker->randomFloat(2, 10, 10000),
-            'payment_method' => $this->faker->randomElement(['credit card', 'bank transfer', 'PayPal']),
-            'transaction_id' => $this->faker->unique()->uuid(),
+            'payment_date' => fake()->date(),
+            'amount' => fake()->randomFloat(2, 10, 10000),
+            'payment_method' => fake()->randomElement(['credit card', 'bank transfer', 'PayPal']),
+            'transaction_id' => fake()->unique()->uuid(),
         ];
     }
 }
