@@ -75,4 +75,3 @@ function shouldGenerateReport(Report $report): bool
     };
     }
 }
-}
