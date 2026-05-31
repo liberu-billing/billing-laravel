@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\ControlPanels;
 
 use GuzzleHttp\Client;
@@ -19,7 +21,7 @@ class SoftaculousClient
         $this->apiToken = config('services.softaculous.api_token');
     }
 
-    public function installScript($domain, $scriptId, $options = [])
+    public function installScript($domain, $scriptId, $options = []): bool
     {
         $endpoint = '/install';
         $params = [

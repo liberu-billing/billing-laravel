@@ -119,7 +119,7 @@ class PaymentReconciliationService
         ]);
     }
 
-    public function handleManualReconciliation(Payment $payment, Invoice $invoice)
+    public function handleManualReconciliation(Payment $payment, Invoice $invoice): bool
     {
         return $this->processReconciliation($payment, $invoice);
     }

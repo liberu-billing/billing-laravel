@@ -70,7 +70,7 @@ class DomainService
         return $result;
     }
 
-    protected function getClientForRegistrar($registrar)
+    protected function getClientForRegistrar($registrar): \App\Services\Registrars\EnomClient|\App\Services\Registrars\ResellerClubClient
     {
         return match ($registrar) {
             'enom' => $this->enomClient,

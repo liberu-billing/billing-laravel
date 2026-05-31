@@ -322,7 +322,7 @@ class Invoice extends Model
         return round($fee, 2);
     }
 
-    public function applyLateFee()
+    public function applyLateFee(): float|int
     {
         $fee = $this->calculateLateFee();
         if ($fee > 0) {

@@ -25,7 +25,7 @@ class DirectAdminClient
         $this->loginKey = $server->api_token;
     }
 
-    public function createAccount(string $username, string $domain, $package)
+    public function createAccount(string $username, string $domain, $package): bool
     {
         $password = $this->generatePassword();
         $params = [
@@ -56,7 +56,7 @@ class DirectAdminClient
         return $this->makeApiCall('/CMD_API_ACCOUNT_USER', $params);
     }
 
-    public function suspendAccount($username)
+    public function suspendAccount($username): bool
     {
         $params = [
             'action' => 'suspend',
@@ -67,7 +67,7 @@ class DirectAdminClient
         return $this->makeApiCall('/CMD_API_SELECT_USERS', $params);
     }
 
-    public function unsuspendAccount($username)
+    public function unsuspendAccount($username): bool
     {
         $params = [
             'action' => 'unsuspend',
@@ -77,7 +77,7 @@ class DirectAdminClient
         return $this->makeApiCall('/CMD_API_SELECT_USERS', $params);
     }
 
-    public function changePackage($username, $newPackage)
+    public function changePackage($username, $newPackage): bool
     {
         $params = [
             'action' => 'package',
@@ -88,7 +88,7 @@ class DirectAdminClient
         return $this->makeApiCall('/CMD_API_MODIFY_USER', $params);
     }
 
-    public function terminateAccount($username)
+    public function terminateAccount($username): bool
     {
         $params = [
             'confirmed' => 'yes',
@@ -99,7 +99,7 @@ class DirectAdminClient
         return $this->makeApiCall('/CMD_API_SELECT_USERS', $params);
     }
 
-    public function addAddon($username, $addon)
+    public function addAddon($username, $addon): bool
     {
         $params = [
             'action' => 'customize',
@@ -110,7 +110,7 @@ class DirectAdminClient
         return $this->makeApiCall('/CMD_API_MODIFY_USER', $params);
     }
 
-    public function removeAddon($username, $addon)
+    public function removeAddon($username, $addon): bool
     {
         $params = [
             'action' => 'customize',
@@ -137,7 +137,7 @@ class DirectAdminClient
             ]);
 
             $result = $response->getBody()->getContents();
-            parse_str((string) $result, $parsed);
+            parse_str($result, $parsed);
 
             if (isset($parsed['error']) && $parsed['error'] === '0') {
                 Log::info("DirectAdmin API call successful", [

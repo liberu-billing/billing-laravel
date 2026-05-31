@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use Exception;
@@ -10,13 +12,13 @@ class InstallationScriptService
 {
     protected $controlPanel;
     
-    public function __construct($controlPanel, protected $gitRepo, protected $domain, protected $dbName, protected $dbUser, protected $dbPass)
+    public function __construct($controlPanel, string protected $gitRepo, string protected $domain, string protected $dbName, string protected $dbUser, protected $dbPass)
     {
-        $this->controlPanel = strtolower($controlPanel);
+        $this->controlPanel = strtolower((string) $controlPanel);
         $this->gitRepo = $this->validateGitRepo($gitRepo);
         $this->domain = $this->validateIdentifier($domain, 'domain', '/^[a-zA-Z0-9._-]+$/');
-        $this->dbName = $this->validateIdentifier($dbName, 'database name', '/^[a-zA-Z0-9_]+$/');
-        $this->dbUser = $this->validateIdentifier($dbUser, 'database user', '/^[a-zA-Z0-9_]+$/');
+        $this->dbName = $this->validateIdentifier($dbName, 'database name', '/^\w+$/');
+        $this->dbUser = $this->validateIdentifier($dbUser, 'database user', '/^\w+$/');
         $this->dbPass = $dbPass;
     }
 
@@ -41,11 +43,11 @@ class InstallationScriptService
      */
     public function generateScript(): string
     {
-        $domain    = escapeshellarg($this->domain);    // phpcs:ignore -- nosemgrep
-        $gitRepo   = escapeshellarg($this->gitRepo);   // phpcs:ignore -- nosemgrep
-        $dbName    = escapeshellarg($this->dbName);    // phpcs:ignore -- nosemgrep
-        $dbUser    = escapeshellarg($this->dbUser);    // phpcs:ignore -- nosemgrep
-        $dbPass    = escapeshellarg($this->dbPass);    // phpcs:ignore -- nosemgrep
+        $domain    = escapeshellarg((string) $this->domain);    // phpcs:ignore -- nosemgrep
+        $gitRepo   = escapeshellarg((string) $this->gitRepo);   // phpcs:ignore -- nosemgrep
+        $dbName    = escapeshellarg((string) $this->dbName);    // phpcs:ignore -- nosemgrep
+        $dbUser    = escapeshellarg((string) $this->dbUser);    // phpcs:ignore -- nosemgrep
+        $dbPass    = escapeshellarg((string) $this->dbPass);    // phpcs:ignore -- nosemgrep
 
         $installDir = "~/laravel-apps/{$domain}";
         $publicHtmlPath = $this->getPublicHtmlPath();

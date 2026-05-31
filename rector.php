@@ -21,6 +21,8 @@ return static function (RectorConfig $rectorConfig): void {
 
     $rectorConfig->skip([
         CompactToVariablesRector::class,
+        // WebhookEndpoint::$events is a DB column, not Laravel's Model::$dispatchesEvents
+        __DIR__.'/app/Models/WebhookEndpoint.php',
     ]);
 
     $rectorConfig->cacheDirectory(__DIR__.'/storage/rector');

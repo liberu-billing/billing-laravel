@@ -24,7 +24,7 @@ class ClientBillingReportService
             $query->where('created_at', '<=', $endDate);
         }
         
-        return $query->get()->map(fn($invoice) => [
+        return $query->get()->map(fn($invoice): array => [
             'invoice_number' => $invoice->invoice_number,
             'date' => $invoice->created_at->format('Y-m-d'),
             'due_date' => $invoice->due_date->format('Y-m-d'),

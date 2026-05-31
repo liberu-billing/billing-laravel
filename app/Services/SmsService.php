@@ -59,7 +59,7 @@ class SmsService
         $cleaned = preg_replace('/[^0-9]/', '', (string) $number);
         
         // Ensure number starts with country code
-        if (strlen($cleaned) === 10) {
+        if (strlen((string) $cleaned) === 10) {
             return '+1' . $cleaned; // Default to US/Canada
         }
         

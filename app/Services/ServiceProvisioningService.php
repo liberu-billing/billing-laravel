@@ -13,7 +13,7 @@ class ServiceProvisioningService
     {
     }
 
-    public function provisionService(Subscription $subscription)
+    public function provisionService(Subscription $subscription): \App\Models\HostingAccount|array
     {
         $service = $subscription->productService;
 
@@ -76,7 +76,7 @@ class ServiceProvisioningService
         return $baseName . random_int(100, 999);
     }
 
-    public function manageService(Subscription $subscription, $action, $options = [])
+    public function manageService(Subscription $subscription, $action, array $options = [])
     {
         $service = $subscription->productService;
 

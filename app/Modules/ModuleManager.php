@@ -201,7 +201,7 @@ class ModuleManager
      */
     protected function hasDependents(string $moduleName): bool
     {
-        return $this->enabled()->contains(fn($module) => in_array($moduleName, $module->getDependencies()));
+        return $this->enabled()->contains(fn($module): bool => in_array($moduleName, $module->getDependencies()));
     }
 
     /**
@@ -230,6 +230,6 @@ class ModuleManager
      */
     public function getAllModulesInfo(): array
     {
-        return $this->modules->map(fn($module) => $this->getModuleInfo($module->getName()))->toArray();
+        return $this->modules->map(fn($module): array => $this->getModuleInfo($module->getName()))->toArray();
     }
 }

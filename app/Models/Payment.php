@@ -28,11 +28,23 @@ use Illuminate\Database\Eloquent\Model;
     'payment_method_details',
     'status'
 ])]
+#[\Illuminate\Database\Eloquent\Attributes\Guarded([
+    'status',
+    'refund_status',
+    'refunded_amount',
+    'refund_reason',
+    'reconciliation_status',
+    'reconciliation_notes',
+    'stripe_token',
+    'square_token',
+    'google_pay_token',
+])]
 class Payment extends Model
 {
     use HasFactory;
     use HasTeam;
 
+    #[\Override]
     protected $fillable = [
         'invoice_id',
         'payment_gateway_id',
@@ -46,18 +58,7 @@ class Payment extends Model
         'payment_method_details',
     ];
 
-    protected $guarded = [
-        'status',
-        'refund_status',
-        'refunded_amount',
-        'refund_reason',
-        'reconciliation_status',
-        'reconciliation_notes',
-        'stripe_token',
-        'square_token',
-        'google_pay_token',
-    ];
-
+    #[\Override]
     protected function casts(): array
 
     {

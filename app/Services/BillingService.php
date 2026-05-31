@@ -704,13 +704,13 @@ class BillingService
         return 'INV-' . strtoupper(uniqid());
     }
 
-    public function handlePartialPayment(Invoice $invoice, float $amount, int $paymentGatewayId)
+    public function handlePartialPayment(Invoice $invoice, float $amount, int $paymentGatewayId): array
     {
         $partialPaymentService = new PartialPaymentService(new PaymentGatewayService());
         return $partialPaymentService->processPartialPayment($invoice, $amount, $paymentGatewayId);
     }
 
-    public function handleRefund(Payment $payment, float $amount)
+    public function handleRefund(Payment $payment, float $amount): array
     {
         $refundService = new RefundService(new PaymentGatewayService());
         return $refundService->processRefund($payment, $amount);

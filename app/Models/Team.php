@@ -23,6 +23,7 @@ class Team extends JetstreamTeam
      *
      * @var array<int, string>
      */
+    #[\Override]
     protected $fillable = [
         'name',
         'personal_team',

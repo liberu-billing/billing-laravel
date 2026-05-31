@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\ControlPanels;
 
 use Exception;
@@ -25,7 +27,7 @@ class VirtualminClient
         $this->apiKey = $server->api_token;
     }
 
-    public function createAccount(string $username, string $domain, $package)
+    public function createAccount(string $username, string $domain, $package): bool
     {
         $password = $this->generatePassword();
         $params = [
@@ -45,7 +47,7 @@ class VirtualminClient
         return $this->makeApiCall($params);
     }
 
-    public function suspendAccount($username)
+    public function suspendAccount($username): bool
     {
         $params = [
             'program' => 'disable-domain',
@@ -56,7 +58,7 @@ class VirtualminClient
         return $this->makeApiCall($params);
     }
 
-    public function unsuspendAccount($username)
+    public function unsuspendAccount($username): bool
     {
         $params = [
             'program' => 'enable-domain',
@@ -66,7 +68,7 @@ class VirtualminClient
         return $this->makeApiCall($params);
     }
 
-    public function changePackage($username, $newPackage)
+    public function changePackage($username, $newPackage): bool
     {
         $params = [
             'program' => 'modify-domain',
@@ -77,7 +79,7 @@ class VirtualminClient
         return $this->makeApiCall($params);
     }
 
-    public function terminateAccount($username)
+    public function terminateAccount($username): bool
     {
         $params = [
             'program' => 'delete-domain',
@@ -87,7 +89,7 @@ class VirtualminClient
         return $this->makeApiCall($params);
     }
 
-    public function addAddon($username, $addon)
+    public function addAddon($username, $addon): bool
     {
         $params = [
             'program' => 'modify-domain',
@@ -98,7 +100,7 @@ class VirtualminClient
         return $this->makeApiCall($params);
     }
 
-    public function removeAddon($username, $addon)
+    public function removeAddon($username, $addon): bool
     {
         $params = [
             'program' => 'modify-domain',
@@ -126,7 +128,7 @@ class VirtualminClient
                 'verify' => false
             ]);
 
-            $result = json_decode((string) $response->getBody()->getContents(), true);
+            $result = json_decode($response->getBody()->getContents(), true);
 
             if (isset($result['status']) && $result['status'] === 'success') {
                 Log::info("Virtualmin API call successful", [

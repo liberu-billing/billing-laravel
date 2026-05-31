@@ -98,7 +98,7 @@ class TaxService
 
     protected function getApplicableRate($taxRates, $item)
     {
-        return $taxRates->first(fn($rate) => $rate->service_type === $item->productService->type);
+        return $taxRates->first(fn($rate): bool => $rate->service_type === $item->productService->type);
     }
 
     protected function calculateItemTax($item, $taxRate): float|int
@@ -125,7 +125,7 @@ class TaxService
 
     protected function formatApiResponse($apiData)
     {
-        return collect($apiData)->map(fn($rate) => new TaxRate([
+        return collect($apiData)->map(fn($rate): \App\Models\TaxRate => new TaxRate([
             'rate' => $rate['rate'],
             'service_type' => $rate['type'],
             'country' => $rate['country'],

@@ -50,7 +50,7 @@ class RefundResource extends Resource
                     ->options(fn() => Payment::whereIn('refund_status', ['none', 'partial'])
                         ->with('invoice')
                         ->get()
-                        ->mapWithKeys(fn($payment) => [
+                        ->mapWithKeys(fn($payment): array => [
                             $payment->id => "Payment #{$payment->id} - Invoice #{$payment->invoice->invoice_number} ({$payment->amount} {$payment->currency})"
                         ]))
                     ->required()

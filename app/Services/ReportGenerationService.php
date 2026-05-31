@@ -15,7 +15,7 @@ class ReportGenerationService
     {
     }
 
-    public function generateReport(Report $report)
+    public function generateReport(Report $report): string
     {
         $data = $this->gatherReportData($report);
         

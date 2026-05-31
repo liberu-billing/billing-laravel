@@ -85,6 +85,7 @@ class Profile extends Page
             ->send();
     }
 
+    #[\Override]
     public static function shouldRegisterNavigation(): bool
     {
         return true;

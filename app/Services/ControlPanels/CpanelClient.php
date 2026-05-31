@@ -25,7 +25,7 @@ class CpanelClient
         $this->apiToken = $server->api_token;
     }
 
-    public function createAccount(string $username, string $domain, $package)
+    public function createAccount(string $username, string $domain, $package): bool
     {
         $endpoint = '/json-api/createacct';
         $params = [
@@ -52,7 +52,7 @@ class CpanelClient
         return $this->makeApiCall($endpoint, $params);
     }
 
-    public function suspendAccount($username)
+    public function suspendAccount($username): bool
     {
         $endpoint = '/json-api/suspendacct';
         $params = [
@@ -64,7 +64,7 @@ class CpanelClient
         return $this->makeApiCall($endpoint, $params);
     }
 
-    public function unsuspendAccount($username)
+    public function unsuspendAccount($username): bool
     {
         $endpoint = '/json-api/unsuspendacct';
         $params = [
@@ -74,7 +74,7 @@ class CpanelClient
         return $this->makeApiCall($endpoint, $params);
     }
 
-    public function changePackage($username, $newPackage)
+    public function changePackage($username, $newPackage): bool
     {
         $endpoint = '/json-api/changepackage';
         $params = [
@@ -85,7 +85,7 @@ class CpanelClient
         return $this->makeApiCall($endpoint, $params);
     }
 
-    public function terminateAccount($username)
+    public function terminateAccount($username): bool
     {
         $endpoint = '/json-api/removeacct';
         $params = [
@@ -96,7 +96,7 @@ class CpanelClient
         return $this->makeApiCall($endpoint, $params);
     }
 
-    public function addAddon($username, $addon)
+    public function addAddon($username, $addon): bool
     {
         // cPanel addons are typically features added to an account
         // This can be done by modifying account features
@@ -109,7 +109,7 @@ class CpanelClient
         return $this->makeApiCall($endpoint, $params);
     }
 
-    public function removeAddon($username, $addon)
+    public function removeAddon($username, $addon): bool
     {
         $endpoint = '/json-api/modifyacct';
         $params = [
@@ -181,7 +181,7 @@ class CpanelClient
         }
     }
 
-    protected function generatePassword()
+    protected function generatePassword(): string
     {
         return bin2hex(random_bytes(12));
     }

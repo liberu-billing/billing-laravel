@@ -51,7 +51,7 @@ class UserFactory extends Factory
                     'user_id' => $user->id,
                     'personal_team' => true,
                 ])
-                ->afterCreating(function (Team $team, User $user) {
+                ->afterCreating(function (Team $team, User $user): void {
                     $user->update(['current_team_id' => $team->id]);
                 })
                 ->when(is_callable($callback), $callback),

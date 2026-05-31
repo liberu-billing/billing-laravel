@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\ControlPanels;
 
 use Exception;
@@ -25,7 +27,7 @@ class PleskClient
         $this->apiKey = $server->api_token;
     }
 
-    public function createAccount($username, $domain, $package)
+    public function createAccount($username, $domain, $package): bool
     {
         $xml = $this->buildXmlRequest('webspace.add', [
             'gen_setup' => [
@@ -64,7 +66,7 @@ class PleskClient
         return $this->makeApiCall($xml);
     }
 
-    public function suspendAccount($username)
+    public function suspendAccount($username): bool
     {
         $xml = $this->buildXmlRequest('customer.set', [
             'filter' => ['login' => $username],
@@ -75,7 +77,7 @@ class PleskClient
         return $this->makeApiCall($xml);
     }
 
-    public function unsuspendAccount($username)
+    public function unsuspendAccount($username): bool
     {
         $xml = $this->buildXmlRequest('customer.set', [
             'filter' => ['login' => $username],
@@ -86,7 +88,7 @@ class PleskClient
         return $this->makeApiCall($xml);
     }
 
-    public function changePackage($username, $newPackage)
+    public function changePackage($username, $newPackage): bool
     {
         $xml = $this->buildXmlRequest('service-plan.set', [
             'filter' => ['owner-login' => $username],
@@ -96,7 +98,7 @@ class PleskClient
         return $this->makeApiCall($xml);
     }
 
-    public function terminateAccount($username)
+    public function terminateAccount($username): bool
     {
         $xml = $this->buildXmlRequest('webspace.del', [
             'filter' => ['owner-login' => $username]
@@ -105,7 +107,7 @@ class PleskClient
         return $this->makeApiCall($xml);
     }
 
-    public function addAddon($username, $addon)
+    public function addAddon($username, $addon): bool
     {
         $xml = $this->buildXmlRequest('site-addon.add', [
             'filter' => ['owner-login' => $username],
@@ -115,7 +117,7 @@ class PleskClient
         return $this->makeApiCall($xml);
     }
 
-    public function removeAddon($username, $addon)
+    public function removeAddon($username, $addon): bool
     {
         $xml = $this->buildXmlRequest('site-addon.del', [
             'filter' => ['owner-login' => $username],
@@ -142,7 +144,7 @@ class PleskClient
                 'verify' => false
             ]);
 
-            $result = simplexml_load_string((string) $response->getBody()->getContents());
+            $result = simplexml_load_string($response->getBody()->getContents());
 
             if ((string)$result->status === 'ok') {
                 Log::info("Plesk API call successful", ['server' => $this->server->hostname]);

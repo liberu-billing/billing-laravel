@@ -11,7 +11,7 @@ class DashboardController extends Controller
 {
     public function getMetrics()
     {
-        return Cache::remember('dashboard.metrics', 300, fn() => [
+        return Cache::remember('dashboard.metrics', 300, fn(): array => [
             'revenue' => $this->getRevenueData(),
             'invoices' => $this->getInvoiceData(),
             'clients' => $this->getClientData()

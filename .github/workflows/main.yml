@@ -33,12 +33,7 @@ jobs:
           --health-retries=3
 
     steps:
-<<<<<<< HEAD
       - name: Checkout code
-=======
-      -
-        name: Checkout
->>>>>>> 6e4ab5069a434a52b132e4330c30b7699e4b54ef
         uses: actions/checkout@v4
 
       - name: Login to Docker Hub

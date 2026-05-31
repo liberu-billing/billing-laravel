@@ -218,7 +218,7 @@ class HostingService
             ->first();
     }
 
-    protected function getClientForControlPanel($controlPanel)
+    protected function getClientForControlPanel($controlPanel): \App\Services\ControlPanels\CpanelClient|\App\Services\ControlPanels\PleskClient|\App\Services\ControlPanels\DirectAdminClient|\App\Services\ControlPanels\VirtualminClient|\App\Services\ControlPanels\LiberuControlPanelClient
     {
         return match ($controlPanel) {
             'cpanel' => $this->cpanelClient,

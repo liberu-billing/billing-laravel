@@ -73,6 +73,5 @@ function shouldGenerateReport(Report $report): bool
         'hourly'  => $lastGenerated->diffInHours(now()) >= 1,
         default   => false,
     };
-    }
 }
 }
