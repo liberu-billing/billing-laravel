@@ -52,8 +52,8 @@ Schedule::call(function (): void {
 })->hourly();
 
 if (! function_exists('shouldGenerateReport')) {
-    function shouldGenerateReport(Report $report): bool
-    {
+function shouldGenerateReport(Report $report): bool
+{
     if (! $report->last_generated_at) {
         return true;
     }
@@ -74,4 +74,5 @@ if (! function_exists('shouldGenerateReport')) {
         default   => false,
     };
     }
+}
 }

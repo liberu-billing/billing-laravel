@@ -9,6 +9,11 @@ use Illuminate\Http\JsonResponse;
 
 class SubscriptionController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Subscription::class, 'subscription');
+    }
+
     public function index(Request $request): JsonResponse
     {
         $subscriptions = Subscription::query()

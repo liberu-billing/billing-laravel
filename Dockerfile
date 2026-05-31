@@ -1,5 +1,4 @@
-# Supported PHP versions: 8.2, 8.3
-# Note: PHP 8.5 is not yet fully supported by all extensions
+# Required PHP version: 8.5 (matches composer.json platform requirement)
 ARG PHP_VERSION=8.5
 
 ###########################################
