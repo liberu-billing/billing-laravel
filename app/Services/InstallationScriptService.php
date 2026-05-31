@@ -18,18 +18,41 @@ class InstallationScriptService
     public function __construct($controlPanel, $gitRepo, $domain, $dbName, $dbUser, $dbPass)
     {
         $this->controlPanel = strtolower($controlPanel);
-        $this->gitRepo = $gitRepo;
-        $this->domain = $domain;
-        $this->dbName = $dbName;
-        $this->dbUser = $dbUser;
+        $this->gitRepo = $this->validateGitRepo($gitRepo);
+        $this->domain = $this->validateIdentifier($domain, 'domain', '/^[a-zA-Z0-9._-]+$/');
+        $this->dbName = $this->validateIdentifier($dbName, 'database name', '/^[a-zA-Z0-9_]+$/');
+        $this->dbUser = $this->validateIdentifier($dbUser, 'database user', '/^[a-zA-Z0-9_]+$/');
         $this->dbPass = $dbPass;
+    }
+
+    protected function validateGitRepo(string $repo): string
+    {
+        if (!filter_var($repo, FILTER_VALIDATE_URL) && !preg_match('/^git@[a-zA-Z0-9._-]+:[a-zA-Z0-9._\/-]+\.git$/', $repo)) {
+            throw new Exception('Invalid git repository URL');
+        }
+        return $repo;
+    }
+
+    protected function validateIdentifier(string $value, string $name, string $pattern): string
+    {
+        if (!preg_match($pattern, $value)) {
+            throw new Exception("Invalid {$name}: only alphanumeric characters, underscores, hyphens, and dots allowed");
+        }
+        return $value;
     }
 
     public function generateScript()
     {
+        // Shell-quote all user-supplied values before embedding in script
+        $domain    = escapeshellarg($this->domain);
+        $gitRepo   = escapeshellarg($this->gitRepo);
+        $dbName    = escapeshellarg($this->dbName);
+        $dbUser    = escapeshellarg($this->dbUser);
+        $dbPass    = escapeshellarg($this->dbPass);
+
         $installDir = "~/laravel-apps/{$this->domain}";
         $publicHtmlPath = $this->getPublicHtmlPath();
-        
+
         $script = [
             '#!/bin/bash',
             'set -e',
@@ -39,7 +62,7 @@ class InstallationScriptService
             "cd {$installDir}",
             '',
             '# Clone repository',
-            "git clone {$this->gitRepo} .",
+            "git clone {$gitRepo} .",
             '',
             '# Install composer dependencies',
             'composer install --no-scripts --no-dev --optimize-autoloader',
@@ -50,9 +73,9 @@ class InstallationScriptService
             '',
             '# Setup Laravel environment',
             'cp .env.example .env',
-            "sed -i 's/DB_DATABASE=.*/DB_DATABASE={$this->dbName}/' .env",
-            "sed -i 's/DB_USERNAME=.*/DB_USERNAME={$this->dbUser}/' .env",
-            "sed -i 's/DB_PASSWORD=.*/DB_PASSWORD={$this->dbPass}/' .env",
+            "sed -i \"s/^DB_DATABASE=.*/DB_DATABASE={$dbName}/\" .env",
+            "sed -i \"s/^DB_USERNAME=.*/DB_USERNAME={$dbUser}/\" .env",
+            "sed -i \"s/^DB_PASSWORD=.*/DB_PASSWORD={$dbPass}/\" .env",
             '',
             '# Generate application key',
             'php artisan key:generate',
@@ -72,9 +95,9 @@ class InstallationScriptService
             '# Create symbolic link',
             "ln -sf {$installDir}/public {$publicHtmlPath}",
             '',
-            'echo "Installation completed successfully!"'
+            'echo "Installation completed successfully!"',
         ];
-        
+
         return implode("\n", $script);
     }
     
