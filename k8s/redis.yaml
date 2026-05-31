@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: liberu-billing-redis
+  namespace: liberu-billing
+  labels:
+    app.kubernetes.io/name: liberu-billing
+    app.kubernetes.io/component: redis
+spec:
+  serviceName: liberu-billing-redis
+  replicas: 1
+  selector:
+    matchLabels:
+      app: liberu-billing-redis
+  template:
+    metadata:
+      labels:
+        app: liberu-billing-redis
+        app.kubernetes.io/name: liberu-billing
+        app.kubernetes.io/component: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          ports:
+            - containerPort: 6379
+          command: ["redis-server", "--appendonly", "yes"]
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "512Mi"
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          readinessProbe:
+            exec:
+              command: ["redis-cli", "ping"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: liberu-billing-redis-data

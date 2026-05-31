@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: liberu-billing-config
+  namespace: liberu-billing
+  labels:
+    app.kubernetes.io/name: liberu-billing
+data:
+  APP_NAME: "Liberu Billing"
+  APP_ENV: "production"
+  APP_DEBUG: "false"
+  APP_URL: "https://billing.liberu.co.uk"
+  LOG_CHANNEL: "stderr"
+  LOG_LEVEL: "error"
+  DB_CONNECTION: "mysql"
+  DB_HOST: "liberu-billing-mysql"
+  DB_PORT: "3306"
+  DB_DATABASE: "liberu"
+  CACHE_DRIVER: "redis"
+  SESSION_DRIVER: "redis"
+  QUEUE_CONNECTION: "redis"
+  REDIS_HOST: "liberu-billing-redis"
+  REDIS_PORT: "6379"
+  BROADCAST_DRIVER: "reverb"
+  CONTAINER_MODE: "app"
+  OCTANE_SERVER: "roadrunner"
+  WITH_HORIZON: "false"
+  WITH_SCHEDULER: "true"
