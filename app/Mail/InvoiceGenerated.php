@@ -52,10 +52,10 @@ class InvoiceGenerated extends Mailable
     protected function parseTemplate($text): string
     {
         $replacements = [
-            '{{invoice_number}}' => $this->invoice->invoice_number,
-            '{{amount}}' => $this->invoice->total_amount,
-            '{{due_date}}' => $this->invoice->due_date->format('Y-m-d'),
-            '{{customer_name}}' => $this->invoice->customer->name,
+            '{{invoice_number}}' => e($this->invoice->invoice_number),
+            '{{amount}}' => e((string) $this->invoice->total_amount),
+            '{{due_date}}' => e($this->invoice->due_date->format('Y-m-d')),
+            '{{customer_name}}' => e($this->invoice->customer->name),
         ];
 
         return strtr($text, $replacements);

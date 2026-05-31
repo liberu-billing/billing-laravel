@@ -48,7 +48,28 @@ class Invoice extends Model
     protected static function boot()
     {
         parent::boot();
-        
+
+        static::creating(function (Invoice $invoice): void {
+            $attrs = $invoice->getAttributes();
+
+            if (empty($attrs['invoice_number'])) {
+                $invoice->invoice_number = 'INV-' . str_pad(
+                    (string) (static::max('id') + 1),
+                    6,
+                    '0',
+                    STR_PAD_LEFT
+                );
+            }
+
+            if (empty($attrs['currency'])) {
+                $invoice->currency = 'USD';
+            }
+
+            if (empty($attrs['status'])) {
+                $invoice->status = 'pending';
+            }
+        });
+
         static::created(function (?\Illuminate\Database\Eloquent\Model $invoice): void {
             app(AuditLogService::class)->log(
                 'invoice_created',

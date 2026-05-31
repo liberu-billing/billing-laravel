@@ -4,26 +4,16 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Traits\HasTeam;
-use Illuminate\Database\Eloquent\Concerns\HasTimestamps;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use JoelButcher\Socialstream\ConnectedAccount as SocialstreamConnectedAccount;
-use JoelButcher\Socialstream\Events\ConnectedAccountCreated;
-use JoelButcher\Socialstream\Events\ConnectedAccountDeleted;
-use JoelButcher\Socialstream\Events\ConnectedAccountUpdated;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class ConnectedAccount extends SocialstreamConnectedAccount
+class ConnectedAccount extends Model
 {
     use HasFactory;
-    use HasTimestamps;
-    use HasTeam;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
     protected $fillable = [
+        'user_id',
         'provider',
         'provider_id',
         'name',
@@ -36,27 +26,16 @@ class ConnectedAccount extends SocialstreamConnectedAccount
         'expires_at',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array
-     */
     protected function casts(): array
     {
         return [
-        'created_at' => 'datetime',
-        'expires_at' => 'datetime',
-    ];
+            'created_at' => 'datetime',
+            'expires_at' => 'datetime',
+        ];
     }
 
-    /**
-     * The event map for the model.
-     *
-     * @var array
-     */
-    protected $dispatchesEvents = [
-        'created' => ConnectedAccountCreated::class,
-        'updated' => ConnectedAccountUpdated::class,
-        'deleted' => ConnectedAccountDeleted::class,
-    ];
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 }

@@ -56,21 +56,54 @@ return [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect' => env('APP_URL').'/oauth/google/callback',
-        'scopes' => [
-            'https://www.googleapis.com/auth/calendar',
-            'https://www.googleapis.com/auth/calendar.events',
-        ],
+    ],
+
+    'github' => [
+        'client_id' => env('GITHUB_CLIENT_ID'),
+        'client_secret' => env('GITHUB_CLIENT_SECRET'),
+        'redirect' => env('APP_URL').'/oauth/github/callback',
+    ],
+
+    'gitlab' => [
+        'client_id' => env('GITLAB_CLIENT_ID'),
+        'client_secret' => env('GITLAB_CLIENT_SECRET'),
+        'redirect' => env('APP_URL').'/oauth/gitlab/callback',
+    ],
+
+    'facebook' => [
+        'client_id' => env('FACEBOOK_CLIENT_ID'),
+        'client_secret' => env('FACEBOOK_CLIENT_SECRET'),
+        'redirect' => env('APP_URL').'/oauth/facebook/callback',
+    ],
+
+    'bitbucket' => [
+        'client_id' => env('BITBUCKET_CLIENT_ID'),
+        'client_secret' => env('BITBUCKET_CLIENT_SECRET'),
+        'redirect' => env('APP_URL').'/oauth/bitbucket/callback',
+    ],
+
+    'linkedin' => [
+        'client_id' => env('LINKEDIN_CLIENT_ID'),
+        'client_secret' => env('LINKEDIN_CLIENT_SECRET'),
+        'redirect' => env('APP_URL').'/oauth/linkedin/callback',
+    ],
+
+    'linkedin-openid' => [
+        'client_id' => env('LINKEDIN_CLIENT_ID'),
+        'client_secret' => env('LINKEDIN_CLIENT_SECRET'),
+        'redirect' => env('APP_URL').'/oauth/linkedin-openid/callback',
     ],
 
     'slack' => [
-        'client_id' => env('SLACK_CLIENT_ID'), 
+        'client_id' => env('SLACK_CLIENT_ID'),
         'client_secret' => env('SLACK_CLIENT_SECRET'),
         'redirect' => env('APP_URL').'/oauth/slack/callback',
-        'scopes' => [
-            'channels:read',
-            'chat:write',
-            'team:read',
-        ],
+    ],
+
+    'twitter-oauth-2' => [
+        'client_id' => env('TWITTER_CLIENT_ID'),
+        'client_secret' => env('TWITTER_CLIENT_SECRET'),
+        'redirect' => env('APP_URL').'/oauth/twitter-oauth-2/callback',
     ],
 
     'trello' => [

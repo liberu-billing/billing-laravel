@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\CheckRole;
 use App\Http\Middleware\RequireTwoFactorEnabled;
+use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\TeamsPermission;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -32,7 +33,12 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->web(append: [
+            SecurityHeaders::class,
             TeamsPermission::class,
+        ]);
+
+        $middleware->api(append: [
+            SecurityHeaders::class,
         ]);
 
         $middleware->alias([

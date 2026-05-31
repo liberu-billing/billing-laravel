@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 #[\Illuminate\Database\Eloquent\Attributes\Fillable([
     'invoice_id',
     'product_service_id',
+    'description',
     'quantity',
     'unit_price',
     'total_price',
@@ -20,6 +21,8 @@ class Invoice_Item extends Model
 {
     use HasFactory;
     use HasTeam;
+
+    protected $table = 'invoice_items';
     
     public function currency()
     {

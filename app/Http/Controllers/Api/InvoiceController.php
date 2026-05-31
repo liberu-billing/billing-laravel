@@ -33,7 +33,7 @@ class InvoiceController extends Controller
         return new InvoiceResource($invoice->load(['customer', 'items']));
     }
     
-    public function store(Request $request): \App\Http\Resources\Api\InvoiceResource
+    public function store(Request $request): \Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
             'customer_id' => 'required|exists:customers,id',
@@ -45,10 +45,28 @@ class InvoiceController extends Controller
             'items.*.price' => 'required|numeric|min:0',
         ]);
 
-        $invoice = Invoice::create($validated);
-        $invoice->items()->createMany($validated['items']);
-        
-        return new InvoiceResource($invoice->load(['customer', 'items']));
+        $itemRows = array_map(fn($item) => [
+            'description' => $item['description'],
+            'quantity'    => $item['quantity'],
+            'unit_price'  => $item['price'],
+            'total_price' => $item['quantity'] * $item['price'],
+            'currency'    => $validated['currency'] ?? 'USD',
+        ], $validated['items']);
+
+        $totalAmount = array_sum(array_column($itemRows, 'total_price'));
+
+        $invoiceData = array_merge(
+            collect($validated)->except('items')->toArray(),
+            ['total_amount' => $totalAmount]
+        );
+        $invoice = new Invoice($invoiceData);
+        $invoice->setAttribute('status', 'pending');
+        $invoice->save();
+        $invoice->refresh();
+
+        $invoice->items()->createMany($itemRows);
+
+        return (new InvoiceResource($invoice->load(['customer', 'items'])))->response()->setStatusCode(201);
     }
     
     public function update(Request $request, Invoice $invoice)

@@ -45,8 +45,8 @@ class Dashboard extends Component
 
     private function getRevenueData(): array
     {
-        $revenue = Invoice::paid()
-            ->selectRaw('DATE(paid_at) as date, SUM(amount) as total')
+        $revenue = Invoice::where('status', 'paid')
+            ->selectRaw('DATE(paid_at) as date, SUM(total_amount) as total')
             ->groupBy('date')
             ->orderBy('date')
             ->get();

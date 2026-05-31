@@ -28,6 +28,13 @@ use App\Http\Controllers\InstallationController;
 |
 */
 
+// Health check (no auth required)
+Route::get('health', fn() => response()->json([
+    'status' => 'ok',
+    'timestamp' => now()->toISOString(),
+    'version' => config('app.version', '1.0.0'),
+]));
+
 // Public routes
 Route::post('auth/token', [AuthController::class, 'token'])
     ->middleware('throttle:5,1');
@@ -37,12 +44,16 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
     // User endpoint
     Route::get('/user', fn(Request $request) => $request->user());
 
+    // Token management
+    Route::delete('auth/token', [AuthController::class, 'revokeToken']);
+    Route::delete('auth/tokens', [AuthController::class, 'revokeAllTokens']);
+
     // Installation endpoint
     Route::post('/install', [InstallationController::class, 'install']);
 
     // Invoice endpoints
     Route::apiResource('invoices', InvoiceController::class);
-    Route::get('invoices/{invoice}/download', [InvoiceController::class, 'download']);
+    Route::get('invoices/{invoice}/download', [InvoiceController::class, 'download'])->name('invoices.download');
 
     // Subscription endpoints
     Route::apiResource('subscriptions', SubscriptionController::class);

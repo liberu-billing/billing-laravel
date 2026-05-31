@@ -11,4 +11,5 @@ return [
     App\Providers\HorizonServiceProvider::class,
     App\Providers\JetstreamServiceProvider::class,
     App\Providers\RouteServiceProvider::class,
+    App\Modules\ModuleServiceProvider::class,
 ];
