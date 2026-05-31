@@ -43,13 +43,11 @@ class InstallationScriptService
 
     public function generateScript()
     {
-        // phpcs:disable WordPress.PHP.DiscouragedPHPFunctions -- escapeshellarg is correct for shell script generation in a Laravel context
-        $domain    = escapeshellarg($this->domain);
-        $gitRepo   = escapeshellarg($this->gitRepo);
-        $dbName    = escapeshellarg($this->dbName);
-        $dbUser    = escapeshellarg($this->dbUser);
-        $dbPass    = escapeshellarg($this->dbPass);
-        // phpcs:enable WordPress.PHP.DiscouragedPHPFunctions
+        $domain    = escapeshellarg($this->domain);    // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions -- required for safe shell script generation
+        $gitRepo   = escapeshellarg($this->gitRepo);   // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions
+        $dbName    = escapeshellarg($this->dbName);    // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions
+        $dbUser    = escapeshellarg($this->dbUser);    // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions
+        $dbPass    = escapeshellarg($this->dbPass);    // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions
 
         $installDir = "~/laravel-apps/{$domain}";
         $publicHtmlPath = $this->getPublicHtmlPath();
