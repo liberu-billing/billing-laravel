@@ -83,7 +83,7 @@ class Profile extends Page
             ->send();
     }
 
-    protected static function shouldRegisterNavigation(): bool
+    public static function shouldRegisterNavigation(): bool
     {
         return true;
     }

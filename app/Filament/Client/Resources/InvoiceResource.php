@@ -143,8 +143,8 @@ class InvoiceResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ListInvoices::class,
-            'view' => ViewInvoice::class,
+            'index' => ListInvoices::route('/'),
+            'view' => ViewInvoice::route('/{record}'),
         ];
     }
 

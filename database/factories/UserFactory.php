@@ -6,6 +6,7 @@ use App\Models\ConnectedAccount;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use JoelButcher\Socialstream\Providers;
 use Laravel\Jetstream\Features as JetstreamFeatures;
@@ -26,7 +27,7 @@ class UserFactory extends Factory
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
+            'password' => Hash::make('password'),
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
             'remember_token' => Str::random(10),
@@ -61,6 +62,9 @@ class UserFactory extends Factory
                     'user_id' => $user->id,
                     'personal_team' => true,
                 ])
+                ->afterCreating(function (Team $team, User $user) {
+                    $user->update(['current_team_id' => $team->id]);
+                })
                 ->when(is_callable($callback), $callback),
             'ownedTeams'
         );
