@@ -27,7 +27,8 @@ use App\Http\Controllers\InstallationController;
 */
 
 // Public routes
-Route::post('auth/token', [AuthController::class, 'token']);
+Route::post('auth/token', [AuthController::class, 'token'])
+    ->middleware('throttle:5,1');
 
 // Protected routes
 Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
