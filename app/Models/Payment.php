@@ -33,7 +33,31 @@ class Payment extends Model
     use HasFactory;
     use HasTeam;
 
-    #[\Override]
+    protected $fillable = [
+        'invoice_id',
+        'payment_gateway_id',
+        'payment_date',
+        'amount',
+        'currency',
+        'payment_method',
+        'transaction_id',
+        'affiliate_id',
+        'affiliate_commission',
+        'payment_method_details',
+    ];
+
+    protected $guarded = [
+        'status',
+        'refund_status',
+        'refunded_amount',
+        'refund_reason',
+        'reconciliation_status',
+        'reconciliation_notes',
+        'stripe_token',
+        'square_token',
+        'google_pay_token',
+    ];
+
     protected function casts(): array
 
     {

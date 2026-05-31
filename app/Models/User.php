@@ -46,7 +46,6 @@ class User extends Authenticatable implements FilamentUser, HasDefaultTenant, Ha
     }
     use HasRoles, HasTeams {
         HasTeams::teams insteadof HasRoles;
-        HasRoles::teams as rolesTeams;
     }
     use Notifiable;
     use TwoFactorAuthenticatable;
