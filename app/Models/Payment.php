@@ -20,18 +20,21 @@ class Payment extends Model
         'currency',
         'payment_method',
         'transaction_id',
-        'refund_status',
-        'refunded_amount',
         'affiliate_id',
         'affiliate_commission',
+        'payment_method_details',
+    ];
+
+    protected $guarded = [
+        'status',
+        'refund_status',
+        'refunded_amount',
         'refund_reason',
         'reconciliation_status',
         'reconciliation_notes',
         'stripe_token',
         'square_token',
         'google_pay_token',
-        'payment_method_details',
-        'status'
     ];
 
     protected function casts(): array
