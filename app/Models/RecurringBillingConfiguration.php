@@ -6,23 +6,29 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasTeam;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'invoice_id',
+    'frequency',
+    'billing_day',
+    'next_billing_date',
+    'is_active'
+])]
 class RecurringBillingConfiguration extends Model
 {
     use HasFactory;
     use HasTeam;
 
-    protected $fillable = [
-        'invoice_id',
-        'frequency',
-        'billing_day',
-        'next_billing_date',
-        'is_active'
-    ];
+    #[\Override]
+    protected function casts(): array
 
-    protected $casts = [
+    {
+
+        return [
         'next_billing_date' => 'date',
         'is_active' => 'boolean'
     ];
+
+    }
 
     public function invoice()
     {

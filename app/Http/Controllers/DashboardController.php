@@ -11,16 +11,14 @@ class DashboardController extends Controller
 {
     public function getMetrics()
     {
-        return Cache::remember('dashboard.metrics', 300, function() {
-            return [
-                'revenue' => $this->getRevenueData(),
-                'invoices' => $this->getInvoiceData(),
-                'clients' => $this->getClientData()
-            ];
-        });
+        return Cache::remember('dashboard.metrics', 300, fn() => [
+            'revenue' => $this->getRevenueData(),
+            'invoices' => $this->getInvoiceData(),
+            'clients' => $this->getClientData()
+        ]);
     }
 
-    private function getRevenueData()
+    private function getRevenueData(): array
     {
         $revenue = Invoice::paid()
             ->selectRaw('DATE(paid_at) as date, SUM(amount) as total')
@@ -40,7 +38,7 @@ class DashboardController extends Controller
         ];
     }
 
-    private function getInvoiceData()
+    private function getInvoiceData(): array
     {
         $statuses = Invoice::selectRaw('status, COUNT(*) as count')
             ->groupBy('status')
@@ -57,7 +55,7 @@ class DashboardController extends Controller
         ];
     }
 
-    private function getClientData()
+    private function getClientData(): array
     {
         $clients = Client::selectRaw('DATE(created_at) as date, COUNT(*) as count')
             ->groupBy('date')

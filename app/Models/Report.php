@@ -1,30 +1,36 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasTeam;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'name',
+    'type', // revenue, expense, outstanding
+    'start_date',
+    'end_date',
+    'filters',
+    'format',
+    'parameters',
+    'schedule',
+    'last_generated_at',
+    'team_id'
+])]
 class Report extends Model
 {
     use HasFactory;
     use HasTeam;
 
-    protected $fillable = [
-        'name',
-        'type', // revenue, expense, outstanding
-        'start_date',
-        'end_date',
-        'filters',
-        'format',
-        'parameters',
-        'schedule',
-        'last_generated_at',
-        'team_id'
-    ];
+    #[\Override]
+    protected function casts(): array
 
-    protected $casts = [
+    {
+
+        return [
         'start_date' => 'datetime',
         'end_date' => 'datetime',
         'filters' => 'array',
@@ -32,6 +38,8 @@ class Report extends Model
         'schedule' => 'array',
         'last_generated_at' => 'datetime'
     ];
+
+    }
 
     public function team()
     {

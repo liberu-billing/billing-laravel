@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Admin\Resources\RecurringBillings;
 
 use Filament\Schemas\Schema;
@@ -24,12 +26,17 @@ use Filament\Tables\Filters\Filter;
 
 class RecurringBillingResource extends Resource
 {
+    #[\Override]
     protected static ?string $model = RecurringBillingConfiguration::class;
 
+    #[\Override]
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-refresh';
+    #[\Override]
     protected static ?string $navigationLabel = 'Recurring Billing';
+    #[\Override]
     protected static string | \UnitEnum | null $navigationGroup = 'Billing';
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -58,6 +65,7 @@ class RecurringBillingResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -97,6 +105,7 @@ class RecurringBillingResource extends Resource
             ]);
     }
     
+    #[\Override]
     public static function getRelations(): array
     {
         return [
@@ -104,6 +113,7 @@ class RecurringBillingResource extends Resource
         ];
     }
     
+    #[\Override]
     public static function getPages(): array
     {
         return [

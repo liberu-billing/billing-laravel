@@ -10,16 +10,18 @@ use Illuminate\Support\Facades\Notification;
 
 class TicketController extends Controller
 {
-    public function index()
+    public function index(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
-        $tickets = auth()->user()->isAdmin() 
+        $user = auth()->user();
+
+        $tickets = $user->hasRole('super_admin') || $user->hasRole('admin')
             ? Ticket::with('user')->latest()->paginate(10)
-            : auth()->user()->tickets()->latest()->paginate(10);
-            
+            : $user->tickets()->latest()->paginate(10);
+
         return view('tickets.index', compact('tickets'));
     }
 
-    public function create()
+    public function create(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         return view('tickets.create');
     }
@@ -27,44 +29,43 @@ class TicketController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'priority' => 'required|in:low,medium,high'
+            'title'       => ['required', 'string', 'max:255'],
+            'description' => ['required', 'string'],
+            'priority'    => ['required', 'in:low,medium,high'],
         ]);
 
         $ticket = Ticket::create([
-            'user_id' => auth()->id(),
-            'title' => $validated['title'],
+            'user_id'     => auth()->id(),
+            'title'       => $validated['title'],
             'description' => $validated['description'],
-            'priority' => $validated['priority']
+            'priority'    => $validated['priority'],
         ]);
 
-        // Notify admins
-        $admins = User::where('is_admin', true)->get();
+        $admins = User::role(['admin', 'super_admin'])->get();
         Notification::send($admins, new NewTicketNotification($ticket));
 
         return redirect()->route('tickets.show', $ticket)
             ->with('success', 'Ticket created successfully.');
     }
 
-    public function show(Ticket $ticket)
+    public function show(Ticket $ticket): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         $this->authorize('view', $ticket);
         $ticket->load(['responses.user', 'user']);
-        
+
         return view('tickets.show', compact('ticket'));
     }
 
     public function update(Request $request, Ticket $ticket)
     {
         $this->authorize('update', $ticket);
-        
+
         $validated = $request->validate([
-            'status' => 'required|in:open,in_progress,closed'
+            'status' => ['required', 'in:open,in_progress,closed'],
         ]);
 
         $ticket->update($validated);
 
-        return redirect()->back()->with('success', 'Ticket status updated successfully.');
+        return redirect()->back()->with('success', 'Ticket status updated.');
     }
 }

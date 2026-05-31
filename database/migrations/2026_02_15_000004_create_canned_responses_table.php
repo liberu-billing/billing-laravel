@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('canned_responses', function (Blueprint $table) {
+        Schema::create('canned_responses', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('team_id')->nullable()->constrained('teams')->onDelete('cascade');
             $table->string('title');

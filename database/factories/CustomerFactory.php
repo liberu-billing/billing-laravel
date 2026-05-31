@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -17,14 +19,14 @@ class CustomerFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name,
-            'email' => $this->faker->unique()->safeEmail,
-            'phone_number' => $this->faker->phoneNumber,
-            'address' => $this->faker->address,
-            'city' => $this->faker->city,
-            'state' => $this->faker->state,
-            'postal_code' => $this->faker->postcode,
-            'country' => $this->faker->country,
+            'name' => fake()->name,
+            'email' => fake()->unique()->safeEmail,
+            'phone_number' => fake()->phoneNumber,
+            'address' => fake()->address,
+            'city' => fake()->city,
+            'state' => fake()->state,
+            'postal_code' => fake()->postcode,
+            'country' => fake()->country,
         ];
     }
 }

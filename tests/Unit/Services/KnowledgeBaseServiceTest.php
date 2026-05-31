@@ -21,7 +21,7 @@ class KnowledgeBaseServiceTest extends TestCase
         $this->kbService = new KnowledgeBaseService();
     }
 
-    public function test_can_search_articles()
+    public function test_can_search_articles(): void
     {
         $user = User::factory()->create();
         $category = KnowledgeBaseCategory::create([
@@ -45,7 +45,7 @@ class KnowledgeBaseServiceTest extends TestCase
         $this->assertEquals('How to reset password', $results->first()->title);
     }
 
-    public function test_can_get_featured_articles()
+    public function test_can_get_featured_articles(): void
     {
         $user = User::factory()->create();
         $category = KnowledgeBaseCategory::create([
@@ -70,7 +70,7 @@ class KnowledgeBaseServiceTest extends TestCase
         $this->assertTrue($featured->first()->is_featured);
     }
 
-    public function test_can_track_article_views()
+    public function test_can_track_article_views(): void
     {
         $user = User::factory()->create();
         $category = KnowledgeBaseCategory::create([
@@ -94,7 +94,7 @@ class KnowledgeBaseServiceTest extends TestCase
         $this->assertEquals(1, $article->fresh()->view_count);
     }
 
-    public function test_can_mark_article_as_helpful()
+    public function test_can_mark_article_as_helpful(): void
     {
         $user = User::factory()->create();
         $category = KnowledgeBaseCategory::create([
@@ -118,7 +118,7 @@ class KnowledgeBaseServiceTest extends TestCase
         $this->assertEquals(1, $article->fresh()->helpful_count);
     }
 
-    public function test_can_get_category_tree()
+    public function test_can_get_category_tree(): void
     {
         $parent = KnowledgeBaseCategory::create([
             'name' => 'Parent Category',
@@ -126,7 +126,7 @@ class KnowledgeBaseServiceTest extends TestCase
             'is_active' => true,
         ]);
 
-        $child = KnowledgeBaseCategory::create([
+        KnowledgeBaseCategory::create([
             'name' => 'Child Category',
             'slug' => 'child-category',
             'parent_id' => $parent->id,

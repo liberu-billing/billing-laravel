@@ -7,28 +7,34 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'name',
+    'company_name',
+    'company_address',
+    'company_phone',
+    'company_email',
+    'logo_path',
+    'header_text',
+    'footer_text',
+    'color_scheme',
+    'is_default',
+    'team_id'
+])]
 class InvoiceTemplate extends Model
 {
     use HasFactory;
     use HasTeam;
 
-    protected $fillable = [
-        'name',
-        'company_name',
-        'company_address',
-        'company_phone',
-        'company_email',
-        'logo_path',
-        'header_text',
-        'footer_text',
-        'color_scheme',
-        'is_default',
-        'team_id'
-    ];
+    #[\Override]
+    protected function casts(): array
 
-    protected $casts = [
+    {
+
+        return [
         'is_default' => 'boolean',
     ];
+
+    }
 
     public function invoices()
     {
@@ -42,14 +48,14 @@ class InvoiceTemplate extends Model
             ->first();
     }
 
-    public function getLogoUrlAttribute()
+    protected function logoUrl(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        return $this->logo_path ? Storage::disk('public')->url($this->logo_path) : null;
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn() => $this->logo_path ? Storage::disk('public')->url($this->logo_path) : null);
     }
 
-    public function getStyledHtmlAttribute()
+    protected function styledHtml(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        return sprintf(
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): string => sprintf(
             '<style>
                 .invoice-box { color: %1$s; }
                 .invoice-header { border-color: %1$s; }
@@ -57,6 +63,6 @@ class InvoiceTemplate extends Model
                 .invoice-items td { border-color: %1$s; }
             </style>',
             $this->color_scheme
-        );
+        ));
     }
 }

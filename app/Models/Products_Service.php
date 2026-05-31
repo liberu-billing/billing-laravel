@@ -8,34 +8,39 @@ use Database\Factories\ProductsServiceFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'name',
+    'description',
+    'base_price',
+    'type',
+    'pricing_model',
+    'custom_pricing_data',
+])]
+#[\Illuminate\Database\Eloquent\Attributes\Table(name: 'products_services')]
 class Products_Service extends Model
 {
     use HasFactory;
     use HasTeam;
-
-    protected $table = 'products_services';
 
     protected static function newFactory(): ProductsServiceFactory
     {
         return ProductsServiceFactory::new();
     }
 
-    protected $fillable = [
-        'name',
-        'description',
-        'base_price',
-        'type',
-        'pricing_model',
-        'custom_pricing_data',
-    ];
+    #[\Override]
+    protected function casts(): array
 
-    protected $casts = [
+    {
+
+        return [
         'custom_pricing_data' => 'array',
     ];
 
-    public function getPriceAttribute()
+    }
+
+    protected function price(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        return $this->base_price;
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn() => $this->base_price);
     }
 
     public function invoiceItems()
@@ -48,7 +53,7 @@ class Products_Service extends Model
         return $this->hasManyThrough(UsageRecord::class, Subscription::class);
     }
 
-    public function getUsageMetrics()
+    public function getUsageMetrics(): array
     {
         if ($this->pricing_model !== 'usage_based') {
             return [];

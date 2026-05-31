@@ -24,7 +24,7 @@ class BillingServiceTest extends TestCase
         parent::setUp();
 
         // Mock the PaymentGatewayService to avoid real payment processing
-        $this->mock(PaymentGatewayService::class, function ($mock) {
+        $this->mock(PaymentGatewayService::class, function ($mock): void {
             $mock->shouldReceive('processPayment')
                 ->andReturn(['success' => true, 'transaction_id' => 'test-txn-123']);
         });
@@ -32,7 +32,7 @@ class BillingServiceTest extends TestCase
         $this->billingService = app(BillingService::class);
     }
 
-    public function testGenerateInvoice()
+    public function testGenerateInvoice(): void
     {
         $customer = Customer::factory()->create();
         $productService = Products_Service::factory()->create(['base_price' => 100]);
@@ -49,7 +49,7 @@ class BillingServiceTest extends TestCase
         $this->assertEquals('pending', $invoice->status);
     }
 
-    public function testProcessRecurringBilling()
+    public function testProcessRecurringBilling(): void
     {
         $subscription = Subscription::factory()->create([
             'end_date' => Carbon::yesterday(),
@@ -63,11 +63,11 @@ class BillingServiceTest extends TestCase
         ]);
     }
 
-    public function testSendOverdueReminders()
+    public function testSendOverdueReminders(): void
     {
         Mail::fake();
 
-        $overdueInvoice = Invoice::factory()->create([
+        Invoice::factory()->create([
             'due_date' => Carbon::yesterday(),
             'status' => 'pending',
         ]);

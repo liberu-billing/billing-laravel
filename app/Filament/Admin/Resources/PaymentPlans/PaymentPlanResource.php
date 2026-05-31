@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Admin\Resources\PaymentPlans;
 
 use Filament\Schemas\Schema;
@@ -18,10 +20,13 @@ use Filament\Tables;
 
 class PaymentPlanResource extends Resource
 {
+    #[\Override]
     protected static ?string $model = PaymentPlan::class;
 
+    #[\Override]
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-calendar';
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -45,6 +50,7 @@ class PaymentPlanResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -64,6 +70,7 @@ class PaymentPlanResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function getRelations(): array
     {
         return [
@@ -71,6 +78,7 @@ class PaymentPlanResource extends Resource
         ];
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [

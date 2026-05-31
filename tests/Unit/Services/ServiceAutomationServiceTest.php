@@ -29,7 +29,7 @@ class ServiceAutomationServiceTest extends TestCase
         $this->automationService = new ServiceAutomationService($webhookService);
     }
 
-    public function test_can_suspend_overdue_services()
+    public function test_can_suspend_overdue_services(): void
     {
         $customer = Customer::factory()->create();
         $productService = Products_Service::factory()->create();
@@ -64,7 +64,7 @@ class ServiceAutomationServiceTest extends TestCase
         ]);
     }
 
-    public function test_can_unsuspend_service()
+    public function test_can_unsuspend_service(): void
     {
         $customer = Customer::factory()->create();
         $productService = Products_Service::factory()->create();
@@ -93,7 +93,7 @@ class ServiceAutomationServiceTest extends TestCase
         $this->assertNotNull($suspension->fresh()->unsuspended_at);
     }
 
-    public function test_can_terminate_service()
+    public function test_can_terminate_service(): void
     {
         $customer = Customer::factory()->create();
         $productService = Products_Service::factory()->create();

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\App\Resources\HostingAccounts;
 
 use Filament\Schemas\Schema;
@@ -20,10 +22,13 @@ use Filament\Tables;
 
 class HostingAccountResource extends Resource
 {
+    #[\Override]
     protected static ?string $model = HostingAccount::class;
 
+    #[\Override]
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-server';
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -59,6 +64,7 @@ class HostingAccountResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -82,6 +88,7 @@ class HostingAccountResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function getRelations(): array
     {
         return [
@@ -89,6 +96,7 @@ class HostingAccountResource extends Resource
         ];
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [

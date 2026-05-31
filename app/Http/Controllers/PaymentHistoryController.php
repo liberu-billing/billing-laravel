@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class PaymentHistoryController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         $query = PaymentHistory::with(['payment', 'invoice', 'customer']);
         
@@ -21,7 +21,7 @@ class PaymentHistoryController extends Controller
         return view('payment-history.index', compact('paymentHistories'));
     }
 
-    public function customerHistory($customerId)
+    public function customerHistory($customerId): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         $customer = Customer::findOrFail($customerId);
         $paymentHistories = PaymentHistory::where('customer_id', $customerId)

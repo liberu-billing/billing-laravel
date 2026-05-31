@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
@@ -13,6 +15,9 @@ class PaymentConfirmation extends Mailable
 {
     use Queueable, SerializesModels;
 
+    /**
+     * @var \App\Models\Payment
+     */
     public $payment;
 
     public function __construct(Payment $payment)

@@ -6,9 +6,9 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
+    public function up(): void
     {
-        Schema::create('payment_gateways', function (Blueprint $table) {
+        Schema::create('payment_gateways', function (Blueprint $table): void {
             $table->id();
             $table->string('name');
             $table->string('api_key');
@@ -17,14 +17,14 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::table('payments', function (Blueprint $table) {
+        Schema::table('payments', function (Blueprint $table): void {
             $table->foreignId('payment_gateway_id')->after('invoice_id')->constrained();
         });
     }
 
-    public function down()
+    public function down(): void
     {
-        Schema::table('payments', function (Blueprint $table) {
+        Schema::table('payments', function (Blueprint $table): void {
             $table->dropForeign(['payment_gateway_id']);
             $table->dropColumn('payment_gateway_id');
         });

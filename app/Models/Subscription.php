@@ -6,30 +6,37 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'customer_id',
+    'product_service_id',
+    'start_date',
+    'end_date',
+    'renewal_period',
+    'status',
+    'price',
+    'currency',
+    'auto_renew',
+    'last_billed_at',
+    'ends_at',
+    'domain',
+    'domain_name',
+    'domain_registrar',
+    'domain_expiration_date',
+    'scheduled_change',
+])]
 class Subscription extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'customer_id',
-        'product_service_id',
-        'start_date',
-        'end_date',
-        'renewal_period',
-        'status',
-        'price',
-        'currency',
-        'auto_renew',
-        'last_billed_at',
-        'ends_at',
-        'domain',
-        'domain_name',
-        'domain_registrar',
-        'domain_expiration_date',
-        'scheduled_change',
-    ];
+    #[\Override]
+    protected $casts = ['start_date' => 'datetime', 'end_date' => 'datetime', 'last_billed_at' => 'datetime'];
 
-    protected $casts = [
+    #[\Override]
+    protected function casts(): array
+
+    {
+
+        return [
         'start_date' => 'datetime',
         'end_date' => 'datetime',
         'domain_expiration_date' => 'datetime',
@@ -41,7 +48,7 @@ class Subscription extends Model
         'ends_at' => 'datetime',
     ];
 
-    protected $dates = ['start_date', 'end_date', 'last_billed_at'];
+    }
 
     public function customer()
     {
@@ -105,7 +112,7 @@ class Subscription extends Model
         return false;
     }
 
-    public function isActive()
+    public function isActive(): bool
     {
         return $this->status === 'active' && $this->end_date->isFuture();
     }
@@ -120,19 +127,14 @@ class Subscription extends Model
         return $nextBillingDate->isPast() && $this->isActive();
     }
 
-    private function getRenewalPeriod()
+    private function getRenewalPeriod(): string
     {
-        switch ($this->renewal_period) {
-            case 'monthly':
-                return '1 month';
-            case 'quarterly':
-                return '3 months';
-            case 'semi-annually':
-                return '6 months';
-            case 'annually':
-                return '1 year';
-            default:
-                return '1 month';
-        }
+        return match ($this->renewal_period) {
+            'monthly' => '1 month',
+            'quarterly' => '3 months',
+            'semi-annually' => '6 months',
+            'annually' => '1 year',
+            default => '1 month',
+        };
     }
 }

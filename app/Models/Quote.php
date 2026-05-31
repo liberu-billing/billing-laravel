@@ -7,28 +7,32 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'team_id',
+    'customer_id',
+    'quote_number',
+    'title',
+    'status',
+    'valid_until',
+    'subtotal',
+    'tax_amount',
+    'total',
+    'currency',
+    'notes',
+    'terms',
+    'sent_at',
+    'viewed_at',
+    'accepted_at',
+    'declined_at',
+])]
 class Quote extends Model
 {
-    protected $fillable = [
-        'team_id',
-        'customer_id',
-        'quote_number',
-        'title',
-        'status',
-        'valid_until',
-        'subtotal',
-        'tax_amount',
-        'total',
-        'currency',
-        'notes',
-        'terms',
-        'sent_at',
-        'viewed_at',
-        'accepted_at',
-        'declined_at',
-    ];
+    #[\Override]
+    protected function casts(): array
 
-    protected $casts = [
+    {
+
+        return [
         'valid_until' => 'date',
         'subtotal' => 'decimal:2',
         'tax_amount' => 'decimal:2',
@@ -39,11 +43,14 @@ class Quote extends Model
         'declined_at' => 'datetime',
     ];
 
+    }
+
+    #[\Override]
     protected static function boot(): void
     {
         parent::boot();
 
-        static::creating(function (Quote $quote) {
+        static::creating(function (Quote $quote): void {
             if (empty($quote->quote_number)) {
                 $quote->quote_number = 'QUO-' . strtoupper(Str::random(8));
             }

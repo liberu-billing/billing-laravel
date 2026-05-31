@@ -10,13 +10,14 @@ class DeleteUser implements DeletesUsers
      * Delete the given user.
      *
      * @param  mixed  $user
-     * @return void
      */
-    public function delete($user)
+    public function delete($user): void
     {
         $user->deleteProfilePhoto();
-        $user->tokens->each->delete();
-        $user->connectedAccounts->each->delete();
+        $user->tokens()->delete();
+        if (method_exists($user, 'connectedAccounts')) {
+            $user->connectedAccounts()->delete();
+        }
         $user->delete();
     }
 }

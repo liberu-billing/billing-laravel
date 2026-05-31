@@ -17,9 +17,9 @@ use Square\Exceptions\ApiException;
 
 class PaymentGatewayService
 {
-    private $maxRetries = 3;
-    private $retryDelay = 5; // seconds
-    private $supportedMethods = [
+    private int $maxRetries = 3;
+    private int $retryDelay = 5; // seconds
+    private array $supportedMethods = [
         'credit_card',
         'debit_card',
         'paypal',
@@ -29,7 +29,7 @@ class PaymentGatewayService
         'bank_transfer'
     ];
 
-    public function validatePaymentMethod($method)
+    public function validatePaymentMethod($method): bool
     {
         return in_array($method, $this->supportedMethods);
     }
@@ -84,20 +84,14 @@ class PaymentGatewayService
   
     private function attemptPayment(Payment $payment, PaymentGateway $gateway)
     {
-        switch ($gateway->name) {
-            case 'PayPal':
-                return $this->processPayPalPayment($payment, $gateway);
-            case 'Stripe':
-                return $this->processStripePayment($payment, $gateway);
-            case 'Authorize.net':
-                return $this->processAuthorizeNetPayment($payment, $gateway);
-            case 'Square':
-                return $this->processSquarePayment($payment, $gateway);
-            case 'Google Pay':
-                return $this->processGooglePayPayment($payment, $gateway);
-            default:
-                throw new Exception('Unsupported payment gateway');
-        }
+        return match ($gateway->name) {
+            'PayPal' => $this->processPayPalPayment($payment),
+            'Stripe' => $this->processStripePayment($payment, $gateway),
+            'Authorize.net' => $this->processAuthorizeNetPayment($payment),
+            'Square' => $this->processSquarePayment($payment, $gateway),
+            'Google Pay' => $this->processGooglePayPayment($payment),
+            default => throw new Exception('Unsupported payment gateway'),
+        };
     }
 
     public function refundPayment(Payment $payment, float $amount)
@@ -139,23 +133,19 @@ class PaymentGatewayService
 
     private function attemptRefund(Payment $payment, PaymentGateway $gateway, float $amount)
     {
-        switch ($gateway->name) {
-            case 'PayPal':
-                return $this->processPayPalRefund($payment, $amount);
-            case 'Stripe':
-                return $this->processStripeRefund($payment, $amount);
-            case 'Authorize.net':
-                return $this->processAuthorizeNetRefund($payment, $amount);
-            default:
-                throw new Exception('Unsupported payment gateway for refunds');
-        }
+        return match ($gateway->name) {
+            'PayPal' => $this->processPayPalRefund(),
+            'Stripe' => $this->processStripeRefund($payment, $amount),
+            'Authorize.net' => $this->processAuthorizeNetRefund(),
+            default => throw new Exception('Unsupported payment gateway for refunds'),
+        };
     }
 
-    private function processPayPalPayment(Payment $payment, PaymentGateway $gateway)
+    private function processPayPalPayment(Payment $payment): void
     {
         // Implement PayPal payment processing logic here
         // Include currency handling
-        $currency = Currency::where('code', $payment->currency)->firstOrFail();
+        Currency::where('code', $payment->currency)->firstOrFail();
         // Use $currency->code for PayPal API calls
     }
 
@@ -190,7 +180,7 @@ class PaymentGatewayService
         } catch (CardException $e) {
             // Handle failed charge
             $payment->update(['status' => 'failed']);
-            throw new Exception('Payment failed: ' . $e->getMessage());
+            throw new Exception('Payment failed: ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -226,11 +216,11 @@ class PaymentGatewayService
             throw new Exception($response->getErrors()[0]->getDetail());
         } catch (ApiException $e) {
             $payment->update(['status' => 'failed']);
-            throw new Exception('Square payment failed: ' . $e->getMessage());
+            throw new Exception('Square payment failed: ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
-    private function processGooglePayPayment(Payment $payment, PaymentGateway $gateway)
+    private function processGooglePayPayment(Payment $payment)
     {
         try {
             $paymentToken = $payment->google_pay_token;
@@ -239,7 +229,7 @@ class PaymentGatewayService
             }
 
             // Process payment through Google Pay API
-            $response = $this->processGooglePayToken($paymentToken, $payment, $gateway);
+            $response = $this->processGooglePayToken();
 
             $payment->update([
                 'transaction_id' => $response['transaction_id'],
@@ -249,11 +239,11 @@ class PaymentGatewayService
             return $response;
         } catch (Exception $e) {
             $payment->update(['status' => 'failed']);
-            throw new Exception('Google Pay payment failed: ' . $e->getMessage());
+            throw new Exception('Google Pay payment failed: ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
-    private function processGooglePayToken($token, Payment $payment, PaymentGateway $gateway)
+    private function processGooglePayToken(): array
     {
         // Implement actual Google Pay API integration here
         // This is a placeholder implementation
@@ -264,15 +254,15 @@ class PaymentGatewayService
         ];
     }
 
-    private function processAuthorizeNetPayment(Payment $payment, PaymentGateway $gateway)
+    private function processAuthorizeNetPayment(Payment $payment): void
     {
         // Implement Authorize.net payment processing logic here
         // Include currency handling
-        $currency = Currency::where('code', $payment->currency)->firstOrFail();
+        Currency::where('code', $payment->currency)->firstOrFail();
         // Use $currency->code for Authorize.net API calls
     }
 
-    private function processStripeRefund(Payment $payment, float $amount)
+    private function processStripeRefund(Payment $payment, float $amount): array
     {
         Stripe::setApiKey($payment->paymentGateway->secret_key);
         
@@ -296,7 +286,7 @@ class PaymentGatewayService
         }
     }
 
-    private function processPayPalRefund(Payment $payment, float $amount)
+    private function processPayPalRefund(): array
     {
         // Implement PayPal refund logic here
         return [
@@ -305,7 +295,7 @@ class PaymentGatewayService
         ];
     }
 
-    private function processAuthorizeNetRefund(Payment $payment, float $amount)
+    private function processAuthorizeNetRefund(): array
     {
         // Implement Authorize.net refund logic here
         return [

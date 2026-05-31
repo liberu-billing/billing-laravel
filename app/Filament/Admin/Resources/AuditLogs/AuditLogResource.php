@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace App\Filament\Admin\Resources\AuditLogs;
 
 use Filament\Tables\Columns\TextColumn;
@@ -14,10 +17,14 @@ use Filament\Forms;
 
 class AuditLogResource extends Resource
 {
+    #[\Override]
     protected static ?string $model = AuditLog::class;
+    #[\Override]
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-clipboard-list';
+    #[\Override]
     protected static string | \UnitEnum | null $navigationGroup = 'Administration';
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table

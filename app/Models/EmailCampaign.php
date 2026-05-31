@@ -5,30 +5,36 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'team_id',
+    'created_by',
+    'name',
+    'subject',
+    'content',
+    'recipient_filters',
+    'status',
+    'total_recipients',
+    'sent_count',
+    'failed_count',
+    'scheduled_at',
+    'started_sending_at',
+    'completed_at',
+])]
 class EmailCampaign extends Model
 {
-    protected $fillable = [
-        'team_id',
-        'created_by',
-        'name',
-        'subject',
-        'content',
-        'recipient_filters',
-        'status',
-        'total_recipients',
-        'sent_count',
-        'failed_count',
-        'scheduled_at',
-        'started_sending_at',
-        'completed_at',
-    ];
+    #[\Override]
+    protected function casts(): array
 
-    protected $casts = [
+    {
+
+        return [
         'recipient_filters' => 'array',
         'scheduled_at' => 'datetime',
         'started_sending_at' => 'datetime',
         'completed_at' => 'datetime',
     ];
+
+    }
 
     public function team(): BelongsTo
     {

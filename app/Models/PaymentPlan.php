@@ -1,30 +1,38 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasTeam;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'invoice_id',
+    'total_installments',
+    'installment_amount',
+    'frequency',
+    'start_date',
+    'next_due_date',
+    'status',
+])]
 class PaymentPlan extends Model
 {
     use HasFactory;
     use HasTeam;
 
-    protected $fillable = [
-        'invoice_id',
-        'total_installments',
-        'installment_amount',
-        'frequency',
-        'start_date',
-        'next_due_date',
-        'status',
-    ];
+    #[\Override]
+    protected function casts(): array
 
-    protected $casts = [
+    {
+
+        return [
         'start_date' => 'datetime',
         'next_due_date' => 'datetime',
     ];
+
+    }
 
     public function invoice()
     {

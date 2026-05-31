@@ -9,27 +9,47 @@ use Illuminate\Support\Facades\Log;
 class InstallationScriptService
 {
     protected $controlPanel;
-    protected $gitRepo;
-    protected $domain;
-    protected $dbName;
-    protected $dbUser;
-    protected $dbPass;
     
-    public function __construct($controlPanel, $gitRepo, $domain, $dbName, $dbUser, $dbPass)
+    public function __construct($controlPanel, protected $gitRepo, protected $domain, protected $dbName, protected $dbUser, protected $dbPass)
     {
         $this->controlPanel = strtolower($controlPanel);
-        $this->gitRepo = $gitRepo;
-        $this->domain = $domain;
-        $this->dbName = $dbName;
-        $this->dbUser = $dbUser;
+        $this->gitRepo = $this->validateGitRepo($gitRepo);
+        $this->domain = $this->validateIdentifier($domain, 'domain', '/^[a-zA-Z0-9._-]+$/');
+        $this->dbName = $this->validateIdentifier($dbName, 'database name', '/^[a-zA-Z0-9_]+$/');
+        $this->dbUser = $this->validateIdentifier($dbUser, 'database user', '/^[a-zA-Z0-9_]+$/');
         $this->dbPass = $dbPass;
     }
 
-    public function generateScript()
+    protected function validateGitRepo(string $repo): string
     {
-        $installDir = "~/laravel-apps/{$this->domain}";
+        if (!filter_var($repo, FILTER_VALIDATE_URL) && !preg_match('/^git@[a-zA-Z0-9._-]+:[a-zA-Z0-9._\/-]+\.git$/', $repo)) {
+            throw new Exception('Invalid git repository URL');
+        }
+        return $repo;
+    }
+
+    protected function validateIdentifier(string $value, string $name, string $pattern): string
+    {
+        if (!preg_match($pattern, $value)) {
+            throw new Exception('Invalid ' . $name . ': only alphanumeric characters, underscores, hyphens, and dots allowed'); // phpcs:ignore WordPress.Security.EscapeOutput -- Laravel exception message, not HTML output
+        }
+        return $value;
+    }
+
+    /**
+     * @SuppressWarnings(PHPMD.DiscouragedFunctions)
+     */
+    public function generateScript(): string
+    {
+        $domain    = escapeshellarg($this->domain);    // phpcs:ignore -- nosemgrep
+        $gitRepo   = escapeshellarg($this->gitRepo);   // phpcs:ignore -- nosemgrep
+        $dbName    = escapeshellarg($this->dbName);    // phpcs:ignore -- nosemgrep
+        $dbUser    = escapeshellarg($this->dbUser);    // phpcs:ignore -- nosemgrep
+        $dbPass    = escapeshellarg($this->dbPass);    // phpcs:ignore -- nosemgrep
+
+        $installDir = "~/laravel-apps/{$domain}";
         $publicHtmlPath = $this->getPublicHtmlPath();
-        
+
         $script = [
             '#!/bin/bash',
             'set -e',
@@ -39,7 +59,7 @@ class InstallationScriptService
             "cd {$installDir}",
             '',
             '# Clone repository',
-            "git clone {$this->gitRepo} .",
+            "git clone {$gitRepo} .",
             '',
             '# Install composer dependencies',
             'composer install --no-scripts --no-dev --optimize-autoloader',
@@ -50,9 +70,9 @@ class InstallationScriptService
             '',
             '# Setup Laravel environment',
             'cp .env.example .env',
-            "sed -i 's/DB_DATABASE=.*/DB_DATABASE={$this->dbName}/' .env",
-            "sed -i 's/DB_USERNAME=.*/DB_USERNAME={$this->dbUser}/' .env",
-            "sed -i 's/DB_PASSWORD=.*/DB_PASSWORD={$this->dbPass}/' .env",
+            "sed -i \"s/^DB_DATABASE=.*/DB_DATABASE={$dbName}/\" .env",
+            "sed -i \"s/^DB_USERNAME=.*/DB_USERNAME={$dbUser}/\" .env",
+            "sed -i \"s/^DB_PASSWORD=.*/DB_PASSWORD={$dbPass}/\" .env",
             '',
             '# Generate application key',
             'php artisan key:generate',
@@ -72,29 +92,24 @@ class InstallationScriptService
             '# Create symbolic link',
             "ln -sf {$installDir}/public {$publicHtmlPath}",
             '',
-            'echo "Installation completed successfully!"'
+            'echo "Installation completed successfully!"',
         ];
-        
+
         return implode("\n", $script);
     }
     
-    protected function getPublicHtmlPath()
+    protected function getPublicHtmlPath(): string
     {
-        switch ($this->controlPanel) {
-            case 'cpanel':
-                return "~/public_html";
-            case 'plesk':
-                return "~/httpdocs";
-            case 'directadmin':
-                return "~/domains/{$this->domain}/public_html";
-            case 'virtualmin':
-                return "~/public_html";
-            default:
-                throw new Exception("Unsupported control panel: {$this->controlPanel}");
-        }
+        return match ($this->controlPanel) {
+            'cpanel' => "~/public_html",
+            'plesk' => "~/httpdocs",
+            'directadmin' => "~/domains/{$this->domain}/public_html",
+            'virtualmin' => "~/public_html",
+            default => throw new Exception("Unsupported control panel: {$this->controlPanel}"),
+        };
     }
     
-    public function execute()
+    public function execute(): bool
     {
         try {
             $script = $this->generateScript();

@@ -27,7 +27,6 @@ class LiberuControlPanelClientTest extends TestCase
         // Use reflection to inject the mock Guzzle client
         $reflection = new \ReflectionClass($this->liberuClient);
         $property = $reflection->getProperty('client');
-        $property->setAccessible(true);
         $property->setValue($this->liberuClient, $this->guzzleClient);
     }
 
@@ -37,7 +36,7 @@ class LiberuControlPanelClientTest extends TestCase
         parent::tearDown();
     }
 
-    public function testCreateAccount()
+    public function testCreateAccount(): void
     {
         $server = HostingServer::factory()->liberu()->create();
         $this->liberuClient->setServer($server);
@@ -58,7 +57,7 @@ class LiberuControlPanelClientTest extends TestCase
         $this->assertTrue($result);
     }
 
-    public function testSuspendAccount()
+    public function testSuspendAccount(): void
     {
         $server = HostingServer::factory()->liberu()->create();
         $this->liberuClient->setServer($server);
@@ -78,7 +77,7 @@ class LiberuControlPanelClientTest extends TestCase
         $this->assertTrue($result);
     }
 
-    public function testUnsuspendAccount()
+    public function testUnsuspendAccount(): void
     {
         $server = HostingServer::factory()->liberu()->create();
         $this->liberuClient->setServer($server);
@@ -98,7 +97,7 @@ class LiberuControlPanelClientTest extends TestCase
         $this->assertTrue($result);
     }
 
-    public function testChangePackage()
+    public function testChangePackage(): void
     {
         $server = HostingServer::factory()->liberu()->create();
         $this->liberuClient->setServer($server);
@@ -118,7 +117,7 @@ class LiberuControlPanelClientTest extends TestCase
         $this->assertTrue($result);
     }
 
-    public function testTerminateAccount()
+    public function testTerminateAccount(): void
     {
         $server = HostingServer::factory()->liberu()->create();
         $this->liberuClient->setServer($server);
@@ -138,7 +137,7 @@ class LiberuControlPanelClientTest extends TestCase
         $this->assertTrue($result);
     }
 
-    public function testAddAddon()
+    public function testAddAddon(): void
     {
         $server = HostingServer::factory()->liberu()->create();
         $this->liberuClient->setServer($server);
@@ -158,7 +157,7 @@ class LiberuControlPanelClientTest extends TestCase
         $this->assertTrue($result);
     }
 
-    public function testRemoveAddon()
+    public function testRemoveAddon(): void
     {
         $server = HostingServer::factory()->liberu()->create();
         $this->liberuClient->setServer($server);

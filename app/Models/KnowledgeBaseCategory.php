@@ -7,26 +7,33 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'parent_id',
+    'name',
+    'slug',
+    'description',
+    'sort_order',
+    'is_active',
+])]
 class KnowledgeBaseCategory extends Model
 {
-    protected $fillable = [
-        'parent_id',
-        'name',
-        'slug',
-        'description',
-        'sort_order',
-        'is_active',
-    ];
+    #[\Override]
+    protected function casts(): array
 
-    protected $casts = [
+    {
+
+        return [
         'is_active' => 'boolean',
     ];
 
+    }
+
+    #[\Override]
     protected static function boot()
     {
         parent::boot();
 
-        static::creating(function ($category) {
+        static::creating(function ($category): void {
             if (empty($category->slug)) {
                 $category->slug = Str::slug($category->name);
             }

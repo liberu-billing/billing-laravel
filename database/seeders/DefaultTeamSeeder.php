@@ -13,7 +13,7 @@ class DefaultTeamSeeder extends Seeder
      */
     public function run(): void
     {
-        $team = Team::create([
+        Team::create([
             'id' => 1,
             'name' => 'default',
             'personal_team' => false,

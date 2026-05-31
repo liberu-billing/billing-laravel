@@ -22,30 +22,26 @@ use App\Mail\OverdueInvoiceReminder;
 
 class BillingService
 {
-    protected $serviceProvisioningService;
-    protected $paymentPlanService;
-    protected $currencyService;
-    protected $paymentGatewayService;
-    protected $pricingService;
-    protected $smsService;
+    protected \App\Services\PaymentPlanService $paymentPlanService;
+    protected \App\Services\PaymentGatewayService $paymentGatewayService;
+    protected \App\Services\PricingService $pricingService;
+    protected \App\Services\SmsService $smsService;
 
     public function __construct(
-        ServiceProvisioningService $serviceProvisioningService,
-        CurrencyService $currencyService,
-        PaymentPlanService $paymentPlanService = null,
-        PaymentGatewayService $paymentGatewayService = null,
-        PricingService $pricingService = null,
-        SmsService $smsService = null
+        protected \App\Services\ServiceProvisioningService $serviceProvisioningService,
+        protected \App\Services\CurrencyService $currencyService,
+        ?PaymentPlanService $paymentPlanService = null,
+        ?PaymentGatewayService $paymentGatewayService = null,
+        ?PricingService $pricingService = null,
+        ?SmsService $smsService = null
     ) {
-        $this->serviceProvisioningService = $serviceProvisioningService;
-        $this->currencyService = $currencyService;
         $this->paymentPlanService = $paymentPlanService ?? new PaymentPlanService($this);
         $this->paymentGatewayService = $paymentGatewayService ?? new PaymentGatewayService();
         $this->pricingService = $pricingService ?? new PricingService();
         $this->smsService = $smsService ?? new SmsService();
     }
 
-    public function createSubscription(Customer $customer, SubscriptionPlan $plan, string $billingCycle)
+    public function createSubscription(Customer $customer, SubscriptionPlan $plan, string $billingCycle): \App\Models\Subscription
     {
         $subscription = new Subscription([
             'customer_id' => $customer->id,
@@ -62,7 +58,7 @@ class BillingService
         $subscription->save();
         
         // Generate initial invoice
-        $invoice = $this->generateInvoice($subscription);
+        $this->generateInvoice($subscription);
         
         return $subscription;
     }
@@ -70,14 +66,14 @@ class BillingService
     public function upgradeSubscription(Subscription $subscription, SubscriptionPlan $newPlan)
     {
         // Calculate prorated amount
-        $proratedAmount = $this->calculateProratedAmount(
+        $this->calculateProratedAmount(
             $subscription->price,
             $newPlan->price,
             $subscription->end_date
         );
         
         // Generate upgrade invoice
-        $invoice = $this->generateInvoice($subscription, $proratedAmount);
+        $invoice = $this->generateInvoice($subscription);
         
         $subscription->update([
             'subscription_plan_id' => $newPlan->id,
@@ -87,7 +83,7 @@ class BillingService
         return $invoice;
     }
 
-    public function cancelSubscription(Subscription $subscription)
+    public function cancelSubscription(Subscription $subscription): bool
     {
         $subscription->update([
             'status' => 'cancelled',
@@ -106,7 +102,7 @@ class BillingService
         return true;
     }
 
-    private function calculateProratedAmount($oldPrice, $newPrice, $endDate)
+    private function calculateProratedAmount($oldPrice, $newPrice, $endDate): float
     {
         $daysRemaining = now()->diffInDays($endDate);
         $totalDays = 30; // Assuming monthly billing
@@ -117,7 +113,7 @@ class BillingService
         return $newAmount - $oldAmount;
     }
 
-    private function calculateEndDate($billingCycle)
+    private function calculateEndDate(string $billingCycle)
     {
         return match($billingCycle) {
             'monthly' => now()->addMonth(),
@@ -128,7 +124,7 @@ class BillingService
         };
     }
 
-    private function calculateRefundAmount(Subscription $subscription)
+    private function calculateRefundAmount(Subscription $subscription): float
     {
         $daysRemaining = now()->diffInDays($subscription->end_date);
         $totalDays = $subscription->start_date->diffInDays($subscription->end_date);#
@@ -193,7 +189,7 @@ class BillingService
     //     return $this->currencyService->convert($amount, $fromCurrency, $toCurrency);
     // }
 
-    public function applyDiscount(Invoice $invoice, string $discountCode)
+    public function applyDiscount(Invoice $invoice, string $discountCode): array
     {
         // $discount = Discount::where('code', $discountCode)
         //     ->where('is_active', true)
@@ -291,7 +287,7 @@ class BillingService
         return $invoice->createPaymentPlan($totalInstallments, $frequency);
     }
 
-    public function processPaymentPlans()
+    public function processPaymentPlans(): void
     {
         $this->paymentPlanService->processPaymentPlans();
     }
@@ -310,7 +306,7 @@ class BillingService
         return ($amount / $fromRate) * $toRate;
     }
 
-    public function processRecurringBilling()
+    public function processRecurringBilling(): void
     {
         // Process subscription-based billing
         $this->processSubscriptionBilling();
@@ -395,7 +391,7 @@ class BillingService
         return $newInvoice;
     }
 
-    public function processAutomaticPayment(Invoice $invoice)
+    public function processAutomaticPayment(Invoice $invoice): array
     {
         $paymentGatewayService = new PaymentGatewayService();
         $customer = $invoice->customer;
@@ -457,20 +453,18 @@ class BillingService
     protected function handleFailedPayment(Invoice $invoice)
     {
         // If payment fails and grace period is over, suspend hosting
-        if ($invoice->due_date->addDays(config('billing.grace_period', 3))->isPast()) {
-            if ($invoice->subscription) {
-                $hostingAccount = $invoice->subscription->hostingAccount;
-                if ($hostingAccount && $hostingAccount->status === 'active') {
-                    $this->serviceProvisioningService->manageService(
-                        $invoice->subscription,
-                        'suspend'
-                    );
-                    
-                    Log::info('Hosting account suspended due to failed payment', [
-                        'invoice_id' => $invoice->id,
-                        'hosting_account_id' => $hostingAccount->id
-                    ]);
-                }
+        if ($invoice->due_date->addDays(config('billing.grace_period', 3))->isPast() && $invoice->subscription) {
+            $hostingAccount = $invoice->subscription->hostingAccount;
+            if ($hostingAccount && $hostingAccount->status === 'active') {
+                $this->serviceProvisioningService->manageService(
+                    $invoice->subscription,
+                    'suspend'
+                );
+                
+                Log::info('Hosting account suspended due to failed payment', [
+                    'invoice_id' => $invoice->id,
+                    'hosting_account_id' => $hostingAccount->id
+                ]);
             }
         }
         
@@ -599,7 +593,7 @@ class BillingService
         }
     }
 
-    public function sendUpcomingDueReminders()
+    public function sendUpcomingDueReminders(): void
     {
         $upcomingInvoices = Invoice::where('status', 'pending')
             ->where('due_date', '>', now())
@@ -645,14 +639,14 @@ class BillingService
     //     return $reminderCount;
     // }
 
-    protected function getInvoiceReminderMessage(Invoice $invoice, int $daysUntilDue)
+    protected function getInvoiceReminderMessage(Invoice $invoice, int $daysUntilDue): string
     {
         return "Reminder: Invoice #{$invoice->invoice_number} for " . 
                "{$invoice->getFormattedAmount()} is due in {$daysUntilDue} days. " .
                "Please ensure timely payment to avoid late fees.";
     }
 
-    public function processLateFees()
+    public function processLateFees(): void
     {
         $pendingInvoices = Invoice::where('status', 'pending')
             ->where('due_date', '<', Carbon::now())
@@ -677,10 +671,10 @@ class BillingService
         }
     }
 
-    private function sendOverdueReminderEmail(Invoice $invoice)
+    private function sendOverdueReminderEmail(Invoice $invoice): void
     {
         $customer = $invoice->customer;
-        $data = [
+        [
             'customer_name' => $customer->name,
             'invoice_number' => $invoice->invoice_number,
             'due_date' => $invoice->due_date->format('Y-m-d'),
@@ -705,7 +699,7 @@ class BillingService
     //     ]));
     // }
 
-    private function generateInvoiceNumber()
+    private function generateInvoiceNumber(): string
     {
         return 'INV-' . strtoupper(uniqid());
     }

@@ -47,6 +47,7 @@ jobs:
 
       - name: Run tests
         run: php artisan test --coverage-clover=coverage.xml
+<<<<<<< HEAD
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
@@ -56,3 +57,5 @@ jobs:
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: false
+=======
+>>>>>>> 455fe74c4e3f2721b8d2c9dc4b10c4bc7be04359

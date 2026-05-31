@@ -10,7 +10,7 @@ use App\Models\HostingServer;
 
 class CpanelClient
 {
-    protected $client;
+    protected \GuzzleHttp\Client $client;
     protected $server;
     protected $apiToken;
 
@@ -19,13 +19,13 @@ class CpanelClient
         $this->client = new Client();
     }
 
-    public function setServer(HostingServer $server)
+    public function setServer(HostingServer $server): void
     {
         $this->server = $server;
         $this->apiToken = $server->api_token;
     }
 
-    public function createAccount($username, $domain, $package)
+    public function createAccount(string $username, string $domain, $package)
     {
         $endpoint = '/json-api/createacct';
         $params = [
@@ -103,7 +103,7 @@ class CpanelClient
         $endpoint = '/json-api/modifyacct';
         $params = [
             'user' => $username,
-            'FEATURE-' . strtoupper($addon) => 1
+            'FEATURE-' . strtoupper((string) $addon) => 1
         ];
 
         return $this->makeApiCall($endpoint, $params);
@@ -114,17 +114,19 @@ class CpanelClient
         $endpoint = '/json-api/modifyacct';
         $params = [
             'user' => $username,
-            'FEATURE-' . strtoupper($addon) => 0
+            'FEATURE-' . strtoupper((string) $addon) => 0
         ];
 
         return $this->makeApiCall($endpoint, $params);
     }
 
-    protected function makeApiCall($endpoint, $params)
+    protected function makeApiCall(string $endpoint, $params): bool
     {
         if (!$this->server) {
             throw new Exception('Server not configured');
         }
+
+        $this->validateHostname($this->server->hostname);
 
         try {
             $response = $this->client->request('GET', 'https://' . $this->server->hostname . ':2087' . $endpoint, [
@@ -132,10 +134,10 @@ class CpanelClient
                     'Authorization' => 'WHM ' . $this->server->username . ':' . $this->apiToken,
                 ],
                 'query' => $params,
-                'verify' => false // Only if using self-signed SSL
+                'verify' => config('services.cpanel.ssl_verify', true),
             ]);
 
-            $result = json_decode($response->getBody(), true);
+            $result = json_decode((string) $response->getBody(), true);
 
             if (isset($result['metadata']['result']) && $result['metadata']['result'] === 1) {
                 Log::info("cPanel API call successful", [
@@ -159,6 +161,23 @@ class CpanelClient
                 'error' => $e->getMessage()
             ]);
             return false;
+        }
+    }
+
+    protected function validateHostname(string $hostname): void
+    {
+        // Reject private/loopback IPs to prevent SSRF
+        if (filter_var($hostname, FILTER_VALIDATE_IP)) {
+            $isPrivate = !filter_var(
+                $hostname,
+                FILTER_VALIDATE_IP,
+                FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
+            );
+            if ($isPrivate) {
+                throw new Exception('Private or reserved IP addresses are not allowed as cPanel hostnames');
+            }
+        } elseif (!filter_var($hostname, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME)) {
+            throw new Exception('Invalid cPanel hostname');
         }
     }
 

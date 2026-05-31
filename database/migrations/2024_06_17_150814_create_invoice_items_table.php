@@ -9,7 +9,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('invoice_items', function (Blueprint $table) {
+        Schema::create('invoice_items', function (Blueprint $table): void {
             $table->id();
             $table->unsignedBigInteger('invoice_id');
             $table->unsignedBigInteger('product_service_id');

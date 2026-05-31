@@ -1,6 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Facade;
+declare(strict_types=1);
+
 use Illuminate\Support\ServiceProvider;
 
 return [
@@ -155,28 +156,7 @@ return [
     |
     */
 
-    'providers' => ServiceProvider::defaultProviders()->merge([
-        /*
-         * Package Service Providers...
-         */
-        // JoelButcher\Socialstream\Filament\SocialstreamPanelProvider::class,
-
-        /*
-         * Application Service Providers...
-         */
-        App\Providers\AppServiceProvider::class,
-        App\Providers\AuthServiceProvider::class,
-        // App\Providers\BroadcastServiceProvider::class,
-        App\Providers\EventServiceProvider::class,
-        App\Providers\Filament\AdminPanelProvider::class,
-        App\Providers\Filament\AppPanelProvider::class,
-        App\Providers\RouteServiceProvider::class,
-
-        // App\Providers\TeamServiceProvider::class,
-        App\Providers\JetstreamServiceProvider::class,
-        App\Providers\FortifyServiceProvider::class,
-
-    ])->toArray(),
+    'providers' => ServiceProvider::defaultProviders()->toArray(),
 
     /*
     |--------------------------------------------------------------------------
@@ -189,8 +169,8 @@ return [
     |
     */
 
-    'aliases' => Facade::defaultAliases()->merge([
-        // 'Example' => App\Facades\Example::class,
+    'aliases' => \Illuminate\Support\Facades\Facade::defaultAliases()->merge([
+        //
     ])->toArray(),
 
 ];

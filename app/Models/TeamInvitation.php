@@ -7,26 +7,21 @@ use Illuminate\Support\Str;
 use Laravel\Jetstream\Jetstream;
 use Laravel\Jetstream\TeamInvitation as JetstreamTeamInvitation;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'email',
+    'role',
+])]
 class TeamInvitation extends JetstreamTeamInvitation
 {
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    protected $fillable = [
-        'email',
-        'role',
-    ];
-
-    /**
      * Bootstrap the model and its traits.
      */
+    #[\Override]
     protected static function boot(): void
     {
         parent::boot();
 
-        static::creating(function ($invitation) {
+        static::creating(function ($invitation): void {
             if (empty($invitation->token)) {
                 $invitation->token = Str::random(64);
             }
@@ -36,6 +31,7 @@ class TeamInvitation extends JetstreamTeamInvitation
     /**
      * Get the team that the invitation belongs to.
      */
+    #[\Override]
     public function team(): BelongsTo
     {
         return $this->belongsTo(Jetstream::teamModel());

@@ -8,8 +8,12 @@ use App\Models\Subscription;
 use App\Models\HostingServer;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\HostingAccount>
+ */
 class HostingAccountFactory extends Factory
 {
+    #[\Override]
     protected $model = HostingAccount::class;
 
     public function definition(): array
@@ -30,70 +34,70 @@ class HostingAccountFactory extends Factory
 
     public function active(): self
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'status' => 'active',
         ]);
     }
 
     public function suspended(): self
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'status' => 'suspended',
         ]);
     }
 
     public function terminated(): self
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'status' => 'terminated',
         ]);
     }
 
     public function pending(): self
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'status' => 'pending',
         ]);
     }
 
     public function withAddons(array $addons): self
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'addons' => $addons,
         ]);
     }
 
     public function cpanel(): self
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'control_panel' => 'cpanel',
         ]);
     }
 
     public function plesk(): self
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'control_panel' => 'plesk',
         ]);
     }
 
     public function directadmin(): self
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'control_panel' => 'directadmin',
         ]);
     }
 
     public function virtualmin(): self
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'control_panel' => 'virtualmin',
         ]);
     }
 
     public function liberu(): self
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'control_panel' => 'liberu',
         ]);
     }

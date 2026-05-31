@@ -5,35 +5,41 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'customer_id',
+    'first_name',
+    'last_name',
+    'email',
+    'phone',
+    'title',
+    'is_primary',
+    'can_view_invoices',
+    'can_make_payments',
+    'can_manage_services',
+])]
 class ClientContact extends Model
 {
-    protected $fillable = [
-        'customer_id',
-        'first_name',
-        'last_name',
-        'email',
-        'phone',
-        'title',
-        'is_primary',
-        'can_view_invoices',
-        'can_make_payments',
-        'can_manage_services',
-    ];
+    #[\Override]
+    protected function casts(): array
 
-    protected $casts = [
+    {
+
+        return [
         'is_primary' => 'boolean',
         'can_view_invoices' => 'boolean',
         'can_make_payments' => 'boolean',
         'can_manage_services' => 'boolean',
     ];
 
+    }
+
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
 
-    public function getFullNameAttribute(): string
+    protected function fullName(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        return trim("{$this->first_name} {$this->last_name}");
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): string => trim("{$this->first_name} {$this->last_name}"));
     }
 }

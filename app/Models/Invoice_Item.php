@@ -1,24 +1,25 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Traits\HasTeam;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'invoice_id',
+    'product_service_id',
+    'quantity',
+    'unit_price',
+    'total_price',
+    'currency',
+])]
 class Invoice_Item extends Model
 {
     use HasFactory;
     use HasTeam;
-
-    protected $fillable = [
-        'invoice_id',
-        'product_service_id',
-        'quantity',
-        'unit_price',
-        'total_price',
-        'currency',
-    ];
     
     public function currency()
     {

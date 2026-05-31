@@ -11,7 +11,9 @@ use Illuminate\Support\Facades\Auth;
 
 class EditProfile extends Page
 {
+    #[\Override]
     protected string $view = 'filament.pages.edit-profile';
+    #[\Override]
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-chart-bar';
 
     public User $user;
@@ -56,6 +58,7 @@ class EditProfile extends Page
             ->send();
     }
 
+    #[\Override]
     public function getBreadcrumbs(): array
     {
         return [

@@ -9,30 +9,23 @@ use Exception;
 
 class ServiceProvisioningService
 {
-    protected $hostingService;
-
-    public function __construct(HostingService $hostingService)
+    public function __construct(protected \App\Services\HostingService $hostingService)
     {
-        $this->hostingService = $hostingService;
     }
 
     public function provisionService(Subscription $subscription)
     {
         $service = $subscription->productService;
 
-        switch ($service->type) {
-            case 'hosting':
-                return $this->provisionHosting($subscription);
-            case 'domain':
-                return $this->provisionDomain($subscription);
-            case 'email':
-                return $this->provisionEmail($subscription);
-            default:
-                throw new Exception('Unsupported service type');
-        }
+        return match ($service->type) {
+            'hosting' => $this->provisionHosting($subscription),
+            'domain' => $this->provisionDomain(),
+            'email' => $this->provisionEmail(),
+            default => throw new Exception('Unsupported service type'),
+        };
     }
 
-    private function provisionHosting(Subscription $subscription)
+    private function provisionHosting(Subscription $subscription): \App\Models\HostingAccount
     {
         $service = $subscription->productService;
         
@@ -59,7 +52,7 @@ class ServiceProvisioningService
         }
     }
 
-    private function provisionDomain(Subscription $subscription)
+    private function provisionDomain(): array
     {
         // Implement domain provisioning logic
         // This would typically involve interacting with a domain registrar API
@@ -67,7 +60,7 @@ class ServiceProvisioningService
         return ['status' => 'success', 'message' => 'Domain provisioned successfully'];
     }
 
-    private function provisionEmail(Subscription $subscription)
+    private function provisionEmail(): array
     {
         // Implement email provisioning logic
         // This would typically involve creating email accounts on your mail server
@@ -75,31 +68,27 @@ class ServiceProvisioningService
         return ['status' => 'success', 'message' => 'Email service provisioned successfully'];
     }
 
-    private function generateUsername($customer)
+    private function generateUsername($customer): string
     {
         // Implement logic to generate a unique username
-        $baseName = strtolower(preg_replace('/[^a-z0-9]/i', '', $customer->name));
+        $baseName = strtolower((string) preg_replace('/[^a-z0-9]/i', '', (string) $customer->name));
         $baseName = substr($baseName, 0, 8);
-        return $baseName . rand(100, 999);
+        return $baseName . random_int(100, 999);
     }
 
     public function manageService(Subscription $subscription, $action, $options = [])
     {
         $service = $subscription->productService;
 
-        switch ($service->type) {
-            case 'hosting':
-                return $this->manageHosting($subscription, $action, $options);
-            case 'domain':
-                return $this->manageDomain($subscription, $action);
-            case 'email':
-                return $this->manageEmail($subscription, $action);
-            default:
-                throw new Exception('Unsupported service type');
-        }
+        return match ($service->type) {
+            'hosting' => $this->manageHosting($subscription, $action, $options),
+            'domain' => $this->manageDomain($action),
+            'email' => $this->manageEmail($action),
+            default => throw new Exception('Unsupported service type'),
+        };
     }
 
-    private function manageHosting(Subscription $subscription, $action, $options = [])
+    private function manageHosting(Subscription $subscription, $action, array $options = [])
     {
         $hostingAccount = HostingAccount::where('subscription_id', $subscription->id)->first();
 
@@ -139,7 +128,7 @@ class ServiceProvisioningService
         }
     }
 
-    private function manageDomain(Subscription $subscription, $action)
+    private function manageDomain($action): array
     {
         // Implement domain management logic
         // This would typically involve interacting with a domain registrar API
@@ -147,7 +136,7 @@ class ServiceProvisioningService
         return ['status' => 'success', 'message' => "Domain {$action} successfully"];
     }
 
-    private function manageEmail(Subscription $subscription, $action)
+    private function manageEmail($action): array
     {
         // Implement email management logic
         // This would typically involve managing email accounts on your mail server

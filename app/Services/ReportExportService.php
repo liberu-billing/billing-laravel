@@ -9,14 +9,11 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportExportService
 {
-    protected $reportService;
-
-    public function __construct(ReportService $reportService)
+    public function __construct(protected \App\Services\ReportService $reportService)
     {
-        $this->reportService = $reportService;
     }
 
-    public function exportToCsv(Report $report)
+    public function exportToCsv(Report $report): string
     {
         $data = $this->generateReportData($report);
         $filename = sprintf('report_%s_%s.csv', $report->type, now()->format('Y-m-d'));
@@ -24,11 +21,11 @@ class ReportExportService
         $handle = fopen('php://temp', 'r+');
         
         // Add headers
-        fputcsv($handle, array_keys(reset($data)));
+        fputcsv($handle, array_keys(reset($data)), escape: '\\');
         
         // Add data
         foreach ($data as $row) {
-            fputcsv($handle, $row);
+            fputcsv($handle, $row, escape: '\\');
         }
         
         rewind($handle);
@@ -40,7 +37,7 @@ class ReportExportService
         return $filename;
     }
 
-    public function exportToPdf(Report $report)
+    public function exportToPdf(Report $report): string
     {
         $data = $this->generateReportData($report);
         $filename = sprintf('report_%s_%s.pdf', $report->type, now()->format('Y-m-d'));

@@ -9,20 +9,17 @@ use Illuminate\Support\Facades\Storage;
 
 class ReportController extends Controller
 {
-    protected $reportService;
-
-    public function __construct(ReportGenerationService $reportService)
+    public function __construct(protected \App\Services\ReportGenerationService $reportService)
     {
-        $this->reportService = $reportService;
     }
 
-    public function index()
+    public function index(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         $reports = Report::where('team_id', auth()->user()->currentTeam->id)->get();
         return view('reports.index', compact('reports'));
     }
 
-    public function create()
+    public function create(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         return view('reports.create');
     }

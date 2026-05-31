@@ -5,11 +5,10 @@ namespace App\Console\Commands;
 use App\Models\AuditLog;
 use Illuminate\Console\Command;
 
+#[\Illuminate\Console\Attributes\Description('Prune old audit logs')]
+#[\Illuminate\Console\Attributes\Signature('audit:prune {--days=90}')]
 class PruneAuditLogs extends Command
 {
-    protected $signature = 'audit:prune {--days=90}';
-    protected $description = 'Prune old audit logs';
-
     public function handle(): void
     {
         $days = $this->option('days');

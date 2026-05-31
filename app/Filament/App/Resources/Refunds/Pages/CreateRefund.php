@@ -8,8 +8,10 @@ use Filament\Resources\Pages\CreateRecord;
 
 class CreateRefund extends CreateRecord
 {
+    #[\Override]
     protected static string $resource = RefundResource::class;
 
+    #[\Override]
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');

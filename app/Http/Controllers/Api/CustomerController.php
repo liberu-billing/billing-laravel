@@ -9,6 +9,11 @@ use Illuminate\Http\JsonResponse;
 
 class CustomerController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Customer::class, 'customer');
+    }
+
     public function index(Request $request): JsonResponse
     {
         $customers = Customer::query()

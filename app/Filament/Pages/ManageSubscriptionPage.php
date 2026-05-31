@@ -16,7 +16,9 @@ use Illuminate\Support\Facades\Auth;
 
 class ManageSubscriptionPage extends Page
 {
+    #[\Override]
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-credit-card';
+    #[\Override]
     protected string $view = 'filament.pages.manage-subscription';
 
     public $subscription;

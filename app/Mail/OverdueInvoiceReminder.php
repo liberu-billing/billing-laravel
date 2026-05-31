@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
@@ -14,6 +16,9 @@ class OverdueInvoiceReminder extends Mailable
 {
     use Queueable, SerializesModels;
 
+    /**
+     * @var \App\Models\Invoice
+     */
     public $invoice;
 
     public function __construct(Invoice $invoice)

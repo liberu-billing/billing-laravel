@@ -5,28 +5,35 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'quote_id',
+    'description',
+    'quantity',
+    'unit_price',
+    'total',
+    'sort_order',
+])]
 class QuoteItem extends Model
 {
-    protected $fillable = [
-        'quote_id',
-        'description',
-        'quantity',
-        'unit_price',
-        'total',
-        'sort_order',
-    ];
+    #[\Override]
+    protected function casts(): array
 
-    protected $casts = [
+    {
+
+        return [
         'quantity' => 'decimal:2',
         'unit_price' => 'decimal:2',
         'total' => 'decimal:2',
     ];
 
+    }
+
+    #[\Override]
     protected static function boot(): void
     {
         parent::boot();
 
-        static::saving(function (QuoteItem $item) {
+        static::saving(function (QuoteItem $item): void {
             $item->total = $item->quantity * $item->unit_price;
         });
     }

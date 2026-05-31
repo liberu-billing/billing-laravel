@@ -6,27 +6,33 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasTeam;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'team_id',
+    'fee_type',
+    'fee_amount',
+    'grace_period_days',
+    'max_fee_amount',
+    'is_compound',
+    'frequency',
+])]
 class LateFeeConfiguration extends Model
 {
     use HasFactory;
     use HasTeam;
 
-    protected $fillable = [
-        'team_id',
-        'fee_type',
-        'fee_amount',
-        'grace_period_days',
-        'max_fee_amount',
-        'is_compound',
-        'frequency',
-    ];
+    #[\Override]
+    protected function casts(): array
 
-    protected $casts = [
+    {
+
+        return [
         'is_compound' => 'boolean',
         'fee_amount' => 'decimal:2',
         'max_fee_amount' => 'decimal:2',
         'grace_period_days' => 'integer',
     ];
+
+    }
 
     public static function getFrequencyOptions(): array
     {
@@ -61,11 +67,12 @@ class LateFeeConfiguration extends Model
         }
     }
 
+    #[\Override]
     protected static function boot(): void
     {
         parent::boot();
 
-        static::saving(function ($config) {
+        static::saving(function ($config): void {
             $config->validate();
         });
     }

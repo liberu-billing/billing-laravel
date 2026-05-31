@@ -8,11 +8,8 @@ use App\Services\Registrars\EnomClient;
 
 class DomainPricingService
 {
-    protected $enomClient;
-
-    public function __construct(EnomClient $enomClient)
+    public function __construct(protected \App\Services\Registrars\EnomClient $enomClient)
     {
-        $this->enomClient = $enomClient;
     }
 
     public function calculateDomainPrice($domainName)
@@ -27,7 +24,7 @@ class DomainPricingService
         return $tldModel->calculatePrice();
     }
 
-    public function syncTldsFromEnom()
+    public function syncTldsFromEnom(): void
     {
         $availableTlds = $this->enomClient->getAvailableTlds();
 
@@ -46,9 +43,9 @@ class DomainPricingService
         }
     }
 
-    protected function getTldFromDomain($domainName)
+    protected function getTldFromDomain($domainName): string
     {
-        $parts = explode('.', $domainName);
+        $parts = explode('.', (string) $domainName);
         return '.' . end($parts);
     }
 }

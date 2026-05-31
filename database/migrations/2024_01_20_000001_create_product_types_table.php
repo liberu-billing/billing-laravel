@@ -6,9 +6,9 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
+    public function up(): void
     {
-        Schema::create('product_types', function (Blueprint $table) {
+        Schema::create('product_types', function (Blueprint $table): void {
             $table->id();
             $table->string('name');
             $table->string('slug')->unique();
@@ -47,7 +47,7 @@ return new class extends Migration
         ]);
     }
 
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('product_types');
     }

@@ -6,28 +6,32 @@ use App\Traits\HasTeam;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'name',
+    'country',
+    'state',
+    'rate',
+    'service_type',
+    'is_active',
+    'team_id',
+    'threshold_amount',
+    'threshold_rate',
+    'effective_date',
+    'expiry_date',
+    'tax_category',
+    'description'
+])]
 class TaxRate extends Model
 {
     use HasFactory;
     use HasTeam;
 
-    protected $fillable = [
-        'name',
-        'country',
-        'state',
-        'rate',
-        'service_type',
-        'is_active',
-        'team_id',
-        'threshold_amount',
-        'threshold_rate',
-        'effective_date',
-        'expiry_date',
-        'tax_category',
-        'description'
-    ];
+    #[\Override]
+    protected function casts(): array
 
-    protected $casts = [
+    {
+
+        return [
         'rate' => 'decimal:2',
         'threshold_amount' => 'decimal:2',
         'threshold_rate' => 'decimal:2',
@@ -36,12 +40,14 @@ class TaxRate extends Model
         'expiry_date' => 'date'
     ];
 
+    }
+
     public function team()
     {
         return $this->belongsTo(Team::class);
     }
 
-    public function isValid()
+    public function isValid(): bool
     {
         $now = now();
         return $this->is_active &&
@@ -49,14 +55,15 @@ class TaxRate extends Model
             ($this->expiry_date === null || $this->expiry_date >= $now);
     }
 
-    public function scopeActive($query)
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function active($query)
     {
         return $query->where('is_active', true)
-            ->where(function ($q) {
+            ->where(function ($q): void {
                 $q->whereNull('effective_date')
                     ->orWhere('effective_date', '<=', now());
             })
-            ->where(function ($q) {
+            ->where(function ($q): void {
                 $q->whereNull('expiry_date')
                     ->orWhere('expiry_date', '>=', now());
             });

@@ -5,23 +5,29 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'team_id',
+    'title',
+    'shortcode',
+    'content',
+    'category',
+    'is_active',
+    'usage_count',
+    'last_used_at',
+])]
 class CannedResponse extends Model
 {
-    protected $fillable = [
-        'team_id',
-        'title',
-        'shortcode',
-        'content',
-        'category',
-        'is_active',
-        'usage_count',
-        'last_used_at',
-    ];
+    #[\Override]
+    protected function casts(): array
 
-    protected $casts = [
+    {
+
+        return [
         'is_active' => 'boolean',
         'last_used_at' => 'datetime',
     ];
+
+    }
 
     public function team(): BelongsTo
     {

@@ -5,8 +5,12 @@ namespace Database\Factories;
 use App\Models\HostingServer;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\HostingServer>
+ */
 class HostingServerFactory extends Factory
 {
+    #[\Override]
     protected $model = HostingServer::class;
 
     public function definition(): array
@@ -27,49 +31,49 @@ class HostingServerFactory extends Factory
 
     public function cpanel(): self
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'control_panel' => 'cpanel',
         ]);
     }
 
     public function plesk(): self
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'control_panel' => 'plesk',
         ]);
     }
 
     public function directadmin(): self
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'control_panel' => 'directadmin',
         ]);
     }
 
     public function virtualmin(): self
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'control_panel' => 'virtualmin',
         ]);
     }
 
     public function liberu(): self
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'control_panel' => 'liberu',
         ]);
     }
 
     public function inactive(): self
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'is_active' => false,
         ]);
     }
 
     public function atCapacity(): self
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function (array $attributes): array {
             $maxAccounts = $attributes['max_accounts'] ?? 100;
             return [
                 'active_accounts' => $maxAccounts,

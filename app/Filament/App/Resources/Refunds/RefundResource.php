@@ -28,34 +28,35 @@ use Closure;
 
 class RefundResource extends Resource
 {
+    #[\Override]
     protected static ?string $model = Payment::class;
 
+    #[\Override]
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-arrow-path';
     
+    #[\Override]
     protected static ?string $navigationLabel = 'Refunds';
 
+    #[\Override]
     protected static ?string $modelLabel = 'Refund';
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 Select::make('payment_id')
                     ->label('Payment')
-                    ->options(function () {
-                        return Payment::whereIn('refund_status', ['none', 'partial'])
-                            ->with('invoice')
-                            ->get()
-                            ->mapWithKeys(function ($payment) {
-                                return [
-                                    $payment->id => "Payment #{$payment->id} - Invoice #{$payment->invoice->invoice_number} ({$payment->amount} {$payment->currency})"
-                                ];
-                            });
-                    })
+                    ->options(fn() => Payment::whereIn('refund_status', ['none', 'partial'])
+                        ->with('invoice')
+                        ->get()
+                        ->mapWithKeys(fn($payment) => [
+                            $payment->id => "Payment #{$payment->id} - Invoice #{$payment->invoice->invoice_number} ({$payment->amount} {$payment->currency})"
+                        ]))
                     ->required()
                     ->searchable()
                     ->reactive()
-                    ->afterStateUpdated(function ($state, callable $set) {
+                    ->afterStateUpdated(function ($state, callable $set): void {
                         if ($state) {
                             $payment = Payment::find($state);
                             $set('max_refund_amount', $payment->getRemainingRefundableAmount());
@@ -67,12 +68,12 @@ class RefundResource extends Resource
                     ->required()
                     ->numeric()
                     ->label('Refund Amount')
-                    ->hint(fn ($state, $record) => $record ? "Maximum refundable amount: {$record->getRemainingRefundableAmount()} {$record->currency}" : '')
+                    ->hint(fn ($state, $record): string => $record ? "Maximum refundable amount: {$record->getRemainingRefundableAmount()} {$record->currency}" : '')
                     ->rules([
                         'required',
                         'numeric',
                         'min:0.01',
-                        function (string $attribute, $value, Closure $fail) {
+                        function (string $attribute, $value, Closure $fail): void {
                             $payment = Payment::find(request()->input('data.payment_id'));
                             if ($payment && $value > $payment->getRemainingRefundableAmount()) {
                                 $fail("The refund amount cannot exceed the remaining refundable amount of {$payment->getRemainingRefundableAmount()} {$payment->currency}");
@@ -89,6 +90,7 @@ class RefundResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -131,7 +133,7 @@ class RefundResource extends Resource
             ])
             ->recordActions([
                 Action::make('refund')
-                    ->visible(fn (Payment $record) => $record->isRefundable())
+                    ->visible(fn (Payment $record): bool => $record->isRefundable())
                     ->schema([
                         TextInput::make('amount')
                             ->required()
@@ -141,7 +143,7 @@ class RefundResource extends Resource
                                 'required',
                                 'numeric',
                                 'min:0.01',
-                                function (string $attribute, $value, Closure $fail) use ($record) {
+                                function (string $attribute, $value, Closure $fail) use ($record): void {
                                     if ($value > $record->getRemainingRefundableAmount()) {
                                         $fail("Cannot refund more than {$record->getRemainingRefundableAmount()} {$record->currency}");
                                     }
@@ -151,7 +153,7 @@ class RefundResource extends Resource
                             ->required()
                             ->label('Refund Reason'),
                     ])
-                    ->action(function (array $data, Payment $record) {
+                    ->action(function (array $data, Payment $record): void {
                         $refundService = app(RefundService::class);
                         
                         try {
@@ -182,11 +184,13 @@ class RefundResource extends Resource
             ->defaultSort('created_at', 'desc');
     }
     
+    #[\Override]
     public static function getRelations(): array
     {
         return [];
     }
     
+    #[\Override]
     public static function getPages(): array
     {
         return [
@@ -196,6 +200,7 @@ class RefundResource extends Resource
         ];
     }    
 
+    #[\Override]
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()

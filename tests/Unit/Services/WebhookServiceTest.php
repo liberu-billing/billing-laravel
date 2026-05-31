@@ -20,7 +20,7 @@ class WebhookServiceTest extends TestCase
         $this->webhookService = new WebhookService();
     }
 
-    public function test_can_dispatch_webhook_event()
+    public function test_can_dispatch_webhook_event(): void
     {
         $endpoint = WebhookEndpoint::create([
             'url' => 'https://example.com/webhook',
@@ -40,7 +40,7 @@ class WebhookServiceTest extends TestCase
         ]);
     }
 
-    public function test_webhook_endpoint_subscription_filter()
+    public function test_webhook_endpoint_subscription_filter(): void
     {
         $endpoint = WebhookEndpoint::create([
             'url' => 'https://example.com/webhook',
@@ -52,7 +52,7 @@ class WebhookServiceTest extends TestCase
         $this->assertFalse($endpoint->isSubscribedTo(WebhookService::EVENT_PAYMENT_RECEIVED));
     }
 
-    public function test_inactive_endpoint_not_subscribed()
+    public function test_inactive_endpoint_not_subscribed(): void
     {
         $endpoint = WebhookEndpoint::create([
             'url' => 'https://example.com/webhook',
@@ -63,7 +63,7 @@ class WebhookServiceTest extends TestCase
         $this->assertFalse($endpoint->isSubscribedTo(WebhookService::EVENT_INVOICE_CREATED));
     }
 
-    public function test_webhook_signature_verification()
+    public function test_webhook_signature_verification(): void
     {
         $payload = json_encode(['test' => 'data']);
         $secret = 'test-secret';
@@ -78,7 +78,7 @@ class WebhookServiceTest extends TestCase
         );
     }
 
-    public function test_get_available_events()
+    public function test_get_available_events(): void
     {
         $events = WebhookService::getAvailableEvents();
 

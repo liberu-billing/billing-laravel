@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Events;
 
 use App\Models\Invoice;
@@ -13,7 +15,13 @@ class InvoiceStatusChanged implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    /**
+     * @var \App\Models\Invoice
+     */
     public $invoice;
+    /**
+     * @var string
+     */
     public $status;
 
     public function __construct(Invoice $invoice, string $status)
@@ -27,7 +35,7 @@ class InvoiceStatusChanged implements ShouldBroadcast
         return new Channel('invoices.' . $this->invoice->id);
     }
 
-    public function broadcastWith()
+    public function broadcastWith(): array
     {
         return [
             'invoice_id' => $this->invoice->id,

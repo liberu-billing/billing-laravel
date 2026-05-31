@@ -5,12 +5,11 @@ declare(strict_types=1);
 use Rector\Caching\ValueObject\Storage\FileCacheStorage;
 use Rector\CodeQuality\Rector\FuncCall\CompactToVariablesRector;
 use Rector\Config\RectorConfig;
+use Rector\Set\ValueObject\LevelSetList;
 use Rector\Set\ValueObject\SetList;
-use Rector\ValueObject\PhpVersion;
 use RectorLaravel\Set\LaravelLevelSetList;
 
 return static function (RectorConfig $rectorConfig): void {
-    // Paths to analyze
     $rectorConfig->paths([
         __DIR__.'/app',
         __DIR__.'/config',
@@ -20,21 +19,18 @@ return static function (RectorConfig $rectorConfig): void {
         __DIR__.'/tests',
     ]);
 
-    // Skip specific rules
     $rectorConfig->skip([
         CompactToVariablesRector::class,
     ]);
 
-    // Enable caching for Rector
     $rectorConfig->cacheDirectory(__DIR__.'/storage/rector');
     $rectorConfig->cacheClass(FileCacheStorage::class);
 
-    // Apply sets for Laravel and general code quality
     $rectorConfig->sets([
-        LaravelLevelSetList::UP_TO_LARAVEL_110,
+        LevelSetList::UP_TO_PHP_85,
+        LaravelLevelSetList::UP_TO_LARAVEL_130,
         SetList::CODE_QUALITY,
+        SetList::DEAD_CODE,
+        SetList::TYPE_DECLARATION,
     ]);
-
-    // Define PHP version for Rector
-    $rectorConfig->phpVersion(PhpVersion::PHP_84);
 };

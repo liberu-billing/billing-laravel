@@ -14,8 +14,10 @@ use Illuminate\Support\Facades\Auth;
 
 class CreateTeam extends RegisterTenant
 {
+    #[\Override]
     protected Width|string|null $maxWidth = '2xl';
 
+    #[\Override]
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -27,6 +29,7 @@ class CreateTeam extends RegisterTenant
             ]);
     }
 
+    #[\Override]
     protected function handleRegistration(array $data): Model
     {
         return app(\App\Actions\Jetstream\CreateTeam::class)->create(auth()->user(), $data);

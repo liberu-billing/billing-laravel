@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Traits\HasTeam;
@@ -39,10 +41,13 @@ class ConnectedAccount extends SocialstreamConnectedAccount
      *
      * @var array
      */
-    protected $casts = [
+    protected function casts(): array
+    {
+        return [
         'created_at' => 'datetime',
         'expires_at' => 'datetime',
     ];
+    }
 
     /**
      * The event map for the model.

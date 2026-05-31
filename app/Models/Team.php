@@ -9,6 +9,11 @@ use Laravel\Jetstream\Events\TeamDeleted;
 use Laravel\Jetstream\Events\TeamUpdated;
 use Laravel\Jetstream\Team as JetstreamTeam;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'name',
+    'personal_team',
+    'user_id',
+])]
 class Team extends JetstreamTeam
 {
     use HasFactory;
@@ -21,6 +26,7 @@ class Team extends JetstreamTeam
     protected $fillable = [
         'name',
         'personal_team',
+        'user_id',
     ];
 
     /**
@@ -28,6 +34,7 @@ class Team extends JetstreamTeam
      *
      * @var array<string, class-string>
      */
+    #[\Override]
     protected $dispatchesEvents = [
         'created' => TeamCreated::class,
         'updated' => TeamUpdated::class,
@@ -39,6 +46,7 @@ class Team extends JetstreamTeam
      *
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [

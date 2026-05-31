@@ -6,9 +6,9 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
+    public function up(): void
     {
-        Schema::create('client_notes', function (Blueprint $table) {
+        Schema::create('client_notes', function (Blueprint $table): void {
             $table->id();
             $table->integer('client_id')->nullable();
             $table->integer('user_id')->nullable(); 
@@ -17,7 +17,7 @@ return new class extends Migration
         });
     }
 
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('client_notes');
     }

@@ -9,13 +9,13 @@ use Illuminate\Support\Facades\Storage;
 
 class InvoiceTemplateController extends Controller
 {
-    public function index()
+    public function index(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         $templates = InvoiceTemplate::where('team_id', auth()->user()->currentTeam->id)->get();
         return view('invoice-templates.index', compact('templates'));
     }
 
-    public function create()
+    public function create(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         return view('invoice-templates.form');
     }
@@ -53,7 +53,7 @@ class InvoiceTemplateController extends Controller
             ->with('success', 'Template created successfully');
     }
 
-    public function edit(InvoiceTemplate $template)
+    public function edit(InvoiceTemplate $template): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         $this->authorize('update', $template);
         return view('invoice-templates.form', compact('template'));
@@ -96,7 +96,7 @@ class InvoiceTemplateController extends Controller
             ->with('success', 'Template updated successfully');
     }
 
-    public function preview(InvoiceTemplate $template)
+    public function preview(InvoiceTemplate $template): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         $this->authorize('view', $template);
         

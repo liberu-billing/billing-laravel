@@ -5,24 +5,30 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'webhook_endpoint_id',
+    'event_type',
+    'payload',
+    'status',
+    'attempts',
+    'last_error',
+    'sent_at',
+    'next_retry_at',
+])]
 class WebhookEvent extends Model
 {
-    protected $fillable = [
-        'webhook_endpoint_id',
-        'event_type',
-        'payload',
-        'status',
-        'attempts',
-        'last_error',
-        'sent_at',
-        'next_retry_at',
-    ];
+    #[\Override]
+    protected function casts(): array
 
-    protected $casts = [
+    {
+
+        return [
         'payload' => 'array',
         'sent_at' => 'datetime',
         'next_retry_at' => 'datetime',
     ];
+
+    }
 
     public function webhookEndpoint(): BelongsTo
     {
