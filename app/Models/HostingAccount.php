@@ -6,24 +6,24 @@ use App\Traits\HasTeam;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'customer_id',
+    'subscription_id',
+    'hosting_server_id',
+    'control_panel',
+    'username',
+    'domain',
+    'package',
+    'status',
+    'price',
+    'addons',
+])]
 class HostingAccount extends Model
 {
     use HasFactory;
     use HasTeam;
 
-    protected $fillable = [
-        'customer_id',
-        'subscription_id',
-        'hosting_server_id',
-        'control_panel',
-        'username',
-        'domain',
-        'package',
-        'status',
-        'price',
-        'addons',
-    ];
-
+    #[\Override]
     protected function casts(): array
 
     {
@@ -50,17 +50,17 @@ class HostingAccount extends Model
         return $this->belongsTo(HostingServer::class, 'hosting_server_id');
     }
 
-    public function isActive()
+    public function isActive(): bool
     {
         return $this->status === 'active';
     }
 
-    public function hasDomain()
+    public function hasDomain(): bool
     {
         return !empty($this->domain);
     }
 
-    public function hasAddon($addon)
+    public function hasAddon($addon): bool
     {
         $addons = $this->addons ?? [];
         return in_array($addon, $addons);

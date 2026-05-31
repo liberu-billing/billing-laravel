@@ -10,7 +10,7 @@ use App\Models\HostingServer;
 
 class PleskClient
 {
-    protected $client;
+    protected \GuzzleHttp\Client $client;
     protected $server;
     protected $apiKey;
 
@@ -19,7 +19,7 @@ class PleskClient
         $this->client = new Client();
     }
 
-    public function setServer(HostingServer $server)
+    public function setServer(HostingServer $server): void
     {
         $this->server = $server;
         $this->apiKey = $server->api_token;
@@ -125,7 +125,7 @@ class PleskClient
         return $this->makeApiCall($xml);
     }
 
-    protected function makeApiCall($xml)
+    protected function makeApiCall($xml): bool
     {
         if (!$this->server) {
             throw new Exception('Server not configured');
@@ -142,7 +142,7 @@ class PleskClient
                 'verify' => false
             ]);
 
-            $result = simplexml_load_string($response->getBody()->getContents());
+            $result = simplexml_load_string((string) $response->getBody()->getContents());
 
             if ((string)$result->status === 'ok') {
                 Log::info("Plesk API call successful", ['server' => $this->server->hostname]);
@@ -164,18 +164,17 @@ class PleskClient
         }
     }
 
-    protected function buildXmlRequest($command, $params)
+    protected function buildXmlRequest($command, $params): string
     {
         $xml = '<?xml version="1.0" encoding="UTF-8"?>';
         $xml .= '<packet version="1.6.9.1">';
         $xml .= "<{$command}>";
         $xml .= $this->arrayToXml($params);
         $xml .= "</{$command}>";
-        $xml .= '</packet>';
-        return $xml;
+        return $xml . '</packet>';
     }
 
-    protected function arrayToXml($array)
+    protected function arrayToXml($array): string
     {
         $xml = '';
         foreach ($array as $key => $value) {
@@ -192,7 +191,7 @@ class PleskClient
         return $xml;
     }
 
-    protected function generatePassword()
+    protected function generatePassword(): string
     {
         return bin2hex(random_bytes(12));
     }

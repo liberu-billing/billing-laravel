@@ -6,24 +6,24 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'category_id',
+    'author_id',
+    'title',
+    'slug',
+    'summary',
+    'content',
+    'sort_order',
+    'is_published',
+    'is_featured',
+    'view_count',
+    'helpful_count',
+    'not_helpful_count',
+    'published_at',
+])]
 class KnowledgeBaseArticle extends Model
 {
-    protected $fillable = [
-        'category_id',
-        'author_id',
-        'title',
-        'slug',
-        'summary',
-        'content',
-        'sort_order',
-        'is_published',
-        'is_featured',
-        'view_count',
-        'helpful_count',
-        'not_helpful_count',
-        'published_at',
-    ];
-
+    #[\Override]
     protected function casts(): array
 
     {
@@ -36,17 +36,18 @@ class KnowledgeBaseArticle extends Model
 
     }
 
+    #[\Override]
     protected static function boot()
     {
         parent::boot();
 
-        static::creating(function ($article) {
+        static::creating(function ($article): void {
             if (empty($article->slug)) {
                 $article->slug = Str::slug($article->title);
             }
         });
 
-        static::updating(function ($article) {
+        static::updating(function ($article): void {
             if ($article->isDirty('is_published') && $article->is_published && !$article->published_at) {
                 $article->published_at = now();
             }

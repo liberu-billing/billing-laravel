@@ -7,17 +7,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'user_id',
+    'title',
+    'description',
+    'status',
+    'priority'
+])]
 class Ticket extends Model
 {
     use HasFactory;
-
-    protected $fillable = [
-        'user_id',
-        'title',
-        'description',
-        'status',
-        'priority'
-    ];
 
     public function user(): BelongsTo
     {

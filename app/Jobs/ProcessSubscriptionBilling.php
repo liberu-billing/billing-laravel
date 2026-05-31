@@ -12,15 +12,15 @@ use Illuminate\Queue\SerializesModels;
 
 class ProcessSubscriptionBilling implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use \Illuminate\Foundation\Queue\Queueable;
 
-    public function handle(BillingService $billingService)
+    public function handle(BillingService $billingService): void
     {
         Subscription::query()
             ->where('status', 'active')
             ->where('auto_renew', true)
             ->get()
-            ->each(function ($subscription) use ($billingService) {
+            ->each(function ($subscription) use ($billingService): void {
                 if ($subscription->needsBilling()) {
                     $invoice = $billingService->generateInvoice($subscription);
                     $billingService->processAutomaticPayment($invoice);

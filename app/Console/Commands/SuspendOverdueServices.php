@@ -6,11 +6,10 @@ use App\Services\ServiceAutomationService;
 use Exception;
 use Illuminate\Console\Command;
 
+#[\Illuminate\Console\Attributes\Description('Suspend services with overdue invoices')]
+#[\Illuminate\Console\Attributes\Signature('services:suspend-overdue {--days=7 : Number of days overdue before suspension}')]
 class SuspendOverdueServices extends Command
 {
-    protected $signature = 'services:suspend-overdue {--days=7 : Number of days overdue before suspension}';
-    protected $description = 'Suspend services with overdue invoices';
-
     public function __construct(
         protected ?ServiceAutomationService $automationService = null
     ) {
@@ -18,7 +17,7 @@ class SuspendOverdueServices extends Command
         $this->automationService = $automationService ?? app(ServiceAutomationService::class);
     }
 
-    public function handle()
+    public function handle(): int
     {
         if (cache()->get('suspending_overdue_services')) {
             $this->warn('Service suspension is already running');

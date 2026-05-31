@@ -22,10 +22,14 @@ use Filament\Actions\Action;
 
 class InvoiceResource extends Resource
 {
+    #[\Override]
     protected static ?string $model = Invoice::class;
+    #[\Override]
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
+    #[\Override]
     protected static ?string $navigationLabel = 'Invoices';
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -49,12 +53,12 @@ class InvoiceResource extends Resource
                                 TextInput::make('remaining_amount')
                                     ->disabled()
                                     ->prefix(fn (Invoice $record) => $record->currency)
-                                    ->visible(fn (Invoice $record) => $record->status === 'partially_paid'),
+                                    ->visible(fn (Invoice $record): bool => $record->status === 'partially_paid'),
                             ]),
                     ]),
 
                 Section::make()
-                    ->visible(fn (Invoice $record) => $record->status !== 'paid')
+                    ->visible(fn (Invoice $record): bool => $record->status !== 'paid')
                     ->schema([
                         Select::make('payment_method')
                             ->options([
@@ -67,13 +71,14 @@ class InvoiceResource extends Resource
                             ->numeric()
                             ->required()
                             ->rules([
-                                fn (Invoice $record) => 'max:' . $record->remaining_amount,
+                                fn (Invoice $record): string => 'max:' . $record->remaining_amount,
                                 'min:1',
                             ]),
                     ]),
             ]);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -110,8 +115,8 @@ class InvoiceResource extends Resource
                 ViewAction::make(),
                 Action::make('pay')
                     ->icon('heroicon-o-credit-card')
-                    ->visible(fn (Invoice $record) => $record->status !== 'paid')
-                    ->action(function (Invoice $record, array $data) {
+                    ->visible(fn (Invoice $record): bool => $record->status !== 'paid')
+                    ->action(function (Invoice $record, array $data): void {
                         $record->processPayment($data['payment_method'], $data['payment_amount']);
                     })
                     ->schema([
@@ -126,20 +131,21 @@ class InvoiceResource extends Resource
                             ->numeric()
                             ->required()
                             ->rules([
-                                fn (Invoice $record) => 'max:' . $record->remaining_amount,
+                                fn (Invoice $record): string => 'max:' . $record->remaining_amount,
                                 'min:1',
                             ]),
                     ]),
                 Action::make('download_pdf')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(fn (Invoice $record) => response()->streamDownload(
-                        fn () => print($record->generatePdf()),
+                        fn (): int => print($record->generatePdf()),
                         "invoice-{$record->invoice_number}.pdf"
                     )),
             ])
             ->defaultSort('created_at', 'desc');
     }
 
+    #[\Override]
     public static function getPages(): array
     {
         return [
@@ -148,6 +154,7 @@ class InvoiceResource extends Resource
         ];
     }
 
+    #[\Override]
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()->where('client_id', auth()->id());

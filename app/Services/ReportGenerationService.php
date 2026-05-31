@@ -11,11 +11,8 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportGenerationService
 {
-    protected $billingService;
-
-    public function __construct(BillingService $billingService)
+    public function __construct(protected \App\Services\BillingService $billingService)
     {
-        $this->billingService = $billingService;
     }
 
     public function generateReport(Report $report)
@@ -59,7 +56,7 @@ class ReportGenerationService
         };
     }
 
-    protected function generatePdfReport($data, Report $report)
+    protected function generatePdfReport($data, Report $report): string
     {
         $pdf = PDF::loadView("reports.templates.{$report->type}", ['data' => $data]);
         $filename = "report_{$report->id}.pdf";
@@ -67,21 +64,21 @@ class ReportGenerationService
         return $filename;
     }
 
-    protected function generateCsvReport($data, Report $report)
+    protected function generateCsvReport($data, Report $report): string
     {
         $filename = "report_{$report->id}.csv";
         $handle = fopen(Storage::path("reports/{$filename}"), 'w');
         
-        fputcsv($handle, array_keys(reset($data)));
+        fputcsv($handle, array_keys(reset($data)), escape: '\\');
         foreach ($data as $row) {
-            fputcsv($handle, $row);
+            fputcsv($handle, $row, escape: '\\');
         }
         
         fclose($handle);
         return $filename;
     }
 
-    protected function generateExcelReport($data, Report $report)
+    protected function generateExcelReport($data, Report $report): string
     {
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();

@@ -42,27 +42,6 @@ class CreateNewUser implements CreatesNewUsers
                 'password' => $this->passwordRules(),
                 // 'role' => ['required', 'string', Rule::in(['tenant', 'buyer', 'seller', 'landlord', 'contractor'])],
             ])->validate();
-
-           
-            $user = DB::transaction(function () use ($input) {
-                $team = $this->configureDefaultTeamContext();
-                return tap(User::create([
-                    'name'     => $input['name'],
-                    'email'    => $input['email'],
-                    'password' => Hash::make($input['password']),
-                ]), function (User $user) use ($input, $team) {
-                    $team->users()->attach($user);
-                    $team = $this->createTeam($user);
-                    $user->switchTeam($team);
-                    setPermissionsTeamId($team->id);
-                    $user = User::find($user->id);
-                    try {
-                        $user->assignRole("panel_user");
-                    } catch (RoleDoesNotExist $e) {
-                        Log::warning('Role panel_user does not exist, skipping role assignment for user ' . $user->id);
-                    }
-                });
-            });
             // $user = DB::transaction(function () use ($input) {
             //     return tap(,
             //     , function (User $user) use ($input) {
@@ -79,7 +58,25 @@ class CreateNewUser implements CreatesNewUsers
             //     'role' => $input['role'],
             // ]);
     
-            return $user;
+            return DB::transaction(function () use ($input) {
+                $team = $this->configureDefaultTeamContext();
+                return tap(User::create([
+                    'name'     => $input['name'],
+                    'email'    => $input['email'],
+                    'password' => Hash::make($input['password']),
+                ]), function (User $user) use ($team): void {
+                    $team->users()->attach($user);
+                    $team = $this->createTeam($user);
+                    $user->switchTeam($team);
+                    setPermissionsTeamId($team->id);
+                    $user = User::find($user->id);
+                    try {
+                        $user->assignRole("panel_user");
+                    } catch (RoleDoesNotExist) {
+                        Log::warning('Role panel_user does not exist, skipping role assignment for user ' . $user->id);
+                    }
+                });
+            });
         } catch (ValidationException $e) {
             Log::error('User creation validation failed', [
                 'errors' => $e->errors(),
@@ -93,20 +90,20 @@ class CreateNewUser implements CreatesNewUsers
                 'sql' => $e->getSql(),
                 'bindings' => $e->getBindings(),
             ]);
-            throw new Exception($this->getDatabaseErrorMessage($e));
+            throw new Exception($this->getDatabaseErrorMessage($e), $e->getCode(), $e);
         } catch (RoleDoesNotExist $e) {
             Log::error('Invalid role specified during user creation', [
                 'role' => $input['role'] ?? 'not provided',
                 'message' => $e->getMessage(),
             ]);
-            throw new Exception('Invalid role specified. Please choose a valid role.');
+            throw new Exception('Invalid role specified. Please choose a valid role.', $e->getCode(), $e);
         } catch (Exception $e) {
             Log::error('Unexpected error during user creation', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'exception_class' => get_class($e),
+                'exception_class' => $e::class,
             ]);
-            throw new Exception('An unexpected error occurred. Please try again later.');
+            throw new Exception('An unexpected error occurred. Please try again later.', $e->getCode(), $e);
         }
     }
     
@@ -149,12 +146,11 @@ class CreateNewUser implements CreatesNewUsers
      /**
      * Create a personal team for the user.
      */
-    protected function createTeam(User $user)
+    protected function createTeam(User $user): Team
     {
-        return $user->ownedTeams()->save(Team::forceCreate([
-            'user_id'       => $user->id,
+        return $user->ownedTeams()->create([
             'name'          => explode(' ', $user->name, 2)[0]."'s Team",
             'personal_team' => true,
-        ]));
+        ]);
     }
 }

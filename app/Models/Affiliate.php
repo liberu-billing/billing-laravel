@@ -1,24 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Traits\HasTeam;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'user_id',
+    'code',
+    'commission_rate',
+    'status',
+    'custom_rates',
+])]
 class Affiliate extends Model
 {
     use HasFactory;
     use HasTeam;
 
-    protected $fillable = [
-        'user_id',
-        'code',
-        'commission_rate',
-        'status',
-        'custom_rates',
-    ];
-
+    #[\Override]
     protected function casts(): array
 
     {

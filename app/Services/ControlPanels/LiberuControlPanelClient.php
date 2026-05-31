@@ -10,7 +10,7 @@ use App\Models\HostingServer;
 
 class LiberuControlPanelClient
 {
-    protected $client;
+    protected \GuzzleHttp\Client $client;
     protected $server;
     protected $apiToken;
 
@@ -19,13 +19,13 @@ class LiberuControlPanelClient
         $this->client = new Client();
     }
 
-    public function setServer(HostingServer $server)
+    public function setServer(HostingServer $server): void
     {
         $this->server = $server;
         $this->apiToken = $server->api_token;
     }
 
-    public function createAccount($username, $domain, $package)
+    public function createAccount(string $username, string $domain, $package)
     {
         $password = $this->generatePassword();
         $data = [
@@ -40,7 +40,7 @@ class LiberuControlPanelClient
         return $this->makeApiCall('POST', '/api/hosting/accounts', $data);
     }
 
-    public function suspendAccount($username)
+    public function suspendAccount(string $username)
     {
         $data = [
             'username' => $username,
@@ -50,14 +50,14 @@ class LiberuControlPanelClient
         return $this->makeApiCall('POST', '/api/hosting/accounts/' . $username . '/suspend', $data);
     }
 
-    public function unsuspendAccount($username)
+    public function unsuspendAccount(string $username)
     {
         return $this->makeApiCall('POST', '/api/hosting/accounts/' . $username . '/unsuspend', [
             'username' => $username
         ]);
     }
 
-    public function changePackage($username, $newPackage)
+    public function changePackage(string $username, $newPackage)
     {
         $data = [
             'username' => $username,
@@ -67,14 +67,14 @@ class LiberuControlPanelClient
         return $this->makeApiCall('PUT', '/api/hosting/accounts/' . $username . '/package', $data);
     }
 
-    public function terminateAccount($username)
+    public function terminateAccount(string $username)
     {
         return $this->makeApiCall('DELETE', '/api/hosting/accounts/' . $username, [
             'username' => $username
         ]);
     }
 
-    public function addAddon($username, $addon)
+    public function addAddon(string $username, $addon)
     {
         $data = [
             'username' => $username,
@@ -84,7 +84,7 @@ class LiberuControlPanelClient
         return $this->makeApiCall('POST', '/api/hosting/accounts/' . $username . '/addons', $data);
     }
 
-    public function removeAddon($username, $addon)
+    public function removeAddon(string $username, string $addon)
     {
         $data = [
             'username' => $username,
@@ -94,7 +94,7 @@ class LiberuControlPanelClient
         return $this->makeApiCall('DELETE', '/api/hosting/accounts/' . $username . '/addons/' . $addon, $data);
     }
 
-    protected function makeApiCall($method, $endpoint, $data = [])
+    protected function makeApiCall($method, string $endpoint, $data = []): bool
     {
         if (!$this->server) {
             throw new Exception('Server not configured');
@@ -114,10 +114,10 @@ class LiberuControlPanelClient
                 $options['json'] = $data;
             }
 
-            $url = rtrim($this->server->api_url, '/') . $endpoint;
+            $url = rtrim((string) $this->server->api_url, '/') . $endpoint;
             $response = $this->client->request($method, $url, $options);
 
-            $result = json_decode($response->getBody()->getContents(), true);
+            $result = json_decode((string) $response->getBody()->getContents(), true);
 
             if ($response->getStatusCode() >= 200 && $response->getStatusCode() < 300) {
                 Log::info("Liberu Control Panel API call successful", [
@@ -147,7 +147,7 @@ class LiberuControlPanelClient
         }
     }
 
-    protected function generatePassword()
+    protected function generatePassword(): string
     {
         return bin2hex(random_bytes(12));
     }

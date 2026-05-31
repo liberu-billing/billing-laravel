@@ -14,21 +14,21 @@ class EmailNotificationService
     protected $maxRetries = 3;
     protected $retryDelay = 300; // 5 minutes
 
-    public function send(Mailable $mailable, string $recipient)
+    public function send(Mailable $mailable, string $recipient): bool
     {
         try {
             Queue::push(new SendEmailNotification($mailable, $recipient));
             
             Log::info('Email notification queued', [
                 'recipient' => $recipient,
-                'mailable_class' => get_class($mailable)
+                'mailable_class' => $mailable::class
             ]);
             
             return true;
         } catch (Exception $e) {
             Log::error('Failed to queue email notification', [
                 'recipient' => $recipient,
-                'mailable_class' => get_class($mailable),
+                'mailable_class' => $mailable::class,
                 'error' => $e->getMessage()
             ]);
             
@@ -36,7 +36,7 @@ class EmailNotificationService
         }
     }
 
-    public function sendNow(Mailable $mailable, string $recipient)
+    public function sendNow(Mailable $mailable, string $recipient): bool
     {
         $attempts = 0;
         
@@ -46,7 +46,7 @@ class EmailNotificationService
                 
                 Log::info('Email notification sent successfully', [
                     'recipient' => $recipient,
-                    'mailable_class' => get_class($mailable),
+                    'mailable_class' => $mailable::class,
                     'attempt' => $attempts + 1
                 ]);
                 
@@ -56,7 +56,7 @@ class EmailNotificationService
                 
                 Log::warning('Email sending failed, retrying...', [
                     'recipient' => $recipient,
-                    'mailable_class' => get_class($mailable),
+                    'mailable_class' => $mailable::class,
                     'attempt' => $attempts,
                     'error' => $e->getMessage()
                 ]);
@@ -64,7 +64,7 @@ class EmailNotificationService
                 if ($attempts >= $this->maxRetries) {
                     Log::error('Email sending failed after max retries', [
                         'recipient' => $recipient,
-                        'mailable_class' => get_class($mailable),
+                        'mailable_class' => $mailable::class,
                         'error' => $e->getMessage()
                     ]);
                     return false;

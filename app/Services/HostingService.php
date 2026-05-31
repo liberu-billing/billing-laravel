@@ -16,27 +16,8 @@ use Illuminate\Support\Facades\Log;
 
 class HostingService
 {
-    protected $cpanelClient;
-    protected $pleskClient;
-    protected $directAdminClient;
-    protected $virtualminClient;
-    protected $liberuControlPanelClient;
-    protected $pricingService;
-
-    public function __construct(
-        CpanelClient $cpanelClient,
-        PleskClient $pleskClient,
-        DirectAdminClient $directAdminClient,
-        VirtualminClient $virtualminClient,
-        LiberuControlPanelClient $liberuControlPanelClient,
-        PricingService $pricingService
-    ) {
-        $this->cpanelClient = $cpanelClient;
-        $this->pleskClient = $pleskClient;
-        $this->directAdminClient = $directAdminClient;
-        $this->virtualminClient = $virtualminClient;
-        $this->liberuControlPanelClient = $liberuControlPanelClient;
-        $this->pricingService = $pricingService;
+    public function __construct(protected \App\Services\ControlPanels\CpanelClient $cpanelClient, protected \App\Services\ControlPanels\PleskClient $pleskClient, protected \App\Services\ControlPanels\DirectAdminClient $directAdminClient, protected \App\Services\ControlPanels\VirtualminClient $virtualminClient, protected \App\Services\ControlPanels\LiberuControlPanelClient $liberuControlPanelClient, protected \App\Services\PricingService $pricingService)
+    {
     }
 
     public function provisionAccount(HostingAccount $account, Products_Service $product, array $options = [])
@@ -212,7 +193,7 @@ class HostingService
         
         if ($result) {
             $addons = $account->addons ?? [];
-            $addons = array_filter($addons, fn($a) => $a !== $addon);
+            $addons = array_filter($addons, fn($a): bool => $a !== $addon);
             $account->addons = array_values($addons);
             $account->save();
             

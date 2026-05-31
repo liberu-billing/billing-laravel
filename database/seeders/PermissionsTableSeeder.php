@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
@@ -10,13 +12,11 @@ class PermissionsTableSeeder extends Seeder
 
     /**
      * Auto generated seed file
-     *
-     * @return void
      */
-    public function run()
+    public function run(): void
     {
         DB::table('permissions')->delete();
-        foreach (self::permissionList() as $key => $value) {
+        foreach (self::permissionList() as $value) {
             DB::table('permissions')->insert([
                 'name' => $value,
                 'guard_name' => 'web',
@@ -26,7 +26,7 @@ class PermissionsTableSeeder extends Seeder
         }
     }
 
-    public static function permissionList(){
+    public static function permissionList(): array{
         return [
             'view_affiliate',
             'view_any_affiliate',

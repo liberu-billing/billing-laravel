@@ -19,7 +19,7 @@ class TaxService
         $this->taxApiConfig = config('services.tax_api');
     }
 
-    public function calculateTax(Invoice $invoice)
+    public function calculateTax(Invoice $invoice): int|float
     {
         $customer = $invoice->customer;
         
@@ -30,9 +30,7 @@ class TaxService
 
         // Try to get tax rates from cache
         $cacheKey = "tax_rates_{$invoice->team_id}_{$customer->country}_{$customer->state}";
-        $taxRates = Cache::remember($cacheKey, 3600, function () use ($invoice, $customer) {
-            return $this->getTaxRates($invoice, $customer);
-        });
+        $taxRates = Cache::remember($cacheKey, 3600, fn() => $this->getTaxRates($invoice, $customer));
 
         $totalTax = 0;
         foreach ($invoice->items as $item) {
@@ -62,7 +60,7 @@ class TaxService
         return TaxRate::where('team_id', $invoice->team_id)
             ->where('is_active', true)
             ->where('country', $customer->country)
-            ->where(function ($query) use ($customer) {
+            ->where(function ($query) use ($customer): void {
                 $query->whereNull('state')
                     ->orWhere('state', $customer->state);
             })
@@ -91,7 +89,7 @@ class TaxService
     {
         return TaxExemption::where('customer_id', $customer->id)
             ->where('is_active', true)
-            ->where(function ($query) {
+            ->where(function ($query): void {
                 $query->where('expiry_date', '>', now())
                     ->orWhereNull('expiry_date');
             })
@@ -100,12 +98,10 @@ class TaxService
 
     protected function getApplicableRate($taxRates, $item)
     {
-        return $taxRates->first(function ($rate) use ($item) {
-            return $rate->service_type === $item->productService->type;
-        });
+        return $taxRates->first(fn($rate) => $rate->service_type === $item->productService->type);
     }
 
-    protected function calculateItemTax($item, $taxRate)
+    protected function calculateItemTax($item, $taxRate): float|int
     {
         $taxableAmount = $item->total_price;
         
@@ -129,15 +125,13 @@ class TaxService
 
     protected function formatApiResponse($apiData)
     {
-        return collect($apiData)->map(function ($rate) {
-            return new TaxRate([
-                'rate' => $rate['rate'],
-                'service_type' => $rate['type'],
-                'country' => $rate['country'],
-                'state' => $rate['state'] ?? null,
-                'threshold_amount' => $rate['threshold_amount'] ?? null,
-                'threshold_rate' => $rate['threshold_rate'] ?? null,
-            ]);
-        });
+        return collect($apiData)->map(fn($rate) => new TaxRate([
+            'rate' => $rate['rate'],
+            'service_type' => $rate['type'],
+            'country' => $rate['country'],
+            'state' => $rate['state'] ?? null,
+            'threshold_amount' => $rate['threshold_amount'] ?? null,
+            'threshold_rate' => $rate['threshold_rate'] ?? null,
+        ]));
     }
 }

@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('webhook_endpoints', function (Blueprint $table) {
+        Schema::create('webhook_endpoints', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('team_id')->nullable()->constrained('teams')->onDelete('cascade');
             $table->string('url');

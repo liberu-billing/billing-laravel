@@ -24,10 +24,13 @@ use App\Services\PartialPaymentService;
 
 class PartialPaymentResource extends Resource
 {
+    #[\Override]
     protected static ?string $model = Invoice::class;
 
+    #[\Override]
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-circle-stack';
 
+    #[\Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -49,6 +52,7 @@ class PartialPaymentResource extends Resource
             ]);
     }
 
+    #[\Override]
     public static function table(Table $table): Table
     {
         return $table
@@ -70,6 +74,7 @@ class PartialPaymentResource extends Resource
             ]);
     }
     
+    #[\Override]
     public static function getRelations(): array
     {
         return [
@@ -77,6 +82,7 @@ class PartialPaymentResource extends Resource
         ];
     }
     
+    #[\Override]
     public static function getPages(): array
     {
         return [
@@ -86,10 +92,11 @@ class PartialPaymentResource extends Resource
         ];
     }    
 
+    #[\Override]
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->where(function ($query) {
+            ->where(function ($query): void {
                 $query->where('status', 'pending')
                       ->orWhere('status', 'partially_paid');
             })

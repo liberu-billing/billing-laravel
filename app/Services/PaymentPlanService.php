@@ -8,11 +8,8 @@ use Carbon\Carbon;
 
 class PaymentPlanService
 {
-    protected $billingService;
-
-    public function __construct(BillingService $billingService)
+    public function __construct(protected \App\Services\BillingService $billingService)
     {
-        $this->billingService = $billingService;
     }
 
     public function createInstallmentInvoice(PaymentPlan $paymentPlan)
@@ -41,7 +38,7 @@ class PaymentPlanService
         return $installmentInvoice;
     }
 
-    public function processPaymentPlans()
+    public function processPaymentPlans(): void
     {
         $activePlans = PaymentPlan::where('status', 'active')
             ->where('next_due_date', '<=', now())
@@ -56,13 +53,13 @@ class PaymentPlanService
         }
     }
 
-    private function generateInstallmentNumber(Invoice $parentInvoice)
+    private function generateInstallmentNumber(Invoice $parentInvoice): string
     {
         $count = $parentInvoice->installments()->count() + 1;
         return $parentInvoice->invoice_number . "-INST{$count}";
     }
 
-    private function calculateNextDueDate($date, $frequency)
+    private function calculateNextDueDate(\DateTimeInterface|\Carbon\WeekDay|\Carbon\Month|string|int|float|null $date, $frequency)
     {
         return match($frequency) {
             'weekly' => Carbon::parse($date)->addWeek(),

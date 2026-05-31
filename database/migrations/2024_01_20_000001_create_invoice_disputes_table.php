@@ -6,9 +6,9 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
+    public function up(): void
     {
-        Schema::create('invoice_disputes', function (Blueprint $table) {
+        Schema::create('invoice_disputes', function (Blueprint $table): void {
             $table->id();
             $table->integer('invoice_id')->nullable();
             $table->integer('customer_id')->constrained();
@@ -22,7 +22,7 @@ return new class extends Migration
         });
     }
 
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('invoice_disputes');
     }

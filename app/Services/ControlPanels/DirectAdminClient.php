@@ -10,7 +10,7 @@ use App\Models\HostingServer;
 
 class DirectAdminClient
 {
-    protected $client;
+    protected \GuzzleHttp\Client $client;
     protected $server;
     protected $loginKey;
 
@@ -19,13 +19,13 @@ class DirectAdminClient
         $this->client = new Client();
     }
 
-    public function setServer(HostingServer $server)
+    public function setServer(HostingServer $server): void
     {
         $this->server = $server;
         $this->loginKey = $server->api_token;
     }
 
-    public function createAccount($username, $domain, $package)
+    public function createAccount(string $username, string $domain, $package)
     {
         $password = $this->generatePassword();
         $params = [
@@ -121,7 +121,7 @@ class DirectAdminClient
         return $this->makeApiCall('/CMD_API_MODIFY_USER', $params);
     }
 
-    protected function makeApiCall($endpoint, $params)
+    protected function makeApiCall(string $endpoint, $params): bool
     {
         if (!$this->server) {
             throw new Exception('Server not configured');
@@ -137,7 +137,7 @@ class DirectAdminClient
             ]);
 
             $result = $response->getBody()->getContents();
-            parse_str($result, $parsed);
+            parse_str((string) $result, $parsed);
 
             if (isset($parsed['error']) && $parsed['error'] === '0') {
                 Log::info("DirectAdmin API call successful", [
@@ -164,7 +164,7 @@ class DirectAdminClient
         }
     }
 
-    protected function generatePassword()
+    protected function generatePassword(): string
     {
         return bin2hex(random_bytes(12));
     }

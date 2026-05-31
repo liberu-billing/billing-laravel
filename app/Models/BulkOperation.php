@@ -5,23 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'user_id',
+    'team_id',
+    'type',
+    'parameters',
+    'status',
+    'total_items',
+    'processed_items',
+    'failed_items',
+    'error_message',
+    'result_file',
+    'started_at',
+    'completed_at',
+])]
 class BulkOperation extends Model
 {
-    protected $fillable = [
-        'user_id',
-        'team_id',
-        'type',
-        'parameters',
-        'status',
-        'total_items',
-        'processed_items',
-        'failed_items',
-        'error_message',
-        'result_file',
-        'started_at',
-        'completed_at',
-    ];
-
+    #[\Override]
     protected function casts(): array
 
     {

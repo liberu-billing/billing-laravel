@@ -13,7 +13,9 @@ use App\Services\BillingService;
 
 class SubscriptionPlansPage extends Page
 {
+    #[\Override]
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    #[\Override]
     protected string $view = 'filament.pages.subscription-plans';
 
     public $selectedPlan;
@@ -64,7 +66,7 @@ class SubscriptionPlansPage extends Page
             return redirect()->route('filament.pages.checkout', [
                 'subscription' => $subscription->id,
             ]);
-        } catch (Exception $e) {
+        } catch (Exception) {
             Notification::make()
                 ->title('Error creating subscription')
                 ->danger()

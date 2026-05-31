@@ -19,7 +19,7 @@ class CannedResponseServiceTest extends TestCase
         $this->cannedResponseService = new CannedResponseService();
     }
 
-    public function test_can_get_canned_response_by_shortcode()
+    public function test_can_get_canned_response_by_shortcode(): void
     {
         CannedResponse::create([
             'title' => 'Welcome Message',
@@ -34,7 +34,7 @@ class CannedResponseServiceTest extends TestCase
         $this->assertEquals('Welcome Message', $response->title);
     }
 
-    public function test_can_replace_variables_in_response()
+    public function test_can_replace_variables_in_response(): void
     {
         $response = CannedResponse::create([
             'title' => 'Welcome Message',
@@ -51,7 +51,7 @@ class CannedResponseServiceTest extends TestCase
         $this->assertEquals('Hello John Doe, your ticket number is 12345.', $content);
     }
 
-    public function test_usage_count_increments()
+    public function test_usage_count_increments(): void
     {
         $response = CannedResponse::create([
             'title' => 'Test Response',
@@ -67,7 +67,7 @@ class CannedResponseServiceTest extends TestCase
         $this->assertNotNull($response->fresh()->last_used_at);
     }
 
-    public function test_can_search_canned_responses()
+    public function test_can_search_canned_responses(): void
     {
         CannedResponse::create([
             'title' => 'Password Reset',
@@ -89,7 +89,7 @@ class CannedResponseServiceTest extends TestCase
         $this->assertEquals('Password Reset', $results->first()->title);
     }
 
-    public function test_can_get_most_used_responses()
+    public function test_can_get_most_used_responses(): void
     {
         CannedResponse::create([
             'title' => 'Popular Response',
@@ -113,7 +113,7 @@ class CannedResponseServiceTest extends TestCase
         $this->assertEquals('Popular Response', $mostUsed->first()->title);
     }
 
-    public function test_available_variables()
+    public function test_available_variables(): void
     {
         $variables = CannedResponseService::getAvailableVariables();
 

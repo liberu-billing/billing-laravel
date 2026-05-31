@@ -9,13 +9,8 @@ use Illuminate\Support\Facades\Log;
 class InstallationScriptService
 {
     protected $controlPanel;
-    protected $gitRepo;
-    protected $domain;
-    protected $dbName;
-    protected $dbUser;
-    protected $dbPass;
     
-    public function __construct($controlPanel, $gitRepo, $domain, $dbName, $dbUser, $dbPass)
+    public function __construct($controlPanel, protected $gitRepo, protected $domain, protected $dbName, protected $dbUser, protected $dbPass)
     {
         $this->controlPanel = strtolower($controlPanel);
         $this->gitRepo = $this->validateGitRepo($gitRepo);
@@ -44,7 +39,7 @@ class InstallationScriptService
     /**
      * @SuppressWarnings(PHPMD.DiscouragedFunctions)
      */
-    public function generateScript()
+    public function generateScript(): string
     {
         $domain    = escapeshellarg($this->domain);    // phpcs:ignore -- nosemgrep
         $gitRepo   = escapeshellarg($this->gitRepo);   // phpcs:ignore -- nosemgrep
@@ -103,23 +98,18 @@ class InstallationScriptService
         return implode("\n", $script);
     }
     
-    protected function getPublicHtmlPath()
+    protected function getPublicHtmlPath(): string
     {
-        switch ($this->controlPanel) {
-            case 'cpanel':
-                return "~/public_html";
-            case 'plesk':
-                return "~/httpdocs";
-            case 'directadmin':
-                return "~/domains/{$this->domain}/public_html";
-            case 'virtualmin':
-                return "~/public_html";
-            default:
-                throw new Exception("Unsupported control panel: {$this->controlPanel}");
-        }
+        return match ($this->controlPanel) {
+            'cpanel' => "~/public_html",
+            'plesk' => "~/httpdocs",
+            'directadmin' => "~/domains/{$this->domain}/public_html",
+            'virtualmin' => "~/public_html",
+            default => throw new Exception("Unsupported control panel: {$this->controlPanel}"),
+        };
     }
     
-    public function execute()
+    public function execute(): bool
     {
         try {
             $script = $this->generateScript();

@@ -1,22 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'name',
+    'base_price',
+    'markup_type',
+    'markup_value',
+    'enom_cost',
+])]
 class Tld extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'name',
-        'base_price',
-        'markup_type',
-        'markup_value',
-        'enom_cost',
-    ];
-
+    #[\Override]
     protected function casts(): array
 
     {

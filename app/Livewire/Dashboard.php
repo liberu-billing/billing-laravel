@@ -36,7 +36,7 @@ class Dashboard extends Component
 
     public function getMetrics(): array
     {
-        return Cache::remember('dashboard.metrics', 300, fn () => [
+        return Cache::remember('dashboard.metrics', 300, fn (): array => [
             'revenue' => $this->getRevenueData(),
             'invoices' => $this->getInvoiceData(),
             'clients' => $this->getClientData(),

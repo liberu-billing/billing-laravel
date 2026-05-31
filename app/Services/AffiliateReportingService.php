@@ -7,7 +7,7 @@ use Carbon\Carbon;
 
 class AffiliateReportingService
 {
-    public function generateReport(Affiliate $affiliate, $startDate, $endDate)
+    public function generateReport(Affiliate $affiliate, $startDate, $endDate): array
     {
         $startDate = Carbon::parse($startDate)->startOfDay();
         $endDate = Carbon::parse($endDate)->endOfDay();

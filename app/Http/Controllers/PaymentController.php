@@ -13,15 +13,8 @@ use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
-    protected $paymentGatewayService;
-    protected $currencyService;
-
-    public function __construct(
-        PaymentGatewayService $paymentGatewayService,
-        CurrencyService $currencyService
-    ) {
-        $this->paymentGatewayService = $paymentGatewayService;
-        $this->currencyService = $currencyService;
+    public function __construct(protected \App\Services\PaymentGatewayService $paymentGatewayService, protected \App\Services\CurrencyService $currencyService)
+    {
     }
 
     public function processPayment(Request $request)

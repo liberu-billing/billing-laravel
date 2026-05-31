@@ -10,7 +10,7 @@ use Illuminate\Validation\Rule;
 
 class LateFeeConfigurationController extends Controller
 {
-    public function index()
+    public function index(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         $config = LateFeeConfiguration::where('team_id', auth()->user()->currentTeam->id)->first();
         return view('late-fees.index', [

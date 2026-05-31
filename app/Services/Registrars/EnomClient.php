@@ -6,7 +6,7 @@ use GuzzleHttp\Client;
 
 class EnomClient
 {
-    protected $client;
+    protected \GuzzleHttp\Client $client;
     protected $apiUrl;
     protected $username;
     protected $password;
@@ -19,19 +19,19 @@ class EnomClient
         $this->password = config('services.enom.password');
     }
 
-    public function registerDomain($domainName, $customerId)
+    public function registerDomain($domainName, $customerId): void
     {
         // Implement eNom API call to register domain
         // Return result with expiration date
     }
 
-    public function renewDomain($domainName, $period)
+    public function renewDomain($domainName, $period): void
     {
         // Implement eNom API call to renew domain
         // Return result with new expiration date
     }
 
-    public function transferDomain($domainName, $authCode, $customerId)
+    public function transferDomain($domainName, $authCode, $customerId): void
     {
         // Implement eNom API call to transfer domain
         // Return result with expiration date
@@ -46,7 +46,7 @@ class EnomClient
             'responsetype' => 'xml',
         ], $params);
 
-        $response = $this->client->get($this->apiUrl, [
+        $this->client->get($this->apiUrl, [
             'query' => $params,
         ]);
 

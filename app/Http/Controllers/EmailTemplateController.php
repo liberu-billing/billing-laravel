@@ -7,9 +7,9 @@ use Illuminate\Http\Request;
 
 class EmailTemplateController extends Controller
 {
-    public function index()
+    public function index(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
-        $templates = EmailTemplate::where(function($query) {
+        $templates = EmailTemplate::where(function($query): void {
             $query->where('team_id', auth()->user()->currentTeam->id)
                   ->orWhere('is_default', true);
         })->get();
@@ -17,7 +17,7 @@ class EmailTemplateController extends Controller
         return view('email-templates.index', compact('templates'));
     }
 
-    public function create()
+    public function create(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         $types = [
             'invoice_generated' => 'Invoice Generated',
@@ -43,7 +43,7 @@ class EmailTemplateController extends Controller
             ->with('success', 'Template created successfully');
     }
 
-    public function edit(EmailTemplate $template)
+    public function edit(EmailTemplate $template): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         $this->authorize('update', $template);
         $types = [

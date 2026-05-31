@@ -19,7 +19,7 @@ class SmsService
         $this->baseUrl = config('services.sms.base_url');
     }
 
-    public function send($to, $message)
+    public function send($to, $message): bool
     {
         try {
             $response = Http::withHeaders([
@@ -56,7 +56,7 @@ class SmsService
     protected function formatPhoneNumber($number)
     {
         // Remove any non-numeric characters
-        $cleaned = preg_replace('/[^0-9]/', '', $number);
+        $cleaned = preg_replace('/[^0-9]/', '', (string) $number);
         
         // Ensure number starts with country code
         if (strlen($cleaned) === 10) {

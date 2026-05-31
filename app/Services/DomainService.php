@@ -10,13 +10,8 @@ use App\Models\HostingAccount;
 
 class DomainService
 {
-    protected $enomClient;
-    protected $resellerClubClient;
-
-    public function __construct(EnomClient $enomClient, ResellerClubClient $resellerClubClient)
+    public function __construct(protected \App\Services\Registrars\EnomClient $enomClient, protected \App\Services\Registrars\ResellerClubClient $resellerClubClient)
     {
-        $this->enomClient = $enomClient;
-        $this->resellerClubClient = $resellerClubClient;
     }
 
     public function registerDomain(Subscription $subscription, $domainName, $registrar = 'enom')
@@ -77,13 +72,10 @@ class DomainService
 
     protected function getClientForRegistrar($registrar)
     {
-        switch ($registrar) {
-            case 'enom':
-                return $this->enomClient;
-            case 'resellerclub':
-                return $this->resellerClubClient;
-            default:
-                throw new Exception("Unsupported domain registrar: $registrar");
-        }
+        return match ($registrar) {
+            'enom' => $this->enomClient,
+            'resellerclub' => $this->resellerClubClient,
+            default => throw new Exception("Unsupported domain registrar: $registrar"),
+        };
     }
 }

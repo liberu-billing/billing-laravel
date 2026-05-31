@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('webhook_events', function (Blueprint $table) {
+        Schema::create('webhook_events', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('webhook_endpoint_id')->constrained('webhook_endpoints')->onDelete('cascade');
             $table->string('event_type'); // e.g., invoice.created, payment.received

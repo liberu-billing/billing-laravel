@@ -10,13 +10,8 @@ class UpcomingInvoiceReminder extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $data;
-    public $template;
-
-    public function __construct($data, $template)
+    public function __construct(public $data, public $template)
     {
-        $this->data = $data;
-        $this->template = $template;
     }
 
     public function build()

@@ -15,33 +15,28 @@ use Illuminate\Support\Facades\Log;
 
 class SendEmailNotification implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
-    protected $mailable;
-    protected $recipient;
+    use \Illuminate\Foundation\Queue\Queueable;
     
     public $tries = 3;
     public $backoff = 300; // 5 minutes
 
-    public function __construct(Mailable $mailable, string $recipient)
+    public function __construct(protected \Illuminate\Mail\Mailable $mailable, protected string $recipient)
     {
-        $this->mailable = $mailable;
-        $this->recipient = $recipient;
     }
 
-    public function handle()
+    public function handle(): void
     {
         try {
             Mail::to($this->recipient)->send($this->mailable);
             
             Log::info('Queued email sent successfully', [
                 'recipient' => $this->recipient,
-                'mailable_class' => get_class($this->mailable)
+                'mailable_class' => $this->mailable::class
             ]);
         } catch (Exception $e) {
             Log::error('Failed to send queued email', [
                 'recipient' => $this->recipient,
-                'mailable_class' => get_class($this->mailable),
+                'mailable_class' => $this->mailable::class,
                 'error' => $e->getMessage(),
                 'attempt' => $this->attempts()
             ]);
@@ -50,11 +45,11 @@ class SendEmailNotification implements ShouldQueue
         }
     }
 
-    public function failed(Throwable $exception)
+    public function failed(Throwable $exception): void
     {
         Log::error('Email job failed permanently', [
             'recipient' => $this->recipient,
-            'mailable_class' => get_class($this->mailable),
+            'mailable_class' => $this->mailable::class,
             'error' => $exception->getMessage()
         ]);
     }

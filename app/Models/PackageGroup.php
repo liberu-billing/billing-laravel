@@ -6,16 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
+#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+    'team_id',
+    'name',
+    'description',
+    'sort_order',
+    'is_active',
+])]
 class PackageGroup extends Model
 {
-    protected $fillable = [
-        'team_id',
-        'name',
-        'description',
-        'sort_order',
-        'is_active',
-    ];
-
+    #[\Override]
     protected function casts(): array
 
     {

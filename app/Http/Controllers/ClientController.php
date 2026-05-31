@@ -7,12 +7,12 @@ use Illuminate\Http\Request;
 
 class ClientController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         $query = Client::query();
 
         if ($request->search) {
-            $query->where(function($q) use ($request) {
+            $query->where(function($q) use ($request): void {
                 $q->where('name', 'like', "%{$request->search}%")
                   ->orWhere('email', 'like', "%{$request->search}%")
                   ->orWhere('company', 'like', "%{$request->search}%");
@@ -27,7 +27,7 @@ class ClientController extends Controller
         return view('clients.index', compact('clients'));
     }
 
-    public function create()
+    public function create(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         return view('clients.create');
     }
@@ -48,7 +48,7 @@ class ClientController extends Controller
         return redirect()->route('clients.index')->with('success', 'Client created successfully');
     }
 
-    public function edit(Client $client)
+    public function edit(Client $client): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
     {
         return view('clients.edit', compact('client'));
     }

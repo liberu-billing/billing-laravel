@@ -15,7 +15,7 @@ class CannedResponseService
         $query = CannedResponse::where('is_active', true);
 
         if ($teamId) {
-            $query->where(function ($q) use ($teamId) {
+            $query->where(function ($q) use ($teamId): void {
                 $q->where('team_id', $teamId)
                   ->orWhereNull('team_id'); // Include global responses
             });
@@ -37,7 +37,7 @@ class CannedResponseService
             ->where('is_active', true);
 
         if ($teamId) {
-            $query->where(function ($q) use ($teamId) {
+            $query->where(function ($q) use ($teamId): void {
                 $q->where('team_id', $teamId)
                   ->orWhereNull('team_id');
             });
@@ -61,14 +61,14 @@ class CannedResponseService
     public function search(string $query, ?int $teamId = null): Collection
     {
         $queryBuilder = CannedResponse::where('is_active', true)
-            ->where(function ($q) use ($query) {
+            ->where(function ($q) use ($query): void {
                 $q->where('title', 'like', "%{$query}%")
                   ->orWhere('content', 'like', "%{$query}%")
                   ->orWhere('shortcode', 'like', "%{$query}%");
             });
 
         if ($teamId) {
-            $queryBuilder->where(function ($q) use ($teamId) {
+            $queryBuilder->where(function ($q) use ($teamId): void {
                 $q->where('team_id', $teamId)
                   ->orWhereNull('team_id');
             });
@@ -85,7 +85,7 @@ class CannedResponseService
         $query = CannedResponse::query();
 
         if ($teamId) {
-            $query->where(function ($q) use ($teamId) {
+            $query->where(function ($q) use ($teamId): void {
                 $q->where('team_id', $teamId)
                   ->orWhereNull('team_id');
             });
@@ -106,7 +106,7 @@ class CannedResponseService
             ->orderByDesc('usage_count');
 
         if ($teamId) {
-            $query->where(function ($q) use ($teamId) {
+            $query->where(function ($q) use ($teamId): void {
                 $q->where('team_id', $teamId)
                   ->orWhereNull('team_id');
             });

@@ -6,7 +6,7 @@ use GuzzleHttp\Client;
 
 class ResellerClubClient
 {
-    protected $client;
+    protected \GuzzleHttp\Client $client;
     protected $apiUrl;
     protected $authUserId;
     protected $apiKey;
@@ -19,32 +19,32 @@ class ResellerClubClient
         $this->apiKey = config('services.resellerclub.api_key');
     }
 
-    public function registerDomain($domainName, $customerId)
+    public function registerDomain($domainName, $customerId): void
     {
         // Implement ResellerClub API call to register domain
         // Return result with expiration date
     }
 
-    public function renewDomain($domainName, $period)
+    public function renewDomain($domainName, $period): void
     {
         // Implement ResellerClub API call to renew domain
         // Return result with new expiration date
     }
 
-    public function transferDomain($domainName, $authCode, $customerId)
+    public function transferDomain($domainName, $authCode, $customerId): void
     {
         // Implement ResellerClub API call to transfer domain
         // Return result with expiration date
     }
 
-    protected function makeApiCall($action, $params)
+    protected function makeApiCall(string $action, $params)
     {
         $params = array_merge([
             'auth-userid' => $this->authUserId,
             'api-key' => $this->apiKey,
         ], $params);
 
-        $response = $this->client->post($this->apiUrl . $action, [
+        $this->client->post($this->apiUrl . $action, [
             'form_params' => $params,
         ]);
 

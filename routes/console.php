@@ -8,11 +8,11 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schedule;
 
-Artisan::command('inspire', function () {
+Artisan::command('inspire', function (): void {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::call(function () {
+Schedule::call(function (): void {
     app(BillingService::class)->processRecurringBilling();
 })->daily();
 
@@ -20,10 +20,10 @@ Schedule::command('invoices:send-reminders')->daily();
 Schedule::command('invoices:process-reminders')->daily();
 Schedule::command('audit:prune')->daily();
 
-Schedule::call(function () {
+Schedule::call(function (): void {
     $reports = Report::query()
         ->whereNotNull('schedule')
-        ->where(function ($query) {
+        ->where(function ($query): void {
             $query->whereNull('last_generated_at')
                 ->orWhere('last_generated_at', '<=', now()->subHour());
         })
@@ -73,5 +73,6 @@ function shouldGenerateReport(Report $report): bool
         'hourly'  => $lastGenerated->diffInHours(now()) >= 1,
         default   => false,
     };
+    }
 }
 }

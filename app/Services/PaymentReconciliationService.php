@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 
 class PaymentReconciliationService
 {
-    public function reconcilePayment(Payment $payment)
+    public function reconcilePayment(Payment $payment): false
     {
         try {
             // Try to match payment with invoice
@@ -59,7 +59,7 @@ class PaymentReconciliationService
             ->first();
     }
 
-    protected function processReconciliation(Payment $payment, Invoice $invoice)
+    protected function processReconciliation(Payment $payment, Invoice $invoice): bool
     {
         // Check for discrepancies
         $discrepancy = $this->checkForDiscrepancies($payment, $invoice);
@@ -91,7 +91,7 @@ class PaymentReconciliationService
         return true;
     }
 
-    protected function checkForDiscrepancies(Payment $payment, Invoice $invoice)
+    protected function checkForDiscrepancies(Payment $payment, Invoice $invoice): ?string
     {
         if ($payment->amount != $invoice->total_amount) {
             return "Payment amount ({$payment->amount}) does not match invoice amount ({$invoice->total_amount})";

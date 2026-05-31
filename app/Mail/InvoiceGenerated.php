@@ -15,6 +15,9 @@ class InvoiceGenerated extends Mailable
 {
     use Queueable, SerializesModels;
 
+    /**
+     * @var \App\Models\Invoice
+     */
     public $invoice;
     protected $template;
 
@@ -46,7 +49,7 @@ class InvoiceGenerated extends Mailable
         );
     }
 
-    protected function parseTemplate($text)
+    protected function parseTemplate($text): string
     {
         $replacements = [
             '{{invoice_number}}' => $this->invoice->invoice_number,
