@@ -41,6 +41,9 @@ class InstallationScriptService
         return $value;
     }
 
+    /**
+     * @SuppressWarnings(PHPMD.DiscouragedFunctions)
+     */
     public function generateScript()
     {
         $domain    = escapeshellarg($this->domain);    // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions -- required for safe shell script generation
