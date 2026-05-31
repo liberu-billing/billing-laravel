@@ -74,4 +74,3 @@ function shouldGenerateReport(Report $report): bool
         default   => false,
     };
 }
-}
