@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        PHP_VERSION: '8.3'
+        PHP_VERSION: '8.5'
         WWWUSER: '${WWWUSER:-1000}'
         WWWGROUP: '${WWWGROUP:-1000}'
     image: boilerplate-laravel:latest
@@ -34,7 +34,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        PHP_VERSION: '8.3'
+        PHP_VERSION: '8.5'
     image: boilerplate-laravel:latest
     environment:
       CONTAINER_MODE: worker
