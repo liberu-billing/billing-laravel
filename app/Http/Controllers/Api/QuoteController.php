@@ -13,7 +13,9 @@ class QuoteController extends Controller
 {
     public function __construct(
         protected QuoteService $quoteService
-    ) {}
+    ) {
+        $this->authorizeResource(Quote::class, 'quote');
+    }
 
     /**
      * List quotes with optional filters
