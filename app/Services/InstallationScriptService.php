@@ -36,21 +36,22 @@ class InstallationScriptService
     protected function validateIdentifier(string $value, string $name, string $pattern): string
     {
         if (!preg_match($pattern, $value)) {
-            throw new Exception('Invalid ' . $name . ': only alphanumeric characters, underscores, hyphens, and dots allowed');
+            throw new Exception('Invalid ' . $name . ': only alphanumeric characters, underscores, hyphens, and dots allowed'); // phpcs:ignore WordPress.Security.EscapeOutput -- Laravel exception message, not HTML output
         }
         return $value;
     }
 
     public function generateScript()
     {
-        // Shell-quote all user-supplied values before embedding in script
+        // phpcs:disable WordPress.PHP.DiscouragedPHPFunctions -- escapeshellarg is correct for shell script generation in a Laravel context
         $domain    = escapeshellarg($this->domain);
         $gitRepo   = escapeshellarg($this->gitRepo);
         $dbName    = escapeshellarg($this->dbName);
         $dbUser    = escapeshellarg($this->dbUser);
         $dbPass    = escapeshellarg($this->dbPass);
+        // phpcs:enable WordPress.PHP.DiscouragedPHPFunctions
 
-        $installDir = "~/laravel-apps/{$this->domain}";
+        $installDir = "~/laravel-apps/{$domain}";
         $publicHtmlPath = $this->getPublicHtmlPath();
 
         $script = [
