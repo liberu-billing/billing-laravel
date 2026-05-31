@@ -15,7 +15,7 @@ class SubscriptionPolicy
         return $user->can('view_any_subscription');
     }
 
-    public function view(User $user, Subscription $subscription): bool
+    public function view(User $user, Subscription $_subscription): bool
     {
         return $user->can('view_subscription');
     }
@@ -25,12 +25,12 @@ class SubscriptionPolicy
         return $user->can('create_subscription');
     }
 
-    public function update(User $user, Subscription $subscription): bool
+    public function update(User $user, Subscription $_subscription): bool
     {
         return $user->can('update_subscription');
     }
 
-    public function delete(User $user, Subscription $subscription): bool
+    public function delete(User $user, Subscription $_subscription): bool
     {
         return $user->can('delete_subscription');
     }
@@ -40,7 +40,7 @@ class SubscriptionPolicy
         return $user->can('delete_any_subscription');
     }
 
-    public function forceDelete(User $user, Subscription $subscription): bool
+    public function forceDelete(User $user, Subscription $_subscription): bool
     {
         return $user->can('force_delete_subscription');
     }
@@ -50,7 +50,7 @@ class SubscriptionPolicy
         return $user->can('force_delete_any_subscription');
     }
 
-    public function restore(User $user, Subscription $subscription): bool
+    public function restore(User $user, Subscription $_subscription): bool
     {
         return $user->can('restore_subscription');
     }
@@ -60,7 +60,7 @@ class SubscriptionPolicy
         return $user->can('restore_any_subscription');
     }
 
-    public function replicate(User $user, Subscription $subscription): bool
+    public function replicate(User $user, Subscription $_subscription): bool
     {
         return $user->can('replicate_subscription');
     }

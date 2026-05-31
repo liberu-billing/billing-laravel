@@ -15,7 +15,7 @@ class CustomerPolicy
         return $user->can('view_any_customer');
     }
 
-    public function view(User $user, Customer $customer): bool
+    public function view(User $user, Customer $_customer): bool
     {
         return $user->can('view_customer');
     }
@@ -25,12 +25,12 @@ class CustomerPolicy
         return $user->can('create_customer');
     }
 
-    public function update(User $user, Customer $customer): bool
+    public function update(User $user, Customer $_customer): bool
     {
         return $user->can('update_customer');
     }
 
-    public function delete(User $user, Customer $customer): bool
+    public function delete(User $user, Customer $_customer): bool
     {
         return $user->can('delete_customer');
     }
@@ -40,7 +40,7 @@ class CustomerPolicy
         return $user->can('delete_any_customer');
     }
 
-    public function forceDelete(User $user, Customer $customer): bool
+    public function forceDelete(User $user, Customer $_customer): bool
     {
         return $user->can('force_delete_customer');
     }
@@ -50,7 +50,7 @@ class CustomerPolicy
         return $user->can('force_delete_any_customer');
     }
 
-    public function restore(User $user, Customer $customer): bool
+    public function restore(User $user, Customer $_customer): bool
     {
         return $user->can('restore_customer');
     }
@@ -60,7 +60,7 @@ class CustomerPolicy
         return $user->can('restore_any_customer');
     }
 
-    public function replicate(User $user, Customer $customer): bool
+    public function replicate(User $user, Customer $_customer): bool
     {
         return $user->can('replicate_customer');
     }

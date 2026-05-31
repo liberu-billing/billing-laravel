@@ -15,7 +15,7 @@ class QuotePolicy
         return $user->can('view_any_quote');
     }
 
-    public function view(User $user, Quote $quote): bool
+    public function view(User $user, Quote $_quote): bool
     {
         return $user->can('view_quote');
     }
@@ -25,12 +25,12 @@ class QuotePolicy
         return $user->can('create_quote');
     }
 
-    public function update(User $user, Quote $quote): bool
+    public function update(User $user, Quote $_quote): bool
     {
         return $user->can('update_quote');
     }
 
-    public function delete(User $user, Quote $quote): bool
+    public function delete(User $user, Quote $_quote): bool
     {
         return $user->can('delete_quote');
     }
@@ -40,7 +40,7 @@ class QuotePolicy
         return $user->can('delete_any_quote');
     }
 
-    public function forceDelete(User $user, Quote $quote): bool
+    public function forceDelete(User $user, Quote $_quote): bool
     {
         return $user->can('force_delete_quote');
     }
@@ -50,7 +50,7 @@ class QuotePolicy
         return $user->can('force_delete_any_quote');
     }
 
-    public function restore(User $user, Quote $quote): bool
+    public function restore(User $user, Quote $_quote): bool
     {
         return $user->can('restore_quote');
     }
@@ -60,7 +60,7 @@ class QuotePolicy
         return $user->can('restore_any_quote');
     }
 
-    public function replicate(User $user, Quote $quote): bool
+    public function replicate(User $user, Quote $_quote): bool
     {
         return $user->can('replicate_quote');
     }
