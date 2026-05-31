@@ -36,7 +36,7 @@ class InstallationScriptService
     protected function validateIdentifier(string $value, string $name, string $pattern): string
     {
         if (!preg_match($pattern, $value)) {
-            throw new Exception("Invalid {$name}: only alphanumeric characters, underscores, hyphens, and dots allowed");
+            throw new Exception('Invalid ' . $name . ': only alphanumeric characters, underscores, hyphens, and dots allowed');
         }
         return $value;
     }
