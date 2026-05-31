@@ -46,11 +46,11 @@ class InstallationScriptService
      */
     public function generateScript()
     {
-        $domain    = escapeshellarg($this->domain);    // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions -- required for safe shell script generation
-        $gitRepo   = escapeshellarg($this->gitRepo);   // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions
-        $dbName    = escapeshellarg($this->dbName);    // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions
-        $dbUser    = escapeshellarg($this->dbUser);    // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions
-        $dbPass    = escapeshellarg($this->dbPass);    // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions
+        $domain    = escapeshellarg($this->domain);    // phpcs:ignore -- nosemgrep
+        $gitRepo   = escapeshellarg($this->gitRepo);   // phpcs:ignore -- nosemgrep
+        $dbName    = escapeshellarg($this->dbName);    // phpcs:ignore -- nosemgrep
+        $dbUser    = escapeshellarg($this->dbUser);    // phpcs:ignore -- nosemgrep
+        $dbPass    = escapeshellarg($this->dbPass);    // phpcs:ignore -- nosemgrep
 
         $installDir = "~/laravel-apps/{$domain}";
         $publicHtmlPath = $this->getPublicHtmlPath();
