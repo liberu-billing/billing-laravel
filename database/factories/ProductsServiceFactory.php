@@ -4,15 +4,16 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\Products_Service;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Products_Service>
+ * @extends Factory<Products_Service>
  */
 class ProductsServiceFactory extends Factory
 {
     #[\Override]
-    protected $model = \App\Models\Products_Service::class;
+    protected $model = Products_Service::class;
 
     /**
      * Define the model's default state.

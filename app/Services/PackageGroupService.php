@@ -16,7 +16,7 @@ class PackageGroupService
     {
         $query = PackageGroup::query()
             ->where('is_active', true)
-            ->with(['packages' => fn($q) => $q->where('is_active', true)])
+            ->with(['packages' => fn ($q) => $q->where('is_active', true)])
             ->orderBy('sort_order');
 
         if ($teamId) {

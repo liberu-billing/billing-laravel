@@ -7,12 +7,16 @@ use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasDefaultTenant;
 use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
+use Illuminate\Database\Eloquent\Attributes\Appends;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
@@ -21,16 +25,16 @@ use Laravel\Jetstream\HasTeams;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
-#[\Illuminate\Database\Eloquent\Attributes\Appends([
+#[Appends([
     'profile_photo_url',
 ])]
-#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+#[Fillable([
     'name',
     'email',
     'password',
     'referred_by',
 ])]
-#[\Illuminate\Database\Eloquent\Attributes\Hidden([
+#[Hidden([
     'password',
     'remember_token',
     'two_factor_recovery_codes',
@@ -55,7 +59,8 @@ class User extends Authenticatable implements FilamentUser, HasDefaultTenant, Ha
     {
         return [
             'email_verified_at' => 'datetime',
-            'password'          => 'hashed',
+            'password' => 'hashed',
+            'dashboard_preferences' => 'array',
         ];
     }
 
@@ -92,7 +97,7 @@ class User extends Authenticatable implements FilamentUser, HasDefaultTenant, Ha
         return $this->belongsTo(Team::class, 'current_team_id');
     }
 
-    public function affiliate(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function affiliate(): HasOne
     {
         return $this->hasOne(Affiliate::class);
     }

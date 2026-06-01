@@ -16,9 +16,10 @@ class InvoiceStatusChanged implements ShouldBroadcast
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
-     * @var \App\Models\Invoice
+     * @var Invoice
      */
     public $invoice;
+
     /**
      * @var string
      */
@@ -32,7 +33,7 @@ class InvoiceStatusChanged implements ShouldBroadcast
 
     public function broadcastOn()
     {
-        return new Channel('invoices.' . $this->invoice->id);
+        return new Channel('invoices.'.$this->invoice->id);
     }
 
     public function broadcastWith(): array

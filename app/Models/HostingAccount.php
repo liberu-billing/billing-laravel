@@ -3,10 +3,11 @@
 namespace App\Models;
 
 use App\Traits\HasTeam;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+#[Fillable([
     'customer_id',
     'subscription_id',
     'hosting_server_id',
@@ -25,13 +26,12 @@ class HostingAccount extends Model
 
     #[\Override]
     protected function casts(): array
-
     {
 
         return [
-        'addons' => 'array',
-        'price' => 'decimal:2',
-    ];
+            'addons' => 'array',
+            'price' => 'decimal:2',
+        ];
 
     }
 
@@ -57,12 +57,13 @@ class HostingAccount extends Model
 
     public function hasDomain(): bool
     {
-        return !empty($this->domain);
+        return ! empty($this->domain);
     }
 
     public function hasAddon($addon): bool
     {
         $addons = $this->addons ?? [];
+
         return in_array($addon, $addons);
     }
 

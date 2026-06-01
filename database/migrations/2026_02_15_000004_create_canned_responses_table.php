@@ -22,7 +22,7 @@ return new class extends Migration
             $table->integer('usage_count')->default(0);
             $table->timestamp('last_used_at')->nullable();
             $table->timestamps();
-            
+
             $table->index(['team_id', 'is_active']);
             $table->index('category');
             $table->index('shortcode');

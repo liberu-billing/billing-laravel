@@ -1,7 +1,10 @@
 <?php
 
+use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\CheckRole;
+use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Middleware\RequireTwoFactorEnabled;
+use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\TeamsPermission;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -32,14 +35,19 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->web(append: [
+            SecurityHeaders::class,
             TeamsPermission::class,
         ]);
 
+        $middleware->api(append: [
+            SecurityHeaders::class,
+        ]);
+
         $middleware->alias([
-            'auth'     => \App\Http\Middleware\Authenticate::class,
-            'guest'    => \App\Http\Middleware\RedirectIfAuthenticated::class,
-            '2fa'      => RequireTwoFactorEnabled::class,
-            'role'     => CheckRole::class,
+            'auth' => Authenticate::class,
+            'guest' => RedirectIfAuthenticated::class,
+            '2fa' => RequireTwoFactorEnabled::class,
+            'role' => CheckRole::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

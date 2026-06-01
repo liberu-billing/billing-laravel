@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Payment;
 use App\Models\Affiliate;
+use App\Models\Payment;
 
 class AffiliateService
 {

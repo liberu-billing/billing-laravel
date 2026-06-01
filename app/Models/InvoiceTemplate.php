@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use App\Traits\HasTeam;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
-#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+#[Fillable([
     'name',
     'company_name',
     'company_address',
@@ -18,7 +20,7 @@ use Illuminate\Support\Facades\Storage;
     'footer_text',
     'color_scheme',
     'is_default',
-    'team_id'
+    'team_id',
 ])]
 class InvoiceTemplate extends Model
 {
@@ -27,12 +29,11 @@ class InvoiceTemplate extends Model
 
     #[\Override]
     protected function casts(): array
-
     {
 
         return [
-        'is_default' => 'boolean',
-    ];
+            'is_default' => 'boolean',
+        ];
 
     }
 
@@ -48,14 +49,14 @@ class InvoiceTemplate extends Model
             ->first();
     }
 
-    protected function logoUrl(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function logoUrl(): Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn() => $this->logo_path ? Storage::disk('public')->url($this->logo_path) : null);
+        return Attribute::make(get: fn () => $this->logo_path ? Storage::disk('public')->url($this->logo_path) : null);
     }
 
-    protected function styledHtml(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function styledHtml(): Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): string => sprintf(
+        return Attribute::make(get: fn (): string => sprintf(
             '<style>
                 .invoice-box { color: %1$s; }
                 .invoice-header { border-color: %1$s; }

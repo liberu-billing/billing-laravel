@@ -14,7 +14,7 @@ class AuditLogService
         AuditLog::create([
             'user_id' => Auth::id(),
             'event' => $event,
-            'auditable_type' => $model instanceof \Illuminate\Database\Eloquent\Model ? $model::class : null,
+            'auditable_type' => $model instanceof Model ? $model::class : null,
             'auditable_id' => $model?->id,
             'old_values' => $oldValues,
             'new_values' => $newValues,

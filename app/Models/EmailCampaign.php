@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+#[Fillable([
     'team_id',
     'created_by',
     'name',
@@ -24,15 +25,14 @@ class EmailCampaign extends Model
 {
     #[\Override]
     protected function casts(): array
-
     {
 
         return [
-        'recipient_filters' => 'array',
-        'scheduled_at' => 'datetime',
-        'started_sending_at' => 'datetime',
-        'completed_at' => 'datetime',
-    ];
+            'recipient_filters' => 'array',
+            'scheduled_at' => 'datetime',
+            'started_sending_at' => 'datetime',
+            'completed_at' => 'datetime',
+        ];
 
     }
 
@@ -79,6 +79,7 @@ class EmailCampaign extends Model
         }
 
         $total = $this->sent_count + $this->failed_count;
+
         return round(($total / $this->total_recipients) * 100, 2);
     }
 }

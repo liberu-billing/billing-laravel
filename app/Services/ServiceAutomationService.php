@@ -86,7 +86,7 @@ class ServiceAutomationService
     {
         $activeSuspension = $subscription->activeSuspension;
 
-        if (!$activeSuspension) {
+        if (! $activeSuspension) {
             return false;
         }
 
@@ -117,7 +117,7 @@ class ServiceAutomationService
      */
     public function autoUnsuspendOnPayment(Invoice $invoice): bool
     {
-        if ($invoice->status !== 'paid' || !$invoice->subscription) {
+        if ($invoice->status !== 'paid' || ! $invoice->subscription) {
             return false;
         }
 

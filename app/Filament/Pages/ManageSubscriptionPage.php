@@ -2,29 +2,34 @@
 
 namespace App\Filament\Pages;
 
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Schema;
-use Filament\Pages\Page;
+use App\Models\Products_Service;
+use App\Models\Subscription;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\DatePicker;
 use Filament\Notifications\Notification;
-use App\Models\Subscription;
-use App\Models\Products_Service;
+use Filament\Pages\Page;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
 
 class ManageSubscriptionPage extends Page
 {
     #[\Override]
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-credit-card';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-credit-card';
+
     #[\Override]
     protected string $view = 'filament.pages.manage-subscription';
 
     public $subscription;
+
     public $selectedProduct;
+
     public $renewalPeriod;
+
     public $autoRenew;
+
     public $startDate;
 
     public function mount(): void
@@ -54,10 +59,10 @@ class ManageSubscriptionPage extends Page
                                 Select::make('renewalPeriod')
                                     ->label('Billing Cycle')
                                     ->options([
-                                        'monthly'        => 'Monthly',
-                                        'quarterly'      => 'Quarterly',
-                                        'semi-annually'  => 'Semi-annually',
-                                        'annually'       => 'Annually',
+                                        'monthly' => 'Monthly',
+                                        'quarterly' => 'Quarterly',
+                                        'semi-annually' => 'Semi-annually',
+                                        'annually' => 'Annually',
                                     ])
                                     ->required(),
 
@@ -78,18 +83,18 @@ class ManageSubscriptionPage extends Page
         $product = Products_Service::findOrFail($this->selectedProduct);
 
         if (! $this->subscription) {
-            $this->subscription = new Subscription();
+            $this->subscription = new Subscription;
         }
 
         $this->subscription->fill([
-            'customer_id'        => Auth::user()->customer->id,
+            'customer_id' => Auth::user()->customer->id,
             'product_service_id' => $this->selectedProduct,
-            'start_date'         => $this->startDate,
-            'renewal_period'     => $this->renewalPeriod,
-            'auto_renew'         => $this->autoRenew,
-            'price'              => $product->price,
-            'currency'           => $product->currency,
-            'status'             => 'active',
+            'start_date' => $this->startDate,
+            'renewal_period' => $this->renewalPeriod,
+            'auto_renew' => $this->autoRenew,
+            'price' => $product->price,
+            'currency' => $product->currency,
+            'status' => 'active',
         ]);
 
         $this->subscription->save();

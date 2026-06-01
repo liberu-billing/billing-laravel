@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
-#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+#[Fillable([
     'parent_id',
     'name',
     'slug',
@@ -19,12 +20,11 @@ class KnowledgeBaseCategory extends Model
 {
     #[\Override]
     protected function casts(): array
-
     {
 
         return [
-        'is_active' => 'boolean',
-    ];
+            'is_active' => 'boolean',
+        ];
 
     }
 

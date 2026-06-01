@@ -19,6 +19,6 @@ return new class extends SettingsMigration
         $this->migrator->add('general.twitter_url');
         $this->migrator->add('general.github_url', 'https://www.github.com/liberu-billing/billing-laravel');
         $this->migrator->add('general.youtube_url');
-        $this->migrator->add('general.footer_copyright', '© ' . date('Y') . ' ' . config('app.name', 'Liberu Billing') . '. All rights reserved.');
+        $this->migrator->add('general.footer_copyright', '© '.date('Y').' '.config('app.name', 'Liberu Billing').'. All rights reserved.');
     }
 };

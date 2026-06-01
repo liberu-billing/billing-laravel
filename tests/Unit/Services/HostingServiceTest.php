@@ -2,30 +2,36 @@
 
 namespace Tests\Unit\Services;
 
-use Tests\TestCase;
-use App\Services\HostingService;
-use App\Services\PricingService;
-use App\Services\ControlPanels\CpanelClient;
-use App\Services\ControlPanels\PleskClient;
-use App\Services\ControlPanels\DirectAdminClient;
-use App\Services\ControlPanels\VirtualminClient;
-use App\Services\ControlPanels\LiberuControlPanelClient;
 use App\Models\HostingAccount;
 use App\Models\HostingServer;
 use App\Models\Products_Service;
+use App\Services\ControlPanels\CpanelClient;
+use App\Services\ControlPanels\DirectAdminClient;
+use App\Services\ControlPanels\LiberuControlPanelClient;
+use App\Services\ControlPanels\PleskClient;
+use App\Services\ControlPanels\VirtualminClient;
+use App\Services\HostingService;
+use App\Services\PricingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
+use Tests\TestCase;
 
 class HostingServiceTest extends TestCase
 {
     use RefreshDatabase;
 
     protected $hostingService;
+
     protected $cpanelClient;
+
     protected $pleskClient;
+
     protected $directAdminClient;
+
     protected $virtualminClient;
+
     protected $liberuClient;
+
     protected $pricingService;
 
     protected function setUp(): void
@@ -56,21 +62,21 @@ class HostingServiceTest extends TestCase
         parent::tearDown();
     }
 
-    public function testProvisionAccountWithCpanel(): void
+    public function test_provision_account_with_cpanel(): void
     {
         $server = HostingServer::factory()->cpanel()->create();
         $account = HostingAccount::factory()->make([
             'status' => 'pending',
-            'hosting_server_id' => null
+            'hosting_server_id' => null,
         ]);
         $account->save();
-        
+
         $product = Products_Service::factory()->create(['name' => 'basic-plan']);
 
         $this->cpanelClient
             ->shouldReceive('setServer')
             ->once()
-            ->with(Mockery::on(fn($s): bool => $s->id === $server->id));
+            ->with(Mockery::on(fn ($s): bool => $s->id === $server->id));
 
         $this->cpanelClient
             ->shouldReceive('createAccount')
@@ -90,21 +96,21 @@ class HostingServiceTest extends TestCase
         $this->assertEquals($server->id, $account->fresh()->hosting_server_id);
     }
 
-    public function testProvisionAccountWithLiberu(): void
+    public function test_provision_account_with_liberu(): void
     {
         $server = HostingServer::factory()->liberu()->create();
         $account = HostingAccount::factory()->make([
             'status' => 'pending',
-            'hosting_server_id' => null
+            'hosting_server_id' => null,
         ]);
         $account->save();
-        
+
         $product = Products_Service::factory()->create(['name' => 'premium-plan']);
 
         $this->liberuClient
             ->shouldReceive('setServer')
             ->once()
-            ->with(Mockery::on(fn($s): bool => $s->id === $server->id));
+            ->with(Mockery::on(fn ($s): bool => $s->id === $server->id));
 
         $this->liberuClient
             ->shouldReceive('createAccount')
@@ -123,18 +129,18 @@ class HostingServiceTest extends TestCase
         $this->assertEquals('active', $account->fresh()->status);
     }
 
-    public function testSuspendAccount(): void
+    public function test_suspend_account(): void
     {
         $server = HostingServer::factory()->cpanel()->create();
         $account = HostingAccount::factory()->create([
             'hosting_server_id' => $server->id,
-            'status' => 'active'
+            'status' => 'active',
         ]);
 
         $this->cpanelClient
             ->shouldReceive('setServer')
             ->once()
-            ->with(Mockery::on(fn($s): bool => $s->id === $server->id));
+            ->with(Mockery::on(fn ($s): bool => $s->id === $server->id));
 
         $this->cpanelClient
             ->shouldReceive('suspendAccount')
@@ -148,18 +154,18 @@ class HostingServiceTest extends TestCase
         $this->assertEquals('suspended', $account->fresh()->status);
     }
 
-    public function testUnsuspendAccount(): void
+    public function test_unsuspend_account(): void
     {
         $server = HostingServer::factory()->plesk()->create();
         $account = HostingAccount::factory()->create([
             'hosting_server_id' => $server->id,
-            'status' => 'suspended'
+            'status' => 'suspended',
         ]);
 
         $this->pleskClient
             ->shouldReceive('setServer')
             ->once()
-            ->with(Mockery::on(fn($s): bool => $s->id === $server->id));
+            ->with(Mockery::on(fn ($s): bool => $s->id === $server->id));
 
         $this->pleskClient
             ->shouldReceive('unsuspendAccount')
@@ -173,21 +179,21 @@ class HostingServiceTest extends TestCase
         $this->assertEquals('active', $account->fresh()->status);
     }
 
-    public function testUpgradeAccount(): void
+    public function test_upgrade_account(): void
     {
         $server = HostingServer::factory()->directadmin()->create();
         $account = HostingAccount::factory()->create([
             'hosting_server_id' => $server->id,
             'package' => 'basic-plan',
-            'price' => 10.00
+            'price' => 10.00,
         ]);
-        
+
         $newProduct = Products_Service::factory()->create(['name' => 'premium-plan']);
 
         $this->directAdminClient
             ->shouldReceive('setServer')
             ->once()
-            ->with(Mockery::on(fn($s): bool => $s->id === $server->id));
+            ->with(Mockery::on(fn ($s): bool => $s->id === $server->id));
 
         $this->directAdminClient
             ->shouldReceive('changePackage')
@@ -207,21 +213,21 @@ class HostingServiceTest extends TestCase
         $this->assertEquals(29.99, $account->fresh()->price);
     }
 
-    public function testDowngradeAccount(): void
+    public function test_downgrade_account(): void
     {
         $server = HostingServer::factory()->virtualmin()->create();
         $account = HostingAccount::factory()->create([
             'hosting_server_id' => $server->id,
             'package' => 'premium-plan',
-            'price' => 30.00
+            'price' => 30.00,
         ]);
-        
+
         $newProduct = Products_Service::factory()->create(['name' => 'basic-plan']);
 
         $this->virtualminClient
             ->shouldReceive('setServer')
             ->once()
-            ->with(Mockery::on(fn($s): bool => $s->id === $server->id));
+            ->with(Mockery::on(fn ($s): bool => $s->id === $server->id));
 
         $this->virtualminClient
             ->shouldReceive('changePackage')
@@ -241,20 +247,20 @@ class HostingServiceTest extends TestCase
         $this->assertEquals(9.99, $account->fresh()->price);
     }
 
-    public function testTerminateAccount(): void
+    public function test_terminate_account(): void
     {
         $server = HostingServer::factory()->cpanel()->create([
-            'active_accounts' => 10
+            'active_accounts' => 10,
         ]);
         $account = HostingAccount::factory()->create([
             'hosting_server_id' => $server->id,
-            'status' => 'active'
+            'status' => 'active',
         ]);
 
         $this->cpanelClient
             ->shouldReceive('setServer')
             ->once()
-            ->with(Mockery::on(fn($s): bool => $s->id === $server->id));
+            ->with(Mockery::on(fn ($s): bool => $s->id === $server->id));
 
         $this->cpanelClient
             ->shouldReceive('terminateAccount')
@@ -269,18 +275,18 @@ class HostingServiceTest extends TestCase
         $this->assertEquals(9, $server->fresh()->active_accounts);
     }
 
-    public function testAddAddon(): void
+    public function test_add_addon(): void
     {
         $server = HostingServer::factory()->cpanel()->create();
         $account = HostingAccount::factory()->create([
             'hosting_server_id' => $server->id,
-            'addons' => []
+            'addons' => [],
         ]);
 
         $this->cpanelClient
             ->shouldReceive('setServer')
             ->once()
-            ->with(Mockery::on(fn($s): bool => $s->id === $server->id));
+            ->with(Mockery::on(fn ($s): bool => $s->id === $server->id));
 
         $this->cpanelClient
             ->shouldReceive('addAddon')
@@ -294,18 +300,18 @@ class HostingServiceTest extends TestCase
         $this->assertTrue($account->fresh()->hasAddon('ssl-certificate'));
     }
 
-    public function testRemoveAddon(): void
+    public function test_remove_addon(): void
     {
         $server = HostingServer::factory()->liberu()->create();
         $account = HostingAccount::factory()->create([
             'hosting_server_id' => $server->id,
-            'addons' => ['ssl-certificate', 'backup-service']
+            'addons' => ['ssl-certificate', 'backup-service'],
         ]);
 
         $this->liberuClient
             ->shouldReceive('setServer')
             ->once()
-            ->with(Mockery::on(fn($s): bool => $s->id === $server->id));
+            ->with(Mockery::on(fn ($s): bool => $s->id === $server->id));
 
         $this->liberuClient
             ->shouldReceive('removeAddon')
@@ -320,27 +326,27 @@ class HostingServiceTest extends TestCase
         $this->assertTrue($account->fresh()->hasAddon('ssl-certificate'));
     }
 
-    public function testProvisionAccountSelectsAvailableServer(): void
+    public function test_provision_account_selects_available_server(): void
     {
         // Create multiple servers, one at capacity
         HostingServer::factory()->cpanel()->atCapacity()->create();
         $availableServer = HostingServer::factory()->cpanel()->create([
             'active_accounts' => 5,
-            'max_accounts' => 100
+            'max_accounts' => 100,
         ]);
 
         $account = HostingAccount::factory()->make([
             'status' => 'pending',
-            'hosting_server_id' => null
+            'hosting_server_id' => null,
         ]);
         $account->save();
-        
+
         $product = Products_Service::factory()->create(['name' => 'basic-plan']);
 
         $this->cpanelClient
             ->shouldReceive('setServer')
             ->once()
-            ->with(Mockery::on(fn($s): bool => $s->id === $availableServer->id));
+            ->with(Mockery::on(fn ($s): bool => $s->id === $availableServer->id));
 
         $this->cpanelClient
             ->shouldReceive('createAccount')

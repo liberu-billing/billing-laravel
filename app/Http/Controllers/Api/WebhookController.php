@@ -22,7 +22,7 @@ class WebhookController extends Controller
         $teamId = $request->user()?->current_team_id;
 
         $endpoints = WebhookEndpoint::query()
-            ->when($teamId, fn($q) => $q->where('team_id', $teamId))
+            ->when($teamId, fn ($q) => $q->where('team_id', $teamId))
             ->with('webhookEvents')
             ->paginate($request->per_page ?? 15);
 

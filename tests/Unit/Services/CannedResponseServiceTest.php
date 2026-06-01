@@ -2,10 +2,10 @@
 
 namespace Tests\Unit\Services;
 
-use Tests\TestCase;
-use App\Services\CannedResponseService;
 use App\Models\CannedResponse;
+use App\Services\CannedResponseService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class CannedResponseServiceTest extends TestCase
 {
@@ -16,7 +16,7 @@ class CannedResponseServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->cannedResponseService = new CannedResponseService();
+        $this->cannedResponseService = new CannedResponseService;
     }
 
     public function test_can_get_canned_response_by_shortcode(): void

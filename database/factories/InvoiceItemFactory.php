@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Models\Invoice;
+use App\Models\Invoice_Item;
 use App\Models\Products_Service;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Invoice_Item>
+ * @extends Factory<Invoice_Item>
  */
 class InvoiceItemFactory extends Factory
 {

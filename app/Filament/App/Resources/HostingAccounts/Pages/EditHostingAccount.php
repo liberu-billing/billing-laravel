@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\App\Resources\HostingAccounts\Pages;
 
-use Filament\Actions\DeleteAction;
 use App\Filament\App\Resources\HostingAccounts\HostingAccountResource;
-use Filament\Pages\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditHostingAccount extends EditRecord

@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace App\Mail;
 
+use App\Models\Payment;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use App\Models\Payment;
 
 class PaymentConfirmation extends Mailable
 {
     use Queueable, SerializesModels;
 
     /**
-     * @var \App\Models\Payment
+     * @var Payment
      */
     public $payment;
 
@@ -28,7 +28,7 @@ class PaymentConfirmation extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Payment Confirmation - Invoice #' . $this->payment->invoice->invoice_number,
+            subject: 'Payment Confirmation - Invoice #'.$this->payment->invoice->invoice_number,
         );
     }
 

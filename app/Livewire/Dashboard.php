@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Client;
 use App\Models\Invoice;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\View\View;
 use Livewire\Component;
 
 class Dashboard extends Component
@@ -45,8 +46,8 @@ class Dashboard extends Component
 
     private function getRevenueData(): array
     {
-        $revenue = Invoice::paid()
-            ->selectRaw('DATE(paid_at) as date, SUM(amount) as total')
+        $revenue = Invoice::where('status', 'paid')
+            ->selectRaw('DATE(paid_at) as date, SUM(total_amount) as total')
             ->groupBy('date')
             ->orderBy('date')
             ->get();
@@ -82,7 +83,7 @@ class Dashboard extends Component
         ];
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         return view('livewire.dashboard', [
             'metrics' => $this->getMetrics(),

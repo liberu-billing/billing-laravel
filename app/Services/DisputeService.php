@@ -2,14 +2,13 @@
 
 namespace App\Services;
 
-use Exception;
+use App\Mail\DisputeCreated;
+use App\Mail\DisputeMessageReceived;
+use App\Mail\DisputeStatusUpdated;
 use App\Models\Invoice;
 use App\Models\InvoiceDispute;
-use App\Models\DisputeMessage;
 use App\Models\User;
-use App\Mail\DisputeCreated;
-use App\Mail\DisputeStatusUpdated;
-use App\Mail\DisputeMessageReceived;
+use Exception;
 use Illuminate\Support\Facades\Mail;
 
 class DisputeService
@@ -25,7 +24,7 @@ class DisputeService
             'customer_id' => $invoice->customer_id,
             'status' => 'open',
             'reason' => $data['reason'],
-            'description' => $data['description']
+            'description' => $data['description'],
         ]);
 
         $invoice->update(['status' => 'disputed']);
@@ -40,7 +39,7 @@ class DisputeService
             'status' => $status,
             'resolution_notes' => $notes,
             'resolved_at' => in_array($status, ['resolved', 'rejected']) ? now() : null,
-            'resolved_by' => in_array($status, ['resolved', 'rejected']) ? auth()->id() : null
+            'resolved_by' => in_array($status, ['resolved', 'rejected']) ? auth()->id() : null,
         ]);
 
         if ($status === 'resolved') {
@@ -57,7 +56,7 @@ class DisputeService
         $message = $dispute->messages()->create([
             'user_id' => auth()->id(),
             'message' => $data['message'],
-            'attachments' => $data['attachments'] ?? null
+            'attachments' => $data['attachments'] ?? null,
         ]);
 
         $this->sendDisputeNotifications($dispute, 'new_message');
@@ -69,11 +68,11 @@ class DisputeService
     {
         $customer = $dispute->customer;
         $adminUsers = User::where('team_id', $customer->team_id)
-            ->whereHas('roles', function($q): void {
+            ->whereHas('roles', function ($q): void {
                 $q->where('name', 'admin');
             })->get();
 
-        switch($type) {
+        switch ($type) {
             case 'created':
                 Mail::to($adminUsers)->send(new DisputeCreated($dispute));
                 break;

@@ -2,19 +2,18 @@
 
 namespace App\Actions\Fortify;
 
-use Illuminate\Validation\ValidationException;
-use Illuminate\Database\QueryException;
-use Spatie\Permission\Exceptions\RoleDoesNotExist;
 use App\Models\Team;
 use App\Models\User;
+use Exception;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
-use BezhanSalleh\FilamentShield\Support\Utils;
-use Exception;
+use Spatie\Permission\Exceptions\RoleDoesNotExist;
 
 class CreateNewUser implements CreatesNewUsers
 {
@@ -23,7 +22,8 @@ class CreateNewUser implements CreatesNewUsers
     /**
      * Validate and create a newly registered user.
      *
-     * @param array<string, string> $input
+     * @param  array<string, string>  $input
+     *
      * @throws ValidationException
      * @throws Exception
      */
@@ -31,7 +31,7 @@ class CreateNewUser implements CreatesNewUsers
     {
         try {
             Validator::make($input, [
-                'name'  => ['required', 'string', 'max:255'],
+                'name' => ['required', 'string', 'max:255'],
                 'email' => [
                     'required',
                     'string',
@@ -57,12 +57,13 @@ class CreateNewUser implements CreatesNewUsers
             //     'email' => $user->email,
             //     'role' => $input['role'],
             // ]);
-    
+
             return DB::transaction(function () use ($input) {
                 $team = $this->configureDefaultTeamContext();
+
                 return tap(User::create([
-                    'name'     => $input['name'],
-                    'email'    => $input['email'],
+                    'name' => $input['name'],
+                    'email' => $input['email'],
                     'password' => Hash::make($input['password']),
                 ]), function (User $user) use ($team): void {
                     $team->users()->attach($user);
@@ -71,9 +72,9 @@ class CreateNewUser implements CreatesNewUsers
                     setPermissionsTeamId($team->id);
                     $user = User::find($user->id);
                     try {
-                        $user->assignRole("panel_user");
+                        $user->assignRole('panel_user');
                     } catch (RoleDoesNotExist) {
-                        Log::warning('Role panel_user does not exist, skipping role assignment for user ' . $user->id);
+                        Log::warning('Role panel_user does not exist, skipping role assignment for user '.$user->id);
                     }
                 });
             });
@@ -106,12 +107,12 @@ class CreateNewUser implements CreatesNewUsers
             throw new Exception('An unexpected error occurred. Please try again later.', $e->getCode(), $e);
         }
     }
-    
+
     private function getDatabaseErrorMessage(QueryException $e): string
     {
         $errorCode = $e->getCode();
         $errorMessage = $e->getMessage();
-    
+
         if (str_contains($errorMessage, 'Duplicate entry')) {
             return 'A user with this email already exists. Please use a different email address.';
         } elseif ($errorCode == 1045) {
@@ -119,7 +120,7 @@ class CreateNewUser implements CreatesNewUsers
         } elseif ($errorCode == 2002) {
             return 'Unable to connect to the database. Please try again later.';
         } else {
-            return 'A database error occurred. Please try again later. Error code: ' . $errorCode;
+            return 'A database error occurred. Please try again later. Error code: '.$errorCode;
         }
     }
 
@@ -131,25 +132,26 @@ class CreateNewUser implements CreatesNewUsers
     protected function configureDefaultTeamContext(): Team
     {
         $team = Team::first();
-        if (!$team) {
+        if (! $team) {
             // Create a default team if none exists (e.g., in a fresh installation)
             $team = Team::forceCreate([
-                'user_id'       => 0,
-                'name'          => 'Default Team',
+                'user_id' => 0,
+                'name' => 'Default Team',
                 'personal_team' => false,
             ]);
         }
         setPermissionsTeamId($team->id);
+
         return $team;
     }
 
-     /**
+    /**
      * Create a personal team for the user.
      */
     protected function createTeam(User $user): Team
     {
         return $user->ownedTeams()->create([
-            'name'          => explode(' ', $user->name, 2)[0]."'s Team",
+            'name' => explode(' ', $user->name, 2)[0]."'s Team",
             'personal_team' => true,
         ]);
     }

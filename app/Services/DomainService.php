@@ -2,17 +2,15 @@
 
 namespace App\Services;
 
-use Exception;
+use App\Models\HostingAccount;
+use App\Models\Subscription;
 use App\Services\Registrars\EnomClient;
 use App\Services\Registrars\ResellerClubClient;
-use App\Models\Subscription;
-use App\Models\HostingAccount;
+use Exception;
 
 class DomainService
 {
-    public function __construct(protected \App\Services\Registrars\EnomClient $enomClient, protected \App\Services\Registrars\ResellerClubClient $resellerClubClient)
-    {
-    }
+    public function __construct(protected EnomClient $enomClient, protected ResellerClubClient $resellerClubClient) {}
 
     public function registerDomain(Subscription $subscription, $domainName, $registrar = 'enom')
     {
@@ -70,7 +68,7 @@ class DomainService
         return $result;
     }
 
-    protected function getClientForRegistrar($registrar)
+    protected function getClientForRegistrar($registrar): EnomClient|ResellerClubClient
     {
         return match ($registrar) {
             'enom' => $this->enomClient,

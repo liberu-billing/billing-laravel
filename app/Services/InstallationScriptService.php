@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use Exception;
@@ -8,31 +10,46 @@ use Illuminate\Support\Facades\Log;
 
 class InstallationScriptService
 {
-    protected $controlPanel;
-    
-    public function __construct($controlPanel, protected $gitRepo, protected $domain, protected $dbName, protected $dbUser, protected $dbPass)
-    {
+    protected string $controlPanel;
+
+    protected string $gitRepo;
+
+    protected string $domain;
+
+    protected string $dbName;
+
+    protected string $dbUser;
+
+    public function __construct(
+        string $controlPanel,
+        string $gitRepo,
+        string $domain,
+        string $dbName,
+        string $dbUser,
+        protected mixed $dbPass,
+    ) {
         $this->controlPanel = strtolower($controlPanel);
         $this->gitRepo = $this->validateGitRepo($gitRepo);
         $this->domain = $this->validateIdentifier($domain, 'domain', '/^[a-zA-Z0-9._-]+$/');
-        $this->dbName = $this->validateIdentifier($dbName, 'database name', '/^[a-zA-Z0-9_]+$/');
-        $this->dbUser = $this->validateIdentifier($dbUser, 'database user', '/^[a-zA-Z0-9_]+$/');
-        $this->dbPass = $dbPass;
+        $this->dbName = $this->validateIdentifier($dbName, 'database name', '/^\w+$/');
+        $this->dbUser = $this->validateIdentifier($dbUser, 'database user', '/^\w+$/');
     }
 
     protected function validateGitRepo(string $repo): string
     {
-        if (!filter_var($repo, FILTER_VALIDATE_URL) && !preg_match('/^git@[a-zA-Z0-9._-]+:[a-zA-Z0-9._\/-]+\.git$/', $repo)) {
+        if (! filter_var($repo, FILTER_VALIDATE_URL) && ! preg_match('/^git@[a-zA-Z0-9._-]+:[a-zA-Z0-9._\/-]+\.git$/', $repo)) {
             throw new Exception('Invalid git repository URL');
         }
+
         return $repo;
     }
 
     protected function validateIdentifier(string $value, string $name, string $pattern): string
     {
-        if (!preg_match($pattern, $value)) {
-            throw new Exception('Invalid ' . $name . ': only alphanumeric characters, underscores, hyphens, and dots allowed'); // phpcs:ignore WordPress.Security.EscapeOutput -- Laravel exception message, not HTML output
+        if (! preg_match($pattern, $value)) {
+            throw new Exception('Invalid '.$name.': only alphanumeric characters, underscores, hyphens, and dots allowed'); // phpcs:ignore WordPress.Security.EscapeOutput -- Laravel exception message, not HTML output
         }
+
         return $value;
     }
 
@@ -41,11 +58,11 @@ class InstallationScriptService
      */
     public function generateScript(): string
     {
-        $domain    = escapeshellarg($this->domain);    // phpcs:ignore -- nosemgrep
-        $gitRepo   = escapeshellarg($this->gitRepo);   // phpcs:ignore -- nosemgrep
-        $dbName    = escapeshellarg($this->dbName);    // phpcs:ignore -- nosemgrep
-        $dbUser    = escapeshellarg($this->dbUser);    // phpcs:ignore -- nosemgrep
-        $dbPass    = escapeshellarg($this->dbPass);    // phpcs:ignore -- nosemgrep
+        $domain = escapeshellarg($this->domain);    // phpcs:ignore -- nosemgrep
+        $gitRepo = escapeshellarg($this->gitRepo);   // phpcs:ignore -- nosemgrep
+        $dbName = escapeshellarg($this->dbName);    // phpcs:ignore -- nosemgrep
+        $dbUser = escapeshellarg($this->dbUser);    // phpcs:ignore -- nosemgrep
+        $dbPass = escapeshellarg((string) $this->dbPass);    // phpcs:ignore -- nosemgrep
 
         $installDir = "~/laravel-apps/{$domain}";
         $publicHtmlPath = $this->getPublicHtmlPath();
@@ -97,42 +114,42 @@ class InstallationScriptService
 
         return implode("\n", $script);
     }
-    
+
     protected function getPublicHtmlPath(): string
     {
         return match ($this->controlPanel) {
-            'cpanel' => "~/public_html",
-            'plesk' => "~/httpdocs",
+            'cpanel' => '~/public_html',
+            'plesk' => '~/httpdocs',
             'directadmin' => "~/domains/{$this->domain}/public_html",
-            'virtualmin' => "~/public_html",
+            'virtualmin' => '~/public_html',
             default => throw new Exception("Unsupported control panel: {$this->controlPanel}"),
         };
     }
-    
+
     public function execute(): bool
     {
         try {
             $script = $this->generateScript();
             $scriptPath = tempnam(sys_get_temp_dir(), 'laravel_install_');
-            
+
             File::put($scriptPath, $script);
             chmod($scriptPath, 0755);
-            
-            $output = shell_exec($scriptPath . " 2>&1");
+
+            $output = shell_exec($scriptPath.' 2>&1');
             unlink($scriptPath);
-            
-            Log::info("Installation script executed successfully", [
+
+            Log::info('Installation script executed successfully', [
                 'domain' => $this->domain,
-                'output' => $output
+                'output' => $output,
             ]);
-            
+
             return true;
         } catch (Exception $e) {
-            Log::error("Installation script failed", [
+            Log::error('Installation script failed', [
                 'domain' => $this->domain,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
-            
+
             throw $e;
         }
     }

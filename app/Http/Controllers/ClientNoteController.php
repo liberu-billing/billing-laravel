@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\ClientNote;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class ClientNoteController extends Controller
 {
@@ -40,13 +40,14 @@ class ClientNoteController extends Controller
         }
 
         $notes = $query->latest()->paginate(10);
+
         return response()->json($notes);
     }
 
     public function suggestions(Request $request): JsonResponse
     {
         $query = $request->get('query');
-        
+
         $suggestions = ClientNote::where('content', 'like', "%{$query}%")
             ->select('content')
             ->distinct()
@@ -60,13 +61,13 @@ class ClientNoteController extends Controller
     {
         $request->validate([
             'client_id' => 'required|exists:clients,id',
-            'content' => 'required|string'
+            'content' => 'required|string',
         ]);
 
         $note = ClientNote::create([
             'client_id' => $request->client_id,
             'user_id' => auth()->id(),
-            'content' => $request->content
+            'content' => $request->content,
         ]);
 
         return response()->json($note->load('user'));
@@ -75,6 +76,7 @@ class ClientNoteController extends Controller
     public function destroy(ClientNote $note): JsonResponse
     {
         $note->delete();
+
         return response()->json(['message' => 'Note deleted successfully']);
     }
 }

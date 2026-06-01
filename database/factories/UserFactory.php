@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 use Laravel\Jetstream\Features as JetstreamFeatures;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
+ * @extends Factory<User>
  */
 class UserFactory extends Factory
 {
@@ -51,7 +51,7 @@ class UserFactory extends Factory
                     'user_id' => $user->id,
                     'personal_team' => true,
                 ])
-                ->afterCreating(function (Team $team, User $user) {
+                ->afterCreating(function (Team $team, User $user): void {
                     $user->update(['current_team_id' => $team->id]);
                 })
                 ->when(is_callable($callback), $callback),

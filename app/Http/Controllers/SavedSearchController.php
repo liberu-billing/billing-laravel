@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\SavedSearch;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Illuminate\Http\JsonResponse;
 
 class SavedSearchController extends Controller
 {
@@ -18,12 +18,12 @@ class SavedSearchController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'criteria' => 'required|array'
+            'criteria' => 'required|array',
         ]);
 
         $search = auth()->user()->savedSearches()->create([
             'name' => $request->name,
-            'criteria' => $request->criteria
+            'criteria' => $request->criteria,
         ]);
 
         return response()->json($search);
@@ -32,13 +32,13 @@ class SavedSearchController extends Controller
     public function share(Request $request): JsonResponse
     {
         $request->validate([
-            'criteria' => 'required|array'
+            'criteria' => 'required|array',
         ]);
 
         $search = auth()->user()->savedSearches()->create([
             'name' => 'Shared Search',
             'criteria' => $request->criteria,
-            'share_token' => Str::random(32)
+            'share_token' => Str::random(32),
         ]);
 
         return response()->json(['token' => $search->share_token]);
@@ -47,6 +47,7 @@ class SavedSearchController extends Controller
     public function loadShared($token): JsonResponse
     {
         $search = SavedSearch::where('share_token', $token)->firstOrFail();
+
         return response()->json($search->criteria);
     }
 }

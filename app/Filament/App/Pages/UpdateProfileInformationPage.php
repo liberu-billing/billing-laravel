@@ -13,10 +13,10 @@ class UpdateProfileInformationPage extends Page
     protected string $view = 'filament.pages.profile.update-profile-information';
 
     #[\Override]
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-user';
 
     #[\Override]
-    protected static string | \UnitEnum | null $navigationGroup = 'Account';
+    protected static string|\UnitEnum|null $navigationGroup = 'Account';
 
     #[\Override]
     protected static ?int $navigationSort = 0;
@@ -31,7 +31,7 @@ class UpdateProfileInformationPage extends Page
     public function mount(): void
     {
         $this->form->fill([
-            'name'  => Auth::user()->name,
+            'name' => Auth::user()->name,
             'email' => Auth::user()->email,
         ]);
     }
@@ -57,7 +57,7 @@ class UpdateProfileInformationPage extends Page
         $user = Auth::user();
 
         $user->forceFill([
-            'name'  => $state['name'],
+            'name' => $state['name'],
             'email' => $state['email'],
         ])->save();
 

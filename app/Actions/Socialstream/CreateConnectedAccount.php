@@ -1,22 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Actions\Socialstream;
 
-use JoelButcher\Socialstream\ConnectedAccount;
+use App\Models\User;
+use Illuminate\Support\Carbon;
+use JoelButcher\Socialstream\ConnectedAccount as SocialstreamConnectedAccount;
 use JoelButcher\Socialstream\Contracts\CreatesConnectedAccounts;
-use JoelButcher\Socialstream\Socialstream;
 use Laravel\Socialite\Contracts\User as ProviderUser;
 
 class CreateConnectedAccount implements CreatesConnectedAccounts
 {
-    /**
-     * Create a connected account for a given user.
-     */
-    public function create(mixed $user, string $provider, ProviderUser $providerUser): ConnectedAccount
+    public function create(User $user, string $provider, ProviderUser $providerUser): SocialstreamConnectedAccount
     {
-        return Socialstream::connectedAccountModel()::forceCreate([
-            'user_id' => $user->id,
-            'provider' => strtolower($provider),
+        return $user->connectedAccounts()->create([
+            'provider' => $provider,
             'provider_id' => $providerUser->getId(),
             'name' => $providerUser->getName(),
             'nickname' => $providerUser->getNickname(),
@@ -25,7 +24,9 @@ class CreateConnectedAccount implements CreatesConnectedAccounts
             'token' => $providerUser->token,
             'secret' => $providerUser->tokenSecret ?? null,
             'refresh_token' => $providerUser->refreshToken ?? null,
-            'expires_at' => property_exists($providerUser, 'expiresIn') ? now()->addSeconds($providerUser->expiresIn) : null,
+            'expires_at' => property_exists($providerUser, 'expiresIn') && $providerUser->expiresIn !== null
+                ? Carbon::now()->addSeconds($providerUser->expiresIn)
+                : null,
         ]);
     }
 }

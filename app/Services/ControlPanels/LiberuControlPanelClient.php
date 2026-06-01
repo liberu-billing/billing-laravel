@@ -1,22 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\ControlPanels;
 
+use App\Models\HostingServer;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Log;
-use App\Models\HostingServer;
 
 class LiberuControlPanelClient
 {
-    protected \GuzzleHttp\Client $client;
+    protected Client $client;
+
     protected $server;
+
     protected $apiToken;
 
     public function __construct()
     {
-        $this->client = new Client();
+        $this->client = new Client;
     }
 
     public function setServer(HostingServer $server): void
@@ -25,124 +29,127 @@ class LiberuControlPanelClient
         $this->apiToken = $server->api_token;
     }
 
-    public function createAccount(string $username, string $domain, $package)
+    public function createAccount(string $username, string $domain, $package): bool
     {
         $password = $this->generatePassword();
         $data = [
             'username' => $username,
             'domain' => $domain,
-            'email' => $username . '@' . $domain,
+            'email' => $username.'@'.$domain,
             'password' => $password,
             'package' => $package,
-            'status' => 'active'
+            'status' => 'active',
         ];
 
         return $this->makeApiCall('POST', '/api/hosting/accounts', $data);
     }
 
-    public function suspendAccount(string $username)
+    public function suspendAccount(string $username): bool
     {
         $data = [
             'username' => $username,
-            'reason' => 'Non-payment'
+            'reason' => 'Non-payment',
         ];
 
-        return $this->makeApiCall('POST', '/api/hosting/accounts/' . $username . '/suspend', $data);
+        return $this->makeApiCall('POST', '/api/hosting/accounts/'.$username.'/suspend', $data);
     }
 
-    public function unsuspendAccount(string $username)
+    public function unsuspendAccount(string $username): bool
     {
-        return $this->makeApiCall('POST', '/api/hosting/accounts/' . $username . '/unsuspend', [
-            'username' => $username
+        return $this->makeApiCall('POST', '/api/hosting/accounts/'.$username.'/unsuspend', [
+            'username' => $username,
         ]);
     }
 
-    public function changePackage(string $username, $newPackage)
+    public function changePackage(string $username, $newPackage): bool
     {
         $data = [
             'username' => $username,
-            'package' => $newPackage
+            'package' => $newPackage,
         ];
 
-        return $this->makeApiCall('PUT', '/api/hosting/accounts/' . $username . '/package', $data);
+        return $this->makeApiCall('PUT', '/api/hosting/accounts/'.$username.'/package', $data);
     }
 
-    public function terminateAccount(string $username)
+    public function terminateAccount(string $username): bool
     {
-        return $this->makeApiCall('DELETE', '/api/hosting/accounts/' . $username, [
-            'username' => $username
+        return $this->makeApiCall('DELETE', '/api/hosting/accounts/'.$username, [
+            'username' => $username,
         ]);
     }
 
-    public function addAddon(string $username, $addon)
+    public function addAddon(string $username, $addon): bool
     {
         $data = [
             'username' => $username,
-            'addon' => $addon
+            'addon' => $addon,
         ];
 
-        return $this->makeApiCall('POST', '/api/hosting/accounts/' . $username . '/addons', $data);
+        return $this->makeApiCall('POST', '/api/hosting/accounts/'.$username.'/addons', $data);
     }
 
-    public function removeAddon(string $username, string $addon)
+    public function removeAddon(string $username, string $addon): bool
     {
         $data = [
             'username' => $username,
-            'addon' => $addon
+            'addon' => $addon,
         ];
 
-        return $this->makeApiCall('DELETE', '/api/hosting/accounts/' . $username . '/addons/' . $addon, $data);
+        return $this->makeApiCall('DELETE', '/api/hosting/accounts/'.$username.'/addons/'.$addon, $data);
     }
 
-    protected function makeApiCall($method, string $endpoint, $data = []): bool
+    protected function makeApiCall(string $method, string $endpoint, $data = []): bool
     {
-        if (!$this->server) {
+        if (! $this->server) {
             throw new Exception('Server not configured');
         }
 
         try {
             $options = [
                 'headers' => [
-                    'Authorization' => 'Bearer ' . $this->apiToken,
+                    'Authorization' => 'Bearer '.$this->apiToken,
                     'Accept' => 'application/json',
                     'Content-Type' => 'application/json',
                 ],
-                'verify' => false
+                'verify' => false,
             ];
 
-            if (!empty($data)) {
+            if (! empty($data)) {
                 $options['json'] = $data;
             }
 
-            $url = rtrim((string) $this->server->api_url, '/') . $endpoint;
+            $url = rtrim((string) $this->server->api_url, '/').$endpoint;
             $response = $this->client->request($method, $url, $options);
 
-            $result = json_decode((string) $response->getBody()->getContents(), true);
+            $result = json_decode($response->getBody()->getContents(), true);
 
             if ($response->getStatusCode() >= 200 && $response->getStatusCode() < 300) {
-                Log::info("Liberu Control Panel API call successful", [
+                Log::info('Liberu Control Panel API call successful', [
                     'method' => $method,
                     'endpoint' => $endpoint,
-                    'server' => $this->server->hostname
+                    'server' => $this->server->hostname,
                 ]);
+
                 return true;
             }
 
-            Log::error("Liberu Control Panel API call failed", [
+            Log::error('Liberu Control Panel API call failed', [
                 'method' => $method,
                 'endpoint' => $endpoint,
                 'server' => $this->server->hostname,
-                'error' => $result['message'] ?? 'Unknown error'
+                'error' => $result['message'] ?? 'Unknown error',
             ]);
+
             return false;
 
         } catch (GuzzleException $e) {
-            Log::error("Liberu Control Panel API call error", [
+            Log::error('Liberu Control Panel API call error', [
                 'method' => $method,
                 'endpoint' => $endpoint,
                 'server' => $this->server->hostname,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }

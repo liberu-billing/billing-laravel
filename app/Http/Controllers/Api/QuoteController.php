@@ -23,8 +23,8 @@ class QuoteController extends Controller
     public function index(Request $request): JsonResponse
     {
         $quotes = Quote::query()
-            ->when($request->status, fn($q) => $q->where('status', $request->status))
-            ->when($request->customer_id, fn($q) => $q->where('customer_id', $request->customer_id))
+            ->when($request->status, fn ($q) => $q->where('status', $request->status))
+            ->when($request->customer_id, fn ($q) => $q->where('customer_id', $request->customer_id))
             ->with(['customer'])
             ->orderByDesc('created_at')
             ->paginate($request->per_page ?? 15);
@@ -116,7 +116,7 @@ class QuoteController extends Controller
      */
     public function send(Quote $quote): JsonResponse
     {
-        if (!in_array($quote->status, ['draft', 'sent'])) {
+        if (! in_array($quote->status, ['draft', 'sent'])) {
             return response()->json([
                 'message' => 'Only draft or sent quotes can be (re)sent.',
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -132,7 +132,7 @@ class QuoteController extends Controller
      */
     public function accept(Quote $quote): JsonResponse
     {
-        if (!in_array($quote->status, ['sent', 'viewed'])) {
+        if (! in_array($quote->status, ['sent', 'viewed'])) {
             return response()->json([
                 'message' => 'Only sent or viewed quotes can be accepted.',
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -148,7 +148,7 @@ class QuoteController extends Controller
      */
     public function decline(Quote $quote): JsonResponse
     {
-        if (!in_array($quote->status, ['sent', 'viewed'])) {
+        if (! in_array($quote->status, ['sent', 'viewed'])) {
             return response()->json([
                 'message' => 'Only sent or viewed quotes can be declined.',
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -164,7 +164,7 @@ class QuoteController extends Controller
      */
     public function convert(Quote $quote): JsonResponse
     {
-        if (!$quote->canBeConverted()) {
+        if (! $quote->canBeConverted()) {
             return response()->json([
                 'message' => 'Only accepted quotes can be converted to invoices.',
             ], Response::HTTP_UNPROCESSABLE_ENTITY);

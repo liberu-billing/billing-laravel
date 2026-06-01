@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Traits\HasTeam;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+#[Fillable([
     'name',
     'hostname',
     'control_panel',
@@ -27,14 +28,13 @@ class HostingServer extends Model
 
     #[\Override]
     protected function casts(): array
-
     {
 
         return [
-        'is_active' => 'boolean',
-        'max_accounts' => 'integer',
-        'active_accounts' => 'integer',
-    ];
+            'is_active' => 'boolean',
+            'max_accounts' => 'integer',
+            'active_accounts' => 'integer',
+        ];
 
     }
 
@@ -50,7 +50,7 @@ class HostingServer extends Model
 
     public function hasCapacity(): bool
     {
-        return !$this->isAtCapacity();
+        return ! $this->isAtCapacity();
     }
 
     public function getUsagePercentage(): float|int
@@ -58,6 +58,7 @@ class HostingServer extends Model
         if ($this->max_accounts === 0) {
             return 0;
         }
+
         return ($this->active_accounts / $this->max_accounts) * 100;
     }
 }

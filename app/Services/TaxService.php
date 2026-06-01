@@ -2,18 +2,18 @@
 
 namespace App\Services;
 
-use Exception;
-use App\Models\TaxRate;
 use App\Models\Invoice;
 use App\Models\TaxExemption;
-use Illuminate\Support\Facades\Http;
+use App\Models\TaxRate;
+use Exception;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class TaxService
 {
     protected $taxApiConfig;
-    
+
     public function __construct()
     {
         $this->taxApiConfig = config('services.tax_api');
@@ -22,7 +22,7 @@ class TaxService
     public function calculateTax(Invoice $invoice): int|float
     {
         $customer = $invoice->customer;
-        
+
         // Check for tax exemption
         if ($this->isExempt($customer)) {
             return 0;
@@ -30,7 +30,7 @@ class TaxService
 
         // Try to get tax rates from cache
         $cacheKey = "tax_rates_{$invoice->team_id}_{$customer->country}_{$customer->state}";
-        $taxRates = Cache::remember($cacheKey, 3600, fn() => $this->getTaxRates($invoice, $customer));
+        $taxRates = Cache::remember($cacheKey, 3600, fn () => $this->getTaxRates($invoice, $customer));
 
         $totalTax = 0;
         foreach ($invoice->items as $item) {
@@ -51,7 +51,7 @@ class TaxService
             try {
                 return $this->getTaxRatesFromApi($customer);
             } catch (Exception $e) {
-                Log::error('Tax API error: ' . $e->getMessage());
+                Log::error('Tax API error: '.$e->getMessage());
                 // Fallback to database rates if API fails
             }
         }
@@ -70,12 +70,12 @@ class TaxService
     protected function getTaxRatesFromApi($customer)
     {
         $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $this->taxApiConfig['api_key']
+            'Authorization' => 'Bearer '.$this->taxApiConfig['api_key'],
         ])->get($this->taxApiConfig['url'], [
             'country' => $customer->country,
             'state' => $customer->state,
             'city' => $customer->city,
-            'postal_code' => $customer->postal_code
+            'postal_code' => $customer->postal_code,
         ]);
 
         if ($response->successful()) {
@@ -98,13 +98,13 @@ class TaxService
 
     protected function getApplicableRate($taxRates, $item)
     {
-        return $taxRates->first(fn($rate) => $rate->service_type === $item->productService->type);
+        return $taxRates->first(fn ($rate): bool => $rate->service_type === $item->productService->type);
     }
 
     protected function calculateItemTax($item, $taxRate): float|int
     {
         $taxableAmount = $item->total_price;
-        
+
         // Apply any special tax rules based on amount thresholds
         if ($taxRate->threshold_amount && $taxableAmount > $taxRate->threshold_amount) {
             $taxableAmount = $this->applyThresholdRules($taxableAmount, $taxRate);
@@ -117,15 +117,17 @@ class TaxService
     {
         if ($taxRate->threshold_rate) {
             $excessAmount = $amount - $taxRate->threshold_amount;
-            return ($taxRate->threshold_amount * ($taxRate->rate / 100)) + 
+
+            return ($taxRate->threshold_amount * ($taxRate->rate / 100)) +
                    ($excessAmount * ($taxRate->threshold_rate / 100));
         }
+
         return $amount;
     }
 
     protected function formatApiResponse($apiData)
     {
-        return collect($apiData)->map(fn($rate) => new TaxRate([
+        return collect($apiData)->map(fn ($rate): TaxRate => new TaxRate([
             'rate' => $rate['rate'],
             'service_type' => $rate['type'],
             'country' => $rate['country'],

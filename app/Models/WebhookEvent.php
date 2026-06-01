@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+#[Fillable([
     'webhook_endpoint_id',
     'event_type',
     'payload',
@@ -19,14 +20,13 @@ class WebhookEvent extends Model
 {
     #[\Override]
     protected function casts(): array
-
     {
 
         return [
-        'payload' => 'array',
-        'sent_at' => 'datetime',
-        'next_retry_at' => 'datetime',
-    ];
+            'payload' => 'array',
+            'sent_at' => 'datetime',
+            'next_retry_at' => 'datetime',
+        ];
 
     }
 

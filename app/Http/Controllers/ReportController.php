@@ -4,22 +4,23 @@ namespace App\Http\Controllers;
 
 use App\Models\Report;
 use App\Services\ReportGenerationService;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class ReportController extends Controller
 {
-    public function __construct(protected \App\Services\ReportGenerationService $reportService)
-    {
-    }
+    public function __construct(protected ReportGenerationService $reportService) {}
 
-    public function index(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function index(): Factory|View
     {
         $reports = Report::where('team_id', auth()->user()->currentTeam->id)->get();
+
         return view('reports.index', compact('reports'));
     }
 
-    public function create(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function create(): Factory|View
     {
         return view('reports.create');
     }
@@ -31,16 +32,17 @@ class ReportController extends Controller
             'type' => 'required|string',
             'format' => 'required|in:pdf,csv,excel',
             'parameters' => 'required|array',
-            'schedule' => 'nullable|array'
+            'schedule' => 'nullable|array',
         ]);
 
         $report = Report::create([
             ...$validated,
-            'team_id' => auth()->user()->currentTeam->id
+            'team_id' => auth()->user()->currentTeam->id,
         ]);
 
         if ($request->generate_now) {
             $filename = $this->reportService->generateReport($report);
+
             return Storage::download("reports/{$filename}");
         }
 
@@ -50,6 +52,7 @@ class ReportController extends Controller
     public function generate(Report $report)
     {
         $filename = $this->reportService->generateReport($report);
+
         return Storage::download("reports/{$filename}");
     }
 }

@@ -2,12 +2,12 @@
 
 namespace Tests\Unit\Services;
 
-use Tests\TestCase;
-use App\Services\KnowledgeBaseService;
 use App\Models\KnowledgeBaseArticle;
 use App\Models\KnowledgeBaseCategory;
 use App\Models\User;
+use App\Services\KnowledgeBaseService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class KnowledgeBaseServiceTest extends TestCase
 {
@@ -18,7 +18,7 @@ class KnowledgeBaseServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->kbService = new KnowledgeBaseService();
+        $this->kbService = new KnowledgeBaseService;
     }
 
     public function test_can_search_articles(): void

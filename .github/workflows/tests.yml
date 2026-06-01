@@ -13,7 +13,7 @@ permissions:
 jobs:
   tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - uses: actions/checkout@v4
@@ -22,7 +22,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.5'
-          extensions: mbstring, pdo, pdo_sqlite, bcmath, opcache, zip, gd, intl
+          extensions: mbstring, pdo, pdo_sqlite, bcmath, opcache, zip, gd, intl, redis
           coverage: xdebug
 
       - name: Get composer cache directory
@@ -45,14 +45,13 @@ jobs:
       - name: Generate application key
         run: php artisan key:generate
 
-      - name: Run tests
+      - name: Run tests with coverage
         run: php artisan test --coverage-clover=coverage.xml
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage.xml
-          flags: unittests
-          name: codecov-umbrella
-          fail_ci_if_error: false
+          name: coverage-report
+          path: coverage.xml
+          retention-days: 7

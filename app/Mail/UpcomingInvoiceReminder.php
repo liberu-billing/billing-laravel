@@ -10,18 +10,16 @@ class UpcomingInvoiceReminder extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public $data, public $template)
-    {
-    }
+    public function __construct(public $data, public $template) {}
 
     public function build()
     {
         return $this->subject($this->parseTemplate($this->template->subject))
-                    ->view('emails.upcoming-invoice-reminder')
-                    ->with([
-                        'content' => $this->parseTemplate($this->template->body),
-                        'data' => $this->data
-                    ]);
+            ->view('emails.upcoming-invoice-reminder')
+            ->with([
+                'content' => $this->parseTemplate($this->template->body),
+                'data' => $this->data,
+            ]);
     }
 
     private function parseTemplate($text)
@@ -29,6 +27,7 @@ class UpcomingInvoiceReminder extends Mailable
         foreach ($this->data as $key => $value) {
             $text = str_replace('{{'.$key.'}}', $value, $text);
         }
+
         return $text;
     }
 }

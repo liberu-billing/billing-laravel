@@ -27,7 +27,7 @@ return new class extends Migration
             $table->integer('not_helpful_count')->default(0);
             $table->timestamp('published_at')->nullable();
             $table->timestamps();
-            
+
             $table->index(['category_id', 'is_published']);
             $table->index(['is_featured', 'is_published']);
             if (config('database.default') !== 'sqlite') {

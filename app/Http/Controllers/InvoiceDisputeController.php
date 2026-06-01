@@ -9,15 +9,13 @@ use Illuminate\Http\Request;
 
 class InvoiceDisputeController extends Controller
 {
-    public function __construct(protected \App\Services\DisputeService $disputeService)
-    {
-    }
+    public function __construct(protected DisputeService $disputeService) {}
 
     public function store(Request $request, Invoice $invoice)
     {
         $validated = $request->validate([
             'reason' => 'required|string|max:255',
-            'description' => 'required|string'
+            'description' => 'required|string',
         ]);
 
         $dispute = $this->disputeService->createDispute($invoice, $validated);
@@ -29,7 +27,7 @@ class InvoiceDisputeController extends Controller
     {
         $validated = $request->validate([
             'status' => 'required|in:under_review,resolved,rejected',
-            'resolution_notes' => 'required_if:status,resolved,rejected|string'
+            'resolution_notes' => 'required_if:status,resolved,rejected|string',
         ]);
 
         $dispute = $this->disputeService->updateDisputeStatus(
@@ -45,7 +43,7 @@ class InvoiceDisputeController extends Controller
     {
         $validated = $request->validate([
             'message' => 'required|string',
-            'attachments' => 'nullable|array'
+            'attachments' => 'nullable|array',
         ]);
 
         $message = $this->disputeService->addMessage($dispute, $validated);

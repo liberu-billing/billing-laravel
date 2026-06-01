@@ -5,12 +5,12 @@ namespace App\Services;
 use App\Models\Invoice;
 use App\Models\PaymentPlan;
 use Carbon\Carbon;
+use Carbon\Month;
+use Carbon\WeekDay;
 
 class PaymentPlanService
 {
-    public function __construct(protected \App\Services\BillingService $billingService)
-    {
-    }
+    public function __construct(protected BillingService $billingService) {}
 
     public function createInstallmentInvoice(PaymentPlan $paymentPlan)
     {
@@ -46,7 +46,7 @@ class PaymentPlanService
 
         foreach ($activePlans as $plan) {
             $this->createInstallmentInvoice($plan);
-            
+
             if ($plan->installments->count() >= $plan->total_installments) {
                 $plan->update(['status' => 'completed']);
             }
@@ -56,12 +56,13 @@ class PaymentPlanService
     private function generateInstallmentNumber(Invoice $parentInvoice): string
     {
         $count = $parentInvoice->installments()->count() + 1;
-        return $parentInvoice->invoice_number . "-INST{$count}";
+
+        return $parentInvoice->invoice_number."-INST{$count}";
     }
 
-    private function calculateNextDueDate(\DateTimeInterface|\Carbon\WeekDay|\Carbon\Month|string|int|float|null $date, $frequency)
+    private function calculateNextDueDate(\DateTimeInterface|WeekDay|Month|string|int|float|null $date, $frequency)
     {
-        return match($frequency) {
+        return match ($frequency) {
             'weekly' => Carbon::parse($date)->addWeek(),
             'monthly' => Carbon::parse($date)->addMonth(),
             'quarterly' => Carbon::parse($date)->addMonths(3),

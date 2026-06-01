@@ -2,24 +2,22 @@
 
 namespace App\Services;
 
-use Exception;
 use App\Models\Report;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Exception;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportGenerationService
 {
-    public function __construct(protected \App\Services\BillingService $billingService)
-    {
-    }
+    public function __construct(protected BillingService $billingService) {}
 
-    public function generateReport(Report $report)
+    public function generateReport(Report $report): string
     {
         $data = $this->gatherReportData($report);
-        
-        return match($report->format) {
+
+        return match ($report->format) {
             'pdf' => $this->generatePdfReport($data, $report),
             'csv' => $this->generateCsvReport($data, $report),
             'excel' => $this->generateExcelReport($data, $report),
@@ -29,9 +27,9 @@ class ReportGenerationService
 
     protected function gatherReportData(Report $report)
     {
-        $clientBillingService = new ClientBillingReportService();
-        
-        return match($report->type) {
+        $clientBillingService = new ClientBillingReportService;
+
+        return match ($report->type) {
             'billing_summary' => $this->billingService->getBillingSummary($report->parameters),
             'revenue_report' => $this->billingService->getRevenueReport($report->parameters),
             'customer_activity' => $this->billingService->getCustomerActivityReport($report->parameters),
@@ -50,7 +48,7 @@ class ReportGenerationService
                 ),
                 'max_monthly_payment' => $clientBillingService->getPaymentTrends(
                     Customer::find($report->parameters['customer_id'])
-                )->max('total_paid')
+                )->max('total_paid'),
             ],
             default => throw new Exception('Unsupported report type')
         };
@@ -58,9 +56,10 @@ class ReportGenerationService
 
     protected function generatePdfReport($data, Report $report): string
     {
-        $pdf = PDF::loadView("reports.templates.{$report->type}", ['data' => $data]);
+        $pdf = Pdf::loadView("reports.templates.{$report->type}", ['data' => $data]);
         $filename = "report_{$report->id}.pdf";
         Storage::put("reports/{$filename}", $pdf->output());
+
         return $filename;
     }
 
@@ -68,35 +67,37 @@ class ReportGenerationService
     {
         $filename = "report_{$report->id}.csv";
         $handle = fopen(Storage::path("reports/{$filename}"), 'w');
-        
+
         fputcsv($handle, array_keys(reset($data)), escape: '\\');
         foreach ($data as $row) {
             fputcsv($handle, $row, escape: '\\');
         }
-        
+
         fclose($handle);
+
         return $filename;
     }
 
     protected function generateExcelReport($data, Report $report): string
     {
-        $spreadsheet = new Spreadsheet();
+        $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
-        
+
         $headers = array_keys(reset($data));
         foreach ($headers as $col => $header) {
             $sheet->setCellValueByColumnAndRow($col + 1, 1, $header);
         }
-        
+
         foreach ($data as $row => $rowData) {
             foreach ($rowData as $col => $value) {
                 $sheet->setCellValueByColumnAndRow($col + 1, $row + 2, $value);
             }
         }
-        
+
         $filename = "report_{$report->id}.xlsx";
         $writer = new Xlsx($spreadsheet);
         $writer->save(Storage::path("reports/{$filename}"));
+
         return $filename;
     }
 }

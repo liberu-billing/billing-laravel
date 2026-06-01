@@ -6,14 +6,17 @@ use GuzzleHttp\Client;
 
 class ResellerClubClient
 {
-    protected \GuzzleHttp\Client $client;
+    protected Client $client;
+
     protected $apiUrl;
+
     protected $authUserId;
+
     protected $apiKey;
 
     public function __construct()
     {
-        $this->client = new Client();
+        $this->client = new Client;
         $this->apiUrl = config('services.resellerclub.api_url');
         $this->authUserId = config('services.resellerclub.auth_userid');
         $this->apiKey = config('services.resellerclub.api_key');
@@ -44,7 +47,7 @@ class ResellerClubClient
             'api-key' => $this->apiKey,
         ], $params);
 
-        $this->client->post($this->apiUrl . $action, [
+        $this->client->post($this->apiUrl.$action, [
             'form_params' => $params,
         ]);
 

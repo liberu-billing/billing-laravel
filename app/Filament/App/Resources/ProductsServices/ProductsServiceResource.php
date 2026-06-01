@@ -2,25 +2,22 @@
 
 namespace App\Filament\App\Resources\ProductsServices;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\KeyValue;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\EditAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use App\Filament\App\Resources\ProductsServices\Pages\ListProductsServices;
 use App\Filament\App\Resources\ProductsServices\Pages\CreateProductsService;
 use App\Filament\App\Resources\ProductsServices\Pages\EditProductsService;
-use App\Filament\App\Resources\ProductsServiceResource\Pages;
+use App\Filament\App\Resources\ProductsServices\Pages\ListProductsServices;
 use App\Models\Products_Service;
 use App\Models\Tld;
-use Filament\Forms;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\KeyValue;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
 class ProductsServiceResource extends Resource
@@ -29,7 +26,7 @@ class ProductsServiceResource extends Resource
     protected static ?string $model = Products_Service::class;
 
     #[\Override]
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     #[\Override]
     public static function form(Schema $schema): Schema
@@ -102,11 +99,11 @@ class ProductsServiceResource extends Resource
                 TextColumn::make('pricing_model'),
                 TextColumn::make('tld.name')
                     ->label('TLD'),
-                    // ->visible(fn ($record) => $record->type === 'domain'),
+                // ->visible(fn ($record) => $record->type === 'domain'),
                 TextColumn::make('markup_type'),
-                    // ->visible(fn ($record) => $record->type === 'domain'),
+                // ->visible(fn ($record) => $record->type === 'domain'),
                 TextColumn::make('markup_value'),
-                    // ->visible(fn ($record) => $record->type === 'domain'),
+                // ->visible(fn ($record) => $record->type === 'domain'),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

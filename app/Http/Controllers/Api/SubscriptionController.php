@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Subscription;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class SubscriptionController extends Controller
 {
@@ -17,8 +17,8 @@ class SubscriptionController extends Controller
     public function index(Request $request): JsonResponse
     {
         $subscriptions = Subscription::query()
-            ->when($request->customer_id, fn($q) => $q->where('customer_id', $request->customer_id))
-            ->when($request->status, fn($q) => $q->where('status', $request->status))
+            ->when($request->customer_id, fn ($q) => $q->where('customer_id', $request->customer_id))
+            ->when($request->status, fn ($q) => $q->where('status', $request->status))
             ->paginate(15);
 
         return response()->json($subscriptions);

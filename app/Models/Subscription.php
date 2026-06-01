@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Carbon\Carbon;
 
-#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+#[Fillable([
     'customer_id',
     'product_service_id',
     'start_date',
@@ -33,20 +34,19 @@ class Subscription extends Model
 
     #[\Override]
     protected function casts(): array
-
     {
 
         return [
-        'start_date' => 'datetime',
-        'end_date' => 'datetime',
-        'domain_expiration_date' => 'datetime',
-        'scheduled_change' => 'array',
-        'price' => 'decimal:2',
-        'currency' => 'string',
-        'auto_renew' => 'boolean',
-        'last_billed_at' => 'datetime',
-        'ends_at' => 'datetime',
-    ];
+            'start_date' => 'datetime',
+            'end_date' => 'datetime',
+            'domain_expiration_date' => 'datetime',
+            'scheduled_change' => 'array',
+            'price' => 'decimal:2',
+            'currency' => 'string',
+            'auto_renew' => 'boolean',
+            'last_billed_at' => 'datetime',
+            'ends_at' => 'datetime',
+        ];
 
     }
 
@@ -79,7 +79,7 @@ class Subscription extends Model
 
     public function renew()
     {
-        if (!$this->auto_renew || $this->status === 'cancelled') {
+        if (! $this->auto_renew || $this->status === 'cancelled') {
             return false;
         }
 
@@ -87,6 +87,7 @@ class Subscription extends Model
         $this->end_date = Carbon::parse($this->end_date)->add($renewalPeriod);
         $this->last_billed_at = now();
         $this->status = 'active';
+
         return $this->save();
     }
 
@@ -94,12 +95,14 @@ class Subscription extends Model
     {
         $this->auto_renew = false;
         $this->status = 'cancelled';
+
         return $this->save();
     }
 
     public function suspend()
     {
         $this->status = 'suspended';
+
         return $this->save();
     }
 
@@ -107,8 +110,10 @@ class Subscription extends Model
     {
         if ($this->status === 'suspended') {
             $this->status = 'active';
+
             return $this->save();
         }
+
         return false;
     }
 
@@ -119,11 +124,12 @@ class Subscription extends Model
 
     public function needsBilling()
     {
-        if (!$this->last_billed_at) {
+        if (! $this->last_billed_at) {
             return true;
         }
 
         $nextBillingDate = Carbon::parse($this->last_billed_at)->add($this->getRenewalPeriod());
+
         return $nextBillingDate->isPast() && $this->isActive();
     }
 

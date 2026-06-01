@@ -2,15 +2,11 @@
 
 namespace App\Filament\App\Pages;
 
-use Filament\Support\Enums\Width;
-use App\Models\User;
-use Filament\Facades\Filament;
 use Filament\Forms\Components\TextInput;
-use Filament\Pages\Concerns\HasSubNavigation;
 use Filament\Pages\Tenancy\RegisterTenant;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\Width;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
 
 class CreateTeam extends RegisterTenant
 {
@@ -25,7 +21,7 @@ class CreateTeam extends RegisterTenant
                 TextInput::make('name')
                     ->label('Team Name')
                     ->required()
-                    ->maxLength(255)
+                    ->maxLength(255),
             ]);
     }
 

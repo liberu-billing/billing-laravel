@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Invoice;
 use App\Models\Quote;
 use App\Models\QuoteItem;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 class QuoteService
@@ -108,14 +107,14 @@ class QuoteService
      */
     public function convertToInvoice(Quote $quote): Invoice
     {
-        if (!$quote->canBeConverted()) {
+        if (! $quote->canBeConverted()) {
             throw new \RuntimeException('Only accepted quotes can be converted to invoices.');
         }
 
         return DB::transaction(function () use ($quote) {
             $invoice = Invoice::create([
                 'customer_id' => $quote->customer_id,
-                'invoice_number' => 'INV-' . strtoupper(uniqid()),
+                'invoice_number' => 'INV-'.strtoupper(uniqid()),
                 'issue_date' => now()->toDateString(),
                 'due_date' => now()->addDays(30)->toDateString(),
                 'status' => 'pending',

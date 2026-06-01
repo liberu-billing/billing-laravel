@@ -2,18 +2,20 @@
 
 namespace App\Models;
 
+use App\Events\InvoiceStatusChanged;
+use App\Mail\InvoiceGenerated;
+use App\Services\AuditLogService;
+use App\Services\CurrencyService;
+use App\Traits\HasTeam;
+use Carbon\CarbonInterface;
 use Exception;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Mail\InvoiceGenerated;
-use App\Services\CurrencyService;
-use App\Services\AuditLogService;
-use App\Traits\HasTeam;
-use App\Events\InvoiceStatusChanged;
 use Illuminate\Support\Facades\Mail;
-use Carbon\Carbon;
 
-#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+#[Fillable([
     'customer_id',
     'subscription_id',
     'invoice_number',
@@ -48,8 +50,29 @@ class Invoice extends Model
     protected static function boot()
     {
         parent::boot();
-        
-        static::created(function (?\Illuminate\Database\Eloquent\Model $invoice): void {
+
+        static::creating(function (Invoice $invoice): void {
+            $attrs = $invoice->getAttributes();
+
+            if (empty($attrs['invoice_number'])) {
+                $invoice->invoice_number = 'INV-'.str_pad(
+                    (string) (static::max('id') + 1),
+                    6,
+                    '0',
+                    STR_PAD_LEFT
+                );
+            }
+
+            if (empty($attrs['currency'])) {
+                $invoice->currency = 'USD';
+            }
+
+            if (empty($attrs['status'])) {
+                $invoice->status = 'pending';
+            }
+        });
+
+        static::created(function (?Model $invoice): void {
             app(AuditLogService::class)->log(
                 'invoice_created',
                 $invoice,
@@ -58,7 +81,7 @@ class Invoice extends Model
             );
         });
 
-        static::updated(function (?\Illuminate\Database\Eloquent\Model $invoice): void {
+        static::updated(function (?Model $invoice): void {
             app(AuditLogService::class)->log(
                 'invoice_updated',
                 $invoice,
@@ -67,7 +90,7 @@ class Invoice extends Model
             );
         });
 
-        static::deleted(function (?\Illuminate\Database\Eloquent\Model $invoice): void {
+        static::deleted(function (?Model $invoice): void {
             app(AuditLogService::class)->log(
                 'invoice_deleted',
                 $invoice,
@@ -90,23 +113,22 @@ class Invoice extends Model
     {
         return $this->activeDispute() !== null;
     }
-    
+
     #[\Override]
     protected function casts(): array
-    
     {
-    
+
         return [
-        'issue_date' => 'datetime',
-        'due_date' => 'datetime',
-        'last_late_fee_date' => 'datetime',
-        'late_fee_amount' => 'decimal:2',
-        'viewed_at' => 'datetime',
-        'sent_at' => 'datetime',
-        'paid_at' => 'datetime',
-        'status_history' => 'array',
-    ];
-    
+            'issue_date' => 'datetime',
+            'due_date' => 'datetime',
+            'last_late_fee_date' => 'datetime',
+            'late_fee_amount' => 'decimal:2',
+            'viewed_at' => 'datetime',
+            'sent_at' => 'datetime',
+            'paid_at' => 'datetime',
+            'status_history' => 'array',
+        ];
+
     }
 
     public function currency()
@@ -161,7 +183,7 @@ class Invoice extends Model
             $payment->save();
 
             $this->updateStatus();
-            
+
             return true;
         }
 
@@ -171,19 +193,19 @@ class Invoice extends Model
     public function updateStatus(): void
     {
         $totalPaid = $this->payments()->sum('amount');
-        
+
         if ($totalPaid >= $this->total_amount) {
             $this->status = 'paid';
         } elseif ($totalPaid > 0) {
             $this->status = 'partially_paid';
         }
-        
+
         $this->save();
     }
 
-    protected function remainingAmount(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function remainingAmount(): Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): int|float => $this->total_amount - $this->payments()->sum('amount'));
+        return Attribute::make(get: fn (): int|float => $this->total_amount - $this->payments()->sum('amount'));
     }
 
     public function parentInvoice()
@@ -195,26 +217,29 @@ class Invoice extends Model
     {
         return $this->hasMany(Invoice::class, 'parent_invoice_id');
     }
+
     public function discount()
     {
         return $this->belongsTo(Discount::class);
     }
 
-    protected function subtotal(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function subtotal(): Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn() => $this->items->sum('total_price'));
+        return Attribute::make(get: fn () => $this->items->sum('total_price'));
     }
 
-    protected function finalTotal(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function finalTotal(): Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): int|float => $this->subtotal + ($this->tax_amount ?? 0) - ($this->discount_amount ?? 0));
+        return Attribute::make(get: fn (): int|float => $this->subtotal + ($this->tax_amount ?? 0) - ($this->discount_amount ?? 0));
     }
 
     public function calculateTax()
     {
         $taxService = app(TaxService::class);
+
         return $taxService->calculateTax($this);
     }
+
     public function template()
     {
         return $this->belongsTo(InvoiceTemplate::class, 'invoice_template_id');
@@ -245,18 +270,20 @@ class Invoice extends Model
         ]);
     }
 
-    private function calculateNextDueDate(\Carbon\CarbonInterface $date, $frequency)
+    private function calculateNextDueDate(CarbonInterface $date, $frequency)
     {
-        return match($frequency) {
+        return match ($frequency) {
             'weekly' => $date->addWeek(),
             'monthly' => $date->addMonth(),
             'quarterly' => $date->addMonths(3),
             default => $date->addMonth(),
         };
     }
+
     public function convertAmountTo(string $targetCurrency): float
     {
         $currencyService = app(CurrencyService::class);
+
         return $currencyService->convert(
             $this->total_amount,
             $this->currency,
@@ -266,7 +293,7 @@ class Invoice extends Model
 
     public function getFormattedAmount(): string
     {
-        return number_format($this->total_amount, 2) . ' ' . $this->currency;
+        return number_format($this->total_amount, 2).' '.$this->currency;
     }
 
     public function isOverdue(): bool
@@ -276,12 +303,12 @@ class Invoice extends Model
 
     public function calculateLateFee(): int|float
     {
-        if (!$this->isOverdue()) {
+        if (! $this->isOverdue()) {
             return 0;
         }
 
         $config = LateFeeConfiguration::where('team_id', $this->team_id)->first();
-        if (!$config) {
+        if (! $config) {
             return 0;
         }
 
@@ -291,8 +318,8 @@ class Invoice extends Model
             return 0;
         }
 
-        $baseAmount = $config->is_compound ? 
-            ($this->total_amount + $this->late_fee_amount) : 
+        $baseAmount = $config->is_compound ?
+            ($this->total_amount + $this->late_fee_amount) :
             $this->total_amount;
 
         $fee = $config->fee_type === 'percentage' ?
@@ -302,7 +329,7 @@ class Invoice extends Model
         // Apply frequency rules
         if ($this->last_late_fee_date) {
             $daysSinceLastFee = $this->last_late_fee_date->diffInDays(now());
-            $fee = match($config->frequency) {
+            $fee = match ($config->frequency) {
                 'one-time' => 0,
                 'daily' => $daysSinceLastFee >= 1 ? $fee : 0,
                 'weekly' => $daysSinceLastFee >= 7 ? $fee : 0,
@@ -322,7 +349,7 @@ class Invoice extends Model
         return round($fee, 2);
     }
 
-    public function applyLateFee()
+    public function applyLateFee(): float|int
     {
         $fee = $this->calculateLateFee();
         if ($fee > 0) {
@@ -338,26 +365,28 @@ class Invoice extends Model
                 ['new_late_fee' => $this->late_fee_amount]
             );
         }
+
         return $fee;
     }
 
-    protected function totalWithLateFee(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function totalWithLateFee(): Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): float|int|array => $this->final_total + $this->late_fee_amount);
+        return Attribute::make(get: fn (): float|int|array => $this->final_total + $this->late_fee_amount);
     }
 
-    protected function formattedTotalWithLateFee(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function formattedTotalWithLateFee(): Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): string => number_format($this->total_with_late_fee, 2) . ' ' . $this->currency);
+        return Attribute::make(get: fn (): string => number_format($this->total_with_late_fee, 2).' '.$this->currency);
     }
 
-    protected function remainingLateFee(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function remainingLateFee(): Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: function (): null|float|int {
+        return Attribute::make(get: function (): null|float|int {
             $config = LateFeeConfiguration::where('team_id', $this->team_id)->first();
-            if (!$config || !$config->max_fee_amount) {
+            if (! $config || ! $config->max_fee_amount) {
                 return null;
             }
+
             return max(0, $config->max_fee_amount - $this->late_fee_amount);
         });
     }
@@ -372,7 +401,7 @@ class Invoice extends Model
         $this->sent_at = now();
         $this->addToStatusHistory('sent');
         $this->save();
-        
+
         event(new InvoiceStatusChanged($this, 'sent'));
     }
 
@@ -381,7 +410,7 @@ class Invoice extends Model
         $this->viewed_at = now();
         $this->addToStatusHistory('viewed');
         $this->save();
-        
+
         event(new InvoiceStatusChanged($this, 'viewed'));
     }
 
@@ -391,7 +420,7 @@ class Invoice extends Model
         $this->status = 'paid';
         $this->addToStatusHistory('paid');
         $this->save();
-        
+
         event(new InvoiceStatusChanged($this, 'paid'));
     }
 
@@ -406,9 +435,9 @@ class Invoice extends Model
         $this->status_history = $history;
     }
 
-    protected function status(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function status(): Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: function ($value) {
+        return Attribute::make(get: function ($value) {
             if ($this->paid_at) {
                 return 'paid';
             }
@@ -418,6 +447,7 @@ class Invoice extends Model
             if ($this->sent_at) {
                 return 'sent';
             }
+
             return $value;
         });
     }
@@ -429,34 +459,34 @@ class Invoice extends Model
         }
 
         $this->update(['is_recurring' => true]);
-        
+
         return $this->recurringConfiguration()->create([
             'frequency' => $frequency,
             'billing_day' => $billingDay,
             'next_billing_date' => $this->calculateNextBillingDate($frequency, $billingDay),
-            'is_active' => true
+            'is_active' => true,
         ]);
     }
 
     private function calculateNextBillingDate($frequency, $billingDay = null)
     {
         $date = now();
-        
+
         if ($billingDay && $billingDay > $date->day) {
             $date->setDay($billingDay);
         } else {
-            $date = match($frequency) {
+            $date = match ($frequency) {
                 'monthly' => $date->addMonth(),
                 'quarterly' => $date->addMonths(3),
                 'yearly' => $date->addYear(),
                 default => $date->addMonth()
             };
-            
+
             if ($billingDay) {
                 $date->setDay($billingDay);
             }
         }
-        
+
         return $date;
     }
 }

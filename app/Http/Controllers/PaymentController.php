@@ -2,20 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use Exception;
-use App\Models\Payment;
 use App\Models\Currency;
 use App\Models\Invoice;
-use App\Services\PaymentGatewayService;
+use App\Models\Payment;
 use App\Services\CurrencyService;
+use App\Services\PaymentGatewayService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
-    public function __construct(protected \App\Services\PaymentGatewayService $paymentGatewayService, protected \App\Services\CurrencyService $currencyService)
-    {
-    }
+    public function __construct(protected PaymentGatewayService $paymentGatewayService, protected CurrencyService $currencyService) {}
 
     public function processPayment(Request $request)
     {
@@ -29,13 +27,13 @@ class PaymentController extends Controller
             'stripe_token' => 'required_if:payment_method,stripe|string',
             'square_token' => 'required_if:payment_method,square|string',
             'google_pay_token' => 'required_if:payment_method,google_pay|string',
-            'payment_method_details' => 'sometimes|array'
+            'payment_method_details' => 'sometimes|array',
         ]);
 
         $invoice = Invoice::findOrFail($request->invoice_id);
 
         // Validate payment method
-        if (!$this->paymentGatewayService->validatePaymentMethod($request->payment_method)) {
+        if (! $this->paymentGatewayService->validatePaymentMethod($request->payment_method)) {
             return response()->json(['message' => 'Unsupported payment method'], 422);
         }
 
@@ -57,7 +55,7 @@ class PaymentController extends Controller
             'square_token' => $request->square_token,
             'google_pay_token' => $request->google_pay_token,
             'payment_method_details' => $request->payment_method_details,
-            'status' => 'pending'
+            'status' => 'pending',
         ])->save();
 
         // Process the payment using the appropriate gateway
@@ -66,16 +64,18 @@ class PaymentController extends Controller
             Log::info('Payment processed successfully', [
                 'payment_id' => $payment->id,
                 'method' => $payment->payment_method,
-                'result' => $result
+                'result' => $result,
             ]);
+
             return response()->json(['message' => 'Payment processed successfully', 'result' => $result]);
         } catch (Exception $e) {
             Log::error('Payment processing failed', [
                 'payment_id' => $payment->id,
                 'method' => $payment->payment_method,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
+
             return response()->json(['message' => 'Payment processing failed', 'error' => $e->getMessage()], 400);
         }
     }

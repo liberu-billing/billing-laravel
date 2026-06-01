@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('client_notes', function (Blueprint $table): void {
             $table->id();
             $table->integer('client_id')->nullable();
-            $table->integer('user_id')->nullable(); 
+            $table->integer('user_id')->nullable();
             $table->text('content');
             $table->timestamps();
         });

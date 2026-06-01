@@ -34,44 +34,44 @@ Schedule::call(function (): void {
             if (shouldGenerateReport($report)) {
                 app(ReportGenerationService::class)->generateReport($report);
                 $report->update([
-                    'last_generated_at'      => now(),
+                    'last_generated_at' => now(),
                     'last_generation_status' => 'success',
                 ]);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Failed to generate report: '.$e->getMessage(), [
                 'report_id' => $report->id,
-                'error'     => $e->getMessage(),
+                'error' => $e->getMessage(),
             ]);
             $report->update([
                 'last_generation_status' => 'failed',
-                'last_error'             => $e->getMessage(),
+                'last_error' => $e->getMessage(),
             ]);
         }
     }
 })->hourly();
 
 if (! function_exists('shouldGenerateReport')) {
-function shouldGenerateReport(Report $report): bool
-{
-    if (! $report->last_generated_at) {
-        return true;
-    }
+    function shouldGenerateReport(Report $report): bool
+    {
+        if (! $report->last_generated_at) {
+            return true;
+        }
 
-    $schedule = $report->schedule;
+        $schedule = $report->schedule;
 
-    if (! isset($schedule['frequency'])) {
-        return false;
-    }
+        if (! isset($schedule['frequency'])) {
+            return false;
+        }
 
-    $lastGenerated = $report->last_generated_at;
+        $lastGenerated = $report->last_generated_at;
 
-    return match ($schedule['frequency']) {
-        'daily'   => $lastGenerated->diffInDays(now()) >= 1,
-        'weekly'  => $lastGenerated->diffInWeeks(now()) >= 1,
-        'monthly' => $lastGenerated->diffInMonths(now()) >= 1,
-        'hourly'  => $lastGenerated->diffInHours(now()) >= 1,
-        default   => false,
-    };
+        return match ($schedule['frequency']) {
+            'daily' => $lastGenerated->diffInDays(now()) >= 1,
+            'weekly' => $lastGenerated->diffInWeeks(now()) >= 1,
+            'monthly' => $lastGenerated->diffInMonths(now()) >= 1,
+            'hourly' => $lastGenerated->diffInHours(now()) >= 1,
+            default => false,
+        };
     }
 }

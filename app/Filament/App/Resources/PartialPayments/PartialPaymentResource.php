@@ -2,25 +2,20 @@
 
 namespace App\Filament\App\Resources\PartialPayments;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteBulkAction;
-use App\Filament\App\Resources\PartialPayments\Pages\ListPartialPayments;
 use App\Filament\App\Resources\PartialPayments\Pages\CreatePartialPayment;
 use App\Filament\App\Resources\PartialPayments\Pages\EditPartialPayment;
-use App\Filament\App\Resources\PartialPaymentResource\Pages;
+use App\Filament\App\Resources\PartialPayments\Pages\ListPartialPayments;
 use App\Models\Invoice;
 use App\Models\PaymentGateway;
-use Filament\Forms;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Services\PartialPaymentService;
 
 class PartialPaymentResource extends Resource
 {
@@ -28,7 +23,7 @@ class PartialPaymentResource extends Resource
     protected static ?string $model = Invoice::class;
 
     #[\Override]
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-circle-stack';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-circle-stack';
 
     #[\Override]
     public static function form(Schema $schema): Schema
@@ -73,7 +68,7 @@ class PartialPaymentResource extends Resource
                 DeleteBulkAction::make(),
             ]);
     }
-    
+
     #[\Override]
     public static function getRelations(): array
     {
@@ -81,7 +76,7 @@ class PartialPaymentResource extends Resource
             //
         ];
     }
-    
+
     #[\Override]
     public static function getPages(): array
     {
@@ -90,7 +85,7 @@ class PartialPaymentResource extends Resource
             'create' => CreatePartialPayment::route('/create'),
             'edit' => EditPartialPayment::route('/{record}/edit'),
         ];
-    }    
+    }
 
     #[\Override]
     public static function getEloquentQuery(): Builder
@@ -98,7 +93,7 @@ class PartialPaymentResource extends Resource
         return parent::getEloquentQuery()
             ->where(function ($query): void {
                 $query->where('status', 'pending')
-                      ->orWhere('status', 'partially_paid');
+                    ->orWhere('status', 'partially_paid');
             })
             ->latest();
     }

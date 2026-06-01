@@ -2,17 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use InvalidArgumentException;
-use Exception;
 use App\Models\LateFeeConfiguration;
+use Exception;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use InvalidArgumentException;
 
 class LateFeeConfigurationController extends Controller
 {
-    public function index(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function index(): Factory|View
     {
         $config = LateFeeConfiguration::where('team_id', auth()->user()->currentTeam->id)->first();
+
         return view('late-fees.index', [
             'config' => $config,
             'frequencyOptions' => LateFeeConfiguration::getFrequencyOptions(),
@@ -57,15 +60,16 @@ class LateFeeConfigurationController extends Controller
         try {
             $config->validate();
             $previewAmount = $invoice->calculateLateFeePreview($config);
+
             return response()->json([
                 'success' => true,
                 'preview_amount' => $previewAmount,
-                'formatted_amount' => number_format($previewAmount, 2) . ' ' . $invoice->currency
+                'formatted_amount' => number_format($previewAmount, 2).' '.$invoice->currency,
             ]);
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 422);
         }
     }

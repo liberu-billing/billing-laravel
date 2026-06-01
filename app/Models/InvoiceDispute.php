@@ -3,18 +3,19 @@
 namespace App\Models;
 
 use App\Traits\HasTeam;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
-#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+#[Fillable([
     'invoice_id',
-    'customer_id', 
+    'customer_id',
     'status',
     'reason',
     'description',
     'resolution_notes',
     'resolved_at',
-    'resolved_by'
+    'resolved_by',
 ])]
 class InvoiceDispute extends Model
 {
@@ -23,12 +24,11 @@ class InvoiceDispute extends Model
 
     #[\Override]
     protected function casts(): array
-
     {
 
         return [
-        'resolved_at' => 'datetime'
-    ];
+            'resolved_at' => 'datetime',
+        ];
 
     }
 

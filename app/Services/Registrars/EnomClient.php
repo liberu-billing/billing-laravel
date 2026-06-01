@@ -6,14 +6,17 @@ use GuzzleHttp\Client;
 
 class EnomClient
 {
-    protected \GuzzleHttp\Client $client;
+    protected Client $client;
+
     protected $apiUrl;
+
     protected $username;
+
     protected $password;
 
     public function __construct()
     {
-        $this->client = new Client();
+        $this->client = new Client;
         $this->apiUrl = config('services.enom.api_url');
         $this->username = config('services.enom.username');
         $this->password = config('services.enom.password');

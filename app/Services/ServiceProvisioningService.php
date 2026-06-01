@@ -2,18 +2,15 @@
 
 namespace App\Services;
 
-use App\Models\Products_Service;
-use App\Models\Subscription;
 use App\Models\HostingAccount;
+use App\Models\Subscription;
 use Exception;
 
 class ServiceProvisioningService
 {
-    public function __construct(protected \App\Services\HostingService $hostingService)
-    {
-    }
+    public function __construct(protected HostingService $hostingService) {}
 
-    public function provisionService(Subscription $subscription)
+    public function provisionService(Subscription $subscription): HostingAccount|array
     {
         $service = $subscription->productService;
 
@@ -25,10 +22,10 @@ class ServiceProvisioningService
         };
     }
 
-    private function provisionHosting(Subscription $subscription): \App\Models\HostingAccount
+    private function provisionHosting(Subscription $subscription): HostingAccount
     {
         $service = $subscription->productService;
-        
+
         // Create hosting account record
         $hostingAccount = new HostingAccount([
             'customer_id' => $subscription->customer_id,
@@ -38,12 +35,13 @@ class ServiceProvisioningService
             'package' => $service->name,
             'status' => 'pending',
         ]);
-        
+
         $hostingAccount->save();
 
         // Provision the account on the control panel
         try {
             $this->hostingService->provisionAccount($hostingAccount, $service);
+
             return $hostingAccount;
         } catch (Exception $e) {
             $hostingAccount->status = 'failed';
@@ -73,10 +71,11 @@ class ServiceProvisioningService
         // Implement logic to generate a unique username
         $baseName = strtolower((string) preg_replace('/[^a-z0-9]/i', '', (string) $customer->name));
         $baseName = substr($baseName, 0, 8);
-        return $baseName . random_int(100, 999);
+
+        return $baseName.random_int(100, 999);
     }
 
-    public function manageService(Subscription $subscription, $action, $options = [])
+    public function manageService(Subscription $subscription, $action, array $options = [])
     {
         $service = $subscription->productService;
 
@@ -92,7 +91,7 @@ class ServiceProvisioningService
     {
         $hostingAccount = HostingAccount::where('subscription_id', $subscription->id)->first();
 
-        if (!$hostingAccount) {
+        if (! $hostingAccount) {
             throw new Exception('Hosting account not found');
         }
 
@@ -104,24 +103,28 @@ class ServiceProvisioningService
             case 'terminate':
                 return $this->hostingService->terminateAccount($hostingAccount);
             case 'upgrade':
-                if (!isset($options['new_product'])) {
+                if (! isset($options['new_product'])) {
                     throw new Exception('New product required for upgrade');
                 }
+
                 return $this->hostingService->upgradeAccount($hostingAccount, $options['new_product'], $options);
             case 'downgrade':
-                if (!isset($options['new_product'])) {
+                if (! isset($options['new_product'])) {
                     throw new Exception('New product required for downgrade');
                 }
+
                 return $this->hostingService->downgradeAccount($hostingAccount, $options['new_product'], $options);
             case 'add_addon':
-                if (!isset($options['addon'])) {
+                if (! isset($options['addon'])) {
                     throw new Exception('Addon name required');
                 }
+
                 return $this->hostingService->addAddon($hostingAccount, $options['addon']);
             case 'remove_addon':
-                if (!isset($options['addon'])) {
+                if (! isset($options['addon'])) {
                     throw new Exception('Addon name required');
                 }
+
                 return $this->hostingService->removeAddon($hostingAccount, $options['addon']);
             default:
                 throw new Exception('Unsupported action for hosting account');

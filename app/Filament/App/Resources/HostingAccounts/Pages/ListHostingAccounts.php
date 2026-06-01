@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\App\Resources\HostingAccounts\Pages;
 
-use Filament\Actions\CreateAction;
 use App\Filament\App\Resources\HostingAccounts\HostingAccountResource;
-use Filament\Pages\Actions;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
 class ListHostingAccounts extends ListRecords

@@ -9,7 +9,9 @@ use Illuminate\Support\Facades\Log;
 class SmsService
 {
     protected $apiKey;
+
     protected $from;
+
     protected $baseUrl;
 
     public function __construct()
@@ -23,32 +25,35 @@ class SmsService
     {
         try {
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->apiKey,
-            ])->post($this->baseUrl . '/messages', [
+                'Authorization' => 'Bearer '.$this->apiKey,
+            ])->post($this->baseUrl.'/messages', [
                 'from' => $this->from,
                 'to' => $this->formatPhoneNumber($to),
-                'message' => $message
+                'message' => $message,
             ]);
 
             if ($response->successful()) {
                 Log::info('SMS sent successfully', [
                     'to' => $to,
-                    'message' => $message
+                    'message' => $message,
                 ]);
+
                 return true;
             }
 
             Log::error('SMS sending failed', [
                 'to' => $to,
-                'error' => $response->body()
+                'error' => $response->body(),
             ]);
+
             return false;
 
         } catch (Exception $e) {
             Log::error('SMS sending failed', [
                 'to' => $to,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }
@@ -57,12 +62,12 @@ class SmsService
     {
         // Remove any non-numeric characters
         $cleaned = preg_replace('/[^0-9]/', '', (string) $number);
-        
+
         // Ensure number starts with country code
-        if (strlen($cleaned) === 10) {
-            return '+1' . $cleaned; // Default to US/Canada
+        if (strlen((string) $cleaned) === 10) {
+            return '+1'.$cleaned; // Default to US/Canada
         }
-        
-        return '+' . $cleaned;
+
+        return '+'.$cleaned;
     }
 }

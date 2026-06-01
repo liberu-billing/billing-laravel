@@ -2,22 +2,20 @@
 
 namespace App\Services;
 
-use Exception;
 use App\Models\Tld;
 use App\Services\Registrars\EnomClient;
+use Exception;
 
 class DomainPricingService
 {
-    public function __construct(protected \App\Services\Registrars\EnomClient $enomClient)
-    {
-    }
+    public function __construct(protected EnomClient $enomClient) {}
 
     public function calculateDomainPrice($domainName)
     {
         $tld = $this->getTldFromDomain($domainName);
         $tldModel = Tld::where('name', $tld)->first();
 
-        if (!$tldModel) {
+        if (! $tldModel) {
             throw new Exception("TLD not supported: $tld");
         }
 
@@ -46,6 +44,7 @@ class DomainPricingService
     protected function getTldFromDomain($domainName): string
     {
         $parts = explode('.', (string) $domainName);
-        return '.' . end($parts);
+
+        return '.'.end($parts);
     }
 }

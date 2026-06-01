@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\App\Resources\PartialPayments\Pages;
 
-use Filament\Actions\CreateAction;
 use App\Filament\App\Resources\PartialPayments\PartialPaymentResource;
-use Filament\Pages\Actions;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
 class ListPartialPayments extends ListRecords

@@ -5,22 +5,26 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Traits\HasTeam;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+#[Fillable([
     'invoice_id',
     'product_service_id',
+    'description',
     'quantity',
     'unit_price',
     'total_price',
     'currency',
 ])]
+#[Table(name: 'invoice_items')]
 class Invoice_Item extends Model
 {
     use HasFactory;
     use HasTeam;
-    
+
     public function currency()
     {
         return $this->belongsTo(Currency::class, 'currency', 'code');

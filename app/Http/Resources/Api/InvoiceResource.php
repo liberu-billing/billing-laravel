@@ -12,6 +12,7 @@ class InvoiceResource extends JsonResource
         return [
             'id' => $this->id,
             'invoice_number' => $this->invoice_number,
+            'customer_id' => $this->customer_id,
             'customer' => new CustomerResource($this->whenLoaded('customer')),
             'total_amount' => $this->total_amount,
             'currency' => $this->currency,
@@ -29,8 +30,8 @@ class InvoiceResource extends JsonResource
             'created_at' => $this->created_at->toIso8601String(),
             'updated_at' => $this->updated_at->toIso8601String(),
             'links' => [
-                'self' => route('api.invoices.show', $this->id),
-                'download' => route('api.invoices.download', $this->id),
+                'self' => url("/api/invoices/{$this->id}"),
+                'download' => url("/api/invoices/{$this->id}/download"),
             ],
         ];
     }

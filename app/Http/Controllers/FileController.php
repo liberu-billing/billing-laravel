@@ -19,7 +19,7 @@ class FileController extends Controller
             ->paginate();
 
         return Inertia::render('Files/Index', [
-            'files' => $files
+            'files' => $files,
         ]);
     }
 
@@ -27,7 +27,7 @@ class FileController extends Controller
     {
         $request->validate([
             'file' => 'required|file|max:10240',
-            'folder_id' => 'nullable|exists:folders,id'
+            'folder_id' => 'nullable|exists:folders,id',
         ]);
 
         $file = $request->file('file');
@@ -49,7 +49,7 @@ class FileController extends Controller
     public function destroy(File $file)
     {
         $this->authorize('delete', $file);
-        
+
         Storage::disk('public')->delete($file->path);
         $file->delete();
 

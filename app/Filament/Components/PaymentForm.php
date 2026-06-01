@@ -2,12 +2,11 @@
 
 namespace App\Filament\Components;
 
-use Filament\Schemas\Components\Component;
-use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Grid;
-use Filament\Forms;
+use Filament\Schemas\Components\Section;
 
 class PaymentForm extends Component
 {
@@ -22,13 +21,13 @@ class PaymentForm extends Component
                     ])
                     ->required()
                     ->reactive(),
-                
+
                 TextInput::make('card_number')
                     ->label('Card Number')
                     ->numeric()
                     ->maxLength(16)
                     ->hidden(fn ($get): bool => $get('payment_method') !== 'stripe'),
-                
+
                 Grid::make(3)
                     ->schema([
                         TextInput::make('expiry_month')
