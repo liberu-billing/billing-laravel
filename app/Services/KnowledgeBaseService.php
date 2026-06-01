@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\KnowledgeBaseArticle;
 use App\Models\KnowledgeBaseCategory;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\DB;
 
 class KnowledgeBaseService
 {
@@ -21,7 +20,7 @@ class KnowledgeBaseService
                     $q->whereFullText(['title', 'content'], $query);
                 }
                 $q->orWhere('title', 'like', "%{$query}%")
-                  ->orWhere('content', 'like', "%{$query}%");
+                    ->orWhere('content', 'like', "%{$query}%");
             });
 
         if ($categoryId) {

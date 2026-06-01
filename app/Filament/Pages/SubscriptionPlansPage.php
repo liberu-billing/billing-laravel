@@ -2,24 +2,27 @@
 
 namespace App\Filament\Pages;
 
-use Exception;
-use Filament\Pages\Page;
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\Select;
-use Filament\Notifications\Notification;
 use App\Models\SubscriptionPlan;
 use App\Services\BillingService;
+use Exception;
+use Filament\Forms\Components\Select;
+use Filament\Notifications\Notification;
+use Filament\Pages\Page;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
 class SubscriptionPlansPage extends Page
 {
     #[\Override]
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
+
     #[\Override]
     protected string $view = 'filament.pages.subscription-plans';
 
     public $selectedPlan;
+
     public $billingCycle = 'monthly';
+
     public $plans;
 
     public function mount(): void
@@ -40,10 +43,10 @@ class SubscriptionPlansPage extends Page
                         Select::make('billingCycle')
                             ->label('Billing Cycle')
                             ->options([
-                                'monthly'       => 'Monthly',
-                                'quarterly'     => 'Quarterly',
+                                'monthly' => 'Monthly',
+                                'quarterly' => 'Quarterly',
                                 'semi-annually' => 'Semi-annually',
-                                'annually'      => 'Annually',
+                                'annually' => 'Annually',
                             ])
                             ->required(),
                     ]),

@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
-use Exception;
 use App\Traits\HasTeam;
+use Exception;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Guarded;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+#[Fillable([
     'invoice_id',
     'payment_gateway_id',
     'payment_date',
@@ -26,9 +29,9 @@ use Illuminate\Database\Eloquent\Model;
     'square_token',
     'google_pay_token',
     'payment_method_details',
-    'status'
+    'status',
 ])]
-#[\Illuminate\Database\Eloquent\Attributes\Guarded([
+#[Guarded([
     'status',
     'refund_status',
     'refunded_amount',
@@ -60,22 +63,21 @@ class Payment extends Model
 
     #[\Override]
     protected function casts(): array
-
     {
 
         return [
-        'amount' => 'float',
-        'refunded_amount' => 'float',
-        'payment_date' => 'datetime',
-        'payment_method_details' => 'array',
-        'status' => 'string'
-    ];
+            'amount' => 'float',
+            'refunded_amount' => 'float',
+            'payment_date' => 'datetime',
+            'payment_method_details' => 'array',
+            'status' => 'string',
+        ];
 
     }
 
-    protected function reconciliationStatusBadge(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function reconciliationStatusBadge(): Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): string => match($this->reconciliation_status) {
+        return Attribute::make(get: fn (): string => match ($this->reconciliation_status) {
             'reconciled' => '<span class="badge badge-success">Reconciled</span>',
             'unmatched' => '<span class="badge badge-warning">Unmatched</span>',
             'discrepancy' => '<span class="badge badge-danger">Discrepancy</span>',
@@ -116,7 +118,7 @@ class Payment extends Model
 
     public function processRefund(float $amount, ?string $reason = null): bool
     {
-        if (!$this->isRefundable()) {
+        if (! $this->isRefundable()) {
             throw new Exception('This payment is not eligible for refund');
         }
 
@@ -134,17 +136,17 @@ class Payment extends Model
 
     public function getFormattedAmount(): string
     {
-        return number_format($this->amount, 2) . ' ' . $this->currency;
+        return number_format($this->amount, 2).' '.$this->currency;
     }
 
     public function getFormattedRefundedAmount(): string
     {
-        return number_format($this->refunded_amount ?? 0, 2) . ' ' . $this->currency;
+        return number_format($this->refunded_amount ?? 0, 2).' '.$this->currency;
     }
 
-    protected function refundStatusBadge(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function refundStatusBadge(): Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): string => match($this->refund_status) {
+        return Attribute::make(get: fn (): string => match ($this->refund_status) {
             'none' => '<span class="badge badge-danger">No Refund</span>',
             'partial' => '<span class="badge badge-warning">Partial Refund</span>',
             'full' => '<span class="badge badge-success">Full Refund</span>',

@@ -23,7 +23,7 @@ return new class extends Migration
             $table->foreignId('unsuspended_by')->nullable()->constrained('users')->onDelete('set null');
             $table->boolean('is_active')->default(true);
             $table->timestamps();
-            
+
             $table->index(['subscription_id', 'is_active']);
             $table->index('suspended_at');
         });

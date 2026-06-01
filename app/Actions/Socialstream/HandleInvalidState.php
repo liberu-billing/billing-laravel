@@ -9,10 +9,11 @@ use Laravel\Socialite\Two\InvalidStateException;
 
 class HandleInvalidState implements HandlesInvalidState
 {
-    public function handle(InvalidStateException $exception, callable $callback = null): void
+    public function handle(InvalidStateException $exception, ?callable $callback = null): void
     {
         if ($callback) {
             $callback($exception);
+
             return;
         }
 

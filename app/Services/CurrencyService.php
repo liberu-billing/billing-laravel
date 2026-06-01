@@ -2,26 +2,27 @@
 
 namespace App\Services;
 
-use RuntimeException;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use RuntimeException;
 
 class CurrencyService
 {
     private const int MAX_DEPTH = 5; // Reduced from 10 to be more conservative
+
     private array $processedCurrencies = [];
+
     private static bool $isProcessing = false;
-    
-    public function convert(float $amount, string $from, string $to): float 
+
+    public function convert(float $amount, string $from, string $to): float
     {
         if (self::$isProcessing) {
-            throw new RuntimeException("Recursive currency conversion detected");
+            throw new RuntimeException('Recursive currency conversion detected');
         }
-        
+
         try {
             self::$isProcessing = true;
             $this->processedCurrencies = [];
-            
+
             return $this->calculateRate($amount, $from, $to, 0);
         } finally {
             self::$isProcessing = false;
@@ -35,13 +36,13 @@ class CurrencyService
     {
         // Prevent infinite recursion
         if ($depth >= self::MAX_DEPTH) {
-            throw new RuntimeException("Maximum currency conversion depth reached");
+            throw new RuntimeException('Maximum currency conversion depth reached');
         }
 
         // Prevent circular references
         $key = "{$from}-{$to}";
         if (isset($this->processedCurrencies[$key])) {
-            throw new RuntimeException("Circular reference detected in currency conversion");
+            throw new RuntimeException('Circular reference detected in currency conversion');
         }
         $this->processedCurrencies[$key] = true;
 
@@ -55,10 +56,10 @@ class CurrencyService
 
         // Your rate calculation logic here
         // Make sure to implement proper error handling
-        
+
         // Clean up processed currencies after calculation
         unset($this->processedCurrencies[$key]);
-        
+
         return $amount * $rate;
     }
 

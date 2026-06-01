@@ -4,10 +4,12 @@ namespace App\Console\Commands;
 
 use App\Services\WebhookService;
 use Exception;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
-#[\Illuminate\Console\Attributes\Description('Process pending webhook events')]
-#[\Illuminate\Console\Attributes\Signature('webhooks:process')]
+#[Description('Process pending webhook events')]
+#[Signature('webhooks:process')]
 class ProcessWebhooks extends Command
 {
     public function __construct(
@@ -21,6 +23,7 @@ class ProcessWebhooks extends Command
     {
         if (cache()->get('processing_webhooks')) {
             $this->warn('Webhook processing is already running');
+
             return Command::FAILURE;
         }
 
@@ -30,14 +33,16 @@ class ProcessWebhooks extends Command
             $this->info('Processing pending webhooks...');
 
             $processed = $this->webhookService->processPending();
-            
+
             $this->info("Processed {$processed} webhook events");
 
             cache()->forget('processing_webhooks');
+
             return Command::SUCCESS;
         } catch (Exception $e) {
             cache()->forget('processing_webhooks');
-            $this->error("Error processing webhooks: " . $e->getMessage());
+            $this->error('Error processing webhooks: '.$e->getMessage());
+
             return Command::FAILURE;
         }
     }

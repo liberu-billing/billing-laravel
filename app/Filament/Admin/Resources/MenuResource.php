@@ -8,9 +8,9 @@ use App\Filament\Admin\Resources\MenuResource\Pages\CreateMenu;
 use App\Filament\Admin\Resources\MenuResource\Pages\EditMenu;
 use App\Filament\Admin\Resources\MenuResource\Pages\ListMenus;
 use App\Models\Menu;
-use Filament\Actions\EditAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
@@ -24,10 +24,10 @@ class MenuResource extends Resource
     protected static ?string $model = Menu::class;
 
     #[\Override]
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-bars-3';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-bars-3';
 
     #[\Override]
-    protected static string | \UnitEnum | null $navigationGroup = 'Administration';
+    protected static string|\UnitEnum|null $navigationGroup = 'Administration';
 
     #[\Override]
     public static function form(Schema $schema): Schema
@@ -88,9 +88,9 @@ class MenuResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => ListMenus::route('/'),
+            'index' => ListMenus::route('/'),
             'create' => CreateMenu::route('/create'),
-            'edit'   => EditMenu::route('/{record}/edit'),
+            'edit' => EditMenu::route('/{record}/edit'),
         ];
     }
 }

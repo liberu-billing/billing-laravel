@@ -2,30 +2,31 @@
 
 namespace App\Filament\Client\Resources;
 
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Grid;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Select;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Actions\ViewAction;
 use App\Filament\Client\Resources\InvoiceResource\Pages\ListInvoices;
 use App\Filament\Client\Resources\InvoiceResource\Pages\ViewInvoice;
-use Illuminate\Database\Eloquent\Builder;
-use App\Filament\Client\Resources\InvoiceResource\Pages;
 use App\Models\Invoice;
-use Filament\Resources\Resource;
-use Filament\Tables\Table;
-use Filament\Schemas\Schema;
 use Filament\Actions\Action;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Resource;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class InvoiceResource extends Resource
 {
     #[\Override]
     protected static ?string $model = Invoice::class;
+
     #[\Override]
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
+
     #[\Override]
     protected static ?string $navigationLabel = 'Invoices';
 
@@ -71,7 +72,7 @@ class InvoiceResource extends Resource
                             ->numeric()
                             ->required()
                             ->rules([
-                                fn (Invoice $record): string => 'max:' . $record->remaining_amount,
+                                fn (Invoice $record): string => 'max:'.$record->remaining_amount,
                                 'min:1',
                             ]),
                     ]),
@@ -92,11 +93,11 @@ class InvoiceResource extends Resource
                 TextColumn::make('status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
-                        'pending'  => 'warning',
-                        'paid'     => 'success',
-                        'overdue'  => 'danger',
+                        'pending' => 'warning',
+                        'paid' => 'success',
+                        'overdue' => 'danger',
                         'partially_paid' => 'info',
-                        default    => 'gray',
+                        default => 'gray',
                     }),
                 TextColumn::make('due_date')
                     ->date()
@@ -131,14 +132,14 @@ class InvoiceResource extends Resource
                             ->numeric()
                             ->required()
                             ->rules([
-                                fn (Invoice $record): string => 'max:' . $record->remaining_amount,
+                                fn (Invoice $record): string => 'max:'.$record->remaining_amount,
                                 'min:1',
                             ]),
                     ]),
                 Action::make('download_pdf')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(fn (Invoice $record) => response()->streamDownload(
-                        fn (): int => print($record->generatePdf()),
+                        fn (): int => print ($record->generatePdf()),
                         "invoice-{$record->invoice_number}.pdf"
                     )),
             ])

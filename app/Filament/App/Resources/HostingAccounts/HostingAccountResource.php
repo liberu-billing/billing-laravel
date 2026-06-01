@@ -4,21 +4,18 @@ declare(strict_types=1);
 
 namespace App\Filament\App\Resources\HostingAccounts;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteBulkAction;
-use App\Filament\App\Resources\HostingAccounts\Pages\ListHostingAccounts;
 use App\Filament\App\Resources\HostingAccounts\Pages\CreateHostingAccount;
 use App\Filament\App\Resources\HostingAccounts\Pages\EditHostingAccount;
-use App\Filament\App\Resources\HostingAccountResource\Pages;
+use App\Filament\App\Resources\HostingAccounts\Pages\ListHostingAccounts;
 use App\Models\HostingAccount;
-use Filament\Forms;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Tables;
 
 class HostingAccountResource extends Resource
 {
@@ -26,7 +23,7 @@ class HostingAccountResource extends Resource
     protected static ?string $model = HostingAccount::class;
 
     #[\Override]
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-server';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-server';
 
     #[\Override]
     public static function form(Schema $schema): Schema

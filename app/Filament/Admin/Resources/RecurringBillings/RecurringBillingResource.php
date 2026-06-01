@@ -4,25 +4,22 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\RecurringBillings;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Toggle;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
 use App\Filament\Resources\RecurringBillingResource\Pages;
 use App\Models\RecurringBillingConfiguration;
-use Filament\Forms;
-
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
-use Filament\Tables\Table;
-use Filament\Tables;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
 
 class RecurringBillingResource extends Resource
 {
@@ -30,11 +27,13 @@ class RecurringBillingResource extends Resource
     protected static ?string $model = RecurringBillingConfiguration::class;
 
     #[\Override]
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-refresh';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-refresh';
+
     #[\Override]
     protected static ?string $navigationLabel = 'Recurring Billing';
+
     #[\Override]
-    protected static string | \UnitEnum | null $navigationGroup = 'Billing';
+    protected static string|\UnitEnum|null $navigationGroup = 'Billing';
 
     #[\Override]
     public static function form(Schema $schema): Schema
@@ -104,7 +103,7 @@ class RecurringBillingResource extends Resource
                 DeleteBulkAction::make(),
             ]);
     }
-    
+
     #[\Override]
     public static function getRelations(): array
     {
@@ -112,7 +111,7 @@ class RecurringBillingResource extends Resource
             //
         ];
     }
-    
+
     #[\Override]
     public static function getPages(): array
     {
@@ -121,5 +120,5 @@ class RecurringBillingResource extends Resource
             // 'create' => Pages\CreateRecurringBilling::route('/create'),
             // 'edit' => Pages\EditRecurringBilling::route('/{record}/edit'),
         ];
-    }    
+    }
 }

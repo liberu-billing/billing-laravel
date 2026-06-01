@@ -117,7 +117,7 @@ return [
     */
 
     'limiters' => [
-        'login'      => 'login',
+        'login' => 'login',
         'two-factor' => 'two-factor',
     ],
 
@@ -152,10 +152,10 @@ return [
         Features::updateProfileInformation(),
         Features::updatePasswords(),
         Features::twoFactorAuthentication([
-            'confirm'         => true,
+            'confirm' => true,
             'confirmPassword' => true,
-            'enforced'       => true,
-            'window'         => 0,
+            'enforced' => true,
+            'window' => 0,
         ]),
     ],
 

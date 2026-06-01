@@ -2,23 +2,20 @@
 
 namespace App\Filament\App\Resources\Affiliates;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\EditAction;
-use Filament\Actions\Action;
-use Filament\Actions\DeleteBulkAction;
-use App\Filament\App\Resources\Affiliates\Pages\ListAffiliates;
 use App\Filament\App\Resources\Affiliates\Pages\CreateAffiliate;
 use App\Filament\App\Resources\Affiliates\Pages\EditAffiliate;
-use App\Filament\App\Resources\AffiliateResource\Pages;
+use App\Filament\App\Resources\Affiliates\Pages\ListAffiliates;
 use App\Models\Affiliate;
 use App\Services\AffiliateReportingService;
-use Filament\Forms;
+use Filament\Actions\Action;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Tables;
 
 class AffiliateResource extends Resource
 {
@@ -26,7 +23,7 @@ class AffiliateResource extends Resource
     protected static ?string $model = Affiliate::class;
 
     #[\Override]
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user-group';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-user-group';
 
     #[\Override]
     public static function form(Schema $schema): Schema
@@ -54,7 +51,7 @@ class AffiliateResource extends Resource
                 TextInput::make('total_earnings')
                     ->disabled()
                     ->label('Total Earnings')
-                    ->formatStateUsing(fn ($state): string => '$' . number_format($state, 2)),
+                    ->formatStateUsing(fn ($state): string => '$'.number_format($state, 2)),
             ]);
     }
 
@@ -81,6 +78,7 @@ class AffiliateResource extends Resource
                     ->icon('heroicon-o-document-report')
                     ->action(function (Affiliate $record, AffiliateReportingService $reportingService) {
                         $report = $reportingService->generateReport($record, now()->subMonth(), now());
+
                         // Here you can return the report data or redirect to a report view
                         return redirect()->route('affiliate.report', $report);
                     }),

@@ -5,12 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Notifications\NewTicketNotification;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
 
 class TicketController extends Controller
 {
-    public function index(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function index(): Factory|View
     {
         $user = auth()->user();
 
@@ -21,7 +23,7 @@ class TicketController extends Controller
         return view('tickets.index', compact('tickets'));
     }
 
-    public function create(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function create(): Factory|View
     {
         return view('tickets.create');
     }
@@ -29,16 +31,16 @@ class TicketController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title'       => ['required', 'string', 'max:255'],
+            'title' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
-            'priority'    => ['required', 'in:low,medium,high'],
+            'priority' => ['required', 'in:low,medium,high'],
         ]);
 
         $ticket = Ticket::create([
-            'user_id'     => auth()->id(),
-            'title'       => $validated['title'],
+            'user_id' => auth()->id(),
+            'title' => $validated['title'],
             'description' => $validated['description'],
-            'priority'    => $validated['priority'],
+            'priority' => $validated['priority'],
         ]);
 
         $admins = User::role(['admin', 'super_admin'])->get();
@@ -48,7 +50,7 @@ class TicketController extends Controller
             ->with('success', 'Ticket created successfully.');
     }
 
-    public function show(Ticket $ticket): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function show(Ticket $ticket): Factory|View
     {
         $this->authorize('view', $ticket);
         $ticket->load(['responses.user', 'user']);

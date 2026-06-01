@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+#[Fillable([
     'name',
     'currency',
     'default_language',
@@ -20,7 +21,7 @@ use Illuminate\Database\Eloquent\Model;
     'facebook',
     'twitter',
     'github',
-    'youtube'
+    'youtube',
 ])]
 class SiteSettings extends Model
 {

@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Tests\Unit\Models;
 
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class UserTest extends TestCase
@@ -26,7 +28,7 @@ class UserTest extends TestCase
         $user = User::factory()->create(['password' => bcrypt('secret')]);
 
         $this->assertNotEquals('secret', $user->password);
-        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('secret', $user->password));
+        $this->assertTrue(Hash::check('secret', $user->password));
     }
 
     public function test_user_has_teams_relationship(): void
@@ -40,7 +42,7 @@ class UserTest extends TestCase
     {
         $user = User::factory()->create(['email_verified_at' => now()]);
 
-        $this->assertInstanceOf(\Carbon\Carbon::class, $user->email_verified_at);
+        $this->assertInstanceOf(Carbon::class, $user->email_verified_at);
     }
 
     public function test_user_hidden_attributes_are_hidden(): void

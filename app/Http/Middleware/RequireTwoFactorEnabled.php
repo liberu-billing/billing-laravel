@@ -11,11 +11,11 @@ class RequireTwoFactorEnabled
     /**
      * Handle an incoming request.
      *
-     * @param Closure(Request):Response $next
+     * @param  Closure(Request):Response  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$request->user() || !$request->user()->two_factor_secret) {
+        if (! $request->user() || ! $request->user()->two_factor_secret) {
             return redirect()->route('profile.show')
                 ->with('error', 'Two-factor authentication must be enabled to access this area.');
         }

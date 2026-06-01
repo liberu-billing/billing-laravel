@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Traits\HasTeam;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Traits\HasTeam;
 
-#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+#[Fillable([
     'invoice_id',
     'total_installments',
     'installment_amount',
@@ -24,13 +25,12 @@ class PaymentPlan extends Model
 
     #[\Override]
     protected function casts(): array
-
     {
 
         return [
-        'start_date' => 'datetime',
-        'next_due_date' => 'datetime',
-    ];
+            'start_date' => 'datetime',
+            'next_due_date' => 'datetime',
+        ];
 
     }
 

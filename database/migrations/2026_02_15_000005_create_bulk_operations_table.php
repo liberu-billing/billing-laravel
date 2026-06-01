@@ -26,7 +26,7 @@ return new class extends Migration
             $table->timestamp('started_at')->nullable();
             $table->timestamp('completed_at')->nullable();
             $table->timestamps();
-            
+
             $table->index(['user_id', 'status']);
             $table->index(['team_id', 'type']);
             $table->index('created_at');

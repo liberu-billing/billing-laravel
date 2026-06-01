@@ -2,18 +2,20 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+#[Fillable([
     'name',
     'code',
-    'description', 
+    'description',
     'price',
     'currency',
     'features',
     'is_active',
-    'trial_days'
+    'trial_days',
 ])]
 class SubscriptionPlan extends Model
 {
@@ -21,15 +23,14 @@ class SubscriptionPlan extends Model
 
     #[\Override]
     protected function casts(): array
-
     {
 
         return [
-        'features' => 'array',
-        'is_active' => 'boolean',
-        'trial_days' => 'integer',
-        'price' => 'decimal:2'
-    ];
+            'features' => 'array',
+            'is_active' => 'boolean',
+            'trial_days' => 'integer',
+            'price' => 'decimal:2',
+        ];
 
     }
 
@@ -38,8 +39,8 @@ class SubscriptionPlan extends Model
         return $this->hasMany(Subscription::class);
     }
 
-    protected function formattedPrice(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function formattedPrice(): Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn(): string => number_format($this->price, 2) . ' ' . $this->currency);
+        return Attribute::make(get: fn (): string => number_format($this->price, 2).' '.$this->currency);
     }
 }

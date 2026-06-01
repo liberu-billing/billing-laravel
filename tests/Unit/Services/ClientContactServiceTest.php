@@ -2,23 +2,24 @@
 
 namespace Tests\Unit\Services;
 
-use Tests\TestCase;
 use App\Models\ClientContact;
 use App\Models\Customer;
 use App\Services\ClientContactService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class ClientContactServiceTest extends TestCase
 {
     use RefreshDatabase;
 
     protected ClientContactService $contactService;
+
     protected Customer $customer;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->contactService = new ClientContactService();
+        $this->contactService = new ClientContactService;
         $this->customer = Customer::factory()->create();
     }
 

@@ -2,20 +2,17 @@
 
 namespace App\Services;
 
-use Exception;
 use App\Models\Payment;
-use App\Services\PaymentGatewayService;
+use Exception;
 use Illuminate\Support\Facades\DB;
 
 class RefundService
 {
-    public function __construct(protected \App\Services\PaymentGatewayService $paymentGatewayService)
-    {
-    }
+    public function __construct(protected PaymentGatewayService $paymentGatewayService) {}
 
     public function processRefund(Payment $payment, float $amount): array
     {
-        if (!$payment->isRefundable()) {
+        if (! $payment->isRefundable()) {
             throw new Exception('This payment is not refundable.');
         }
 
@@ -37,13 +34,15 @@ class RefundService
                 $this->updateInvoiceStatus($payment->invoice);
 
                 DB::commit();
+
                 return ['success' => true, 'message' => 'Refund processed successfully.'];
             } else {
                 throw new Exception($refundResult['message']);
             }
         } catch (Exception $e) {
             DB::rollBack();
-            return ['success' => false, 'message' => 'Refund failed: ' . $e->getMessage()];
+
+            return ['success' => false, 'message' => 'Refund failed: '.$e->getMessage()];
         }
     }
 

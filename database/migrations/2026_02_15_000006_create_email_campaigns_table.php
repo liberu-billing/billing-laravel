@@ -27,7 +27,7 @@ return new class extends Migration
             $table->timestamp('started_sending_at')->nullable();
             $table->timestamp('completed_at')->nullable();
             $table->timestamps();
-            
+
             $table->index(['team_id', 'status']);
             $table->index('scheduled_at');
         });

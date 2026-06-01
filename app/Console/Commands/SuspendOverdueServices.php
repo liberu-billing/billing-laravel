@@ -4,10 +4,12 @@ namespace App\Console\Commands;
 
 use App\Services\ServiceAutomationService;
 use Exception;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
-#[\Illuminate\Console\Attributes\Description('Suspend services with overdue invoices')]
-#[\Illuminate\Console\Attributes\Signature('services:suspend-overdue {--days=7 : Number of days overdue before suspension}')]
+#[Description('Suspend services with overdue invoices')]
+#[Signature('services:suspend-overdue {--days=7 : Number of days overdue before suspension}')]
 class SuspendOverdueServices extends Command
 {
     public function __construct(
@@ -21,6 +23,7 @@ class SuspendOverdueServices extends Command
     {
         if (cache()->get('suspending_overdue_services')) {
             $this->warn('Service suspension is already running');
+
             return Command::FAILURE;
         }
 
@@ -31,14 +34,16 @@ class SuspendOverdueServices extends Command
             $this->info("Suspending services with invoices overdue by {$days} days...");
 
             $suspended = $this->automationService->suspendOverdueServices($days);
-            
+
             $this->info("Suspended {$suspended} services");
 
             cache()->forget('suspending_overdue_services');
+
             return Command::SUCCESS;
         } catch (Exception $e) {
             cache()->forget('suspending_overdue_services');
-            $this->error("Error suspending services: " . $e->getMessage());
+            $this->error('Error suspending services: '.$e->getMessage());
+
             return Command::FAILURE;
         }
     }

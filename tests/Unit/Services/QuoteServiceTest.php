@@ -2,24 +2,25 @@
 
 namespace Tests\Unit\Services;
 
-use Tests\TestCase;
 use App\Models\Customer;
 use App\Models\Quote;
 use App\Models\QuoteItem;
 use App\Services\QuoteService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class QuoteServiceTest extends TestCase
 {
     use RefreshDatabase;
 
     protected QuoteService $quoteService;
+
     protected Customer $customer;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->quoteService = new QuoteService();
+        $this->quoteService = new QuoteService;
         $this->customer = Customer::factory()->create();
     }
 

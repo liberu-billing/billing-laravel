@@ -2,16 +2,16 @@
 
 namespace Tests\Unit\Services;
 
-use Tests\TestCase;
+use App\Models\Customer;
+use App\Models\Invoice;
+use App\Models\Products_Service;
+use App\Models\ServiceSuspension;
+use App\Models\Subscription;
 use App\Services\ServiceAutomationService;
 use App\Services\WebhookService;
-use App\Models\Subscription;
-use App\Models\Invoice;
-use App\Models\ServiceSuspension;
-use App\Models\Customer;
-use App\Models\Products_Service;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
+use Tests\TestCase;
 
 class ServiceAutomationServiceTest extends TestCase
 {
@@ -22,10 +22,10 @@ class ServiceAutomationServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $webhookService = Mockery::mock(WebhookService::class);
         $webhookService->shouldReceive('dispatch')->andReturn(null);
-        
+
         $this->automationService = new ServiceAutomationService($webhookService);
     }
 
@@ -33,7 +33,7 @@ class ServiceAutomationServiceTest extends TestCase
     {
         $customer = Customer::factory()->create();
         $productService = Products_Service::factory()->create();
-        
+
         $subscription = Subscription::create([
             'customer_id' => $customer->id,
             'product_service_id' => $productService->id,
@@ -68,7 +68,7 @@ class ServiceAutomationServiceTest extends TestCase
     {
         $customer = Customer::factory()->create();
         $productService = Products_Service::factory()->create();
-        
+
         $subscription = Subscription::create([
             'customer_id' => $customer->id,
             'product_service_id' => $productService->id,
@@ -97,7 +97,7 @@ class ServiceAutomationServiceTest extends TestCase
     {
         $customer = Customer::factory()->create();
         $productService = Products_Service::factory()->create();
-        
+
         $subscription = Subscription::create([
             'customer_id' => $customer->id,
             'product_service_id' => $productService->id,

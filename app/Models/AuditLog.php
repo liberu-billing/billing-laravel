@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+#[Fillable([
     'user_id',
     'event',
     'auditable_type',
@@ -20,13 +21,12 @@ class AuditLog extends Model
 {
     #[\Override]
     protected function casts(): array
-
     {
 
         return [
-        'old_values' => 'array',
-        'new_values' => 'array',
-    ];
+            'old_values' => 'array',
+            'new_values' => 'array',
+        ];
 
     }
 

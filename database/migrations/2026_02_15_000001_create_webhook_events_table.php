@@ -22,7 +22,7 @@ return new class extends Migration
             $table->timestamp('sent_at')->nullable();
             $table->timestamp('next_retry_at')->nullable();
             $table->timestamps();
-            
+
             $table->index(['webhook_endpoint_id', 'status']);
             $table->index(['event_type', 'created_at']);
             $table->index('next_retry_at');

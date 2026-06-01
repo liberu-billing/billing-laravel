@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\InvoiceController;
-use App\Http\Controllers\Api\SubscriptionController;
-use App\Http\Controllers\Api\CustomerController;
-use App\Http\Controllers\Api\WebhookController;
-use App\Http\Controllers\Api\KnowledgeBaseController;
 use App\Http\Controllers\Api\CannedResponseController;
-use App\Http\Controllers\Api\QuoteController;
 use App\Http\Controllers\Api\ClientContactController;
+use App\Http\Controllers\Api\CustomerController;
+use App\Http\Controllers\Api\InvoiceController;
+use App\Http\Controllers\Api\KnowledgeBaseController;
 use App\Http\Controllers\Api\PackageGroupController;
+use App\Http\Controllers\Api\QuoteController;
+use App\Http\Controllers\Api\SubscriptionController;
+use App\Http\Controllers\Api\WebhookController;
 use App\Http\Controllers\ClientNoteController;
 use App\Http\Controllers\InstallationController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,7 +29,7 @@ use App\Http\Controllers\InstallationController;
 */
 
 // Health check (no auth required)
-Route::get('health', fn() => response()->json([
+Route::get('health', fn () => response()->json([
     'status' => 'ok',
     'timestamp' => now()->toISOString(),
     'version' => config('app.version', '1.0.0'),
@@ -42,7 +42,7 @@ Route::post('auth/token', [AuthController::class, 'token'])
 // Protected routes
 Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
     // User endpoint
-    Route::get('/user', fn(Request $request) => $request->user());
+    Route::get('/user', fn (Request $request) => $request->user());
 
     // Token management
     Route::delete('auth/token', [AuthController::class, 'revokeToken']);

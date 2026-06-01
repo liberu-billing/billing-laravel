@@ -2,20 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\InvoiceTemplate;
 use App\Models\Invoice;
+use App\Models\InvoiceTemplate;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class InvoiceTemplateController extends Controller
 {
-    public function index(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function index(): Factory|View
     {
         $templates = InvoiceTemplate::where('team_id', auth()->user()->currentTeam->id)->get();
+
         return view('invoice-templates.index', compact('templates'));
     }
 
-    public function create(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function create(): Factory|View
     {
         return view('invoice-templates.form');
     }
@@ -53,9 +56,10 @@ class InvoiceTemplateController extends Controller
             ->with('success', 'Template created successfully');
     }
 
-    public function edit(InvoiceTemplate $template): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function edit(InvoiceTemplate $template): Factory|View
     {
         $this->authorize('update', $template);
+
         return view('invoice-templates.form', compact('template'));
     }
 
@@ -96,15 +100,15 @@ class InvoiceTemplateController extends Controller
             ->with('success', 'Template updated successfully');
     }
 
-    public function preview(InvoiceTemplate $template): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function preview(InvoiceTemplate $template): Factory|View
     {
         $this->authorize('view', $template);
-        
+
         $invoice = Invoice::where('team_id', $template->team_id)
             ->with(['customer', 'items.productService'])
             ->first();
-            
-        if (!$invoice) {
+
+        if (! $invoice) {
             $invoice = new Invoice([
                 'invoice_number' => 'PREVIEW-001',
                 'total_amount' => 1000.00,

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use Exception;
 use App\Services\InstallationScriptService;
+use Exception;
 use Illuminate\Http\Request;
 
 class InstallationController extends Controller
@@ -20,7 +20,7 @@ class InstallationController extends Controller
             'db_user' => 'required|string',
             'db_password' => 'required|string',
         ]);
-        
+
         $installer = new InstallationScriptService(
             $validated['control_panel'],
             $validated['git_repo'],
@@ -29,9 +29,10 @@ class InstallationController extends Controller
             $validated['db_user'],
             $validated['db_password']
         );
-        
+
         try {
             $installer->execute();
+
             return response()->json(['message' => 'Installation completed successfully']);
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);

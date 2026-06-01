@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\App\Resources\Users\Pages;
 
-use Filament\Actions\DeleteAction;
 use App\Filament\App\Resources\Users\UserResource;
-use Filament\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditUser extends EditRecord

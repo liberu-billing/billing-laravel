@@ -3,19 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
 class ClientController extends Controller
 {
-    public function index(Request $request): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function index(Request $request): Factory|View
     {
         $query = Client::query();
 
         if ($request->search) {
-            $query->where(function($q) use ($request): void {
+            $query->where(function ($q) use ($request): void {
                 $q->where('name', 'like', "%{$request->search}%")
-                  ->orWhere('email', 'like', "%{$request->search}%")
-                  ->orWhere('company', 'like', "%{$request->search}%");
+                    ->orWhere('email', 'like', "%{$request->search}%")
+                    ->orWhere('company', 'like', "%{$request->search}%");
             });
         }
 
@@ -24,10 +26,11 @@ class ClientController extends Controller
         }
 
         $clients = $query->paginate(10);
+
         return view('clients.index', compact('clients'));
     }
 
-    public function create(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function create(): Factory|View
     {
         return view('clients.create');
     }
@@ -45,10 +48,11 @@ class ClientController extends Controller
         ]);
 
         Client::create($validated);
+
         return redirect()->route('clients.index')->with('success', 'Client created successfully');
     }
 
-    public function edit(Client $client): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function edit(Client $client): Factory|View
     {
         return view('clients.edit', compact('client'));
     }
@@ -66,12 +70,14 @@ class ClientController extends Controller
         ]);
 
         $client->update($validated);
+
         return redirect()->route('clients.index')->with('success', 'Client updated successfully');
     }
 
     public function destroy(Client $client)
     {
         $client->delete();
+
         return redirect()->route('clients.index')->with('success', 'Client deleted successfully');
     }
 }

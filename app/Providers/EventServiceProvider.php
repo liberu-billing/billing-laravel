@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Services\AuditLogService;
+use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;
@@ -44,12 +44,12 @@ class EventServiceProvider extends ServiceProvider
 
     // public static function logLogin($event): void
     // {
-        // app(AuditLogService::class)->log('login', $event->user);
+    // app(AuditLogService::class)->log('login', $event->user);
     // }
 
     // public static function logLogout($event): void
     // {
-        // app(AuditLogService::class)->log('logout', $event->user);
+    // app(AuditLogService::class)->log('logout', $event->user);
     // }
 
     // public static function logFailedLogin($event): void

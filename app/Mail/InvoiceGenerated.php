@@ -2,23 +2,23 @@
 
 namespace App\Mail;
 
+use App\Models\EmailTemplate;
+use App\Models\Invoice;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use App\Models\Invoice;
-use App\Models\EmailTemplate;
 
 class InvoiceGenerated extends Mailable
 {
     use Queueable, SerializesModels;
 
     /**
-     * @var \App\Models\Invoice
+     * @var Invoice
      */
     public $invoice;
+
     protected $template;
 
     public function __construct(Invoice $invoice)
@@ -30,8 +30,8 @@ class InvoiceGenerated extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: $this->template ? 
-                $this->parseTemplate($this->template->subject) : 
+            subject: $this->template ?
+                $this->parseTemplate($this->template->subject) :
                 'Invoice Generated',
         );
     }
@@ -41,8 +41,8 @@ class InvoiceGenerated extends Mailable
         return new Content(
             view: 'emails.dynamic-template',
             with: [
-                'content' => $this->template ? 
-                    $this->parseTemplate($this->template->body) : 
+                'content' => $this->template ?
+                    $this->parseTemplate($this->template->body) :
                     view('emails.invoice-generated', ['invoice' => $this->invoice])->render(),
                 'invoice' => $this->invoice,
             ],

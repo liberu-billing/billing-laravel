@@ -23,7 +23,7 @@ class ClientContactService
     public function createContact(Customer $customer, array $data): ClientContact
     {
         return DB::transaction(function () use ($customer, $data) {
-            if (!empty($data['is_primary'])) {
+            if (! empty($data['is_primary'])) {
                 $customer->contacts()->update(['is_primary' => false]);
             }
 
@@ -37,7 +37,7 @@ class ClientContactService
     public function updateContact(ClientContact $contact, array $data): ClientContact
     {
         return DB::transaction(function () use ($contact, $data) {
-            if (!empty($data['is_primary'])) {
+            if (! empty($data['is_primary'])) {
                 $contact->customer->contacts()
                     ->where('id', '!=', $contact->id)
                     ->update(['is_primary' => false]);

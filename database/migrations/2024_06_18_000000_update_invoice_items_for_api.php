@@ -10,13 +10,13 @@ return new class extends Migration
     {
         Schema::table('invoice_items', function (Blueprint $table): void {
             // Add description column if missing
-            if (!Schema::hasColumn('invoice_items', 'description')) {
+            if (! Schema::hasColumn('invoice_items', 'description')) {
                 $table->string('description')->nullable()->after('invoice_id');
             }
             // Make product_service_id nullable (items may come from free-text descriptions)
             $table->unsignedBigInteger('product_service_id')->nullable()->change();
             // Rename total to total_price to match model fillable
-            if (Schema::hasColumn('invoice_items', 'total') && !Schema::hasColumn('invoice_items', 'total_price')) {
+            if (Schema::hasColumn('invoice_items', 'total') && ! Schema::hasColumn('invoice_items', 'total_price')) {
                 $table->renameColumn('total', 'total_price');
             }
         });

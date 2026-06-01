@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\DB;
 
 class PermissionsTableSeeder extends Seeder
 {
-
     /**
      * Auto generated seed file
      */
@@ -26,7 +25,8 @@ class PermissionsTableSeeder extends Seeder
         }
     }
 
-    public static function permissionList(): array{
+    public static function permissionList(): array
+    {
         return [
             'view_affiliate',
             'view_any_affiliate',

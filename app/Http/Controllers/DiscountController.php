@@ -3,17 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Models\Discount;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
 class DiscountController extends Controller
 {
-    public function index(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function index(): Factory|View
     {
         $discounts = Discount::paginate(10);
+
         return view('discounts.index', compact('discounts'));
     }
 
-    public function create(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function create(): Factory|View
     {
         return view('discounts.create');
     }
@@ -38,7 +41,7 @@ class DiscountController extends Controller
             ->with('success', 'Discount created successfully');
     }
 
-    public function edit(Discount $discount): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function edit(Discount $discount): Factory|View
     {
         return view('discounts.edit', compact('discount'));
     }
@@ -54,7 +57,7 @@ class DiscountController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
             'max_uses' => 'nullable|integer|min:1',
-            'is_active' => 'boolean'
+            'is_active' => 'boolean',
         ]);
 
         $discount->update($validated);
@@ -66,6 +69,7 @@ class DiscountController extends Controller
     public function destroy(Discount $discount)
     {
         $discount->delete();
+
         return redirect()->route('discounts.index')
             ->with('success', 'Discount deleted successfully');
     }
@@ -75,7 +79,7 @@ class DiscountController extends Controller
         $code = $request->input('code');
         $discount = Discount::where('code', $code)->first();
 
-        if (!$discount || !$discount->isValid()) {
+        if (! $discount || ! $discount->isValid()) {
             return response()->json(['valid' => false]);
         }
 

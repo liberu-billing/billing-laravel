@@ -22,7 +22,7 @@ class IntegrationController extends Controller
     public function callback(Request $request, string $provider)
     {
         $socialiteUser = Socialite::driver($provider)->user();
-        
+
         $this->integrationService->connect($provider, $request->user(), [
             'token' => $socialiteUser->token,
             'refresh_token' => $socialiteUser->refreshToken,

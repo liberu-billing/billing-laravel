@@ -4,21 +4,19 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Subscriptions;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Toggle;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
 use App\Filament\Resources\SubscriptionResource\Pages;
 use App\Models\Subscription;
-use Filament\Forms;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Filament\Tables;
 
 class SubscriptionResource extends Resource
 {
@@ -26,7 +24,7 @@ class SubscriptionResource extends Resource
     protected static ?string $model = Subscription::class;
 
     #[\Override]
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-collection';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-collection';
 
     #[\Override]
     public static function form(Schema $schema): Schema
@@ -48,7 +46,7 @@ class SubscriptionResource extends Resource
                         'active' => 'Active',
                         'pending' => 'Pending',
                         'cancelled' => 'Cancelled',
-                        'suspended' => 'Suspended'
+                        'suspended' => 'Suspended',
                     ])
                     ->required(),
                 Toggle::make('auto_renew')
@@ -75,7 +73,7 @@ class SubscriptionResource extends Resource
                         'active' => 'Active',
                         'pending' => 'Pending',
                         'cancelled' => 'Cancelled',
-                        'suspended' => 'Suspended'
+                        'suspended' => 'Suspended',
                     ]),
             ])
             ->recordActions([
@@ -91,7 +89,7 @@ class SubscriptionResource extends Resource
             //
         ];
     }
-    
+
     #[\Override]
     public static function getPages(): array
     {
@@ -100,5 +98,5 @@ class SubscriptionResource extends Resource
             // 'create' => Pages\CreateSubscription::route('/create'),
             // 'edit' => Pages\EditSubscription::route('/{record}/edit'),
         ];
-    }    
+    }
 }

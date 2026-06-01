@@ -6,7 +6,7 @@ namespace Tests\Unit\Models;
 
 use App\Models\Customer;
 use App\Models\Invoice;
-use App\Models\Subscription;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -36,13 +36,13 @@ class CustomerTest extends TestCase
         $email = 'unique@example.com';
         Customer::factory()->create(['email' => $email]);
 
-        $this->expectException(\Illuminate\Database\QueryException::class);
+        $this->expectException(QueryException::class);
         Customer::factory()->create(['email' => $email]);
     }
 
     public function test_customer_has_correct_fillable_attributes(): void
     {
-        $customer = new Customer();
+        $customer = new Customer;
         $fillable = $customer->getFillable();
 
         $this->assertContains('name', $fillable);

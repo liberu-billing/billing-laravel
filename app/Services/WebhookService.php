@@ -13,23 +13,41 @@ class WebhookService
      * Available webhook event types
      */
     public const EVENT_INVOICE_CREATED = 'invoice.created';
+
     public const EVENT_INVOICE_UPDATED = 'invoice.updated';
+
     public const EVENT_INVOICE_PAID = 'invoice.paid';
+
     public const EVENT_INVOICE_OVERDUE = 'invoice.overdue';
+
     public const EVENT_PAYMENT_RECEIVED = 'payment.received';
+
     public const EVENT_PAYMENT_FAILED = 'payment.failed';
+
     public const EVENT_PAYMENT_REFUNDED = 'payment.refunded';
+
     public const EVENT_SUBSCRIPTION_CREATED = 'subscription.created';
+
     public const EVENT_SUBSCRIPTION_UPDATED = 'subscription.updated';
+
     public const EVENT_SUBSCRIPTION_CANCELLED = 'subscription.cancelled';
+
     public const EVENT_SUBSCRIPTION_RENEWED = 'subscription.renewed';
+
     public const EVENT_CLIENT_CREATED = 'client.created';
+
     public const EVENT_CLIENT_UPDATED = 'client.updated';
+
     public const EVENT_SERVICE_PROVISIONED = 'service.provisioned';
+
     public const EVENT_SERVICE_SUSPENDED = 'service.suspended';
+
     public const EVENT_SERVICE_TERMINATED = 'service.terminated';
+
     public const EVENT_TICKET_CREATED = 'ticket.created';
+
     public const EVENT_TICKET_UPDATED = 'ticket.updated';
+
     public const EVENT_TICKET_CLOSED = 'ticket.closed';
 
     /**
@@ -99,10 +117,11 @@ class WebhookService
             if ($response->successful()) {
                 $event->markAsSent();
                 $endpoint->update(['last_triggered_at' => now()]);
+
                 return true;
             }
 
-            throw new \Exception('HTTP ' . $response->status() . ': ' . $response->body());
+            throw new \Exception('HTTP '.$response->status().': '.$response->body());
         } catch (\Exception $e) {
             Log::error('Webhook delivery failed', [
                 'webhook_event_id' => $event->id,
@@ -182,6 +201,7 @@ class WebhookService
     public static function verifySignature(string $payload, string $signature, string $secret): bool
     {
         $expectedSignature = hash_hmac('sha256', $payload, $secret);
+
         return hash_equals($expectedSignature, $signature);
     }
 }

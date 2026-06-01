@@ -2,38 +2,36 @@
 
 namespace App\Services;
 
-use InvalidArgumentException;
 use App\Models\Report;
-use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
+use InvalidArgumentException;
 
 class ReportExportService
 {
-    public function __construct(protected \App\Services\ReportService $reportService)
-    {
-    }
+    public function __construct(protected ReportService $reportService) {}
 
     public function exportToCsv(Report $report): string
     {
         $data = $this->generateReportData($report);
         $filename = sprintf('report_%s_%s.csv', $report->type, now()->format('Y-m-d'));
-        
+
         $handle = fopen('php://temp', 'r+');
-        
+
         // Add headers
         fputcsv($handle, array_keys(reset($data)), escape: '\\');
-        
+
         // Add data
         foreach ($data as $row) {
             fputcsv($handle, $row, escape: '\\');
         }
-        
+
         rewind($handle);
         $csv = stream_get_contents($handle);
         fclose($handle);
-        
+
         Storage::put("reports/{$filename}", $csv);
-        
+
         return $filename;
     }
 
@@ -41,20 +39,20 @@ class ReportExportService
     {
         $data = $this->generateReportData($report);
         $filename = sprintf('report_%s_%s.pdf', $report->type, now()->format('Y-m-d'));
-        
-        $pdf = PDF::loadView('reports.pdf', [
+
+        $pdf = Pdf::loadView('reports.pdf', [
             'report' => $report,
-            'data' => $data
+            'data' => $data,
         ]);
-        
+
         Storage::put("reports/{$filename}", $pdf->output());
-        
+
         return $filename;
     }
 
     private function generateReportData(Report $report)
     {
-        return match($report->type) {
+        return match ($report->type) {
             'revenue' => $this->reportService->generateRevenueReport(
                 $report->start_date,
                 $report->end_date,

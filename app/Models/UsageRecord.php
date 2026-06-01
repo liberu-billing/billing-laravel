@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+#[Fillable([
     'subscription_id',
     'metric_name',
     'quantity',
@@ -20,14 +21,13 @@ class UsageRecord extends Model
 
     #[\Override]
     protected function casts(): array
-
     {
 
         return [
-        'recorded_at' => 'datetime',
-        'processed' => 'boolean',
-        'quantity' => 'decimal:2'
-    ];
+            'recorded_at' => 'datetime',
+            'processed' => 'boolean',
+            'quantity' => 'decimal:2',
+        ];
 
     }
 

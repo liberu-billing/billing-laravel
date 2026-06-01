@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+#[Fillable([
     'subscription_id',
     'invoice_id',
     'reason',
@@ -20,14 +21,13 @@ class ServiceSuspension extends Model
 {
     #[\Override]
     protected function casts(): array
-
     {
 
         return [
-        'suspended_at' => 'datetime',
-        'unsuspended_at' => 'datetime',
-        'is_active' => 'boolean',
-    ];
+            'suspended_at' => 'datetime',
+            'unsuspended_at' => 'datetime',
+            'is_active' => 'boolean',
+        ];
 
     }
 

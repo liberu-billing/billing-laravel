@@ -2,16 +2,16 @@
 
 namespace Tests\Unit\Services;
 
-use Tests\TestCase;
+use App\Models\Customer;
+use App\Models\Invoice;
+use App\Models\Products_Service;
+use App\Models\Subscription;
 use App\Services\BillingService;
 use App\Services\PaymentGatewayService;
-use App\Models\Subscription;
-use App\Models\Invoice;
-use App\Models\Customer;
-use App\Models\Products_Service;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
-use Carbon\Carbon;
+use Tests\TestCase;
 
 class BillingServiceTest extends TestCase
 {
@@ -32,7 +32,7 @@ class BillingServiceTest extends TestCase
         $this->billingService = app(BillingService::class);
     }
 
-    public function testGenerateInvoice(): void
+    public function test_generate_invoice(): void
     {
         $customer = Customer::factory()->create();
         $productService = Products_Service::factory()->create(['base_price' => 100]);
@@ -49,7 +49,7 @@ class BillingServiceTest extends TestCase
         $this->assertEquals('pending', $invoice->status);
     }
 
-    public function testProcessRecurringBilling(): void
+    public function test_process_recurring_billing(): void
     {
         $subscription = Subscription::factory()->create([
             'end_date' => Carbon::yesterday(),
@@ -63,7 +63,7 @@ class BillingServiceTest extends TestCase
         ]);
     }
 
-    public function testSendOverdueReminders(): void
+    public function test_send_overdue_reminders(): void
     {
         Mail::fake();
 

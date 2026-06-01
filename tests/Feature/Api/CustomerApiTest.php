@@ -21,7 +21,7 @@ class CustomerApiTest extends TestCase
     {
         parent::setUp();
         $this->user = User::factory()->withPersonalTeam()->create();
-        Gate::before(fn () => true);
+        Gate::before(fn (): true => true);
     }
 
     public function test_unauthenticated_request_returns_401(): void

@@ -2,17 +2,18 @@
 
 namespace App\Models;
 
+use App\Traits\HasTeam;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Traits\HasTeam;
 
-#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+#[Fillable([
     'name',
     'type',
     'subject',
     'body',
     'team_id',
-    'is_default'
+    'is_default',
 ])]
 class EmailTemplate extends Model
 {

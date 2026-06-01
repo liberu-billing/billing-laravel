@@ -2,14 +2,14 @@
 
 namespace Database\Factories;
 
-use App\Models\HostingAccount;
 use App\Models\Customer;
-use App\Models\Subscription;
+use App\Models\HostingAccount;
 use App\Models\HostingServer;
+use App\Models\Subscription;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\HostingAccount>
+ * @extends Factory<HostingAccount>
  */
 class HostingAccountFactory extends Factory
 {

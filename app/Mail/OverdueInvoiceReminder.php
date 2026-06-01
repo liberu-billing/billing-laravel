@@ -4,20 +4,19 @@ declare(strict_types=1);
 
 namespace App\Mail;
 
+use App\Models\Invoice;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use App\Models\Invoice;
 
 class OverdueInvoiceReminder extends Mailable
 {
     use Queueable, SerializesModels;
 
     /**
-     * @var \App\Models\Invoice
+     * @var Invoice
      */
     public $invoice;
 

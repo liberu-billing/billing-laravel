@@ -3,32 +3,32 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
-use App\Models\Subscription;
 use App\Models\Products_Service;
+use App\Models\Subscription;
 use App\Services\BillingService;
-use App\Services\HostingService;
 use App\Services\DomainService;
+use App\Services\HostingService;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
 
 class ServiceManagementController extends Controller
 {
-    public function __construct(protected \App\Services\BillingService $billingService, protected \App\Services\HostingService $hostingService, protected \App\Services\DomainService $domainService)
-    {
-    }
+    public function __construct(protected BillingService $billingService, protected HostingService $hostingService, protected DomainService $domainService) {}
 
-    public function index(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function index(): Factory|View
     {
         $subscriptions = auth()->user()->customer->subscriptions;
+
         return view('client.services.index', compact('subscriptions'));
     }
 
-    public function show(Subscription $subscription): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function show(Subscription $subscription): Factory|View
     {
         $availableUpgrades = Products_Service::where('type', $subscription->productService->type)
             ->where('price', '>', $subscription->productService->price)
             ->get();
-            
+
         $availableDowngrades = Products_Service::where('type', $subscription->productService->type)
             ->where('price', '<', $subscription->productService->price)
             ->get();
@@ -39,14 +39,14 @@ class ServiceManagementController extends Controller
     public function upgrade(Request $request, Subscription $subscription)
     {
         $request->validate([
-            'new_service_id' => 'required|exists:products_services,id'
+            'new_service_id' => 'required|exists:products_services,id',
         ]);
 
         $newService = Products_Service::findOrFail($request->new_service_id);
-        
+
         // Calculate prorated amount
         $proratedAmount = $this->calculateProration($subscription, $newService);
-        
+
         // Generate invoice for upgrade
         $invoice = $this->billingService->generateInvoice($subscription);
         $invoice->total_amount = $proratedAmount;
@@ -67,16 +67,16 @@ class ServiceManagementController extends Controller
     public function downgrade(Request $request, Subscription $subscription)
     {
         $request->validate([
-            'new_service_id' => 'required|exists:products_services,id'
+            'new_service_id' => 'required|exists:products_services,id',
         ]);
 
         $newService = Products_Service::findOrFail($request->new_service_id);
-        
+
         // Schedule downgrade for end of billing period
         $subscription->scheduled_change = [
             'type' => 'downgrade',
             'product_service_id' => $newService->id,
-            'effective_date' => $subscription->end_date
+            'effective_date' => $subscription->end_date,
         ];
         $subscription->save();
 
@@ -89,7 +89,7 @@ class ServiceManagementController extends Controller
         // Schedule cancellation for end of billing period
         $subscription->scheduled_change = [
             'type' => 'cancel',
-            'effective_date' => $subscription->end_date
+            'effective_date' => $subscription->end_date,
         ];
         $subscription->save();
 
@@ -97,17 +97,17 @@ class ServiceManagementController extends Controller
             ->with('success', 'Service scheduled for cancellation at end of billing period');
     }
 
-    private function calculateProration(\App\Models\Subscription $subscription, $newService): float
+    private function calculateProration(Subscription $subscription, $newService): float
     {
         $daysRemaining = now()->diffInDays($subscription->end_date);
         $totalDays = $subscription->start_date->diffInDays($subscription->end_date);
-        
+
         $oldAmount = $subscription->productService->price;
         $newAmount = $newService->price;
-        
+
         $proratedRefund = ($oldAmount / $totalDays) * $daysRemaining;
         $proratedCharge = ($newAmount / $totalDays) * $daysRemaining;
-        
+
         return $proratedCharge - $proratedRefund;
     }
 }

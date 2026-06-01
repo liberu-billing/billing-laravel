@@ -2,22 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Products_Service;
+use App\Models\Currency;
 use App\Models\Customer;
 use App\Models\HostingAccount;
-use App\Models\Subscription;
 use App\Models\Invoice;
 use App\Models\Invoice_Item;
-use App\Models\Currency;
-use App\Http\Controllers\PaymentController;
+use App\Models\Products_Service;
+use App\Models\Subscription;
 use App\Services\BillingService;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-    public function create(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function create(): Factory|View
     {
         $packages = Products_Service::where('type', 'hosting')->get();
+
         return view('orders.create', compact('packages'));
     }
 
@@ -43,7 +45,7 @@ class OrderController extends Controller
         $package = Products_Service::findOrFail($request->package_id);
 
         // Convert package price to selected currency
-        $billingService = new BillingService();
+        $billingService = new BillingService;
         $convertedPrice = $billingService->convertCurrency($package->price, $package->currency, $request->currency);
 
         // Create subscription
@@ -85,7 +87,7 @@ class OrderController extends Controller
         ]);
 
         // Process payment
-        $paymentController = new PaymentController();
+        $paymentController = new PaymentController;
         $paymentData = [
             'invoice_id' => $invoice->id,
             'payment_gateway_id' => $request->payment_method === 'credit_card' ? 2 : 1, // Assuming 2 is Stripe and 1 is PayPal
@@ -104,19 +106,22 @@ class OrderController extends Controller
             // Payment successful, update statuses
             $invoice->update(['status' => 'paid']);
             $hostingAccount->update(['status' => 'active']);
+
             return redirect()->route('orders.confirmation', $invoice->id)->with('success', 'Your order has been placed successfully!');
         } else {
             // Payment failed, rollback changes
             $subscription->delete();
             $hostingAccount->delete();
             $invoice->delete();
+
             return back()->withErrors(['payment' => 'Payment processing failed. Please try again.']);
         }
     }
 
-    public function confirmation($invoiceId): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function confirmation($invoiceId): Factory|View
     {
         $invoice = Invoice::findOrFail($invoiceId);
+
         return view('orders.confirmation', compact('invoice'));
     }
 }

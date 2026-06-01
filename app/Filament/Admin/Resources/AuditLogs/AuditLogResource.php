@@ -4,25 +4,24 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\AuditLogs;
 
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\Filter;
-use Filament\Forms\Components\DatePicker;
-use App\Filament\Resources\AuditLogResource\Pages;
 use App\Models\AuditLog;
+use Filament\Forms\Components\DatePicker;
 use Filament\Resources\Resource;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Filament\Tables;
-use Filament\Forms;
 
 class AuditLogResource extends Resource
 {
     #[\Override]
     protected static ?string $model = AuditLog::class;
+
     #[\Override]
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-clipboard-list';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-clipboard-list';
+
     #[\Override]
-    protected static string | \UnitEnum | null $navigationGroup = 'Administration';
+    protected static string|\UnitEnum|null $navigationGroup = 'Administration';
 
     #[\Override]
     public static function table(Table $table): Table

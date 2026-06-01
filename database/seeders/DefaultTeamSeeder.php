@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\Team;
 use App\Models\Branch;
+use App\Models\Team;
+use Illuminate\Database\Seeder;
 
 class DefaultTeamSeeder extends Seeder
 {

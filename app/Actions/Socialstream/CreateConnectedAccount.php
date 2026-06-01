@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\Socialstream;
 
-use App\Models\ConnectedAccount;
 use App\Models\User;
 use Illuminate\Support\Carbon;
 use JoelButcher\Socialstream\ConnectedAccount as SocialstreamConnectedAccount;
@@ -25,7 +24,7 @@ class CreateConnectedAccount implements CreatesConnectedAccounts
             'token' => $providerUser->token,
             'secret' => $providerUser->tokenSecret ?? null,
             'refresh_token' => $providerUser->refreshToken ?? null,
-            'expires_at' => isset($providerUser->expiresIn)
+            'expires_at' => property_exists($providerUser, 'expiresIn') && $providerUser->expiresIn !== null
                 ? Carbon::now()->addSeconds($providerUser->expiresIn)
                 : null,
         ]);

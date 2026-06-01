@@ -8,29 +8,10 @@ on:
   deployment_status:
   workflow_dispatch:
 
-env:
-  DB_DATABASE: liberu
-  DB_USERNAME: root
-  DB_PASSWORD: root
-
 jobs:
   docker:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
-
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: liberu
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
 
     steps:
       - name: Checkout code

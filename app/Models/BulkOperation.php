@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+#[Fillable([
     'user_id',
     'team_id',
     'type',
@@ -23,14 +24,13 @@ class BulkOperation extends Model
 {
     #[\Override]
     protected function casts(): array
-
     {
 
         return [
-        'parameters' => 'array',
-        'started_at' => 'datetime',
-        'completed_at' => 'datetime',
-    ];
+            'parameters' => 'array',
+            'started_at' => 'datetime',
+            'completed_at' => 'datetime',
+        ];
 
     }
 

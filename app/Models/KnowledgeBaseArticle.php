@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
-#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+#[Fillable([
     'category_id',
     'author_id',
     'title',
@@ -25,14 +26,13 @@ class KnowledgeBaseArticle extends Model
 {
     #[\Override]
     protected function casts(): array
-
     {
 
         return [
-        'is_published' => 'boolean',
-        'is_featured' => 'boolean',
-        'published_at' => 'datetime',
-    ];
+            'is_published' => 'boolean',
+            'is_featured' => 'boolean',
+            'published_at' => 'datetime',
+        ];
 
     }
 
@@ -48,7 +48,7 @@ class KnowledgeBaseArticle extends Model
         });
 
         static::updating(function ($article): void {
-            if ($article->isDirty('is_published') && $article->is_published && !$article->published_at) {
+            if ($article->isDirty('is_published') && $article->is_published && ! $article->published_at) {
                 $article->published_at = now();
             }
         });
@@ -82,7 +82,7 @@ class KnowledgeBaseArticle extends Model
     public function getHelpfulnessRatio(): float
     {
         $total = $this->helpful_count + $this->not_helpful_count;
-        
+
         if ($total === 0) {
             return 0;
         }

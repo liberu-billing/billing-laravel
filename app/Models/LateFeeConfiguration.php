@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use App\Traits\HasTeam;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Traits\HasTeam;
 
-#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+#[Fillable([
     'team_id',
     'fee_type',
     'fee_amount',
@@ -22,15 +23,14 @@ class LateFeeConfiguration extends Model
 
     #[\Override]
     protected function casts(): array
-
     {
 
         return [
-        'is_compound' => 'boolean',
-        'fee_amount' => 'decimal:2',
-        'max_fee_amount' => 'decimal:2',
-        'grace_period_days' => 'integer',
-    ];
+            'is_compound' => 'boolean',
+            'fee_amount' => 'decimal:2',
+            'max_fee_amount' => 'decimal:2',
+            'grace_period_days' => 'integer',
+        ];
 
     }
 
@@ -38,9 +38,9 @@ class LateFeeConfiguration extends Model
     {
         return [
             'one-time' => 'One Time',
-            'daily'    => 'Daily',
-            'weekly'   => 'Weekly',
-            'monthly'  => 'Monthly',
+            'daily' => 'Daily',
+            'weekly' => 'Weekly',
+            'monthly' => 'Monthly',
         ];
     }
 
@@ -48,7 +48,7 @@ class LateFeeConfiguration extends Model
     {
         return [
             'percentage' => 'Percentage',
-            'fixed'      => 'Fixed Amount',
+            'fixed' => 'Fixed Amount',
         ];
     }
 

@@ -4,15 +4,17 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use Exception;
-use Illuminate\Console\Command;
 use App\Services\DomainPricingService;
+use Exception;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
+use Illuminate\Console\Command;
 
-#[\Illuminate\Console\Attributes\Description('Synchronize domain pricing and TLDs from Enom')]
-#[\Illuminate\Console\Attributes\Signature('enom:sync-domains')]
+#[Description('Synchronize domain pricing and TLDs from Enom')]
+#[Signature('enom:sync-domains')]
 class SyncEnomDomains extends Command
 {
-    public function __construct(protected \App\Services\DomainPricingService $domainPricingService)
+    public function __construct(protected DomainPricingService $domainPricingService)
     {
         parent::__construct();
     }
@@ -25,7 +27,7 @@ class SyncEnomDomains extends Command
             $this->domainPricingService->syncTldsFromEnom();
             $this->info('Enom domain synchronization completed successfully.');
         } catch (Exception $e) {
-            $this->error('An error occurred during Enom domain synchronization: ' . $e->getMessage());
+            $this->error('An error occurred during Enom domain synchronization: '.$e->getMessage());
         }
     }
 }

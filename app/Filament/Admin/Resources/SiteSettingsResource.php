@@ -8,10 +8,10 @@ use App\Filament\Admin\Resources\SiteSettingsResource\Pages\CreateSiteSettings;
 use App\Filament\Admin\Resources\SiteSettingsResource\Pages\EditSiteSettings;
 use App\Filament\Admin\Resources\SiteSettingsResource\Pages\ListSiteSettings;
 use App\Models\SiteSettings;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -24,10 +24,10 @@ class SiteSettingsResource extends Resource
     protected static ?string $model = SiteSettings::class;
 
     #[\Override]
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-cog-8-tooth';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-cog-8-tooth';
 
     #[\Override]
-    protected static string | \UnitEnum | null $navigationGroup = 'Settings';
+    protected static string|\UnitEnum|null $navigationGroup = 'Settings';
 
     #[\Override]
     public static function form(Schema $schema): Schema
@@ -107,9 +107,9 @@ class SiteSettingsResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => ListSiteSettings::route('/'),
+            'index' => ListSiteSettings::route('/'),
             'create' => CreateSiteSettings::route('/create'),
-            'edit'   => EditSiteSettings::route('/{record}/edit'),
+            'edit' => EditSiteSettings::route('/{record}/edit'),
         ];
     }
 }

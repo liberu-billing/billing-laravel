@@ -17,7 +17,7 @@ class CannedResponseService
         if ($teamId) {
             $query->where(function ($q) use ($teamId): void {
                 $q->where('team_id', $teamId)
-                  ->orWhereNull('team_id'); // Include global responses
+                    ->orWhereNull('team_id'); // Include global responses
             });
         }
 
@@ -39,7 +39,7 @@ class CannedResponseService
         if ($teamId) {
             $query->where(function ($q) use ($teamId): void {
                 $q->where('team_id', $teamId)
-                  ->orWhereNull('team_id');
+                    ->orWhereNull('team_id');
             });
         }
 
@@ -52,6 +52,7 @@ class CannedResponseService
     public function use(CannedResponse $response, array $variables = []): string
     {
         $response->use();
+
         return $response->replaceVariables($variables);
     }
 
@@ -63,14 +64,14 @@ class CannedResponseService
         $queryBuilder = CannedResponse::where('is_active', true)
             ->where(function ($q) use ($query): void {
                 $q->where('title', 'like', "%{$query}%")
-                  ->orWhere('content', 'like', "%{$query}%")
-                  ->orWhere('shortcode', 'like', "%{$query}%");
+                    ->orWhere('content', 'like', "%{$query}%")
+                    ->orWhere('shortcode', 'like', "%{$query}%");
             });
 
         if ($teamId) {
             $queryBuilder->where(function ($q) use ($teamId): void {
                 $q->where('team_id', $teamId)
-                  ->orWhereNull('team_id');
+                    ->orWhereNull('team_id');
             });
         }
 
@@ -87,7 +88,7 @@ class CannedResponseService
         if ($teamId) {
             $query->where(function ($q) use ($teamId): void {
                 $q->where('team_id', $teamId)
-                  ->orWhereNull('team_id');
+                    ->orWhereNull('team_id');
             });
         }
 
@@ -108,7 +109,7 @@ class CannedResponseService
         if ($teamId) {
             $query->where(function ($q) use ($teamId): void {
                 $q->where('team_id', $teamId)
-                  ->orWhereNull('team_id');
+                    ->orWhereNull('team_id');
             });
         }
 

@@ -2,11 +2,10 @@
 
 namespace Tests\Unit\Services;
 
-use Tests\TestCase;
-use App\Services\WebhookService;
 use App\Models\WebhookEndpoint;
-use App\Models\WebhookEvent;
+use App\Services\WebhookService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class WebhookServiceTest extends TestCase
 {
@@ -17,7 +16,7 @@ class WebhookServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->webhookService = new WebhookService();
+        $this->webhookService = new WebhookService;
     }
 
     public function test_can_dispatch_webhook_event(): void

@@ -7,7 +7,10 @@ namespace Tests\Feature\Livewire;
 use App\Livewire\CreateTeam;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Routing\Exceptions\UrlGenerationException;
+use Laravel\Jetstream\Contracts\CreatesTeams;
 use Livewire\Livewire;
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Tests\TestCase;
 
 class CreateTeamTest extends TestCase
@@ -30,7 +33,7 @@ class CreateTeamTest extends TestCase
         Livewire::actingAs($user)
             ->test(CreateTeam::class)
             ->set('state.name', '')
-            ->call('createTeam', app(\Laravel\Jetstream\Contracts\CreatesTeams::class))
+            ->call('createTeam', app(CreatesTeams::class))
             ->assertHasErrors(['state.name']);
     }
 
@@ -42,8 +45,8 @@ class CreateTeamTest extends TestCase
             Livewire::actingAs($user)
                 ->test(CreateTeam::class)
                 ->set('state.name', 'My Test Team')
-                ->call('createTeam', app(\Laravel\Jetstream\Contracts\CreatesTeams::class));
-        } catch (\Symfony\Component\Routing\Exception\RouteNotFoundException|\Illuminate\Routing\Exceptions\UrlGenerationException $e) {
+                ->call('createTeam', app(CreatesTeams::class));
+        } catch (RouteNotFoundException|UrlGenerationException) {
             // Route may not exist in test environment - that's OK, team was created
         }
 

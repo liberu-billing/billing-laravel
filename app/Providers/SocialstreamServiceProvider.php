@@ -4,10 +4,18 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Actions\Socialstream\CreateConnectedAccount;
+use App\Actions\Socialstream\CreateUserFromProvider;
+use App\Actions\Socialstream\GenerateRedirectForProvider;
+use App\Actions\Socialstream\HandleInvalidState;
+use App\Actions\Socialstream\ResolveSocialiteUser;
+use App\Actions\Socialstream\UpdateConnectedAccount;
 use Illuminate\Support\ServiceProvider;
+use JoelButcher\Socialstream\Socialstream;
 
 class SocialstreamServiceProvider extends ServiceProvider
 {
+    #[\Override]
     public function register(): void
     {
         //
@@ -15,27 +23,27 @@ class SocialstreamServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        if (! class_exists(\JoelButcher\Socialstream\Socialstream::class)) {
+        if (! class_exists(Socialstream::class)) {
             return;
         }
 
-        \JoelButcher\Socialstream\Socialstream::resolvesSocialiteUsersUsing(
-            \App\Actions\Socialstream\ResolveSocialiteUser::class
+        Socialstream::resolvesSocialiteUsersUsing(
+            ResolveSocialiteUser::class
         );
-        \JoelButcher\Socialstream\Socialstream::createUsersFromProviderUsing(
-            \App\Actions\Socialstream\CreateUserFromProvider::class
+        Socialstream::createUsersFromProviderUsing(
+            CreateUserFromProvider::class
         );
-        \JoelButcher\Socialstream\Socialstream::createConnectedAccountsUsing(
-            \App\Actions\Socialstream\CreateConnectedAccount::class
+        Socialstream::createConnectedAccountsUsing(
+            CreateConnectedAccount::class
         );
-        \JoelButcher\Socialstream\Socialstream::updateConnectedAccountsUsing(
-            \App\Actions\Socialstream\UpdateConnectedAccount::class
+        Socialstream::updateConnectedAccountsUsing(
+            UpdateConnectedAccount::class
         );
-        \JoelButcher\Socialstream\Socialstream::handlesInvalidStateUsing(
-            \App\Actions\Socialstream\HandleInvalidState::class
+        Socialstream::handlesInvalidStateUsing(
+            HandleInvalidState::class
         );
-        \JoelButcher\Socialstream\Socialstream::generatesProvidersRedirectsUsing(
-            \App\Actions\Socialstream\GenerateRedirectForProvider::class
+        Socialstream::generatesProvidersRedirectsUsing(
+            GenerateRedirectForProvider::class
         );
     }
 }

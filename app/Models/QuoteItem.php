@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+#[Fillable([
     'quote_id',
     'description',
     'quantity',
@@ -17,14 +18,13 @@ class QuoteItem extends Model
 {
     #[\Override]
     protected function casts(): array
-
     {
 
         return [
-        'quantity' => 'decimal:2',
-        'unit_price' => 'decimal:2',
-        'total' => 'decimal:2',
-    ];
+            'quantity' => 'decimal:2',
+            'unit_price' => 'decimal:2',
+            'total' => 'decimal:2',
+        ];
 
     }
 

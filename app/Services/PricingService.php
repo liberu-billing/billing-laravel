@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Products_Service;
 use App\Models\UsageRecord;
-use Carbon\Carbon;
 
 class PricingService
 {
@@ -40,7 +39,7 @@ class PricingService
         $startDate = $options['start_date'] ?? null;
         $endDate = $options['end_date'] ?? null;
 
-        if (!$subscriptionId || !$startDate || !$endDate) {
+        if (! $subscriptionId || ! $startDate || ! $endDate) {
             return $product->base_price;
         }
 
@@ -56,7 +55,7 @@ class PricingService
 
         foreach ($usageConfig as $metric => $pricing) {
             $metricUsage = $usage->where('metric_name', $metric)->sum('quantity');
-            
+
             if ($pricing['type'] === 'per_unit') {
                 $totalPrice += $metricUsage * $pricing['rate'];
             } elseif ($pricing['type'] === 'tiered') {

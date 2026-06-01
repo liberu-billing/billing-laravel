@@ -2,9 +2,8 @@
 
 namespace App\Filament\App\Resources\Refunds\Pages;
 
-use Filament\Actions\DeleteAction;
 use App\Filament\App\Resources\Refunds\RefundResource;
-use Filament\Pages\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditRefund extends EditRecord

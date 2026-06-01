@@ -22,7 +22,7 @@ class UpdateConnectedAccount implements UpdatesConnectedAccounts
             'token' => $providerUser->token,
             'secret' => $providerUser->tokenSecret ?? null,
             'refresh_token' => $providerUser->refreshToken ?? null,
-            'expires_at' => isset($providerUser->expiresIn)
+            'expires_at' => property_exists($providerUser, 'expiresIn') && $providerUser->expiresIn !== null
                 ? Carbon::now()->addSeconds($providerUser->expiresIn)
                 : null,
         ])->save();

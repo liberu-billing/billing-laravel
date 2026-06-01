@@ -2,23 +2,24 @@
 
 namespace App\Console\Commands;
 
-use Exception;
-use Illuminate\Console\Command;
 use App\Services\BillingService;
+use Exception;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
+use Illuminate\Console\Command;
 
-#[\Illuminate\Console\Attributes\Description('Process invoice reminders for upcoming and overdue invoices')]
-#[\Illuminate\Console\Attributes\Signature('invoices:process-reminders')]
+#[Description('Process invoice reminders for upcoming and overdue invoices')]
+#[Signature('invoices:process-reminders')]
 class ProcessInvoiceReminders extends Command
 {
-    protected ?\App\Services\BillingService $billingService;
+    protected ?BillingService $billingService;
 
     public function __construct($serviceProvisioningService = null, $currencyService = null)
     {
         parent::__construct();
-        if($serviceProvisioningService == null || $currencyService == null){
+        if ($serviceProvisioningService == null || $currencyService == null) {
             $this->billingService = null;
-        }
-        else{
+        } else {
             $this->billingService = new BillingService($serviceProvisioningService, $currencyService);
         }
     }
@@ -27,6 +28,7 @@ class ProcessInvoiceReminders extends Command
     {
         if (cache()->get('processing_invoice_reminders')) {
             $this->warn('Invoice reminder processing is already running');
+
             return Command::FAILURE;
         }
 
@@ -42,10 +44,12 @@ class ProcessInvoiceReminders extends Command
             $this->info("Sent {$overdueCount} overdue invoice reminders");
 
             cache()->forget('processing_invoice_reminders');
+
             return Command::SUCCESS;
         } catch (Exception $e) {
             cache()->forget('processing_invoice_reminders');
-            $this->error("Error processing reminders: " . $e->getMessage());
+            $this->error('Error processing reminders: '.$e->getMessage());
+
             return Command::FAILURE;
         }
     }

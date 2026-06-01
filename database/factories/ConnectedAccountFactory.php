@@ -9,10 +9,11 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ConnectedAccount>
+ * @extends Factory<ConnectedAccount>
  */
 class ConnectedAccountFactory extends Factory
 {
+    #[\Override]
     protected $model = ConnectedAccount::class;
 
     public function definition(): array

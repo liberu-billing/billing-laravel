@@ -68,6 +68,24 @@ jobs:
       - name: Run Laravel Pint (code style)
         run: ./vendor/bin/pint --test
 
+  npm-audit:
+    name: NPM Dependency Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Check for known npm vulnerabilities
+        run: npm audit --audit-level=high
+
   duplicate-code:
     name: Duplicate Code Detection
     runs-on: ubuntu-latest

@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+#[Fillable([
     'team_id',
     'title',
     'shortcode',
@@ -19,13 +20,12 @@ class CannedResponse extends Model
 {
     #[\Override]
     protected function casts(): array
-
     {
 
         return [
-        'is_active' => 'boolean',
-        'last_used_at' => 'datetime',
-    ];
+            'is_active' => 'boolean',
+            'last_used_at' => 'datetime',
+        ];
 
     }
 
@@ -45,7 +45,7 @@ class CannedResponse extends Model
         $content = $this->content;
 
         foreach ($variables as $key => $value) {
-            $content = str_replace('{{' . $key . '}}', $value, $content);
+            $content = str_replace('{{'.$key.'}}', $value, $content);
         }
 
         return $content;

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Services;
 
-use App\Models\AuditLog;
 use App\Models\User;
 use App\Services\AuditLogService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -27,7 +26,7 @@ class AuditLogServiceTest extends TestCase
         $user = User::factory()->withPersonalTeam()->create();
         $this->actingAs($user);
 
-        $model = new \stdClass();
+        new \stdClass;
 
         $this->service->log('test_action', null, null, ['key' => 'value']);
 

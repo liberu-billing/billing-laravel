@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Invoice;
 use App\Models\Client;
+use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -11,10 +11,10 @@ class DashboardController extends Controller
 {
     public function getMetrics()
     {
-        return Cache::remember('dashboard.metrics', 300, fn(): array => [
+        return Cache::remember('dashboard.metrics', 300, fn (): array => [
             'revenue' => $this->getRevenueData(),
             'invoices' => $this->getInvoiceData(),
-            'clients' => $this->getClientData()
+            'clients' => $this->getClientData(),
         ]);
     }
 
@@ -32,9 +32,9 @@ class DashboardController extends Controller
                 [
                     'label' => 'Revenue',
                     'data' => $revenue->pluck('total'),
-                    'borderColor' => '#4F46E5'
-                ]
-            ]
+                    'borderColor' => '#4F46E5',
+                ],
+            ],
         ];
     }
 
@@ -49,9 +49,9 @@ class DashboardController extends Controller
             'datasets' => [
                 [
                     'data' => $statuses->pluck('count'),
-                    'backgroundColor' => ['#4F46E5', '#10B981', '#EF4444']
-                ]
-            ]
+                    'backgroundColor' => ['#4F46E5', '#10B981', '#EF4444'],
+                ],
+            ],
         ];
     }
 
@@ -68,20 +68,20 @@ class DashboardController extends Controller
                 [
                     'label' => 'New Clients',
                     'data' => $clients->pluck('count'),
-                    'backgroundColor' => '#4F46E5'
-                ]
-            ]
+                    'backgroundColor' => '#4F46E5',
+                ],
+            ],
         ];
     }
 
     public function savePreferences(Request $request)
     {
         $request->validate([
-            'charts' => 'required|array'
+            'charts' => 'required|array',
         ]);
 
         auth()->user()->update([
-            'dashboard_preferences' => $request->charts
+            'dashboard_preferences' => $request->charts,
         ]);
 
         return response()->json(['message' => 'Preferences saved']);
@@ -90,7 +90,7 @@ class DashboardController extends Controller
     public function getPreferences()
     {
         return response()->json([
-            'charts' => auth()->user()->dashboard_preferences
+            'charts' => auth()->user()->dashboard_preferences,
         ]);
     }
 }

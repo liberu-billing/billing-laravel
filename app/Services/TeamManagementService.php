@@ -14,7 +14,7 @@ class TeamManagementService
             $team = Team::firstOrCreate(
                 ['name' => $user->name."'s Team"],
                 [
-                    'user_id'       => $user->id,
+                    'user_id' => $user->id,
                     'personal_team' => true,
                 ]
             );

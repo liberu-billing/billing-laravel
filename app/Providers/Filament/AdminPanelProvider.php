@@ -16,9 +16,10 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Widgets;
+use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
@@ -54,7 +55,7 @@ class AdminPanelProvider extends PanelProvider
                 StartSession::class,
                 AuthenticateSession::class,
                 ShareErrorsFromSession::class,
-                \Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class,
+                PreventRequestForgery::class,
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
@@ -76,7 +77,7 @@ class AdminPanelProvider extends PanelProvider
                     MenuItem::make()
                         ->label('Team Settings')
                         ->icon('heroicon-o-cog-6-tooth')
-                        ->url(fn (): \Illuminate\Contracts\Routing\UrlGenerator|string => $this->shouldRegisterMenuItem()
+                        ->url(fn (): UrlGenerator|string => $this->shouldRegisterMenuItem()
                             ? url(Pages\EditTeam::getUrl())
                             : url($panel->getPath())),
                 ]);

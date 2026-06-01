@@ -13,7 +13,7 @@ class AppServiceProvider extends ServiceProvider
     #[\Override]
     public function register(): void
     {
-        $this->app->singleton(ModuleManager::class, fn (): \App\Modules\ModuleManager => new ModuleManager());
+        $this->app->singleton(ModuleManager::class, fn (): ModuleManager => new ModuleManager);
     }
 
     public function boot(): void

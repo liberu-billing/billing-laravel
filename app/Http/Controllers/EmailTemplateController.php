@@ -3,26 +3,29 @@
 namespace App\Http\Controllers;
 
 use App\Models\EmailTemplate;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
 class EmailTemplateController extends Controller
 {
-    public function index(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function index(): Factory|View
     {
-        $templates = EmailTemplate::where(function($query): void {
+        $templates = EmailTemplate::where(function ($query): void {
             $query->where('team_id', auth()->user()->currentTeam->id)
-                  ->orWhere('is_default', true);
+                ->orWhere('is_default', true);
         })->get();
-        
+
         return view('email-templates.index', compact('templates'));
     }
 
-    public function create(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function create(): Factory|View
     {
         $types = [
             'invoice_generated' => 'Invoice Generated',
             'overdue_reminder' => 'Overdue Reminder',
         ];
+
         return view('email-templates.create', compact('types'));
     }
 
@@ -43,20 +46,21 @@ class EmailTemplateController extends Controller
             ->with('success', 'Template created successfully');
     }
 
-    public function edit(EmailTemplate $template): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function edit(EmailTemplate $template): Factory|View
     {
         $this->authorize('update', $template);
         $types = [
             'invoice_generated' => 'Invoice Generated',
             'overdue_reminder' => 'Overdue Reminder',
         ];
+
         return view('email-templates.edit', compact('template', 'types'));
     }
 
     public function update(Request $request, EmailTemplate $template)
     {
         $this->authorize('update', $template);
-        
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'type' => 'required|string',

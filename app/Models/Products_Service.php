@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
-use Exception;
 use App\Traits\HasTeam;
 use Database\Factories\ProductsServiceFactory;
+use Exception;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+#[Fillable([
     'name',
     'description',
     'base_price',
@@ -16,7 +19,7 @@ use Illuminate\Database\Eloquent\Model;
     'pricing_model',
     'custom_pricing_data',
 ])]
-#[\Illuminate\Database\Eloquent\Attributes\Table(name: 'products_services')]
+#[Table(name: 'products_services')]
 class Products_Service extends Model
 {
     use HasFactory;
@@ -29,18 +32,17 @@ class Products_Service extends Model
 
     #[\Override]
     protected function casts(): array
-
     {
 
         return [
-        'custom_pricing_data' => 'array',
-    ];
+            'custom_pricing_data' => 'array',
+        ];
 
     }
 
-    protected function price(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function price(): Attribute
     {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: fn() => $this->base_price);
+        return Attribute::make(get: fn () => $this->base_price);
     }
 
     public function invoiceItems()
@@ -58,13 +60,13 @@ class Products_Service extends Model
         if ($this->pricing_model !== 'usage_based') {
             return [];
         }
-        
+
         return array_keys($this->custom_pricing_data['usage_config'] ?? []);
     }
 
     public function recordUsage($subscriptionId, $metric, $quantity)
     {
-        if (!in_array($metric, $this->getUsageMetrics())) {
+        if (! in_array($metric, $this->getUsageMetrics())) {
             throw new Exception("Invalid usage metric: {$metric}");
         }
 

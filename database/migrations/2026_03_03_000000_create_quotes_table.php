@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('quote_number')->unique();
             $table->string('title');
             $table->enum('status', ['draft', 'sent', 'viewed', 'accepted', 'declined', 'expired'])
-                  ->default('draft');
+                ->default('draft');
             $table->date('valid_until')->nullable();
             $table->decimal('subtotal', 10, 2)->default(0);
             $table->decimal('tax_amount', 10, 2)->default(0);

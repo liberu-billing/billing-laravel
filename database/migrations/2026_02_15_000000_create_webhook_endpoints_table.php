@@ -23,7 +23,7 @@ return new class extends Migration
             $table->integer('retry_interval')->default(60); // seconds
             $table->timestamp('last_triggered_at')->nullable();
             $table->timestamps();
-            
+
             $table->index(['team_id', 'is_active']);
         });
     }

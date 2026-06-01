@@ -30,7 +30,7 @@ class InvoiceResource extends JsonResource
             'created_at' => $this->created_at->toIso8601String(),
             'updated_at' => $this->updated_at->toIso8601String(),
             'links' => [
-                'self'     => url("/api/invoices/{$this->id}"),
+                'self' => url("/api/invoices/{$this->id}"),
                 'download' => url("/api/invoices/{$this->id}/download"),
             ],
         ];

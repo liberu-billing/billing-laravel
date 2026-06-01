@@ -24,12 +24,12 @@ class EditTeam extends EditTenantProfile
     public function form(Schema $schema): Schema
     {
         return $schema
-        ->components([
-            TextInput::make('name')
-                ->label('Team Name')
-                ->required()
-                ->maxLength(255),
-        ]);
+            ->components([
+                TextInput::make('name')
+                    ->label('Team Name')
+                    ->required()
+                    ->maxLength(255),
+            ]);
     }
 
     public function submit()
@@ -37,8 +37,8 @@ class EditTeam extends EditTenantProfile
         $this->validate();
 
         $team = Team::forceCreate([
-            'user_id'       => Filament::auth()->id(),
-            'name'          => $this->name,
+            'user_id' => Filament::auth()->id(),
+            'name' => $this->name,
             'personal_team' => false,
         ]);
 

@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+#[Fillable([
     'customer_id',
     'amount',
     'description',
@@ -21,6 +22,7 @@ class Credit extends Model
     {
         return $this->belongsTo(Customer::class);
     }
+
     #[\Override]
     protected function casts(): array
     {

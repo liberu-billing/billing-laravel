@@ -37,18 +37,18 @@ class ModuleSystemTest extends TestCase
     public function test_it_can_enable_and_disable_modules(): void
     {
         $moduleName = 'BlogModule';
-        
+
         // Enable module
         $result = $this->moduleManager->enable($moduleName);
         $this->assertTrue($result);
-        
+
         $module = $this->moduleManager->get($moduleName);
         $this->assertTrue($module->isEnabled());
 
         // Disable module
         $result = $this->moduleManager->disable($moduleName);
         $this->assertTrue($result);
-        
+
         $module = $this->moduleManager->get($moduleName);
         $this->assertFalse($module->isEnabled());
     }
@@ -57,7 +57,7 @@ class ModuleSystemTest extends TestCase
     public function test_it_can_get_module_info(): void
     {
         $info = $this->moduleManager->getModuleInfo('BlogModule');
-        
+
         $this->assertArrayHasKey('name', $info);
         $this->assertArrayHasKey('version', $info);
         $this->assertArrayHasKey('description', $info);
@@ -68,18 +68,18 @@ class ModuleSystemTest extends TestCase
     public function test_it_can_install_and_uninstall_modules(): void
     {
         $moduleName = 'BlogModule';
-        
+
         // Install module
         $result = $this->moduleManager->install($moduleName);
         $this->assertTrue($result);
-        
+
         $module = $this->moduleManager->get($moduleName);
         $this->assertTrue($module->isEnabled());
 
         // Uninstall module
         $result = $this->moduleManager->uninstall($moduleName);
         $this->assertTrue($result);
-        
+
         $module = $this->moduleManager->get($moduleName);
         $this->assertFalse($module->isEnabled());
     }

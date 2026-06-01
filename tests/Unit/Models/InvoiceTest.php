@@ -6,8 +6,6 @@ namespace Tests\Unit\Models;
 
 use App\Models\Customer;
 use App\Models\Invoice;
-use App\Models\Invoice_Item;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -67,7 +65,7 @@ class InvoiceTest extends TestCase
 
     public function test_invoice_has_correct_fillable_attributes(): void
     {
-        $invoice = new Invoice();
+        $invoice = new Invoice;
         $fillable = $invoice->getFillable();
 
         $this->assertContains('customer_id', $fillable);

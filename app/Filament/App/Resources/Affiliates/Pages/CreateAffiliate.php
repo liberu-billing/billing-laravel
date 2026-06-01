@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Filament\App\Resources\Affiliates\Pages;
 
 use App\Filament\App\Resources\Affiliates\AffiliateResource;
-use Filament\Pages\Actions;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateAffiliate extends CreateRecord

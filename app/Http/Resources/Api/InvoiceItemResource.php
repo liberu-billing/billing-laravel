@@ -8,6 +8,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class InvoiceItemResource extends JsonResource
 {
+    #[\Override]
     public function toArray($request): array
     {
         return [

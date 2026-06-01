@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\ReminderSetting;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
 class ReminderSettingsController extends Controller
 {
-    public function edit(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+    public function edit(): Factory|View
     {
         $settings = ReminderSetting::firstOrCreate(
             ['team_id' => auth()->user()->currentTeam->id],
@@ -15,10 +17,10 @@ class ReminderSettingsController extends Controller
                 'days_before_reminder' => 1,
                 'reminder_frequency' => 7,
                 'max_reminders' => 3,
-                'is_active' => true
+                'is_active' => true,
             ]
         );
-        
+
         return view('reminder-settings.edit', compact('settings'));
     }
 
@@ -28,13 +30,13 @@ class ReminderSettingsController extends Controller
             'days_before_reminder' => 'required|integer|min:1',
             'reminder_frequency' => 'required|integer|min:1',
             'max_reminders' => 'required|integer|min:1',
-            'is_active' => 'boolean'
+            'is_active' => 'boolean',
         ]);
 
         $settings = ReminderSetting::firstOrCreate(
             ['team_id' => auth()->user()->currentTeam->id]
         );
-        
+
         $settings->update($validated);
 
         return redirect()->back()->with('success', 'Reminder settings updated successfully');

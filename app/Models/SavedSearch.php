@@ -2,25 +2,25 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+#[Fillable([
     'user_id',
     'name',
     'criteria',
-    'share_token'
+    'share_token',
 ])]
 class SavedSearch extends Model
 {
     #[\Override]
     protected function casts(): array
-
     {
 
         return [
-        'criteria' => 'array'
-    ];
+            'criteria' => 'array',
+        ];
 
     }
 

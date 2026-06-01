@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Traits\HasTeam;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Traits\HasTeam;
 
-#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+#[Fillable([
     'code',
     'name',
     'description',
@@ -19,7 +20,7 @@ use App\Traits\HasTeam;
     'end_date',
     'max_uses',
     'used_count',
-    'is_active'
+    'is_active',
 ])]
 class Discount extends Model
 {
@@ -28,14 +29,13 @@ class Discount extends Model
 
     #[\Override]
     protected function casts(): array
-
     {
 
         return [
-        'start_date' => 'datetime',
-        'end_date' => 'datetime',
-        'is_active' => 'boolean'
-    ];
+            'start_date' => 'datetime',
+            'end_date' => 'datetime',
+            'is_active' => 'boolean',
+        ];
 
     }
 

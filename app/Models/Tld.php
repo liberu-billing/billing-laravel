@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+#[Fillable([
     'name',
     'base_price',
     'markup_type',
@@ -20,14 +21,13 @@ class Tld extends Model
 
     #[\Override]
     protected function casts(): array
-
     {
 
         return [
-        'base_price' => 'float',
-        'markup_value' => 'float',
-        'enom_cost' => 'float',
-    ];
+            'base_price' => 'float',
+            'markup_value' => 'float',
+            'enom_cost' => 'float',
+        ];
 
     }
 
@@ -38,6 +38,7 @@ class Tld extends Model
         } elseif ($this->markup_type === 'fixed') {
             return $this->enom_cost + $this->markup_value;
         }
+
         return $this->base_price;
     }
 }

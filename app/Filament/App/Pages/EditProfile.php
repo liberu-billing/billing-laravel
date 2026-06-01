@@ -13,8 +13,9 @@ class EditProfile extends Page
 {
     #[\Override]
     protected string $view = 'filament.pages.edit-profile';
+
     #[\Override]
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-chart-bar';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-chart-bar';
 
     public User $user;
 
@@ -22,7 +23,7 @@ class EditProfile extends Page
     {
         $this->user = Auth::user();
         $this->form->fill([
-            'name'  => $this->user->name,
+            'name' => $this->user->name,
             'email' => $this->user->email,
         ]);
     }
@@ -48,7 +49,7 @@ class EditProfile extends Page
         $state = $this->form->getState();
 
         $this->user->forceFill([
-            'name'  => $state['name'],
+            'name' => $state['name'],
             'email' => $state['email'],
         ])->save();
 

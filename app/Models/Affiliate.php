@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Traits\HasTeam;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[\Illuminate\Database\Eloquent\Attributes\Fillable([
+#[Fillable([
     'user_id',
     'code',
     'commission_rate',
@@ -22,12 +23,11 @@ class Affiliate extends Model
 
     #[\Override]
     protected function casts(): array
-
     {
 
         return [
-        'custom_rates' => 'array',
-    ];
+            'custom_rates' => 'array',
+        ];
 
     }
 

@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Menu;
+use Illuminate\Database\Seeder;
 
 class MenuSeeder extends Seeder
 {
@@ -13,12 +13,12 @@ class MenuSeeder extends Seeder
             [
                 'name' => 'Home',
                 'url' => '/',
-                'order' => 1
+                'order' => 1,
             ],
             [
                 'name' => 'Dashboard',
                 'url' => '/dashboard',
-                'order' => 2
+                'order' => 2,
             ],
             [
                 'name' => 'Invoices',
@@ -28,7 +28,7 @@ class MenuSeeder extends Seeder
                     ['name' => 'All Invoices', 'url' => '/invoices/all', 'order' => 1],
                     ['name' => 'Create Invoice', 'url' => '/invoices/create', 'order' => 2],
                     ['name' => 'Recurring Invoices', 'url' => '/invoices/recurring', 'order' => 3],
-                ]
+                ],
             ],
             [
                 'name' => 'Payments',
@@ -37,32 +37,32 @@ class MenuSeeder extends Seeder
                 'children' => [
                     ['name' => 'Payment History', 'url' => '/payments/history', 'order' => 1],
                     ['name' => 'Make Payment', 'url' => '/payments/make', 'order' => 2],
-                ]
+                ],
             ],
             [
                 'name' => 'Clients',
                 'url' => '/clients',
-                'order' => 5
+                'order' => 5,
             ],
             [
                 'name' => 'Reports',
                 'url' => '/reports',
-                'order' => 6
+                'order' => 6,
             ],
             [
                 'name' => 'Affiliates',
                 'url' => '/affiliates',
-                'order' => 7
+                'order' => 7,
             ],
             [
                 'name' => 'About',
                 'url' => '/about',
-                'order' => 8
+                'order' => 8,
             ],
             [
                 'name' => 'Contact',
                 'url' => '/contact',
-                'order' => 9
+                'order' => 9,
             ],
         ];
 

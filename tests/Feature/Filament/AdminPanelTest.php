@@ -40,8 +40,6 @@ class AdminPanelTest extends TestCase
     {
         $response = $this->get('/admin/login');
 
-        $response->assertStatus(200)
-            ->assertSee('email', false)
-            ->assertSee('password', false);
+        $response->assertStatus(200)->assertSeeHtml('email')->assertSeeHtml('password');
     }
 }

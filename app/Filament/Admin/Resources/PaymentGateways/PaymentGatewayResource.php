@@ -20,10 +20,12 @@ class PaymentGatewayResource extends Resource
 {
     #[\Override]
     protected static ?string $model = PaymentGateway::class;
+
     #[\Override]
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCreditCard;
+
     #[\Override]
-    protected static string | \UnitEnum | null $navigationGroup = 'Settings';
+    protected static string|\UnitEnum|null $navigationGroup = 'Settings';
 
     #[\Override]
     public static function form(Schema $schema): Schema

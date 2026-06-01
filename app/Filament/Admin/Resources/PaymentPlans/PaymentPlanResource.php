@@ -4,19 +4,17 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\PaymentPlans;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\DatePicker;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
 use App\Filament\Resources\PaymentPlanResource\Pages;
 use App\Models\PaymentPlan;
-use Filament\Forms;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
 class PaymentPlanResource extends Resource
 {
@@ -24,7 +22,7 @@ class PaymentPlanResource extends Resource
     protected static ?string $model = PaymentPlan::class;
 
     #[\Override]
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-calendar';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-calendar';
 
     #[\Override]
     public static function form(Schema $schema): Schema
