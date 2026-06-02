@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use App\Modules\ModuleManager;
@@ -7,10 +9,9 @@ use Exception;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\File;
 
 #[Description('Manage application modules')]
-#[Signature('module {action} {name?} {--force}')]
+#[Signature('module {action} {name?} {--force} {--format=table : Output format (table|json)}')]
 class ModuleCommand extends Command
 {
     public function __construct(protected ModuleManager $moduleManager)
@@ -18,204 +19,108 @@ class ModuleCommand extends Command
         parent::__construct();
     }
 
-    /**
-     * Execute the console command.
-     */
     public function handle(): int
     {
-        $action = $this->argument('action');
-        $name = $this->argument('name');
-
-        return match ($action) {
-            'list' => $this->listModules(),
-            'enable' => $this->enableModule($name),
-            'disable' => $this->disableModule($name),
-            'install' => $this->installModule($name),
-            'uninstall' => $this->uninstallModule($name),
-            'create' => $this->createModule($name),
-            'info' => $this->showModuleInfo($name),
-            default => $this->showHelp(),
+        return match ($this->argument('action')) {
+            'list'      => $this->listModules(),
+            'enable'    => $this->enableModule($this->argument('name')),
+            'disable'   => $this->disableModule($this->argument('name')),
+            'install'   => $this->installModule($this->argument('name')),
+            'uninstall' => $this->uninstallModule($this->argument('name')),
+            'create'    => $this->createModule($this->argument('name')),
+            'info'      => $this->showModuleInfo($this->argument('name')),
+            'health'    => $this->healthCheck($this->argument('name')),
+            default     => $this->showHelp(),
         };
     }
 
-    /**
-     * List all modules.
-     */
     protected function listModules(): int
     {
         $modules = $this->moduleManager->all();
 
         if ($modules->isEmpty()) {
-            $this->info('No modules found.');
+            $this->outputResult(['modules' => [], 'count' => 0]);
 
-            return 0;
+            return self::SUCCESS;
+        }
+
+        $rows = $modules->map(fn ($m): array => [
+            'name'        => $m->getName(),
+            'version'     => $m->getVersion(),
+            'status'      => $m->isEnabled() ? 'enabled' : 'disabled',
+            'description' => $m->getDescription(),
+            'dependencies' => implode(', ', $m->getDependencies()),
+        ])->values()->all();
+
+        if ($this->option('format') === 'json') {
+            $this->line(json_encode(['modules' => $rows], JSON_PRETTY_PRINT));
+
+            return self::SUCCESS;
         }
 
         $this->table(
-            ['Name', 'Version', 'Status', 'Description'],
-            $modules->map(fn ($module): array => [
-                $module->getName(),
-                $module->getVersion(),
-                $module->isEnabled() ? '<fg=green>Enabled</>' : '<fg=red>Disabled</>',
-                $module->getDescription(),
-            ])->toArray()
+            ['Name', 'Version', 'Status', 'Description', 'Dependencies'],
+            array_map(fn (array $r): array => [
+                $r['name'],
+                $r['version'],
+                $r['status'] === 'enabled' ? '<fg=green>Enabled</>' : '<fg=red>Disabled</>',
+                $r['description'],
+                $r['dependencies'] ?: '—',
+            ], $rows)
         );
 
-        return 0;
+        return self::SUCCESS;
     }
 
-    /**
-     * Enable a module.
-     */
     protected function enableModule(?string $name): int
     {
-        if (! $name) {
-            $this->error('Module name is required.');
-
-            return 1;
-        }
-
-        try {
-            if ($this->moduleManager->enable($name)) {
-                $this->info("Module '{$name}' has been enabled.");
-
-                return 0;
-            }
-
-            $this->error("Module '{$name}' not found.");
-
-            return 1;
-        } catch (Exception $e) {
-            $this->error("Failed to enable module '{$name}': ".$e->getMessage());
-
-            return 1;
-        }
+        return $this->runModuleAction('enable', $name, fn () => $this->moduleManager->enable($name));
     }
 
-    /**
-     * Disable a module.
-     */
     protected function disableModule(?string $name): int
     {
-        if (! $name) {
-            $this->error('Module name is required.');
-
-            return 1;
-        }
-
-        try {
-            if ($this->moduleManager->disable($name)) {
-                $this->info("Module '{$name}' has been disabled.");
-
-                return 0;
-            }
-
-            $this->error("Module '{$name}' not found.");
-
-            return 1;
-        } catch (Exception $e) {
-            $this->error("Failed to disable module '{$name}': ".$e->getMessage());
-
-            return 1;
-        }
+        return $this->runModuleAction('disable', $name, fn () => $this->moduleManager->disable($name));
     }
 
-    /**
-     * Install a module.
-     */
     protected function installModule(?string $name): int
     {
-        if (! $name) {
-            $this->error('Module name is required.');
-
-            return 1;
-        }
-
-        try {
-            if ($this->moduleManager->install($name)) {
-                $this->info("Module '{$name}' has been installed and enabled.");
-
-                return 0;
-            }
-
-            $this->error("Module '{$name}' not found.");
-
-            return 1;
-        } catch (Exception $e) {
-            $this->error("Failed to install module '{$name}': ".$e->getMessage());
-
-            return 1;
-        }
+        return $this->runModuleAction('install', $name, fn () => $this->moduleManager->install($name));
     }
 
-    /**
-     * Uninstall a module.
-     */
     protected function uninstallModule(?string $name): int
     {
         if (! $name) {
             $this->error('Module name is required.');
 
-            return 1;
+            return self::FAILURE;
         }
 
-        if (! $this->option('force') && ! $this->confirm("Are you sure you want to uninstall module '{$name}'? This action cannot be undone.")) {
-            $this->info('Operation cancelled.');
+        if (! $this->option('force') && ! $this->confirm("Uninstall module '{$name}'? This cannot be undone.")) {
+            $this->info('Cancelled.');
 
-            return 0;
+            return self::SUCCESS;
         }
 
-        try {
-            if ($this->moduleManager->uninstall($name)) {
-                $this->info("Module '{$name}' has been uninstalled.");
-
-                return 0;
-            }
-
-            $this->error("Module '{$name}' not found.");
-
-            return 1;
-        } catch (Exception $e) {
-            $this->error("Failed to uninstall module '{$name}': ".$e->getMessage());
-
-            return 1;
-        }
+        return $this->runModuleAction('uninstall', $name, fn () => $this->moduleManager->uninstall($name));
     }
 
-    /**
-     * Create a new module.
-     */
     protected function createModule(?string $name): int
     {
         if (! $name) {
             $this->error('Module name is required.');
 
-            return 1;
+            return self::FAILURE;
         }
 
-        $modulePath = app_path("Modules/{$name}");
-
-        if (File::exists($modulePath)) {
-            $this->error("Module '{$name}' already exists.");
-
-            return 1;
-        }
-
-        $this->createModuleStructure($name, $modulePath);
-        $this->info("Module '{$name}' has been created successfully.");
-
-        return 0;
+        return $this->call('make:module', ['name' => $name, '--force' => $this->option('force')]);
     }
 
-    /**
-     * Show module information.
-     */
     protected function showModuleInfo(?string $name): int
     {
         if (! $name) {
             $this->error('Module name is required.');
 
-            return 1;
+            return self::FAILURE;
         }
 
         $info = $this->moduleManager->getModuleInfo($name);
@@ -223,154 +128,99 @@ class ModuleCommand extends Command
         if ($info === []) {
             $this->error("Module '{$name}' not found.");
 
-            return 1;
+            return self::FAILURE;
         }
 
-        $this->info('Module Information:');
-        $this->line("Name: {$info['name']}");
-        $this->line("Version: {$info['version']}");
-        $this->line("Description: {$info['description']}");
-        $this->line('Status: '.($info['enabled'] ? 'Enabled' : 'Disabled'));
+        $this->outputResult($info);
 
-        if (! empty($info['dependencies'])) {
-            $this->line('Dependencies: '.implode(', ', $info['dependencies']));
+        return self::SUCCESS;
+    }
+
+    protected function healthCheck(?string $name): int
+    {
+        $results = $name
+            ? [$name => $this->moduleManager->checkHealth($name)]
+            : $this->moduleManager->checkAllHealth();
+
+        if ($this->option('format') === 'json') {
+            $this->line(json_encode($results, JSON_PRETTY_PRINT));
+
+            return self::SUCCESS;
         }
 
-        return 0;
-    }
+        $hasIssues = false;
 
-    /**
-     * Create module directory structure.
-     */
-    protected function createModuleStructure(string $name, string $modulePath): void
-    {
-        // Create directories
-        $directories = [
-            'Providers',
-            'Http/Controllers',
-            'Http/Middleware',
-            'Models',
-            'Services',
-            'resources/views',
-            'resources/lang',
-            'resources/assets',
-            'routes',
-            'database/migrations',
-            'database/seeders',
-            'config',
-            'tests',
-        ];
-
-        foreach ($directories as $directory) {
-            File::makeDirectory("{$modulePath}/{$directory}", 0755, true);
+        foreach ($results as $moduleName => $health) {
+            if (empty($health['issues'])) {
+                $this->line("<fg=green>✓</> {$moduleName}: healthy");
+            } else {
+                $hasIssues = true;
+                $this->line("<fg=red>✗</> {$moduleName}:");
+                foreach ($health['issues'] as $issue) {
+                    $this->line("    - {$issue}");
+                }
+            }
         }
 
-        // Create module.json
-        $moduleInfo = [
-            'name' => $name,
-            'version' => '1.0.0',
-            'description' => "Custom {$name} module",
-            'dependencies' => [],
-            'config' => [],
-        ];
-
-        File::put("{$modulePath}/module.json", json_encode($moduleInfo, JSON_PRETTY_PRINT));
-
-        // Create module class
-        $moduleClass = $this->getModuleClassStub($name);
-        File::put("{$modulePath}/{$name}Module.php", $moduleClass);
-
-        // Create service provider
-        $serviceProvider = $this->getServiceProviderStub($name);
-        File::put("{$modulePath}/Providers/{$name}ServiceProvider.php", $serviceProvider);
-
-        // Create routes files
-        File::put("{$modulePath}/routes/web.php", "<?php\n\n// Web routes for {$name} module\n");
-        File::put("{$modulePath}/routes/api.php", "<?php\n\n// API routes for {$name} module\n");
+        return $hasIssues ? self::FAILURE : self::SUCCESS;
     }
 
-    /**
-     * Get module class stub.
-     */
-    protected function getModuleClassStub(string $name): string
-    {
-        return "<?php
-
-namespace App\\Modules\\{$name};
-
-use App\\Modules\\BaseModule;
-
-class {$name}Module extends BaseModule
-{
-    protected function onEnable(): void
-    {
-        // Called when module is enabled
-    }
-
-    protected function onDisable(): void
-    {
-        // Called when module is disabled
-    }
-
-    protected function onInstall(): void
-    {
-        // Called when module is installed
-    }
-
-    protected function onUninstall(): void
-    {
-        // Called when module is uninstalled
-    }
-}
-";
-    }
-
-    /**
-     * Get service provider stub.
-     */
-    protected function getServiceProviderStub(string $name): string
-    {
-        return "<?php
-
-namespace App\\Modules\\{$name}\\Providers;
-
-use Illuminate\\Support\\ServiceProvider;
-
-class {$name}ServiceProvider extends ServiceProvider
-{
-    /**
-     * Register any application services.
-     */
-    public function register(): void
-    {
-        // Register module services
-    }
-
-    /**
-     * Bootstrap any application services.
-     */
-    public function boot(): void
-    {
-        // Boot module services
-    }
-}
-";
-    }
-
-    /**
-     * Show help information.
-     */
     protected function showHelp(): int
     {
-        $this->info('Available actions:');
-        $this->line('  list                 List all modules');
-        $this->line('  enable <name>        Enable a module');
-        $this->line('  disable <name>       Disable a module');
-        $this->line('  install <name>       Install a module');
-        $this->line('  uninstall <name>     Uninstall a module');
-        $this->line('  create <name>        Create a new module');
-        $this->line('  info <name>          Show module information');
+        $this->info('Usage: php artisan module <action> [name] [options]');
+        $this->newLine();
+        $this->line('Actions:');
+        $this->line('  list                  List all modules');
+        $this->line('  enable   <name>       Enable a module');
+        $this->line('  disable  <name>       Disable a module');
+        $this->line('  install  <name>       Install a module');
+        $this->line('  uninstall <name>      Uninstall a module (--force skips confirmation)');
+        $this->line('  create   <name>       Scaffold a new module (delegates to make:module)');
+        $this->line('  info     <name>       Show module information');
+        $this->line('  health   [name]       Check module health (all modules if name omitted)');
+        $this->newLine();
+        $this->line('Options:');
+        $this->line('  --format=json         Output as JSON (list, info, health)');
 
-        return 0;
+        return self::SUCCESS;
+    }
+
+    private function runModuleAction(string $verb, ?string $name, callable $action): int
+    {
+        if (! $name) {
+            $this->error('Module name is required.');
+
+            return self::FAILURE;
+        }
+
+        try {
+            if ($action()) {
+                $this->info("Module '{$name}' {$verb}d.");
+
+                return self::SUCCESS;
+            }
+
+            $this->error("Module '{$name}' not found.");
+
+            return self::FAILURE;
+        } catch (Exception $e) {
+            $this->error("Failed to {$verb} '{$name}': ".$e->getMessage());
+
+            return self::FAILURE;
+        }
+    }
+
+    private function outputResult(array $data): void
+    {
+        if ($this->option('format') === 'json') {
+            $this->line(json_encode($data, JSON_PRETTY_PRINT));
+        } else {
+            foreach ($data as $key => $value) {
+                if (is_array($value)) {
+                    $value = implode(', ', $value) ?: '—';
+                }
+                $this->line(ucfirst((string) $key).': '.(string) $value);
+            }
+        }
     }
 }

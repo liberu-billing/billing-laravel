@@ -6,6 +6,7 @@ namespace: liberu-billing
 resources:
   - namespace.yaml
   - configmap.yaml
+  - nginx-configmap.yaml
   - secret.yaml
   - pvc.yaml
   - mysql.yaml
@@ -15,6 +16,8 @@ resources:
   - ingress.yaml
   - hpa.yaml
   - pdb.yaml
+  - network-policy.yaml
+  - resource-quota.yaml
 
 commonLabels:
   app.kubernetes.io/managed-by: kustomize

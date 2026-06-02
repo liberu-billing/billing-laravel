@@ -153,4 +153,28 @@ return [
         'laravel' => '13.0',
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | External Module Paths
+    |--------------------------------------------------------------------------
+    |
+    | Additional filesystem paths to scan for modules outside the main
+    | modules directory (e.g. plugin directories).
+    |
+    */
+
+    'external_paths' => [],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Load Composer Modules
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, Composer packages that expose a `laravel-module` extra key
+    | will be loaded as modules automatically.
+    |
+    */
+
+    'load_composer_modules' => env('MODULES_LOAD_COMPOSER', false),
+
 ];

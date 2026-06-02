@@ -1,15 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules;
 
 use App\Modules\Contracts\ModuleInterface;
+use App\Modules\Events\ModuleDisabled;
+use App\Modules\Events\ModuleEnabled;
+use App\Modules\Events\ModuleInstalled;
+use App\Modules\Events\ModuleUninstalled;
+use App\Modules\Traits\Configurable;
+use App\Modules\Traits\HasModuleHooks;
 use Artisan;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\File;
 use ReflectionClass;
 
 abstract class BaseModule implements ModuleInterface
 {
+    use Configurable, HasModuleHooks;
+
     protected string $name;
 
     protected string $version;
@@ -25,97 +36,76 @@ abstract class BaseModule implements ModuleInterface
         $this->loadModuleInfo();
     }
 
-    /**
-     * Get the module name.
-     */
     public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * Get the module version.
-     */
     public function getVersion(): string
     {
         return $this->version;
     }
 
-    /**
-     * Get the module description.
-     */
     public function getDescription(): string
     {
         return $this->description;
     }
 
-    /**
-     * Get the module dependencies.
-     */
     public function getDependencies(): array
     {
         return $this->dependencies;
     }
 
-    /**
-     * Check if the module is enabled.
-     */
     public function isEnabled(): bool
     {
         return Cache::get("module.{$this->name}.enabled", false);
     }
 
-    /**
-     * Enable the module.
-     */
     public function enable(): void
     {
+        $this->executeHook('before_enable');
         Cache::put("module.{$this->name}.enabled", true);
         $this->onEnable();
+        $this->executeHook('after_enable');
+        Event::dispatch(new ModuleEnabled($this->name, $this));
     }
 
-    /**
-     * Disable the module.
-     */
     public function disable(): void
     {
+        $this->executeHook('before_disable');
         Cache::put("module.{$this->name}.enabled", false);
         $this->onDisable();
+        $this->executeHook('after_disable');
+        Event::dispatch(new ModuleDisabled($this->name, $this));
     }
 
-    /**
-     * Install the module.
-     */
     public function install(): void
     {
+        $this->executeHook('before_install');
         $this->runMigrations();
         $this->publishAssets();
         $this->onInstall();
         $this->enable();
+        $this->executeHook('after_install');
+        Event::dispatch(new ModuleInstalled($this->name, $this));
     }
 
-    /**
-     * Uninstall the module.
-     */
     public function uninstall(): void
     {
+        $this->executeHook('before_uninstall');
         $this->disable();
         $this->rollbackMigrations();
         $this->removeAssets();
         $this->onUninstall();
+        $this->executeHook('after_uninstall');
+        Event::dispatch(new ModuleUninstalled($this->name, $this));
     }
 
-    /**
-     * Get module configuration.
-     */
     public function getConfig(): array
     {
         return $this->config;
     }
 
-    /**
-     * Load module information from module.json file.
-     */
     protected function loadModuleInfo(): void
     {
         $modulePath = $this->getModulePath();
@@ -132,9 +122,6 @@ abstract class BaseModule implements ModuleInterface
         }
     }
 
-    /**
-     * Get the module path.
-     */
     protected function getModulePath(): string
     {
         $reflection = new ReflectionClass($this);
@@ -142,33 +129,33 @@ abstract class BaseModule implements ModuleInterface
         return dirname($reflection->getFileName());
     }
 
-    /**
-     * Run module migrations.
-     */
     protected function runMigrations(): void
     {
         $migrationsPath = $this->getModulePath().'/database/migrations';
 
-        if (File::exists($migrationsPath)) {
-            Artisan::call('migrate', [
-                '--path' => 'app/Modules/'.$this->name.'/database/migrations',
-                '--force' => true,
-            ]);
+        if (! File::exists($migrationsPath)) {
+            return;
         }
+
+        // Guard against path traversal
+        $resolvedPath = realpath('app/Modules/'.$this->name.'/database/migrations');
+        $resolvedBase = realpath(app_path('Modules'));
+
+        if ($resolvedPath === false || $resolvedBase === false || ! str_starts_with($resolvedPath, $resolvedBase)) {
+            return;
+        }
+
+        Artisan::call('migrate', [
+            '--path' => 'app/Modules/'.$this->name.'/database/migrations',
+            '--force' => true,
+        ]);
     }
 
-    /**
-     * Rollback module migrations.
-     */
     protected function rollbackMigrations(): void
     {
-        // Implementation depends on specific requirements
-        // Could use migration tags or custom rollback logic
+        // Modules may implement specific rollback logic if needed
     }
 
-    /**
-     * Publish module assets.
-     */
     protected function publishAssets(): void
     {
         Artisan::call('vendor:publish', [
@@ -177,9 +164,6 @@ abstract class BaseModule implements ModuleInterface
         ]);
     }
 
-    /**
-     * Remove module assets.
-     */
     protected function removeAssets(): void
     {
         $assetsPath = public_path("modules/{$this->name}");
@@ -188,35 +172,11 @@ abstract class BaseModule implements ModuleInterface
         }
     }
 
-    /**
-     * Hook called when module is enabled.
-     */
-    protected function onEnable(): void
-    {
-        // Override in child classes
-    }
+    protected function onEnable(): void {}
 
-    /**
-     * Hook called when module is disabled.
-     */
-    protected function onDisable(): void
-    {
-        // Override in child classes
-    }
+    protected function onDisable(): void {}
 
-    /**
-     * Hook called when module is installed.
-     */
-    protected function onInstall(): void
-    {
-        // Override in child classes
-    }
+    protected function onInstall(): void {}
 
-    /**
-     * Hook called when module is uninstalled.
-     */
-    protected function onUninstall(): void
-    {
-        // Override in child classes
-    }
+    protected function onUninstall(): void {}
 }

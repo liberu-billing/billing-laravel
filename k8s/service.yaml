@@ -12,7 +12,7 @@ spec:
     app: liberu-billing-app
   ports:
     - port: 80
-      targetPort: 9000
+      targetPort: 80
       protocol: TCP
       name: http
 ---

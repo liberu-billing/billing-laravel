@@ -44,6 +44,11 @@
                 </div>
             </form>
 
+            @if (\JoelButcher\Socialstream\Socialstream::show())
+                <div class="mt-6">
+                    <x-socialstream::socialstream />
+                </div>
+            @endif
         </div>
     </div>
 @endsection

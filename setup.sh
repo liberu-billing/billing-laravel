@@ -53,7 +53,7 @@ command_exists() {
 ensure_composer() {
     if command_exists composer; then
         print_success "Composer is already installed"
-        COMPOSER_CMD="composer"
+        COMPOSER_CMD=(composer)
         return 0
     fi
 
@@ -82,7 +82,7 @@ ensure_composer() {
 
     if [ -f "composer.phar" ]; then
         print_success "Composer.phar downloaded successfully"
-        COMPOSER_CMD="php composer.phar"
+        COMPOSER_CMD=(php composer.phar)
         return 0
     else
         print_error "Failed to download composer.phar"
@@ -90,9 +90,35 @@ ensure_composer() {
     fi
 }
 
+# Check PHP version meets minimum requirement
+check_php_version() {
+    if ! command_exists php; then
+        print_error "PHP is not installed. Please install PHP 8.5 or higher."
+        return 1
+    fi
+
+    local version
+    version=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
+    local required="8.5"
+
+    if php -r "exit(version_compare(PHP_VERSION, '${required}', '>=') ? 0 : 1);"; then
+        print_success "PHP ${version} found (>= ${required} required)"
+        return 0
+    else
+        print_error "PHP ${version} found but >= ${required} is required."
+        return 1
+    fi
+}
+
 # Install composer dependencies
 install_composer_dependencies() {
     print_header "🎬 COMPOSER INSTALL"
+
+    # Verify PHP version first
+    if ! check_php_version; then
+        print_error "Cannot proceed without a compatible PHP version"
+        return 1
+    fi
 
     # Check if vendor directory exists
     if [ -d "vendor" ] && [ -f "vendor/autoload.php" ]; then
@@ -112,8 +138,8 @@ install_composer_dependencies() {
     fi
 
     # Run composer install
-    print_info "Running: $COMPOSER_CMD install"
-    if eval "$COMPOSER_CMD install --no-interaction --prefer-dist"; then
+    print_info "Running: ${COMPOSER_CMD[*]} install"
+    if "${COMPOSER_CMD[@]}" install --no-interaction --prefer-dist; then
         print_success "Composer dependencies installed successfully"
         return 0
     else
@@ -248,6 +274,18 @@ install_standalone() {
     echo "=================================="
     echo ""
 
+    # Upgrade Filament assets (no-op if Filament is not installed)
+    print_header "🎬 FILAMENT UPGRADE"
+    if php artisan filament:upgrade 2>/dev/null; then
+        print_success "Filament assets upgraded"
+    else
+        print_warning "Filament upgrade skipped (Filament not installed or DB not ready)"
+    fi
+
+    echo ""
+    echo "=================================="
+    echo ""
+
     # Install npm dependencies
     if ! install_npm_dependencies; then
         print_warning "NPM install failed, but continuing..."
@@ -279,42 +317,70 @@ install_standalone() {
     echo "=================================="
     echo ""
 
-    # Run database migrations
-    print_header "🎬 PHP ARTISAN MIGRATE:FRESH"
-    if php artisan migrate:fresh; then
-        print_success "Database migrated successfully"
+    # Create storage symlink
+    print_header "🎬 PHP ARTISAN STORAGE:LINK"
+    if php artisan storage:link 2>/dev/null; then
+        print_success "Storage symlink created"
     else
-        print_error "Database migration failed"
-        exit 1
+        print_warning "Storage symlink already exists or failed — continuing"
     fi
 
     echo ""
     echo "=================================="
     echo ""
 
-    # Seeding database
-    print_header "🎬 PHP ARTISAN DB:SEED"
-    if php artisan db:seed; then
-        print_success "Database seeded successfully"
-    else
-        print_error "Database seeding failed"
-        exit 1
-    fi
+    # Run database migrations and seed
+    print_header "🎬 DATABASE MIGRATION"
+    print_warning "migrate:fresh DROPS ALL TABLES and re-runs all migrations."
+    while true; do
+        read -p "Use migrate:fresh --seed (drop all + reseed)? Or migrate (safe)? (fresh/migrate) " migrate_choice
+        case "$migrate_choice" in
+            fresh)
+                if php artisan migrate:fresh --seed; then
+                    print_success "Database migrated (fresh) and seeded"
+                else
+                    print_error "Database migration failed"
+                    exit 1
+                fi
+                break
+                ;;
+            migrate)
+                if php artisan migrate --seed --no-interaction; then
+                    print_success "Database migrated and seeded"
+                else
+                    print_error "Database migration failed"
+                    exit 1
+                fi
+                break
+                ;;
+            *)
+                print_warning "Please enter 'fresh' or 'migrate'."
+                ;;
+        esac
+    done
 
     echo ""
     echo "=================================="
     echo ""
 
-    # Run PHPUnit tests
-    print_header "🎬 RUNNING PHPUNIT TESTS"
-    if [ -f "vendor/bin/phpunit" ]; then
+    # Run tests (prefer Pest, fall back to PHPUnit)
+    print_header "🎬 RUNNING TESTS"
+    if [ -f "vendor/bin/pest" ]; then
+        print_info "Running: ./vendor/bin/pest"
+        if ./vendor/bin/pest; then
+            print_success "Pest tests passed"
+        else
+            print_warning "Pest tests failed. Please review the errors."
+        fi
+    elif [ -f "vendor/bin/phpunit" ]; then
+        print_info "Running: ./vendor/bin/phpunit"
         if ./vendor/bin/phpunit; then
             print_success "PHPUnit tests passed"
         else
             print_warning "PHPUnit tests failed. Please review the errors."
         fi
     else
-        print_warning "PHPUnit not found. Skipping tests."
+        print_warning "No test runner found. Skipping tests."
     fi
 
     echo ""
@@ -325,6 +391,8 @@ install_standalone() {
     print_header "🎬 PHP ARTISAN OPTIMIZE:CLEAR"
     php artisan optimize:clear
     php artisan route:clear
+    php artisan view:clear
+    php artisan config:clear
 
     echo ""
     print_success "=================================="
@@ -338,11 +406,14 @@ install_standalone() {
         case $cond in
             [Yy]* )
                 print_success "Starting server..."
+                print_info "Tip: use 'php artisan octane:start' for better performance in production."
                 php artisan serve
                 break
                 ;;
             [Nn]* )
-                print_success "Installation complete. Start with: php artisan octane:start"
+                print_success "Installation complete."
+                print_info "Start with:  php artisan octane:start --server=roadrunner"
+                print_info "Or dev mode: php artisan serve"
                 exit 0
                 ;;
             * )
@@ -385,15 +456,13 @@ install_docker() {
 
     # Build and start containers
     print_info "Building and starting Docker containers..."
-    if command_exists docker-compose; then
-        docker-compose up -d --build
-    else
-        docker compose up -d --build
-    fi
+    DOCKER_CMD="docker compose"
+    command_exists docker-compose && DOCKER_CMD="docker-compose"
 
-    if [ $? -eq 0 ]; then
+    if $DOCKER_CMD up -d --build; then
         print_success "Docker containers started successfully"
-        print_info "Your application should be available at http://localhost:8000"
+        print_info "Application available at http://localhost:8000"
+        print_info "Run '$DOCKER_CMD logs -f' to follow logs"
     else
         print_error "Failed to start Docker containers"
         exit 1
@@ -412,41 +481,94 @@ install_kubernetes() {
         exit 1
     fi
 
-    print_success "kubectl is installed"
+    print_success "kubectl found: $(kubectl version --client 2>/dev/null | head -1)"
 
-    # Check for k8s config files
-    if [ ! -d "k8s" ] && [ ! -d "kubernetes" ]; then
-        print_error "No Kubernetes configuration directory found (k8s/ or kubernetes/)"
-        print_warning "Kubernetes installation requires configuration files."
-        print_info "Please create Kubernetes manifests in a k8s/ or kubernetes/ directory"
+    # Verify cluster connectivity
+    if ! kubectl cluster-info >/dev/null 2>&1; then
+        print_error "Cannot connect to a Kubernetes cluster."
+        print_info "Ensure your kubeconfig is set up correctly (kubectl cluster-info)."
         exit 1
     fi
 
-    # Determine config directory
+    print_success "Kubernetes cluster reachable"
+
+    # Locate k8s directory
     K8S_DIR="k8s"
     if [ ! -d "$K8S_DIR" ] && [ -d "kubernetes" ]; then
         K8S_DIR="kubernetes"
     fi
 
-    print_info "Using Kubernetes configurations from: $K8S_DIR/"
-
-    # Setup .env file
-    if [ ! -f ".env" ]; then
-        print_info "Copying .env.example to .env"
-        cp .env.example .env
-        print_warning "Please edit .env file to configure your Kubernetes environment"
-        read -p "Press Enter to continue after editing .env..."
+    if [ ! -d "$K8S_DIR" ]; then
+        print_error "No Kubernetes configuration directory found (k8s/ or kubernetes/)"
+        exit 1
     fi
 
-    # Apply Kubernetes configurations
-    print_info "Applying Kubernetes configurations..."
-    if kubectl apply -f "$K8S_DIR/"; then
-        print_success "Kubernetes resources created successfully"
-        print_info "Check status with: kubectl get pods"
+    print_info "Using Kubernetes configurations from: $K8S_DIR/"
+
+    # Choose overlay
+    echo ""
+    echo "Select deployment environment:"
+    echo "  1) production"
+    echo "  2) development"
+    echo ""
+
+    OVERLAY="production"
+    while true; do
+        read -p "Enter your choice (1-2, default: 1): " env_choice
+        case "${env_choice:-1}" in
+            1) OVERLAY="production"; break ;;
+            2) OVERLAY="development"; break ;;
+            *) print_warning "Please enter 1 or 2." ;;
+        esac
+    done
+
+    if [ ! -d "$K8S_DIR/overlays/$OVERLAY" ]; then
+        print_error "Overlay '$OVERLAY' not found at $K8S_DIR/overlays/$OVERLAY"
+        exit 1
+    fi
+
+    print_info "Deploying overlay: $OVERLAY"
+
+    # Validate first (optional — continue on failure)
+    if [ -f "$K8S_DIR/validate.sh" ]; then
+        print_info "Running pre-deploy validation..."
+        if bash "$K8S_DIR/validate.sh" "$OVERLAY"; then
+            print_success "Validation passed"
+        else
+            print_warning "Validation reported issues. Review above before proceeding."
+            read -p "Continue anyway? (y/n) " -n 1 -r; echo
+            [[ ! $REPLY =~ ^[Yy]$ ]] && { print_info "Deployment cancelled."; exit 0; }
+        fi
+    fi
+
+    # Apply via kustomize
+    print_info "Applying: kubectl apply -k $K8S_DIR/overlays/$OVERLAY"
+    if kubectl apply -k "$K8S_DIR/overlays/$OVERLAY"; then
+        print_success "Kubernetes resources applied successfully"
     else
         print_error "Failed to apply Kubernetes configurations"
         exit 1
     fi
+
+    # Wait for rollout
+    print_info "Waiting for rollout (timeout: 5m)..."
+    NAMESPACE=$(kubectl kustomize "$K8S_DIR/overlays/$OVERLAY" 2>/dev/null \
+        | grep '^  namespace:' | head -1 | awk '{print $2}')
+    NAMESPACE="${NAMESPACE:-liberu-billing}"
+
+    if kubectl rollout status deployment/liberu-billing-app -n "$NAMESPACE" --timeout=5m; then
+        print_success "Deployment rolled out successfully"
+    else
+        print_warning "Rollout did not complete within 5 minutes — check: kubectl get pods -n $NAMESPACE"
+    fi
+
+    echo ""
+    print_success "Deployment complete!"
+    print_info "Useful commands:"
+    print_info "  kubectl get pods -n $NAMESPACE"
+    print_info "  kubectl logs -f deployment/liberu-billing-app -n $NAMESPACE"
+    print_info "  kubectl describe deployment/liberu-billing-app -n $NAMESPACE"
+    print_info "  ./k8s/deploy.sh $OVERLAY"
 }
 
 # Main installation menu

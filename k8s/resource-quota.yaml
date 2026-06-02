@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: liberu-billing-quota
+  namespace: liberu-billing
+  labels:
+    app.kubernetes.io/name: liberu-billing
+spec:
+  hard:
+    requests.cpu: "10"
+    limits.cpu: "20"
+    requests.memory: 20Gi
+    limits.memory: 40Gi
+    pods: "50"
+    persistentvolumeclaims: "10"
+    requests.storage: 100Gi
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: liberu-billing-limits
+  namespace: liberu-billing
+  labels:
+    app.kubernetes.io/name: liberu-billing
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: "1000m"
+        memory: 1Gi
+      defaultRequest:
+        cpu: "250m"
+        memory: 256Mi
+      max:
+        cpu: "4"
+        memory: 8Gi
+    - type: Pod
+      max:
+        cpu: "8"
+        memory: 16Gi

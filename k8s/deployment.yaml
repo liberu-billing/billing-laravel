@@ -28,13 +28,56 @@ spec:
         runAsUser: 1000
         runAsGroup: 1000
         fsGroup: 1000
+      initContainers:
+        - name: wait-for-mysql
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z liberu-billing-mysql 3306; do
+                echo "Waiting for MySQL…"
+                sleep 3
+              done
+              echo "MySQL is ready."
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+        - name: migrations
+          image: liberu/billing:latest
+          imagePullPolicy: Always
+          command:
+            - sh
+            - -c
+            - |
+              php artisan migrate --force --no-interaction
+              php artisan config:cache
+              php artisan route:cache
+              php artisan view:cache
+          envFrom:
+            - configMapRef:
+                name: liberu-billing-config
+            - secretRef:
+                name: liberu-billing-secrets
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: storage
+              mountPath: /var/www/html/storage/app
       containers:
         - name: app
           image: liberu/billing:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 9000
-              name: http
+              name: php-fpm
               protocol: TCP
           envFrom:
             - configMapRef:
@@ -48,31 +91,68 @@ spec:
             limits:
               cpu: "1000m"
               memory: "1Gi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: storage
+              mountPath: /var/www/html/storage/app
+            - name: logs
+              mountPath: /var/www/html/storage/logs
+
+        - name: nginx
+          image: nginx:1.27-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              name: http
+              protocol: TCP
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          securityContext:
+            runAsNonRoot: false
+            runAsUser: 101
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+              add: [NET_BIND_SERVICE]
           readinessProbe:
             httpGet:
               path: /up
-              port: 9000
+              port: 80
             initialDelaySeconds: 10
             periodSeconds: 10
             failureThreshold: 3
           livenessProbe:
             httpGet:
               path: /up
-              port: 9000
+              port: 80
             initialDelaySeconds: 30
             periodSeconds: 20
             failureThreshold: 3
           volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d
+              readOnly: true
             - name: storage
               mountPath: /var/www/html/storage/app
-            - name: logs
-              mountPath: /var/www/html/storage/logs
+              readOnly: true
+
       volumes:
         - name: storage
           persistentVolumeClaim:
             claimName: liberu-billing-storage
         - name: logs
           emptyDir: {}
+        - name: nginx-config
+          configMap:
+            name: liberu-billing-nginx-config
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -98,6 +178,23 @@ spec:
         runAsNonRoot: true
         runAsUser: 1000
         runAsGroup: 1000
+      initContainers:
+        - name: wait-for-mysql
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z liberu-billing-mysql 3306; do
+                echo "Waiting for MySQL…"
+                sleep 3
+              done
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
       containers:
         - name: horizon
           image: liberu/billing:latest
@@ -117,6 +214,10 @@ spec:
             limits:
               cpu: "500m"
               memory: "512Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
           volumeMounts:
             - name: storage
               mountPath: /var/www/html/storage/app

@@ -1,28 +1,35 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Modules;
 
+use App\Modules\Support\ExternalModuleLoader;
+use Filament\PanelRegistry;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 
 class ModuleServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     #[\Override]
     public function register(): void
     {
-        $this->registerModules();
+        try {
+            $this->registerModules();
+            $this->registerExternalModules();
+        } catch (\Throwable) {
+            // Silently skip during initial setup (no DB / cache yet)
+        }
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
-        $this->bootModules();
+        try {
+            $this->bootModules();
+        } catch (\Throwable) {
+            // Silently skip during initial setup (no DB / cache yet)
+        }
     }
 
     /**
@@ -144,7 +151,6 @@ class ModuleServiceProvider extends ServiceProvider
      */
     protected function bootModule(string $moduleName, string $modulePath): void
     {
-        // Publish module assets
         $assetsPath = $modulePath.'/resources/assets';
         if (File::exists($assetsPath)) {
             $this->publishes([
@@ -152,7 +158,6 @@ class ModuleServiceProvider extends ServiceProvider
             ], Str::snake($moduleName).'-assets');
         }
 
-        // Publish module configuration
         $configPath = $modulePath.'/config';
         if (File::exists($configPath)) {
             $configFiles = File::files($configPath);
@@ -161,6 +166,61 @@ class ModuleServiceProvider extends ServiceProvider
                     $configFile->getPathname() => config_path(Str::snake($moduleName).'.'.$configFile->getFilename()),
                 ], Str::snake($moduleName).'-config');
             }
+        }
+
+        $this->registerModuleFilament($moduleName, $modulePath);
+    }
+
+    /**
+     * Register a module's Filament resources, pages, and widgets with all panels.
+     */
+    protected function registerModuleFilament(string $moduleName, string $modulePath): void
+    {
+        $filamentPath = $modulePath.'/Filament';
+
+        if (! File::isDirectory($filamentPath) || ! class_exists(PanelRegistry::class)) {
+            return;
+        }
+
+        $namespace = "App\\Modules\\{$moduleName}\\Filament";
+
+        $this->callAfterResolving(PanelRegistry::class, function (PanelRegistry $registry) use ($filamentPath, $namespace): void {
+            foreach ($registry->all() as $panel) {
+                if (File::isDirectory($filamentPath.'/Resources')) {
+                    $panel->discoverResources(
+                        in: $filamentPath.'/Resources',
+                        for: $namespace.'\\Resources',
+                    );
+                }
+
+                if (File::isDirectory($filamentPath.'/Pages')) {
+                    $panel->discoverPages(
+                        in: $filamentPath.'/Pages',
+                        for: $namespace.'\\Pages',
+                    );
+                }
+
+                if (File::isDirectory($filamentPath.'/Widgets')) {
+                    $panel->discoverWidgets(
+                        in: $filamentPath.'/Widgets',
+                        for: $namespace.'\\Widgets',
+                    );
+                }
+            }
+        });
+    }
+
+    protected function registerExternalModules(): void
+    {
+        if (! config('modules.load_composer_modules', false) && empty(config('modules.external_paths', []))) {
+            return;
+        }
+
+        $loader = new ExternalModuleLoader;
+
+        foreach ($loader->load() as $module) {
+            $moduleName = $module->getName();
+            $this->registerModule($moduleName, dirname((new \ReflectionClass($module))->getFileName()));
         }
     }
 }
