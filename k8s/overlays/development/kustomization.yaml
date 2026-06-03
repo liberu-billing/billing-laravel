@@ -4,7 +4,7 @@ kind: Kustomization
 namespace: liberu-billing-dev
 
 resources:
-  - ../../
+  - ../base
 
 patches:
   - patch: |-
@@ -19,8 +19,8 @@ patches:
         path: /spec/replicas
         value: 1
     target:
-      kind: HorizontalPodAutoscaler
-      name: liberu-billing-app-hpa
+      kind: Deployment
+      name: liberu-billing-horizon
 
 configMapGenerator:
   - name: liberu-billing-config

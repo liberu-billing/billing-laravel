@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Modules;
 
+use App\Models\Module as ModuleModel;
 use App\Modules\Contracts\ModuleInterface;
 use App\Modules\Support\ExternalModuleLoader;
 use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 
 class ModuleManager
 {
@@ -41,6 +43,11 @@ class ModuleManager
         return $this->modules->first(fn ($module): bool => $module->getName() === $name);
     }
 
+    public function find(string $name): ?ModuleInterface
+    {
+        return $this->get($name);
+    }
+
     public function has(string $name): bool
     {
         return $this->modules->contains(fn ($module): bool => $module->getName() === $name);
@@ -59,6 +66,19 @@ class ModuleManager
         }
 
         $module->enable();
+
+        try {
+            $record = ModuleModel::firstOrNew(['name' => $module->getName()]);
+            $record->enabled = true;
+            $record->version = $module->getVersion();
+            $record->description = $module->getDescription();
+            $record->dependencies = $module->getDependencies();
+            $record->config = $module->getConfig();
+            $record->save();
+        } catch (\Throwable $e) {
+            Log::warning("Failed to persist enabled state for module '{$name}': ".$e->getMessage());
+        }
+
         $this->clearCache();
 
         return true;
@@ -77,6 +97,15 @@ class ModuleManager
         }
 
         $module->disable();
+
+        try {
+            $record = ModuleModel::firstOrNew(['name' => $module->getName()]);
+            $record->enabled = false;
+            $record->save();
+        } catch (\Throwable $e) {
+            Log::warning("Failed to persist disabled state for module '{$name}': ".$e->getMessage());
+        }
+
         $this->clearCache();
 
         return true;
@@ -156,25 +185,31 @@ class ModuleManager
         $module = $this->get($name);
 
         if (! $module instanceof ModuleInterface) {
-            return ['issues' => ["Module '{$name}' not found."]];
+            return ['name' => $name, 'healthy' => false, 'errors' => ["Module '{$name}' not found."], 'warnings' => []];
         }
 
-        $issues = [];
+        $errors = [];
+        $warnings = [];
 
         foreach ($module->getDependencies() as $dep) {
             $depModule = $this->get($dep);
             if (! $depModule) {
-                $issues[] = "Missing dependency: {$dep}";
+                $errors[] = "Missing dependency: {$dep}";
             } elseif (! $depModule->isEnabled()) {
-                $issues[] = "Dependency disabled: {$dep}";
+                $warnings[] = "Dependency disabled: {$dep}";
             }
         }
 
-        if (empty($module->getConfig()) && $module->isEnabled()) {
-            // config absence is a warning, not an error — omit
+        if ($module->isEnabled() && ! $this->checkDependencies($module)) {
+            $errors[] = 'Module is enabled but has unmet dependencies.';
         }
 
-        return ['name' => $name, 'issues' => $issues];
+        return [
+            'name' => $name,
+            'healthy' => empty($errors),
+            'errors' => $errors,
+            'warnings' => $warnings,
+        ];
     }
 
     public function checkAllHealth(): array
@@ -212,20 +247,49 @@ class ModuleManager
 
     protected function discoverLocalModules(): void
     {
-        $modulesPath = config('modules.path', app_path('Modules'));
+        $paths = [
+            config('modules.path', app_path('Modules')) => config('modules.namespace', 'App\\Modules'),
+        ];
 
-        if (! File::exists($modulesPath)) {
-            return;
+        $altPath = base_path('app-modules');
+        if (File::exists($altPath)) {
+            $paths[$altPath] = config('modules.alt_namespace', 'Modules');
         }
 
-        foreach (File::directories($modulesPath) as $modulePath) {
-            $moduleName = basename((string) $modulePath);
-            $moduleClass = "App\\Modules\\{$moduleName}\\{$moduleName}Module";
+        foreach ($paths as $modulesPath => $namespace) {
+            if (! File::exists($modulesPath)) {
+                continue;
+            }
 
-            if (class_exists($moduleClass)) {
-                $module = new $moduleClass;
-                if ($module instanceof ModuleInterface) {
-                    $this->register($module);
+            foreach (File::directories($modulesPath) as $modulePath) {
+                $moduleName = basename((string) $modulePath);
+                // Support both legacy (Name/NameModule.php) and modular (Name/src/NameModule.php)
+                $moduleClass = "{$namespace}\\{$moduleName}\\{$moduleName}Module";
+
+                if (class_exists($moduleClass)) {
+                    try {
+                        $module = new $moduleClass;
+                    } catch (\Throwable $e) {
+                        Log::warning("Failed to instantiate module '{$moduleName}': ".$e->getMessage());
+                        continue;
+                    }
+                    if ($module instanceof ModuleInterface) {
+                        $this->register($module);
+
+                        try {
+                            ModuleModel::updateOrCreate(
+                                ['name' => $module->getName()],
+                                [
+                                    'version' => $module->getVersion(),
+                                    'description' => $module->getDescription(),
+                                    'dependencies' => $module->getDependencies(),
+                                    'config' => $module->getConfig(),
+                                ]
+                            );
+                        } catch (\Throwable $e) {
+                            // DB not ready during initial setup — skip silently
+                        }
+                    }
                 }
             }
         }

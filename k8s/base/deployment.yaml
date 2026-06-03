@@ -122,18 +122,23 @@ spec:
             capabilities:
               drop: [ALL]
               add: [NET_BIND_SERVICE]
-          readinessProbe:
+          startupProbe:
             httpGet:
               path: /up
               port: 80
             initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /up
+              port: 80
             periodSeconds: 10
             failureThreshold: 3
           livenessProbe:
             httpGet:
               path: /up
               port: 80
-            initialDelaySeconds: 30
             periodSeconds: 20
             failureThreshold: 3
           volumeMounts:

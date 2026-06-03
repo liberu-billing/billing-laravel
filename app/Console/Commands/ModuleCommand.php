@@ -151,13 +151,23 @@ class ModuleCommand extends Command
         $hasIssues = false;
 
         foreach ($results as $moduleName => $health) {
-            if (empty($health['issues'])) {
-                $this->line("<fg=green>✓</> {$moduleName}: healthy");
+            $errors = $health['errors'] ?? $health['issues'] ?? [];
+            $warnings = $health['warnings'] ?? [];
+
+            if (empty($errors)) {
+                $status = empty($warnings) ? 'healthy' : 'healthy (with warnings)';
+                $this->line("<fg=green>✓</> {$moduleName}: {$status}");
+                foreach ($warnings as $warning) {
+                    $this->line("    <fg=yellow>⚠</> {$warning}");
+                }
             } else {
                 $hasIssues = true;
                 $this->line("<fg=red>✗</> {$moduleName}:");
-                foreach ($health['issues'] as $issue) {
-                    $this->line("    - {$issue}");
+                foreach ($errors as $error) {
+                    $this->line("    - {$error}");
+                }
+                foreach ($warnings as $warning) {
+                    $this->line("    <fg=yellow>⚠</> {$warning}");
                 }
             }
         }

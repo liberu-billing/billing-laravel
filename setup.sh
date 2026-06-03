@@ -6,6 +6,9 @@
 
 set -e  # Exit on error
 
+# Global composer command array (set by ensure_composer)
+COMPOSER_CMD=(composer)
+
 # Colors for output
 RED='\e[91m'
 GREEN='\e[92m'
@@ -112,7 +115,7 @@ check_php_version() {
 
 # Install composer dependencies
 install_composer_dependencies() {
-    print_header "🎬 COMPOSER INSTALL"
+    print_header "COMPOSER INSTALL"
 
     # Verify PHP version first
     if ! check_php_version; then
@@ -150,7 +153,7 @@ install_composer_dependencies() {
 
 # Install npm dependencies
 install_npm_dependencies() {
-    print_header "🎬 NPM INSTALL"
+    print_header "NPM INSTALL"
 
     # Check if node_modules directory exists
     if [ -d "node_modules" ]; then
@@ -183,7 +186,7 @@ install_npm_dependencies() {
 
 # Build frontend assets
 build_frontend_assets() {
-    print_header "🎬 NPM BUILD"
+    print_header "NPM BUILD"
 
     # Check if npm is available
     if ! command_exists npm; then
@@ -207,17 +210,16 @@ install_standalone() {
     print_header "STANDALONE INSTALLATION"
     print_info "Starting standalone installation process..."
 
-    clear
     echo "=================================="
     echo "===== USER: [$(whoami)]"
-    echo "===== [PHP $(php -r 'echo phpversion();')]"
+    echo "===== [PHP $(php -r 'echo phpversion();' 2>/dev/null || echo 'unknown')]"
     echo "=================================="
     echo ""
 
     # Setup the .env file
     copy=true
     while true; do
-        read -p "🎬 DEV ---> DID YOU WANT TO COPY THE .ENV.EXAMPLE TO .ENV? (y/n) " yn
+        read -p "DID YOU WANT TO COPY THE .ENV.EXAMPLE TO .ENV? (y/n) " yn
         case $yn in
             [Yy]* )
                 print_success "Copying .env.example to .env"
@@ -243,7 +245,7 @@ install_standalone() {
     # Ask user to confirm that .env file is properly setup before continuing
     if [ "$copy" = true ]; then
         while true; do
-            read -p "🎬 DEV ---> DID YOU SETUP YOUR DATABASE CREDENTIALS IN THE .ENV FILE? (y/n) " cond
+            read -p "DID YOU SETUP YOUR DATABASE CREDENTIALS IN THE .ENV FILE? (y/n) " cond
             case $cond in
                 [Yy]* )
                     print_success "Perfect let's continue with the setup"
@@ -275,11 +277,19 @@ install_standalone() {
     echo ""
 
     # Upgrade Filament assets (no-op if Filament is not installed)
-    print_header "🎬 FILAMENT UPGRADE"
+    print_header "FILAMENT UPGRADE"
     if php artisan filament:upgrade 2>/dev/null; then
         print_success "Filament assets upgraded"
     else
         print_warning "Filament upgrade skipped (Filament not installed or DB not ready)"
+    fi
+
+    # Dump module autoload
+    print_info "Running module:dump-autoload..."
+    if php artisan module:dump-autoload 2>/dev/null; then
+        print_success "Module autoload updated"
+    else
+        print_warning "module:dump-autoload skipped (DB may not be ready yet)"
     fi
 
     echo ""
@@ -304,9 +314,11 @@ install_standalone() {
     echo "=================================="
     echo ""
 
-    # Generate Laravel key
-    print_header "🎬 PHP ARTISAN KEY:GENERATE"
-    if php artisan key:generate; then
+    # Generate Laravel key (only if not already set)
+    print_header "PHP ARTISAN KEY:GENERATE"
+    if grep -q '^APP_KEY=base64:' .env 2>/dev/null; then
+        print_info "APP_KEY already set in .env — skipping key:generate"
+    elif php artisan key:generate; then
         print_success "Application key generated"
     else
         print_error "Failed to generate application key"
@@ -318,7 +330,7 @@ install_standalone() {
     echo ""
 
     # Create storage symlink
-    print_header "🎬 PHP ARTISAN STORAGE:LINK"
+    print_header "PHP ARTISAN STORAGE:LINK"
     if php artisan storage:link 2>/dev/null; then
         print_success "Storage symlink created"
     else
@@ -330,13 +342,13 @@ install_standalone() {
     echo ""
 
     # Run database migrations and seed
-    print_header "🎬 DATABASE MIGRATION"
+    print_header "DATABASE MIGRATION"
     print_warning "migrate:fresh DROPS ALL TABLES and re-runs all migrations."
     while true; do
         read -p "Use migrate:fresh --seed (drop all + reseed)? Or migrate (safe)? (fresh/migrate) " migrate_choice
         case "$migrate_choice" in
             fresh)
-                if php artisan migrate:fresh --seed; then
+                if php artisan migrate:fresh --seed --no-interaction; then
                     print_success "Database migrated (fresh) and seeded"
                 else
                     print_error "Database migration failed"
@@ -364,7 +376,7 @@ install_standalone() {
     echo ""
 
     # Run tests (prefer Pest, fall back to PHPUnit)
-    print_header "🎬 RUNNING TESTS"
+    print_header "RUNNING TESTS"
     if [ -f "vendor/bin/pest" ]; then
         print_info "Running: ./vendor/bin/pest"
         if ./vendor/bin/pest; then
@@ -388,11 +400,8 @@ install_standalone() {
     echo ""
 
     # Run optimization commands for Laravel
-    print_header "🎬 PHP ARTISAN OPTIMIZE:CLEAR"
+    print_header "PHP ARTISAN OPTIMIZE:CLEAR"
     php artisan optimize:clear
-    php artisan route:clear
-    php artisan view:clear
-    php artisan config:clear
 
     echo ""
     print_success "=================================="
@@ -402,7 +411,7 @@ install_standalone() {
 
     # Ask if user wants to start the server
     while true; do
-        read -p "🎬 DEV ---> DID YOU WANT TO START THE SERVER? (y/n) " cond
+        read -p "DID YOU WANT TO START THE SERVER? (y/n) " cond
         case $cond in
             [Yy]* )
                 print_success "Starting server..."
@@ -454,14 +463,45 @@ install_docker() {
         read -p "Press Enter to continue after editing .env..."
     fi
 
-    # Build and start containers
+    # Build and start containers — prefer Docker Compose v2 ('docker compose')
     print_info "Building and starting Docker containers..."
-    DOCKER_CMD="docker compose"
-    command_exists docker-compose && DOCKER_CMD="docker-compose"
+    if docker compose version >/dev/null 2>&1; then
+        DOCKER_CMD="docker compose"
+    elif command_exists docker-compose; then
+        DOCKER_CMD="docker-compose"
+    else
+        print_error "Neither 'docker compose' nor 'docker-compose' found."
+        exit 1
+    fi
 
     if $DOCKER_CMD up -d --build; then
         print_success "Docker containers started successfully"
-        print_info "Application available at http://localhost:8000"
+
+        # Wait for the app container to become healthy (up to 60s)
+        print_info "Waiting for app container to be ready..."
+        WAIT_SECS=0
+        until $DOCKER_CMD exec app php artisan --version >/dev/null 2>&1 || [ $WAIT_SECS -ge 60 ]; do
+            sleep 3
+            WAIT_SECS=$((WAIT_SECS + 3))
+        done
+
+        if [ $WAIT_SECS -ge 60 ]; then
+            print_warning "App container did not become ready in 60 s — check: $DOCKER_CMD logs app"
+        fi
+
+        print_info "Running post-start setup..."
+        # Only generate key if APP_KEY is not already set
+        if ! $DOCKER_CMD exec app php artisan key:show 2>/dev/null | grep -q 'base64:'; then
+            $DOCKER_CMD exec app php artisan key:generate --ansi 2>/dev/null || true
+        fi
+        $DOCKER_CMD exec app php artisan migrate --force --no-interaction 2>/dev/null || \
+            print_warning "Migration failed — run manually: $DOCKER_CMD exec app php artisan migrate"
+        $DOCKER_CMD exec app php artisan storage:link 2>/dev/null || true
+        $DOCKER_CMD exec app php artisan filament:upgrade 2>/dev/null || true
+        $DOCKER_CMD exec app php artisan module:dump-autoload 2>/dev/null || true
+        $DOCKER_CMD exec app php artisan optimize:clear 2>/dev/null || true
+
+        print_success "Application available at http://localhost:8000"
         print_info "Run '$DOCKER_CMD logs -f' to follow logs"
     else
         print_error "Failed to start Docker containers"
@@ -503,7 +543,12 @@ install_kubernetes() {
         exit 1
     fi
 
-    print_info "Using Kubernetes configurations from: $K8S_DIR/"
+    if [ ! -d "$K8S_DIR/base" ]; then
+        print_error "No base manifests found at $K8S_DIR/base/ — run the setup from the project root."
+        exit 1
+    fi
+
+    print_info "Using Kubernetes configurations from: $K8S_DIR/ (base/overlays layout)"
 
     # Choose overlay
     echo ""

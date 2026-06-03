@@ -4,8 +4,17 @@ kind: Kustomization
 namespace: liberu-billing
 
 resources:
-  - ../../
+  - ../base
   - hpa.yaml
+
+patches:
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 3
+    target:
+      kind: Deployment
+      name: liberu-billing-app
 
 configMapGenerator:
   - name: liberu-billing-config

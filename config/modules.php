@@ -67,11 +67,24 @@ return [
     | Module Namespace
     |--------------------------------------------------------------------------
     |
-    | The base namespace for modules.
+    | The base namespace for modules in app/Modules/ (legacy pattern).
+    | For app-modules/ (modular pattern) set alt_namespace below.
     |
     */
 
     'namespace' => 'App\\Modules',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Alternative Module Namespace
+    |--------------------------------------------------------------------------
+    |
+    | The PSR-4 namespace for modules located in app-modules/ (modular pattern).
+    | These modules use a src/ subdirectory layout.
+    |
+    */
+
+    'alt_namespace' => 'Modules',
 
     /*
     |--------------------------------------------------------------------------
@@ -137,7 +150,7 @@ return [
     |
     */
 
-    'development' => env('APP_DEBUG', false),
+    'development' => env('MODULES_DEVELOPMENT', env('APP_DEBUG', false)),
 
     /*
     |--------------------------------------------------------------------------

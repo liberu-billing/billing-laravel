@@ -3,6 +3,10 @@ kind: Kustomization
 
 namespace: liberu-billing
 
+commonLabels:
+  app.kubernetes.io/managed-by: kustomize
+  app.kubernetes.io/part-of: liberu
+
 resources:
   - namespace.yaml
   - configmap.yaml
@@ -14,11 +18,6 @@ resources:
   - deployment.yaml
   - service.yaml
   - ingress.yaml
-  - hpa.yaml
   - pdb.yaml
   - network-policy.yaml
   - resource-quota.yaml
-
-commonLabels:
-  app.kubernetes.io/managed-by: kustomize
-  app.kubernetes.io/part-of: liberu

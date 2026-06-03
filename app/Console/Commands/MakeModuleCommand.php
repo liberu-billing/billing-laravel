@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\File;
 
 class MakeModuleCommand extends Command
 {
-    protected $signature = 'make:module {name : The PascalCase module name} {--force : Overwrite if exists}';
+    protected $signature = 'make:module {name : The PascalCase module name} {--force : Overwrite if exists} {--modular : Create in app-modules/ with src/ layout (modular pattern)}';
 
     protected $description = 'Scaffold a new application module';
 
@@ -18,12 +18,24 @@ class MakeModuleCommand extends Command
         $name = $this->argument('name');
 
         if (! preg_match('/^[A-Z][A-Za-z0-9]+$/', $name)) {
-            $this->error("Module name must start with an uppercase letter and contain only alphanumeric characters.");
+            $this->error('Module name must start with an uppercase letter and contain only alphanumeric characters.');
 
             return self::FAILURE;
         }
 
-        $modulePath = app_path("Modules/{$name}");
+        $modular = $this->option('modular');
+
+        if ($modular) {
+            $modulePath = base_path("app-modules/{$name}");
+            $relPath = "app-modules/{$name}";
+            $namespace = config('modules.alt_namespace', 'Modules');
+            $srcPath = "{$modulePath}/src";
+        } else {
+            $modulePath = app_path("Modules/{$name}");
+            $relPath = "app/Modules/{$name}";
+            $namespace = config('modules.namespace', 'App\\Modules');
+            $srcPath = $modulePath;
+        }
 
         if (File::exists($modulePath) && ! $this->option('force')) {
             $this->error("Module '{$name}' already exists. Use --force to overwrite.");
@@ -31,49 +43,72 @@ class MakeModuleCommand extends Command
             return self::FAILURE;
         }
 
-        $this->createDirectories($modulePath);
-        $this->createModuleJson($name, $modulePath);
-        $this->createModuleClass($name, $modulePath);
-        $this->createServiceProvider($name, $modulePath);
-        $this->createRoutes($name, $modulePath);
-        $this->createController($name, $modulePath);
-        $this->createModel($name, $modulePath);
-        $this->createMigration($name, $modulePath);
-        $this->createView($name, $modulePath);
-        $this->createConfig($name, $modulePath);
-        $this->createFilamentResource($name, $modulePath);
-        $this->createTest($name, $modulePath);
+        if ($modular) {
+            $this->createModularDirectories($modulePath);
+            $this->createModularComposerJson($name, $modulePath, $namespace);
+        } else {
+            $this->createDirectories($modulePath);
+        }
 
-        $this->info("Module '{$name}' created at app/Modules/{$name}");
-        $this->line("Run: <comment>composer dump-autoload</comment> to register the new module.");
+        $this->createModuleJson($name, $srcPath);
+        $this->createModuleClass($name, $srcPath, $namespace);
+        $this->createServiceProvider($name, $srcPath, $namespace);
+        $this->createRoutes($name, $modulePath);
+        $this->createController($name, $srcPath, $namespace);
+        $this->createModel($name, $srcPath, $namespace);
+        $this->createMigration($name, "{$modulePath}/database");
+        $this->createView($name, "{$modulePath}/resources/views");
+        $this->createConfig($name, "{$modulePath}/config");
+        $this->createFilamentResource($name, $srcPath, $namespace);
+        $this->createTest($name, "{$modulePath}/tests", $namespace);
+
+        $this->info("Module '{$name}' created at {$relPath}");
+        $this->line('Run: <comment>composer dump-autoload</comment> to register the new module.');
 
         return self::SUCCESS;
     }
 
     private function createDirectories(string $modulePath): void
     {
-        $dirs = [
-            'Filament/Resources',
-            'Filament/Pages',
-            'Filament/Widgets',
-            'Http/Controllers',
-            'Http/Middleware',
-            'Models',
-            'Providers',
-            'Services',
-            'config',
-            'database/migrations',
-            'database/seeders',
-            'resources/assets',
-            'resources/lang',
-            'resources/views',
-            'routes',
-            'tests',
-        ];
-
-        foreach ($dirs as $dir) {
+        foreach ([
+            'Filament/Resources', 'Filament/Pages', 'Filament/Widgets',
+            'Http/Controllers', 'Http/Middleware',
+            'Models', 'Providers', 'Services',
+            'config', 'database/migrations', 'database/seeders',
+            'resources/assets', 'resources/lang', 'resources/views',
+            'routes', 'tests',
+        ] as $dir) {
             File::makeDirectory("{$modulePath}/{$dir}", 0755, true, true);
         }
+    }
+
+    private function createModularDirectories(string $modulePath): void
+    {
+        foreach ([
+            'src/Filament/Resources', 'src/Filament/Pages', 'src/Filament/Widgets',
+            'src/Http/Controllers', 'src/Http/Middleware',
+            'src/Models', 'src/Providers', 'src/Services',
+            'config', 'database/migrations', 'database/seeders', 'database/factories',
+            'resources/assets', 'resources/lang', 'resources/views',
+            'routes', 'tests/Unit', 'tests/Feature',
+        ] as $dir) {
+            File::makeDirectory("{$modulePath}/{$dir}", 0755, true, true);
+        }
+    }
+
+    private function createModularComposerJson(string $name, string $modulePath, string $namespace): void
+    {
+        $ns = rtrim($namespace, '\\').'\\';
+        File::put("{$modulePath}/composer.json", json_encode([
+            'name' => 'liberu/'.strtolower($name),
+            'description' => "The {$name} module for Liberu Billing.",
+            'type' => 'library',
+            'autoload' => [
+                'psr-4' => [
+                    "{$ns}{$name}\\" => 'src/',
+                ],
+            ],
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)."\n");
     }
 
     private function createModuleJson(string $name, string $modulePath): void
@@ -87,14 +122,15 @@ class MakeModuleCommand extends Command
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)."\n");
     }
 
-    private function createModuleClass(string $name, string $modulePath): void
+    private function createModuleClass(string $name, string $srcPath, string $namespace): void
     {
-        File::put("{$modulePath}/{$name}Module.php", <<<PHP
+        $ns = rtrim($namespace, '\\');
+        File::put("{$srcPath}/{$name}Module.php", <<<PHP
         <?php
 
         declare(strict_types=1);
 
-        namespace App\Modules\\{$name};
+        namespace {$ns}\\{$name};
 
         use App\Modules\BaseModule;
         use Illuminate\Support\Facades\Log;
@@ -124,14 +160,15 @@ class MakeModuleCommand extends Command
         PHP);
     }
 
-    private function createServiceProvider(string $name, string $modulePath): void
+    private function createServiceProvider(string $name, string $srcPath, string $namespace): void
     {
-        File::put("{$modulePath}/Providers/{$name}ServiceProvider.php", <<<PHP
+        $ns = rtrim($namespace, '\\');
+        File::put("{$srcPath}/Providers/{$name}ServiceProvider.php", <<<PHP
         <?php
 
         declare(strict_types=1);
 
-        namespace App\Modules\\{$name}\\Providers;
+        namespace {$ns}\\{$name}\\Providers;
 
         use Illuminate\Support\ServiceProvider;
 
@@ -148,22 +185,20 @@ class MakeModuleCommand extends Command
         PHP);
     }
 
-    private function createFilamentResource(string $name, string $modulePath): void
+    private function createFilamentResource(string $name, string $srcPath, string $namespace): void
     {
-        $snake = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $name));
-        $plural = $snake.'s';
+        $ns = rtrim($namespace, '\\');
+        File::makeDirectory("{$srcPath}/Filament/Resources/{$name}Resource/Pages", 0755, true, true);
 
-        File::makeDirectory("{$modulePath}/Filament/Resources/{$name}Resource/Pages", 0755, true, true);
-
-        File::put("{$modulePath}/Filament/Resources/{$name}Resource.php", <<<PHP
+        File::put("{$srcPath}/Filament/Resources/{$name}Resource.php", <<<PHP
         <?php
 
         declare(strict_types=1);
 
-        namespace App\Modules\\{$name}\\Filament\\Resources;
+        namespace {$ns}\\{$name}\\Filament\\Resources;
 
-        use App\Modules\\{$name}\\Filament\\Resources\\{$name}Resource\\Pages;
-        use App\Modules\\{$name}\\Models\\{$name};
+        use {$ns}\\{$name}\\Filament\\Resources\\{$name}Resource\\Pages;
+        use {$ns}\\{$name}\\Models\\{$name};
         use Filament\Forms;
         use Filament\Forms\Form;
         use Filament\Resources\Resource;
@@ -220,14 +255,14 @@ class MakeModuleCommand extends Command
         }
         PHP);
 
-        File::put("{$modulePath}/Filament/Resources/{$name}Resource/Pages/List{$name}s.php", <<<PHP
+        File::put("{$srcPath}/Filament/Resources/{$name}Resource/Pages/List{$name}s.php", <<<PHP
         <?php
 
         declare(strict_types=1);
 
-        namespace App\Modules\\{$name}\\Filament\\Resources\\{$name}Resource\\Pages;
+        namespace {$ns}\\{$name}\\Filament\\Resources\\{$name}Resource\\Pages;
 
-        use App\Modules\\{$name}\\Filament\\Resources\\{$name}Resource;
+        use {$ns}\\{$name}\\Filament\\Resources\\{$name}Resource;
         use Filament\Actions;
         use Filament\Resources\Pages\ListRecords;
 
@@ -244,14 +279,14 @@ class MakeModuleCommand extends Command
         }
         PHP);
 
-        File::put("{$modulePath}/Filament/Resources/{$name}Resource/Pages/Create{$name}.php", <<<PHP
+        File::put("{$srcPath}/Filament/Resources/{$name}Resource/Pages/Create{$name}.php", <<<PHP
         <?php
 
         declare(strict_types=1);
 
-        namespace App\Modules\\{$name}\\Filament\\Resources\\{$name}Resource\\Pages;
+        namespace {$ns}\\{$name}\\Filament\\Resources\\{$name}Resource\\Pages;
 
-        use App\Modules\\{$name}\\Filament\\Resources\\{$name}Resource;
+        use {$ns}\\{$name}\\Filament\\Resources\\{$name}Resource;
         use Filament\Resources\Pages\CreateRecord;
 
         class Create{$name} extends CreateRecord
@@ -260,14 +295,14 @@ class MakeModuleCommand extends Command
         }
         PHP);
 
-        File::put("{$modulePath}/Filament/Resources/{$name}Resource/Pages/Edit{$name}.php", <<<PHP
+        File::put("{$srcPath}/Filament/Resources/{$name}Resource/Pages/Edit{$name}.php", <<<PHP
         <?php
 
         declare(strict_types=1);
 
-        namespace App\Modules\\{$name}\\Filament\\Resources\\{$name}Resource\\Pages;
+        namespace {$ns}\\{$name}\\Filament\\Resources\\{$name}Resource\\Pages;
 
-        use App\Modules\\{$name}\\Filament\\Resources\\{$name}Resource;
+        use {$ns}\\{$name}\\Filament\\Resources\\{$name}Resource;
         use Filament\Actions;
         use Filament\Resources\Pages\EditRecord;
 
@@ -310,14 +345,15 @@ class MakeModuleCommand extends Command
         PHP);
     }
 
-    private function createController(string $name, string $modulePath): void
+    private function createController(string $name, string $srcPath, string $namespace): void
     {
-        File::put("{$modulePath}/Http/Controllers/{$name}Controller.php", <<<PHP
+        $ns = rtrim($namespace, '\\');
+        File::put("{$srcPath}/Http/Controllers/{$name}Controller.php", <<<PHP
         <?php
 
         declare(strict_types=1);
 
-        namespace App\Modules\\{$name}\\Http\\Controllers;
+        namespace {$ns}\\{$name}\\Http\\Controllers;
 
         use Illuminate\Http\Request;
         use Illuminate\Routing\Controller;
@@ -332,14 +368,15 @@ class MakeModuleCommand extends Command
         PHP);
     }
 
-    private function createModel(string $name, string $modulePath): void
+    private function createModel(string $name, string $srcPath, string $namespace): void
     {
-        File::put("{$modulePath}/Models/{$name}.php", <<<PHP
+        $ns = rtrim($namespace, '\\');
+        File::put("{$srcPath}/Models/{$name}.php", <<<PHP
         <?php
 
         declare(strict_types=1);
 
-        namespace App\Modules\\{$name}\\Models;
+        namespace {$ns}\\{$name}\\Models;
 
         use Illuminate\Database\Eloquent\Model;
 
@@ -350,12 +387,13 @@ class MakeModuleCommand extends Command
         PHP);
     }
 
-    private function createMigration(string $name, string $modulePath): void
+    private function createMigration(string $name, string $dbPath): void
     {
         $table = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $name)).'s';
         $timestamp = now()->format('Y_m_d_His');
 
-        File::put("{$modulePath}/database/migrations/{$timestamp}_create_{$table}_table.php", <<<PHP
+        File::makeDirectory("{$dbPath}/migrations", 0755, true, true);
+        File::put("{$dbPath}/migrations/{$timestamp}_create_{$table}_table.php", <<<PHP
         <?php
 
         use Illuminate\Database\Migrations\Migration;
@@ -379,9 +417,10 @@ class MakeModuleCommand extends Command
         PHP);
     }
 
-    private function createView(string $name, string $modulePath): void
+    private function createView(string $name, string $viewsPath): void
     {
-        File::put("{$modulePath}/resources/views/index.blade.php", <<<BLADE
+        File::makeDirectory($viewsPath, 0755, true, true);
+        File::put("{$viewsPath}/index.blade.php", <<<BLADE
         <x-app-layout>
             <x-slot name="header">
                 <h2 class="font-semibold text-xl text-gray-800 leading-tight">
@@ -400,11 +439,11 @@ class MakeModuleCommand extends Command
         BLADE);
     }
 
-    private function createConfig(string $name, string $modulePath): void
+    private function createConfig(string $name, string $configPath): void
     {
         $key = strtolower($name);
-
-        File::put("{$modulePath}/config/{$key}.php", <<<PHP
+        File::makeDirectory($configPath, 0755, true, true);
+        File::put("{$configPath}/{$key}.php", <<<PHP
         <?php
 
         return [
@@ -413,16 +452,18 @@ class MakeModuleCommand extends Command
         PHP);
     }
 
-    private function createTest(string $name, string $modulePath): void
+    private function createTest(string $name, string $testsPath, string $namespace): void
     {
-        File::put("{$modulePath}/tests/{$name}ModuleTest.php", <<<PHP
+        $ns = rtrim($namespace, '\\');
+        File::makeDirectory($testsPath, 0755, true, true);
+        File::put("{$testsPath}/{$name}ModuleTest.php", <<<PHP
         <?php
 
         declare(strict_types=1);
 
-        namespace App\Modules\\{$name}\\Tests;
+        namespace {$ns}\\{$name}\\Tests;
 
-        use App\Modules\\{$name}\\{$name}Module;
+        use {$ns}\\{$name}\\{$name}Module;
         use Tests\TestCase;
 
         class {$name}ModuleTest extends TestCase

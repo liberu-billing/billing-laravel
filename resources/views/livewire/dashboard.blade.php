@@ -37,7 +37,7 @@
 
 @push('scripts')
 <script>
-    document.addEventListener('livewire:load', function () {
+    document.addEventListener('livewire:initialized', function () {
         const charts = {};
         const metrics = @json($metrics);
         

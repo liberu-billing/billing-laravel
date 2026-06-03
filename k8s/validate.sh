@@ -2,7 +2,7 @@
 # Validate Kubernetes manifests for liberu-billing.
 # Usage: ./k8s/validate.sh [development|production]
 #
-# Requires: kubectl (with kustomize support), kubeval or kubeconform (optional).
+# Requires: kubectl (with kustomize support), kubeconform (optional).
 
 set -e
 
@@ -28,7 +28,7 @@ if ! command -v kubectl >/dev/null 2>&1; then
     fail "kubectl not found. Install it from https://kubernetes.io/docs/tasks/tools/"
     exit 1
 fi
-pass "kubectl found: $(kubectl version --client --short 2>/dev/null || kubectl version --client 2>/dev/null | head -1)"
+pass "kubectl found: $(kubectl version --client 2>/dev/null | grep 'Client Version' | awk '{print $3}' || echo 'unknown')"
 
 # 2 — overlay directory exists
 if [[ ! -d "${K8S_DIR}/overlays/${OVERLAY}" ]]; then
@@ -38,7 +38,14 @@ if [[ ! -d "${K8S_DIR}/overlays/${OVERLAY}" ]]; then
 fi
 pass "Overlay directory exists: overlays/${OVERLAY}"
 
-# 3 — kustomize build (dry-run render)
+# 3 — base directory exists
+if [[ ! -d "${K8S_DIR}/base" ]]; then
+    fail "Base directory not found at ${K8S_DIR}/base"
+    exit 1
+fi
+pass "Base directory exists: base/"
+
+# 4 — kustomize build (dry-run render)
 echo ""
 echo "Running: kubectl kustomize overlays/${OVERLAY}"
 if RENDERED=$(kubectl kustomize "${K8S_DIR}/overlays/${OVERLAY}" 2>&1); then
@@ -50,7 +57,7 @@ else
     echo "${RENDERED}"
 fi
 
-# 4 — kubectl apply dry-run (requires a reachable cluster; skip if unavailable)
+# 5 — kubectl apply dry-run (requires a reachable cluster; skip if unavailable)
 echo ""
 echo "Running: kubectl apply --dry-run=client"
 if kubectl cluster-info >/dev/null 2>&1; then
@@ -64,7 +71,7 @@ else
     warn "No cluster reachable — skipping live dry-run (kustomize render still validated above)"
 fi
 
-# 5 — kubeconform / kubeval (optional schema validation)
+# 6 — kubeconform / kubeval (optional schema validation)
 echo ""
 for tool in kubeconform kubeval; do
     if command -v "${tool}" >/dev/null 2>&1; then
@@ -78,7 +85,7 @@ for tool in kubeconform kubeval; do
     fi
 done
 
-# 6 — secrets placeholder check
+# 7 — secrets placeholder check
 echo ""
 if echo "${RENDERED}" | grep -q 'CHANGE_ME'; then
     warn "Placeholder secrets detected — replace CHANGE_ME values before production deploy"

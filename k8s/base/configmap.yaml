@@ -26,3 +26,7 @@ data:
   OCTANE_SERVER: "roadrunner"
   WITH_HORIZON: "false"
   WITH_SCHEDULER: "true"
+  KUBERNETES_ENABLED: "true"
+  KUBERNETES_INGRESS_CLASS: "nginx"
+  KUBERNETES_CERT_ISSUER: "letsencrypt-prod"
+  KUBERNETES_STORAGE_CLASS: "standard"
