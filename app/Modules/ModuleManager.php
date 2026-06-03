@@ -124,6 +124,19 @@ class ModuleManager
         }
 
         $module->install();
+
+        try {
+            $record = ModuleModel::firstOrNew(['name' => $module->getName()]);
+            $record->enabled = true;
+            $record->version = $module->getVersion();
+            $record->description = $module->getDescription();
+            $record->dependencies = $module->getDependencies();
+            $record->config = $module->getConfig();
+            $record->save();
+        } catch (\Throwable $e) {
+            Log::warning("Failed to persist install state for module '{$name}': ".$e->getMessage());
+        }
+
         $this->clearCache();
 
         return true;
@@ -142,6 +155,15 @@ class ModuleManager
         }
 
         $module->uninstall();
+
+        try {
+            $record = ModuleModel::firstOrNew(['name' => $module->getName()]);
+            $record->enabled = false;
+            $record->save();
+        } catch (\Throwable $e) {
+            Log::warning("Failed to persist uninstall state for module '{$name}': ".$e->getMessage());
+        }
+
         $this->clearCache();
 
         return true;
@@ -263,32 +285,49 @@ class ModuleManager
 
             foreach (File::directories($modulesPath) as $modulePath) {
                 $moduleName = basename((string) $modulePath);
-                // Support both legacy (Name/NameModule.php) and modular (Name/src/NameModule.php)
-                $moduleClass = "{$namespace}\\{$moduleName}\\{$moduleName}Module";
 
-                if (class_exists($moduleClass)) {
-                    try {
-                        $module = new $moduleClass;
-                    } catch (\Throwable $e) {
-                        Log::warning("Failed to instantiate module '{$moduleName}': ".$e->getMessage());
-                        continue;
+                // Try two conventions:
+                //   1. Dir = "Blog"      → class App\Modules\Blog\BlogModule  (make:module Blog)
+                //   2. Dir = "BlogModule"→ class App\Modules\BlogModule\BlogModule (manual/legacy)
+                $candidates = [
+                    "{$namespace}\\{$moduleName}\\{$moduleName}Module",
+                    "{$namespace}\\{$moduleName}\\{$moduleName}",
+                ];
+
+                $moduleClass = null;
+                foreach ($candidates as $candidate) {
+                    if (class_exists($candidate)) {
+                        $moduleClass = $candidate;
+                        break;
                     }
-                    if ($module instanceof ModuleInterface) {
-                        $this->register($module);
+                }
 
-                        try {
-                            ModuleModel::updateOrCreate(
-                                ['name' => $module->getName()],
-                                [
-                                    'version' => $module->getVersion(),
-                                    'description' => $module->getDescription(),
-                                    'dependencies' => $module->getDependencies(),
-                                    'config' => $module->getConfig(),
-                                ]
-                            );
-                        } catch (\Throwable $e) {
-                            // DB not ready during initial setup — skip silently
-                        }
+                if ($moduleClass === null) {
+                    continue;
+                }
+
+                try {
+                    $module = new $moduleClass;
+                } catch (\Throwable $e) {
+                    Log::warning("Failed to instantiate module '{$moduleName}': ".$e->getMessage());
+                    continue;
+                }
+
+                if ($module instanceof ModuleInterface) {
+                    $this->register($module);
+
+                    try {
+                        ModuleModel::updateOrCreate(
+                            ['name' => $module->getName()],
+                            [
+                                'version' => $module->getVersion(),
+                                'description' => $module->getDescription(),
+                                'dependencies' => $module->getDependencies(),
+                                'config' => $module->getConfig(),
+                            ]
+                        );
+                    } catch (\Throwable) {
+                        // DB not ready during initial setup — skip silently
                     }
                 }
             }
