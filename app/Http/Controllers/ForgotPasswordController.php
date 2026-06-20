@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
-use Laravel\Jetstream\Http\Controllers\AuthenticatedSessionController;
+use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 
 class ForgotPasswordController extends AuthenticatedSessionController
 {

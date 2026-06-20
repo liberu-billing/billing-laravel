@@ -6,6 +6,8 @@ use App\Events\InvoiceStatusChanged;
 use App\Mail\InvoiceGenerated;
 use App\Services\AuditLogService;
 use App\Services\CurrencyService;
+use App\Services\PaymentGatewayService;
+use App\Services\TaxService;
 use App\Traits\HasTeam;
 use Carbon\CarbonInterface;
 use Exception;
@@ -13,6 +15,9 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Mail;
 
 #[Fillable([
@@ -47,11 +52,12 @@ class Invoice extends Model
     use HasTeam;
 
     #[\Override]
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
 
-        static::creating(function (Invoice $invoice): void {
+        static::creating(
+            static function (Invoice $invoice): void {
             $attrs = $invoice->getAttributes();
 
             if (empty($attrs['invoice_number'])) {
@@ -72,7 +78,8 @@ class Invoice extends Model
             }
         });
 
-        static::created(function (?Model $invoice): void {
+        static::created(
+            static function (?Model $invoice): void {
             app(AuditLogService::class)->log(
                 'invoice_created',
                 $invoice,
@@ -81,7 +88,8 @@ class Invoice extends Model
             );
         });
 
-        static::updated(function (?Model $invoice): void {
+        static::updated(
+            static function (?Model $invoice): void {
             app(AuditLogService::class)->log(
                 'invoice_updated',
                 $invoice,
@@ -90,7 +98,8 @@ class Invoice extends Model
             );
         });
 
-        static::deleted(function (?Model $invoice): void {
+        static::deleted(
+            static function (?Model $invoice): void {
             app(AuditLogService::class)->log(
                 'invoice_deleted',
                 $invoice,
@@ -99,12 +108,12 @@ class Invoice extends Model
         });
     }
 
-    public function disputes()
+    public function disputes(): HasMany
     {
         return $this->hasMany(InvoiceDispute::class);
     }
 
-    public function activeDispute()
+    public function activeDispute(): ?\stdClass
     {
         return $this->disputes()->whereIn('status', ['open', 'under_review'])->latest()->first();
     }
@@ -131,36 +140,39 @@ class Invoice extends Model
 
     }
 
-    public function currency()
+    public function currency(): BelongsTo
     {
         return $this->belongsTo(Currency::class, 'currency', 'code');
     }
 
-    public function subscription()
+    public function subscription(): BelongsTo
     {
         return $this->belongsTo(Subscription::class);
     }
 
-    public function customer()
+    public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
 
-    public function paymentPlan()
+    public function paymentPlan(): HasOne
     {
         return $this->hasOne(PaymentPlan::class);
     }
 
-    public function payments()
+    public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
     }
 
-    public function items()
+    public function items(): HasMany
     {
         return $this->hasMany(Invoice_Item::class);
     }
 
+    /**
+     * @throws Exception
+     */
     public function processPayment(string $paymentMethod, float $amount): bool
     {
         if ($amount <= 0 || $amount > $this->remaining_amount) {
@@ -208,17 +220,17 @@ class Invoice extends Model
         return Attribute::make(get: fn (): int|float => $this->total_amount - $this->payments()->sum('amount'));
     }
 
-    public function parentInvoice()
+    public function parentInvoice(): BelongsTo
     {
-        return $this->belongsTo(Invoice::class, 'parent_invoice_id');
+        return $this->belongsTo(__CLASS__, 'parent_invoice_id');
     }
 
-    public function installments()
+    public function installments(): HasMany
     {
-        return $this->hasMany(Invoice::class, 'parent_invoice_id');
+        return $this->hasMany(__CLASS__, 'parent_invoice_id');
     }
 
-    public function discount()
+    public function discount(): BelongsTo
     {
         return $this->belongsTo(Discount::class);
     }
@@ -235,12 +247,10 @@ class Invoice extends Model
 
     public function calculateTax()
     {
-        $taxService = app(TaxService::class);
-
-        return $taxService->calculateTax($this);
+        return app(TaxService::class)->calculateTax($this);
     }
 
-    public function template()
+    public function template(): BelongsTo
     {
         return $this->belongsTo(InvoiceTemplate::class, 'invoice_template_id');
     }
@@ -270,7 +280,7 @@ class Invoice extends Model
         ]);
     }
 
-    private function calculateNextDueDate(CarbonInterface $date, $frequency)
+    private function calculateNextDueDate(CarbonInterface $date, $frequency): CarbonInterface
     {
         return match ($frequency) {
             'weekly' => $date->addWeek(),
@@ -282,9 +292,7 @@ class Invoice extends Model
 
     public function convertAmountTo(string $targetCurrency): float
     {
-        $currencyService = app(CurrencyService::class);
-
-        return $currencyService->convert(
+        return app(CurrencyService::class)->convert(
             $this->total_amount,
             $this->currency,
             $targetCurrency
@@ -391,7 +399,7 @@ class Invoice extends Model
         });
     }
 
-    public function recurringConfiguration()
+    public function recurringConfiguration(): HasOne
     {
         return $this->hasOne(RecurringBillingConfiguration::class);
     }
@@ -424,7 +432,7 @@ class Invoice extends Model
         event(new InvoiceStatusChanged($this, 'paid'));
     }
 
-    protected function addToStatusHistory($status)
+    protected function addToStatusHistory($status): void
     {
         $history = $this->status_history ?? [];
         $history[] = [
@@ -468,7 +476,7 @@ class Invoice extends Model
         ]);
     }
 
-    private function calculateNextBillingDate($frequency, $billingDay = null)
+    private function calculateNextBillingDate($frequency, $billingDay = null): CarbonInterface
     {
         $date = now();
 

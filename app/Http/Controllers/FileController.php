@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\File;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -23,7 +24,7 @@ class FileController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $request->validate([
             'file' => 'required|file|max:10240',
@@ -46,7 +47,7 @@ class FileController extends Controller
         return redirect()->back();
     }
 
-    public function destroy(File $file)
+    public function destroy(File $file): RedirectResponse
     {
         $this->authorize('delete', $file);
 

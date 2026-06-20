@@ -8,6 +8,7 @@ use App\Models\Payment;
 use App\Services\CurrencyService;
 use App\Services\PaymentGatewayService;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -15,7 +16,7 @@ class PaymentController extends Controller
 {
     public function __construct(protected PaymentGatewayService $paymentGatewayService, protected CurrencyService $currencyService) {}
 
-    public function processPayment(Request $request)
+    public function processPayment(Request $request): ?JsonResponse
     {
         // Validate the request
         $validatedData = $request->validate([

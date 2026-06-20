@@ -9,13 +9,12 @@ use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Log;
+use Random\RandomException;
 
 class VirtualminClient
 {
     protected Client $client;
-
     protected $server;
-
     protected $apiKey;
 
     public function __construct()
@@ -29,6 +28,9 @@ class VirtualminClient
         $this->apiKey = $server->api_token;
     }
 
+    /**
+     * @throws Exception
+     */
     public function createAccount(string $username, string $domain, $package): bool
     {
         $password = $this->generatePassword();
@@ -49,6 +51,9 @@ class VirtualminClient
         return $this->makeApiCall($params);
     }
 
+    /**
+     * @throws Exception
+     */
     public function suspendAccount($username): bool
     {
         $params = [
@@ -60,6 +65,9 @@ class VirtualminClient
         return $this->makeApiCall($params);
     }
 
+    /**
+     * @throws Exception
+     */
     public function unsuspendAccount($username): bool
     {
         $params = [
@@ -70,6 +78,9 @@ class VirtualminClient
         return $this->makeApiCall($params);
     }
 
+    /**
+     * @throws Exception
+     */
     public function changePackage($username, $newPackage): bool
     {
         $params = [
@@ -81,6 +92,9 @@ class VirtualminClient
         return $this->makeApiCall($params);
     }
 
+    /**
+     * @throws Exception
+     */
     public function terminateAccount($username): bool
     {
         $params = [
@@ -91,6 +105,9 @@ class VirtualminClient
         return $this->makeApiCall($params);
     }
 
+    /**
+     * @throws Exception
+     */
     public function addAddon($username, $addon): bool
     {
         $params = [
@@ -102,6 +119,9 @@ class VirtualminClient
         return $this->makeApiCall($params);
     }
 
+    /**
+     * @throws Exception
+     */
     public function removeAddon($username, $addon): bool
     {
         $params = [
@@ -130,7 +150,12 @@ class VirtualminClient
                 'verify' => false,
             ]);
 
-            $result = json_decode($response->getBody()->getContents(), true);
+            $result = json_decode(
+                $response->getBody()->getContents(),
+                true,
+                512,
+                JSON_THROW_ON_ERROR
+            );
 
             if (isset($result['status']) && $result['status'] === 'success') {
                 Log::info('Virtualmin API call successful', [
@@ -160,6 +185,9 @@ class VirtualminClient
         }
     }
 
+    /**
+     * @throws RandomException
+     */
     protected function generatePassword(): string
     {
         return bin2hex(random_bytes(12));

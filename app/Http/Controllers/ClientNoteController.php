@@ -46,7 +46,7 @@ class ClientNoteController extends Controller
 
     public function suggestions(Request $request): JsonResponse
     {
-        $query = $request->get('query');
+        $query = $request->input('query');
 
         $suggestions = ClientNote::where('content', 'like', "%{$query}%")
             ->select('content')

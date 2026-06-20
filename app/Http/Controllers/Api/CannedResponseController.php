@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\CannedResponse;
 use App\Services\CannedResponseService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class CannedResponseController extends Controller
@@ -16,7 +17,7 @@ class CannedResponseController extends Controller
     /**
      * Get all canned responses
      */
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $teamId = $request->user()?->current_team_id;
         $category = $request->get('category');
@@ -31,7 +32,7 @@ class CannedResponseController extends Controller
     /**
      * Get canned response by shortcode
      */
-    public function show(string $shortcode, Request $request)
+    public function show(string $shortcode, Request $request): JsonResponse
     {
         $teamId = $request->user()?->current_team_id;
         $response = $this->cannedResponseService->getByShortcode($shortcode, $teamId);
@@ -50,7 +51,7 @@ class CannedResponseController extends Controller
     /**
      * Use a canned response
      */
-    public function use(string $shortcode, Request $request)
+    public function use(string $shortcode, Request $request): JsonResponse
     {
         $request->validate([
             'variables' => 'nullable|array',
@@ -78,7 +79,7 @@ class CannedResponseController extends Controller
     /**
      * Search canned responses
      */
-    public function search(Request $request)
+    public function search(Request $request): JsonResponse
     {
         $request->validate([
             'q' => 'required|string|min:2',
@@ -95,7 +96,7 @@ class CannedResponseController extends Controller
     /**
      * Get categories
      */
-    public function categories(Request $request)
+    public function categories(Request $request): JsonResponse
     {
         $teamId = $request->user()?->current_team_id;
         $categories = $this->cannedResponseService->getCategories($teamId);
@@ -108,7 +109,7 @@ class CannedResponseController extends Controller
     /**
      * Get most used responses
      */
-    public function mostUsed(Request $request)
+    public function mostUsed(Request $request): JsonResponse
     {
         $teamId = $request->user()?->current_team_id;
         $limit = $request->get('limit', 10);
@@ -123,7 +124,7 @@ class CannedResponseController extends Controller
     /**
      * Get available variables
      */
-    public function variables()
+    public function variables(): JsonResponse
     {
         return response()->json([
             'data' => CannedResponseService::getAvailableVariables(),

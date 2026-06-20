@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Invoice;
 use App\Models\LateFeeConfiguration;
 use Exception;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use InvalidArgumentException;
@@ -23,7 +26,7 @@ class LateFeeConfigurationController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request): ?RedirectResponse
     {
         $validated = $request->validate([
             'fee_type' => ['required', Rule::in(['percentage', 'fixed'])],
@@ -51,7 +54,7 @@ class LateFeeConfigurationController extends Controller
         }
     }
 
-    public function preview(Request $request)
+    public function preview(Request $request): ?JsonResponse
     {
         $invoice = Invoice::findOrFail($request->invoice_id);
         $config = new LateFeeConfiguration($request->all());

@@ -22,13 +22,11 @@ class ServiceSuspension extends Model
     #[\Override]
     protected function casts(): array
     {
-
         return [
             'suspended_at' => 'datetime',
             'unsuspended_at' => 'datetime',
             'is_active' => 'boolean',
         ];
-
     }
 
     public function subscription(): BelongsTo

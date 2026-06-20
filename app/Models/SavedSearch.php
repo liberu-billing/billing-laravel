@@ -17,11 +17,9 @@ class SavedSearch extends Model
     #[\Override]
     protected function casts(): array
     {
-
         return [
             'criteria' => 'array',
         ];
-
     }
 
     public function user(): BelongsTo

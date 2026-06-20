@@ -4,13 +4,14 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    public function token(Request $request)
+    public function token(Request $request): JsonResponse
     {
         $request->validate([
             'email' => 'required|email',
@@ -34,14 +35,14 @@ class AuthController extends Controller
         ]);
     }
 
-    public function revokeToken(Request $request)
+    public function revokeToken(Request $request): JsonResponse
     {
         $request->user()->currentAccessToken()->delete();
 
         return response()->json(['message' => 'Token revoked successfully']);
     }
 
-    public function revokeAllTokens(Request $request)
+    public function revokeAllTokens(Request $request): JsonResponse
     {
         $request->user()->tokens()->delete();
 

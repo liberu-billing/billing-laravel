@@ -9,13 +9,12 @@ use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Log;
+use Random\RandomException;
 
 class LiberuControlPanelClient
 {
     protected Client $client;
-
     protected $server;
-
     protected $apiToken;
 
     public function __construct()
@@ -29,6 +28,9 @@ class LiberuControlPanelClient
         $this->apiToken = $server->api_token;
     }
 
+    /**
+     * @throws Exception
+     */
     public function createAccount(string $username, string $domain, $package): bool
     {
         $password = $this->generatePassword();
@@ -44,6 +46,9 @@ class LiberuControlPanelClient
         return $this->makeApiCall('POST', '/api/hosting/accounts', $data);
     }
 
+    /**
+     * @throws Exception
+     */
     public function suspendAccount(string $username): bool
     {
         $data = [
@@ -54,6 +59,9 @@ class LiberuControlPanelClient
         return $this->makeApiCall('POST', '/api/hosting/accounts/'.$username.'/suspend', $data);
     }
 
+    /**
+     * @throws Exception
+     */
     public function unsuspendAccount(string $username): bool
     {
         return $this->makeApiCall('POST', '/api/hosting/accounts/'.$username.'/unsuspend', [
@@ -61,6 +69,9 @@ class LiberuControlPanelClient
         ]);
     }
 
+    /**
+     * @throws Exception
+     */
     public function changePackage(string $username, $newPackage): bool
     {
         $data = [
@@ -71,6 +82,9 @@ class LiberuControlPanelClient
         return $this->makeApiCall('PUT', '/api/hosting/accounts/'.$username.'/package', $data);
     }
 
+    /**
+     * @throws Exception
+     */
     public function terminateAccount(string $username): bool
     {
         return $this->makeApiCall('DELETE', '/api/hosting/accounts/'.$username, [
@@ -78,6 +92,9 @@ class LiberuControlPanelClient
         ]);
     }
 
+    /**
+     * @throws Exception
+     */
     public function addAddon(string $username, $addon): bool
     {
         $data = [
@@ -154,6 +171,9 @@ class LiberuControlPanelClient
         }
     }
 
+    /**
+     * @throws RandomException
+     */
     protected function generatePassword(): string
     {
         return bin2hex(random_bytes(12));

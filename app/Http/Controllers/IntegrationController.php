@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\IntegrationService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -19,7 +20,7 @@ class IntegrationController extends Controller
             ->redirect();
     }
 
-    public function callback(Request $request, string $provider)
+    public function callback(Request $request, string $provider): RedirectResponse
     {
         $socialiteUser = Socialite::driver($provider)->user();
 
@@ -33,7 +34,7 @@ class IntegrationController extends Controller
             ->with('status', 'Integration connected successfully.');
     }
 
-    public function destroy(Request $request, string $provider)
+    public function destroy(Request $request, string $provider): RedirectResponse
     {
         $this->integrationService->disconnect($provider, $request->user());
 

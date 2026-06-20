@@ -9,13 +9,12 @@ use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Log;
+use Random\RandomException;
 
 class PleskClient
 {
     protected Client $client;
-
     protected $server;
-
     protected $apiKey;
 
     public function __construct()
@@ -29,6 +28,9 @@ class PleskClient
         $this->apiKey = $server->api_token;
     }
 
+    /**
+     * @throws Exception
+     */
     public function createAccount($username, $domain, $package): bool
     {
         $xml = $this->buildXmlRequest('webspace.add', [
@@ -68,6 +70,9 @@ class PleskClient
         return $this->makeApiCall($xml);
     }
 
+    /**
+     * @throws Exception
+     */
     public function suspendAccount($username): bool
     {
         $xml = $this->buildXmlRequest('customer.set', [
@@ -79,6 +84,9 @@ class PleskClient
         return $this->makeApiCall($xml);
     }
 
+    /**
+     * @throws Exception
+     */
     public function unsuspendAccount($username): bool
     {
         $xml = $this->buildXmlRequest('customer.set', [
@@ -90,6 +98,9 @@ class PleskClient
         return $this->makeApiCall($xml);
     }
 
+    /**
+     * @throws Exception
+     */
     public function changePackage($username, $newPackage): bool
     {
         $xml = $this->buildXmlRequest('service-plan.set', [
@@ -100,6 +111,9 @@ class PleskClient
         return $this->makeApiCall($xml);
     }
 
+    /**
+     * @throws Exception
+     */
     public function terminateAccount($username): bool
     {
         $xml = $this->buildXmlRequest('webspace.del', [
@@ -109,6 +123,9 @@ class PleskClient
         return $this->makeApiCall($xml);
     }
 
+    /**
+     * @throws Exception
+     */
     public function addAddon($username, $addon): bool
     {
         $xml = $this->buildXmlRequest('site-addon.add', [
@@ -119,6 +136,9 @@ class PleskClient
         return $this->makeApiCall($xml);
     }
 
+    /**
+     * @throws Exception
+     */
     public function removeAddon($username, $addon): bool
     {
         $xml = $this->buildXmlRequest('site-addon.del', [
@@ -200,6 +220,9 @@ class PleskClient
         return $xml;
     }
 
+    /**
+     * @throws RandomException
+     */
     protected function generatePassword(): string
     {
         return bin2hex(random_bytes(12));

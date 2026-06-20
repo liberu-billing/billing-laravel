@@ -21,19 +21,18 @@ class KnowledgeBaseCategory extends Model
     #[\Override]
     protected function casts(): array
     {
-
         return [
             'is_active' => 'boolean',
         ];
-
     }
 
     #[\Override]
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
 
-        static::creating(function ($category): void {
+        static::creating(
+            static function ($category): void {
             if (empty($category->slug)) {
                 $category->slug = Str::slug($category->name);
             }
@@ -42,12 +41,12 @@ class KnowledgeBaseCategory extends Model
 
     public function parent(): BelongsTo
     {
-        return $this->belongsTo(KnowledgeBaseCategory::class, 'parent_id');
+        return $this->belongsTo(__CLASS__, 'parent_id');
     }
 
     public function children(): HasMany
     {
-        return $this->hasMany(KnowledgeBaseCategory::class, 'parent_id')
+        return $this->hasMany(__CLASS__, 'parent_id')
             ->orderBy('sort_order');
     }
 

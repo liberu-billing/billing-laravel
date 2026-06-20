@@ -33,7 +33,8 @@ class QuoteItem extends Model
     {
         parent::boot();
 
-        static::saving(function (QuoteItem $item): void {
+        static::saving(
+            static function (QuoteItem $item): void {
             $item->total = $item->quantity * $item->unit_price;
         });
     }

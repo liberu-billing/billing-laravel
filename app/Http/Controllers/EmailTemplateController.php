@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\EmailTemplate;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class EmailTemplateController extends Controller
@@ -29,7 +30,7 @@ class EmailTemplateController extends Controller
         return view('email-templates.create', compact('types'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -57,7 +58,7 @@ class EmailTemplateController extends Controller
         return view('email-templates.edit', compact('template', 'types'));
     }
 
-    public function update(Request $request, EmailTemplate $template)
+    public function update(Request $request, EmailTemplate $template): RedirectResponse
     {
         $this->authorize('update', $template);
 

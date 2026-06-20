@@ -6,6 +6,7 @@ use App\Traits\HasTeam;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
     'customer_id',
@@ -35,17 +36,17 @@ class HostingAccount extends Model
 
     }
 
-    public function customer()
+    public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
 
-    public function subscription()
+    public function subscription(): BelongsTo
     {
         return $this->belongsTo(Subscription::class);
     }
 
-    public function server()
+    public function server(): BelongsTo
     {
         return $this->belongsTo(HostingServer::class, 'hosting_server_id');
     }
@@ -64,7 +65,11 @@ class HostingAccount extends Model
     {
         $addons = $this->addons ?? [];
 
-        return in_array($addon, $addons);
+        return in_array(
+            $addon,
+            $addons,
+            true
+        );
     }
 
     public function getAddons()

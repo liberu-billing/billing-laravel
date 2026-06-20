@@ -8,6 +8,7 @@ use App\Traits\HasTeam;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
     'name',
@@ -23,13 +24,11 @@ use Illuminate\Database\Eloquent\Model;
 ])]
 class Report extends Model
 {
-    use HasFactory;
     use HasTeam;
 
     #[\Override]
     protected function casts(): array
     {
-
         return [
             'start_date' => 'datetime',
             'end_date' => 'datetime',
@@ -38,10 +37,9 @@ class Report extends Model
             'schedule' => 'array',
             'last_generated_at' => 'datetime',
         ];
-
     }
 
-    public function team()
+    public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }

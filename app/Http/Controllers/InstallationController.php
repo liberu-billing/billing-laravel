@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 
 class InstallationController extends Controller
 {
-    public function install(Request $request)
+    public function install(Request $request): ?\Illuminate\Http\JsonResponse
     {
         $validated = $request->validate([
             'control_panel' => 'required|string|in:cpanel,plesk,directadmin,virtualmin',

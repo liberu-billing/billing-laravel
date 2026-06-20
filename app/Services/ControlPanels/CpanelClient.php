@@ -11,9 +11,7 @@ use Illuminate\Support\Facades\Log;
 class CpanelClient
 {
     protected Client $client;
-
     protected $server;
-
     protected $apiToken;
 
     public function __construct()
@@ -27,6 +25,9 @@ class CpanelClient
         $this->apiToken = $server->api_token;
     }
 
+    /**
+     * @throws Exception
+     */
     public function createAccount(string $username, string $domain, $package): bool
     {
         $endpoint = '/json-api/createacct';
@@ -54,6 +55,9 @@ class CpanelClient
         return $this->makeApiCall($endpoint, $params);
     }
 
+    /**
+     * @throws Exception
+     */
     public function suspendAccount($username): bool
     {
         $endpoint = '/json-api/suspendacct';
@@ -66,6 +70,9 @@ class CpanelClient
         return $this->makeApiCall($endpoint, $params);
     }
 
+    /**
+     * @throws Exception
+     */
     public function unsuspendAccount($username): bool
     {
         $endpoint = '/json-api/unsuspendacct';
@@ -76,6 +83,9 @@ class CpanelClient
         return $this->makeApiCall($endpoint, $params);
     }
 
+    /**
+     * @throws Exception
+     */
     public function changePackage($username, $newPackage): bool
     {
         $endpoint = '/json-api/changepackage';
@@ -87,6 +97,9 @@ class CpanelClient
         return $this->makeApiCall($endpoint, $params);
     }
 
+    /**
+     * @throws Exception
+     */
     public function terminateAccount($username): bool
     {
         $endpoint = '/json-api/removeacct';
@@ -98,6 +111,9 @@ class CpanelClient
         return $this->makeApiCall($endpoint, $params);
     }
 
+    /**
+     * @throws Exception
+     */
     public function addAddon($username, $addon): bool
     {
         // cPanel addons are typically features added to an account
@@ -111,6 +127,9 @@ class CpanelClient
         return $this->makeApiCall($endpoint, $params);
     }
 
+    /**
+     * @throws Exception
+     */
     public function removeAddon($username, $addon): bool
     {
         $endpoint = '/json-api/modifyacct';
@@ -122,6 +141,9 @@ class CpanelClient
         return $this->makeApiCall($endpoint, $params);
     }
 
+    /**
+     * @throws Exception
+     */
     protected function makeApiCall(string $endpoint, $params): bool
     {
         if (! $this->server) {
@@ -139,7 +161,12 @@ class CpanelClient
                 'verify' => config('services.cpanel.ssl_verify', true),
             ]);
 
-            $result = json_decode((string) $response->getBody(), true);
+            $result = json_decode(
+                (string)$response->getBody(),
+                true,
+                512,
+                JSON_THROW_ON_ERROR
+            );
 
             if (isset($result['metadata']['result']) && $result['metadata']['result'] === 1) {
                 Log::info('cPanel API call successful', [

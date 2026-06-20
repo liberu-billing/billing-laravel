@@ -18,7 +18,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class Client extends Model
 {
-    use HasFactory;
 
     #[\Override]
     protected function casts(): array

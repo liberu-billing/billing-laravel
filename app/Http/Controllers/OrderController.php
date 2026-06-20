@@ -12,6 +12,7 @@ use App\Models\Subscription;
 use App\Services\BillingService;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -23,7 +24,7 @@ class OrderController extends Controller
         return view('orders.create', compact('packages'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request): ?RedirectResponse
     {
         $request->validate([
             'package_id' => 'required|exists:products_services,id',

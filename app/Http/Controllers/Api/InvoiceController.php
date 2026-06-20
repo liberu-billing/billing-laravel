@@ -7,6 +7,7 @@ use App\Http\Resources\Api\InvoiceResource;
 use App\Models\Invoice;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\PDF;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -17,7 +18,7 @@ class InvoiceController extends Controller
         $this->authorizeResource(Invoice::class, 'invoice');
     }
 
-    public function index(Request $request)
+    public function index(Request $request): AnonymousResourceCollection
     {
         $invoices = Invoice::query()
             ->when($request->status, fn ($q) => $q->where('status', $request->status))
@@ -46,7 +47,8 @@ class InvoiceController extends Controller
             'items.*.price' => 'required|numeric|min:0',
         ]);
 
-        $itemRows = array_map(fn (array $item): array => [
+        $itemRows = array_map(
+            static fn (array $item): array => [
             'description' => $item['description'],
             'quantity' => $item['quantity'],
             'unit_price' => $item['price'],

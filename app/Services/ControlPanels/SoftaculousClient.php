@@ -11,9 +11,7 @@ use Illuminate\Support\Facades\Log;
 class SoftaculousClient
 {
     protected Client $client;
-
     protected $apiUrl;
-
     protected $apiToken;
 
     public function __construct()
@@ -29,7 +27,10 @@ class SoftaculousClient
         $params = [
             'domain' => $domain,
             'script' => $scriptId,
-            'options' => json_encode($options),
+            'options' => json_encode(
+                $options,
+                JSON_THROW_ON_ERROR
+            ),
         ];
 
         return $this->makeApiCall($endpoint, $params);
@@ -45,7 +46,12 @@ class SoftaculousClient
                 'form_params' => $params,
             ]);
 
-            $result = json_decode((string) $response->getBody(), true);
+            $result = json_decode(
+                (string)$response->getBody(),
+                true,
+                512,
+                JSON_THROW_ON_ERROR
+            );
 
             if (isset($result['success']) && $result['success'] === true) {
                 Log::info('Softaculous API call successful', ['endpoint' => $endpoint, 'params' => $params]);

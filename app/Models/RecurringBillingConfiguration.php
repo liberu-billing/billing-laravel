@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use App\Traits\HasTeam;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
     'invoice_id',
@@ -16,26 +18,23 @@ use Illuminate\Database\Eloquent\Model;
 ])]
 class RecurringBillingConfiguration extends Model
 {
-    use HasFactory;
     use HasTeam;
 
     #[\Override]
     protected function casts(): array
     {
-
         return [
             'next_billing_date' => 'date',
             'is_active' => 'boolean',
         ];
-
     }
 
-    public function invoice()
+    public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
     }
 
-    public function calculateNextBillingDate()
+    public function calculateNextBillingDate(): CarbonInterface
     {
         $date = now();
 

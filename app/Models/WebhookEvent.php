@@ -21,13 +21,11 @@ class WebhookEvent extends Model
     #[\Override]
     protected function casts(): array
     {
-
         return [
             'payload' => 'array',
             'sent_at' => 'datetime',
             'next_retry_at' => 'datetime',
         ];
-
     }
 
     public function webhookEndpoint(): BelongsTo

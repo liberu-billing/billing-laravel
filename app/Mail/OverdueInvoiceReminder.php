@@ -18,7 +18,7 @@ class OverdueInvoiceReminder extends Mailable
     /**
      * @var Invoice
      */
-    public $invoice;
+    public Invoice $invoice;
 
     public function __construct(Invoice $invoice)
     {

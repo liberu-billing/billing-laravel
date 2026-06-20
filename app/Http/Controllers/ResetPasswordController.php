@@ -3,11 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
-use Laravel\Jetstream\Http\Controllers\AuthenticatedSessionController;
+use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 
 class ResetPasswordController extends AuthenticatedSessionController
 {
@@ -16,7 +17,7 @@ class ResetPasswordController extends AuthenticatedSessionController
         return view('admin.auth.reset-password', ['token' => $token, 'email' => $request->email]);
     }
 
-    public function reset(Request $request)
+    public function reset(Request $request): RedirectResponse
     {
         $request->validate([
             'token' => 'required',

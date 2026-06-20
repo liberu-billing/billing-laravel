@@ -50,7 +50,8 @@ class Quote extends Model
     {
         parent::boot();
 
-        static::creating(function (Quote $quote): void {
+        static::creating(
+            static function (Quote $quote): void {
             if (empty($quote->quote_number)) {
                 $quote->quote_number = 'QUO-'.strtoupper(Str::random(8));
             }

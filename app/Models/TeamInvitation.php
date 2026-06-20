@@ -22,7 +22,8 @@ class TeamInvitation extends JetstreamTeamInvitation
     {
         parent::boot();
 
-        static::creating(function ($invitation): void {
+        static::creating(
+            static function ($invitation): void {
             if (empty($invitation->token)) {
                 $invitation->token = Str::random(64);
             }

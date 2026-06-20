@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\KnowledgeBaseArticle;
 use App\Services\KnowledgeBaseService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class KnowledgeBaseController extends Controller
@@ -16,7 +17,7 @@ class KnowledgeBaseController extends Controller
     /**
      * Get all categories
      */
-    public function categories()
+    public function categories(): JsonResponse
     {
         return response()->json([
             'data' => $this->knowledgeBaseService->getCategoryTree(),
@@ -26,7 +27,7 @@ class KnowledgeBaseController extends Controller
     /**
      * Search articles
      */
-    public function search(Request $request)
+    public function search(Request $request): JsonResponse
     {
         $request->validate([
             'q' => 'required|string|min:2',
@@ -48,9 +49,9 @@ class KnowledgeBaseController extends Controller
     /**
      * Get featured articles
      */
-    public function featured(Request $request)
+    public function featured(Request $request): JsonResponse
     {
-        $limit = $request->get('limit', 5);
+        $limit = $request->input('limit', 5);
         $articles = $this->knowledgeBaseService->getFeatured($limit);
 
         return response()->json([
@@ -61,9 +62,9 @@ class KnowledgeBaseController extends Controller
     /**
      * Get popular articles
      */
-    public function popular(Request $request)
+    public function popular(Request $request): JsonResponse
     {
-        $limit = $request->get('limit', 10);
+        $limit = $request->input('limit', 10);
         $articles = $this->knowledgeBaseService->getPopular($limit);
 
         return response()->json([
@@ -74,7 +75,7 @@ class KnowledgeBaseController extends Controller
     /**
      * Get article by slug
      */
-    public function show(string $slug)
+    public function show(string $slug): JsonResponse
     {
         $article = KnowledgeBaseArticle::where('slug', $slug)
             ->where('is_published', true)
@@ -96,7 +97,7 @@ class KnowledgeBaseController extends Controller
     /**
      * Mark article as helpful
      */
-    public function markHelpful(string $slug)
+    public function markHelpful(string $slug): JsonResponse
     {
         $article = KnowledgeBaseArticle::where('slug', $slug)
             ->where('is_published', true)
@@ -112,7 +113,7 @@ class KnowledgeBaseController extends Controller
     /**
      * Mark article as not helpful
      */
-    public function markNotHelpful(string $slug)
+    public function markNotHelpful(string $slug): JsonResponse
     {
         $article = KnowledgeBaseArticle::where('slug', $slug)
             ->where('is_published', true)
@@ -128,7 +129,7 @@ class KnowledgeBaseController extends Controller
     /**
      * Get articles by category
      */
-    public function byCategory(int $categoryId)
+    public function byCategory(int $categoryId): JsonResponse
     {
         $articles = $this->knowledgeBaseService->getByCategory($categoryId);
 

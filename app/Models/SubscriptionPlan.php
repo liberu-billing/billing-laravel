@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'name',
@@ -19,8 +20,6 @@ use Illuminate\Database\Eloquent\Model;
 ])]
 class SubscriptionPlan extends Model
 {
-    use HasFactory;
-
     #[\Override]
     protected function casts(): array
     {
@@ -34,7 +33,7 @@ class SubscriptionPlan extends Model
 
     }
 
-    public function subscriptions()
+    public function subscriptions(): HasMany
     {
         return $this->hasMany(Subscription::class);
     }

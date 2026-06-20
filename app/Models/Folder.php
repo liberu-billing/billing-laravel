@@ -22,12 +22,12 @@ class Folder extends Model
 
     public function parent(): BelongsTo
     {
-        return $this->belongsTo(Folder::class, 'parent_id');
+        return $this->belongsTo(__CLASS__, 'parent_id');
     }
 
     public function children(): HasMany
     {
-        return $this->hasMany(Folder::class, 'parent_id');
+        return $this->hasMany(__CLASS__, 'parent_id');
     }
 
     public function files(): HasMany

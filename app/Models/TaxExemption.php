@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
     'customer_id',
@@ -16,20 +17,16 @@ use Illuminate\Database\Eloquent\Model;
 ])]
 class TaxExemption extends Model
 {
-    use HasFactory;
-
     #[\Override]
     protected function casts(): array
     {
-
         return [
             'expiry_date' => 'date',
             'is_active' => 'boolean',
         ];
-
     }
 
-    public function customer()
+    public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }

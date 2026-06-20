@@ -5,13 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Invoice;
 use App\Models\InvoiceDispute;
 use App\Services\DisputeService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class InvoiceDisputeController extends Controller
 {
     public function __construct(protected DisputeService $disputeService) {}
 
-    public function store(Request $request, Invoice $invoice)
+    public function store(Request $request, Invoice $invoice): JsonResponse
     {
         $validated = $request->validate([
             'reason' => 'required|string|max:255',
@@ -23,7 +24,7 @@ class InvoiceDisputeController extends Controller
         return response()->json($dispute, 201);
     }
 
-    public function update(Request $request, InvoiceDispute $dispute)
+    public function update(Request $request, InvoiceDispute $dispute): JsonResponse
     {
         $validated = $request->validate([
             'status' => 'required|in:under_review,resolved,rejected',
@@ -39,7 +40,7 @@ class InvoiceDisputeController extends Controller
         return response()->json($dispute);
     }
 
-    public function addMessage(Request $request, InvoiceDispute $dispute)
+    public function addMessage(Request $request, InvoiceDispute $dispute): JsonResponse
     {
         $validated = $request->validate([
             'message' => 'required|string',

@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 
 class RoleBasedRedirect
 {
-    protected $roleRedirects = [
+    protected array $roleRedirects = [
         'admin' => '/admin',
         'staff' => '/staff',
         'buyer' => '/buyer',

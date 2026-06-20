@@ -19,11 +19,9 @@ class PackageGroup extends Model
     #[\Override]
     protected function casts(): array
     {
-
         return [
             'is_active' => 'boolean',
         ];
-
     }
 
     public function team(): BelongsTo

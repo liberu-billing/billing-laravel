@@ -10,6 +10,7 @@ use Filament\PanelRegistry;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use ReflectionClass;
 
 class ModuleServiceProvider extends ServiceProvider
 {
@@ -219,7 +220,7 @@ class ModuleServiceProvider extends ServiceProvider
             $moduleName = $module->getName();
             $this->registerModule(
                 $moduleName,
-                dirname((new \ReflectionClass($module))->getFileName()),
+                dirname(new ReflectionClass($module)->getFileName()),
                 config('modules.namespace', 'App\\Modules')
             );
         }

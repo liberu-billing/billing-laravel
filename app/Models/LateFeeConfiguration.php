@@ -18,7 +18,6 @@ use Illuminate\Database\Eloquent\Model;
 ])]
 class LateFeeConfiguration extends Model
 {
-    use HasFactory;
     use HasTeam;
 
     #[\Override]
@@ -72,7 +71,8 @@ class LateFeeConfiguration extends Model
     {
         parent::boot();
 
-        static::saving(function ($config): void {
+        static::saving(
+            static function ($config): void {
             $config->validate();
         });
     }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\WebhookEndpoint;
 use App\Models\WebhookEvent;
 use App\Services\WebhookService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class WebhookController extends Controller
@@ -32,7 +33,7 @@ class WebhookController extends Controller
     /**
      * Create a webhook endpoint
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'url' => 'required|url',
@@ -57,7 +58,7 @@ class WebhookController extends Controller
     /**
      * Show a webhook endpoint
      */
-    public function show(WebhookEndpoint $webhook)
+    public function show(WebhookEndpoint $webhook): JsonResponse
     {
         $this->authorize('view', $webhook);
 
@@ -69,7 +70,7 @@ class WebhookController extends Controller
     /**
      * Update a webhook endpoint
      */
-    public function update(Request $request, WebhookEndpoint $webhook)
+    public function update(Request $request, WebhookEndpoint $webhook): JsonResponse
     {
         $this->authorize('update', $webhook);
 
@@ -94,7 +95,7 @@ class WebhookController extends Controller
     /**
      * Delete a webhook endpoint
      */
-    public function destroy(WebhookEndpoint $webhook)
+    public function destroy(WebhookEndpoint $webhook): JsonResponse
     {
         $this->authorize('delete', $webhook);
 
@@ -108,7 +109,7 @@ class WebhookController extends Controller
     /**
      * Test a webhook endpoint
      */
-    public function test(WebhookEndpoint $webhook)
+    public function test(WebhookEndpoint $webhook): JsonResponse
     {
         $this->authorize('update', $webhook);
 
@@ -134,7 +135,7 @@ class WebhookController extends Controller
     /**
      * Get webhook events
      */
-    public function events(Request $request, WebhookEndpoint $webhook)
+    public function events(Request $request, WebhookEndpoint $webhook): JsonResponse
     {
         $this->authorize('view', $webhook);
 
@@ -148,7 +149,7 @@ class WebhookController extends Controller
     /**
      * Get available event types
      */
-    public function eventTypes()
+    public function eventTypes(): JsonResponse
     {
         return response()->json([
             'data' => WebhookService::getAvailableEvents(),
@@ -158,7 +159,7 @@ class WebhookController extends Controller
     /**
      * Retry a failed webhook event
      */
-    public function retryEvent(WebhookEvent $event)
+    public function retryEvent(WebhookEvent $event): JsonResponse
     {
         $this->authorize('update', $event->webhookEndpoint);
 

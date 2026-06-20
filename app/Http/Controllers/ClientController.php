@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Client;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class ClientController extends Controller
@@ -35,7 +36,7 @@ class ClientController extends Controller
         return view('clients.create');
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -57,7 +58,7 @@ class ClientController extends Controller
         return view('clients.edit', compact('client'));
     }
 
-    public function update(Request $request, Client $client)
+    public function update(Request $request, Client $client): RedirectResponse
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -74,7 +75,7 @@ class ClientController extends Controller
         return redirect()->route('clients.index')->with('success', 'Client updated successfully');
     }
 
-    public function destroy(Client $client)
+    public function destroy(Client $client): RedirectResponse
     {
         $client->delete();
 

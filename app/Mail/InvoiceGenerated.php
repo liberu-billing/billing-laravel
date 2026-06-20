@@ -17,7 +17,7 @@ class InvoiceGenerated extends Mailable
     /**
      * @var Invoice
      */
-    public $invoice;
+    public Invoice $invoice;
 
     protected $template;
 

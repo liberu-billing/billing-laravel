@@ -8,6 +8,7 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportController extends Controller
 {
@@ -49,7 +50,7 @@ class ReportController extends Controller
         return redirect()->route('reports.index');
     }
 
-    public function generate(Report $report)
+    public function generate(Report $report): StreamedResponse
     {
         $filename = $this->reportService->generateReport($report);
 

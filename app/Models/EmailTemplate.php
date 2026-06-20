@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Model;
 ])]
 class EmailTemplate extends Model
 {
-    use HasFactory, HasTeam;
+    use HasTeam;
 
     public static function getTemplate($type, $teamId = null)
     {

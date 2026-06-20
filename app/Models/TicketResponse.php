@@ -14,8 +14,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class TicketResponse extends Model
 {
-    use HasFactory;
-
     public function ticket(): BelongsTo
     {
         return $this->belongsTo(Ticket::class);

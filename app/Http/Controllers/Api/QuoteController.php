@@ -183,7 +183,7 @@ class QuoteController extends Controller
      */
     public function statistics(Request $request): JsonResponse
     {
-        $teamId = $request->get('team_id');
+        $teamId = $request->input('team_id');
         $stats = $this->quoteService->getStatistics($teamId);
 
         return response()->json(['data' => $stats]);

@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 #[Fillable([
     'name',
@@ -33,11 +35,9 @@ class Products_Service extends Model
     #[\Override]
     protected function casts(): array
     {
-
         return [
             'custom_pricing_data' => 'array',
         ];
-
     }
 
     protected function price(): Attribute
@@ -45,12 +45,12 @@ class Products_Service extends Model
         return Attribute::make(get: fn () => $this->base_price);
     }
 
-    public function invoiceItems()
+    public function invoiceItems(): HasMany
     {
         return $this->hasMany(Invoice_Item::class, 'product_service_id');
     }
 
-    public function usageRecords()
+    public function usageRecords(): HasManyThrough
     {
         return $this->hasManyThrough(UsageRecord::class, Subscription::class);
     }

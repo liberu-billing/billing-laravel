@@ -8,6 +8,7 @@ use App\Traits\HasTeam;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'name',
@@ -38,7 +39,7 @@ class HostingServer extends Model
 
     }
 
-    public function hostingAccounts()
+    public function hostingAccounts(): HasMany
     {
         return $this->hasMany(HostingAccount::class);
     }

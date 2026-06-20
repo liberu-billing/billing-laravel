@@ -18,7 +18,7 @@ class PaymentConfirmation extends Mailable
     /**
      * @var Payment
      */
-    public $payment;
+    public Payment $payment;
 
     public function __construct(Payment $payment)
     {

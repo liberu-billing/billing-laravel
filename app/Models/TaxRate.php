@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
     'name',
@@ -25,13 +26,11 @@ use Illuminate\Database\Eloquent\Model;
 ])]
 class TaxRate extends Model
 {
-    use HasFactory;
     use HasTeam;
 
     #[\Override]
     protected function casts(): array
     {
-
         return [
             'rate' => 'decimal:2',
             'threshold_amount' => 'decimal:2',
@@ -40,10 +39,9 @@ class TaxRate extends Model
             'effective_date' => 'date',
             'expiry_date' => 'date',
         ];
-
     }
 
-    public function team()
+    public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }

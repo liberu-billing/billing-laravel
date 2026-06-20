@@ -12,7 +12,7 @@ class UpcomingInvoiceReminder extends Mailable
 
     public function __construct(public $data, public $template) {}
 
-    public function build()
+    public function build(): self
     {
         return $this->subject($this->parseTemplate($this->template->subject))
             ->view('emails.upcoming-invoice-reminder')

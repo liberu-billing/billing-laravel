@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Notifications\NewTicketNotification;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
 
@@ -28,7 +29,7 @@ class TicketController extends Controller
         return view('tickets.create');
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],

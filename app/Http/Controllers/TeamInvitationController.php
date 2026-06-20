@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\TeamInvitation;
+use App\Mail\TeamInvitation as MailTeamInvitation;
 use App\Models\Team;
+use App\Models\TeamInvitation;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -27,7 +28,7 @@ class TeamInvitationController extends Controller
             'token' => $invitationToken,
         ]);
 
-        Mail::to($request->email)->send(new TeamInvitation($user, $team, $invitationToken));
+        Mail::to($request->email)->send(new MailTeamInvitation($user, $team, $invitationToken));
 
         return response()->json(['message' => 'Invitation sent successfully.']);
     }

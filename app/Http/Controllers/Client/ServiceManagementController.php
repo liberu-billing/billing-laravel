@@ -36,7 +36,7 @@ class ServiceManagementController extends Controller
         return view('client.services.show', compact('subscription', 'availableUpgrades', 'availableDowngrades'));
     }
 
-    public function upgrade(Request $request, Subscription $subscription)
+    public function upgrade(Request $request, Subscription $subscription): \Illuminate\Http\RedirectResponse
     {
         $request->validate([
             'new_service_id' => 'required|exists:products_services,id',
@@ -64,7 +64,7 @@ class ServiceManagementController extends Controller
             ->with('success', 'Service upgraded successfully');
     }
 
-    public function downgrade(Request $request, Subscription $subscription)
+    public function downgrade(Request $request, Subscription $subscription): \Illuminate\Http\RedirectResponse
     {
         $request->validate([
             'new_service_id' => 'required|exists:products_services,id',
@@ -84,7 +84,7 @@ class ServiceManagementController extends Controller
             ->with('success', 'Service scheduled for downgrade at end of billing period');
     }
 
-    public function cancel(Subscription $subscription)
+    public function cancel(Subscription $subscription): \Illuminate\Http\RedirectResponse
     {
         // Schedule cancellation for end of billing period
         $subscription->scheduled_change = [

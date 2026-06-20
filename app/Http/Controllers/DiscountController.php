@@ -21,7 +21,7 @@ class DiscountController extends Controller
         return view('discounts.create');
     }
 
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\RedirectResponse
     {
         $validated = $request->validate([
             'code' => 'required|unique:discounts',
@@ -66,7 +66,7 @@ class DiscountController extends Controller
             ->with('success', 'Discount updated successfully');
     }
 
-    public function destroy(Discount $discount)
+    public function destroy(Discount $discount): \Illuminate\Http\RedirectResponse
     {
         $discount->delete();
 

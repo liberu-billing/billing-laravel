@@ -25,5 +25,4 @@ use Illuminate\Database\Eloquent\Model;
 ])]
 class SiteSettings extends Model
 {
-    use HasFactory;
 }

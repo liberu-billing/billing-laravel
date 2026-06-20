@@ -16,9 +16,9 @@ class SendEmailNotification implements ShouldQueue
 {
     use Queueable;
 
-    public $tries = 3;
+    public int $tries = 3;
 
-    public $backoff = 300; // 5 minutes
+    public int $backoff = 300; // 5 minutes
 
     public function __construct(protected Mailable $mailable, protected string $recipient) {}
 

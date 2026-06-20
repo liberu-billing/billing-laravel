@@ -7,6 +7,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
     'subscription_id',
@@ -16,22 +17,17 @@ use Illuminate\Database\Eloquent\Model;
     'processed',
 ])]
 class UsageRecord extends Model
-{
-    use HasFactory;
-
-    #[\Override]
+{#[\Override]
     protected function casts(): array
     {
-
         return [
             'recorded_at' => 'datetime',
             'processed' => 'boolean',
             'quantity' => 'decimal:2',
         ];
-
     }
 
-    public function subscription()
+    public function subscription(): BelongsTo
     {
         return $this->belongsTo(Subscription::class);
     }

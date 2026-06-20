@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ReminderSetting;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class ReminderSettingsController extends Controller
@@ -24,7 +25,7 @@ class ReminderSettingsController extends Controller
         return view('reminder-settings.edit', compact('settings'));
     }
 
-    public function update(Request $request)
+    public function update(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'days_before_reminder' => 'required|integer|min:1',

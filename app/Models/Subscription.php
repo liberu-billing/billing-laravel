@@ -6,6 +6,8 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'customer_id',
@@ -50,34 +52,34 @@ class Subscription extends Model
 
     }
 
-    public function customer()
+    public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
 
-    public function productService()
+    public function productService(): BelongsTo
     {
         return $this->belongsTo(Products_Service::class, 'product_service_id');
     }
 
-    public function invoices()
+    public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
     }
 
-    public function suspensions()
+    public function suspensions(): HasMany
     {
         return $this->hasMany(ServiceSuspension::class);
     }
 
-    public function activeSuspension()
+    public function activeSuspension(): HasMany
     {
         return $this->hasOne(ServiceSuspension::class)
             ->where('is_active', true)
             ->whereNull('unsuspended_at');
     }
 
-    public function renew()
+    public function renew(): bool
     {
         if (! $this->auto_renew || $this->status === 'cancelled') {
             return false;
@@ -91,7 +93,7 @@ class Subscription extends Model
         return $this->save();
     }
 
-    public function cancel()
+    public function cancel(): bool
     {
         $this->auto_renew = false;
         $this->status = 'cancelled';
@@ -99,14 +101,14 @@ class Subscription extends Model
         return $this->save();
     }
 
-    public function suspend()
+    public function suspend(): bool
     {
         $this->status = 'suspended';
 
         return $this->save();
     }
 
-    public function resume()
+    public function resume(): bool
     {
         if ($this->status === 'suspended') {
             $this->status = 'active';
@@ -122,7 +124,7 @@ class Subscription extends Model
         return $this->status === 'active' && $this->end_date->isFuture();
     }
 
-    public function needsBilling()
+    public function needsBilling(): bool
     {
         if (! $this->last_billed_at) {
             return true;

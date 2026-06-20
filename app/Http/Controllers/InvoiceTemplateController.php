@@ -6,6 +6,7 @@ use App\Models\Invoice;
 use App\Models\InvoiceTemplate;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -23,7 +24,7 @@ class InvoiceTemplateController extends Controller
         return view('invoice-templates.form');
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -63,7 +64,7 @@ class InvoiceTemplateController extends Controller
         return view('invoice-templates.form', compact('template'));
     }
 
-    public function update(Request $request, InvoiceTemplate $template)
+    public function update(Request $request, InvoiceTemplate $template): RedirectResponse
     {
         $this->authorize('update', $template);
 

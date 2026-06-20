@@ -7,6 +7,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'code',
@@ -15,19 +16,17 @@ use Illuminate\Database\Eloquent\Model;
 ])]
 class Currency extends Model
 {
-    use HasFactory;
-
-    public function invoices()
+    public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class, 'currency', 'code');
     }
 
-    public function invoiceItems()
+    public function invoiceItems(): HasMany
     {
         return $this->hasMany(Invoice_Item::class, 'currency', 'code');
     }
 
-    public function payments()
+    public function payments(): HasMany
     {
         return $this->hasMany(Payment::class, 'currency', 'code');
     }

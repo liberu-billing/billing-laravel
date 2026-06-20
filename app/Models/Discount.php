@@ -8,6 +8,7 @@ use App\Traits\HasTeam;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'code',
@@ -24,7 +25,6 @@ use Illuminate\Database\Eloquent\Model;
 ])]
 class Discount extends Model
 {
-    use HasFactory;
     use HasTeam;
 
     #[\Override]
@@ -39,7 +39,7 @@ class Discount extends Model
 
     }
 
-    public function invoices()
+    public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
     }

@@ -8,6 +8,7 @@ use App\Traits\HasTeam;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'name',
@@ -17,7 +18,6 @@ use Illuminate\Database\Eloquent\Model;
 ])]
 class PaymentGateway extends Model
 {
-    use HasFactory;
     use HasTeam;
 
     #[\Override]
@@ -30,7 +30,7 @@ class PaymentGateway extends Model
 
     }
 
-    public function payments()
+    public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
     }

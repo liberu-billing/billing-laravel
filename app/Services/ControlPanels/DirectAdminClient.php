@@ -7,13 +7,12 @@ use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Log;
+use Random\RandomException;
 
 class DirectAdminClient
 {
     protected Client $client;
-
     protected $server;
-
     protected $loginKey;
 
     public function __construct()
@@ -27,6 +26,9 @@ class DirectAdminClient
         $this->loginKey = $server->api_token;
     }
 
+    /**
+     * @throws Exception
+     */
     public function createAccount(string $username, string $domain, $package): bool
     {
         $password = $this->generatePassword();
@@ -58,6 +60,9 @@ class DirectAdminClient
         return $this->makeApiCall('/CMD_API_ACCOUNT_USER', $params);
     }
 
+    /**
+     * @throws Exception
+     */
     public function suspendAccount($username): bool
     {
         $params = [
@@ -69,6 +74,9 @@ class DirectAdminClient
         return $this->makeApiCall('/CMD_API_SELECT_USERS', $params);
     }
 
+    /**
+     * @throws Exception
+     */
     public function unsuspendAccount($username): bool
     {
         $params = [
@@ -79,6 +87,9 @@ class DirectAdminClient
         return $this->makeApiCall('/CMD_API_SELECT_USERS', $params);
     }
 
+    /**
+     * @throws Exception
+     */
     public function changePackage($username, $newPackage): bool
     {
         $params = [
@@ -90,6 +101,9 @@ class DirectAdminClient
         return $this->makeApiCall('/CMD_API_MODIFY_USER', $params);
     }
 
+    /**
+     * @throws Exception
+     */
     public function terminateAccount($username): bool
     {
         $params = [
@@ -101,6 +115,9 @@ class DirectAdminClient
         return $this->makeApiCall('/CMD_API_SELECT_USERS', $params);
     }
 
+    /**
+     * @throws Exception
+     */
     public function addAddon($username, $addon): bool
     {
         $params = [
@@ -112,6 +129,9 @@ class DirectAdminClient
         return $this->makeApiCall('/CMD_API_MODIFY_USER', $params);
     }
 
+    /**
+     * @throws Exception
+     */
     public function removeAddon($username, $addon): bool
     {
         $params = [
@@ -169,6 +189,9 @@ class DirectAdminClient
         }
     }
 
+    /**
+     * @throws RandomException
+     */
     protected function generatePassword(): string
     {
         return bin2hex(random_bytes(12));
