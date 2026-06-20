@@ -6,6 +6,7 @@ namespace App\Jobs;
 
 use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -13,7 +14,7 @@ use Throwable;
 
 class SendEmailNotification implements ShouldQueue
 {
-    use \Illuminate\Foundation\Queue\Queueable;
+    use Queueable;
 
     public $tries = 3;
 

@@ -310,6 +310,7 @@ class ModuleManager
                     $module = new $moduleClass;
                 } catch (\Throwable $e) {
                     Log::warning("Failed to instantiate module '{$moduleName}': ".$e->getMessage());
+
                     continue;
                 }
 

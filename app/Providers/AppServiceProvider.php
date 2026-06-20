@@ -28,30 +28,34 @@ class AppServiceProvider extends ServiceProvider
         $this->configureVite();
         $this->configurePassword();
     }
+
     private function configureModels(): void
     {
         Model::shouldBeStrict();
         Model::unguard();
         Model::automaticallyEagerLoadRelationships();
     }
+
     private function configurePassword(): void
     {
         Password::defaults(
             static function () {
                 return Password::min(12)        // NIST 800-63B: minimum 12 characters
-                ->mixedCase()      // At least one uppercase and one lowercase
-                ->numbers()        // At least one digit
-                ->symbols()        // At least one symbol (@$!%*#?&)
-                ->uncompromised(); // Check against breach database
+                    ->mixedCase()      // At least one uppercase and one lowercase
+                    ->numbers()        // At least one digit
+                    ->symbols()        // At least one symbol (@$!%*#?&)
+                    ->uncompromised(); // Check against breach database
             },
         );
     }
+
     private function configureUrl(): void
     {
         if ($this->app->isProduction()) {
             URL::forceScheme('https');
         }
     }
+
     private function configureVite(): void
     {
         Vite::usePrefetchStrategy('aggressive');

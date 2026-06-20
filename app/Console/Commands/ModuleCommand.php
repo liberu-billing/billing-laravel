@@ -22,15 +22,15 @@ class ModuleCommand extends Command
     public function handle(): int
     {
         return match ($this->argument('action')) {
-            'list'      => $this->listModules(),
-            'enable'    => $this->enableModule($this->argument('name')),
-            'disable'   => $this->disableModule($this->argument('name')),
-            'install'   => $this->installModule($this->argument('name')),
+            'list' => $this->listModules(),
+            'enable' => $this->enableModule($this->argument('name')),
+            'disable' => $this->disableModule($this->argument('name')),
+            'install' => $this->installModule($this->argument('name')),
             'uninstall' => $this->uninstallModule($this->argument('name')),
-            'create'    => $this->createModule($this->argument('name')),
-            'info'      => $this->showModuleInfo($this->argument('name')),
-            'health'    => $this->healthCheck($this->argument('name')),
-            default     => $this->showHelp(),
+            'create' => $this->createModule($this->argument('name')),
+            'info' => $this->showModuleInfo($this->argument('name')),
+            'health' => $this->healthCheck($this->argument('name')),
+            default => $this->showHelp(),
         };
     }
 
@@ -45,9 +45,9 @@ class ModuleCommand extends Command
         }
 
         $rows = $modules->map(fn ($m): array => [
-            'name'        => $m->getName(),
-            'version'     => $m->getVersion(),
-            'status'      => $m->isEnabled() ? 'enabled' : 'disabled',
+            'name' => $m->getName(),
+            'version' => $m->getVersion(),
+            'status' => $m->isEnabled() ? 'enabled' : 'disabled',
             'description' => $m->getDescription(),
             'dependencies' => implode(', ', $m->getDependencies()),
         ])->values()->all();

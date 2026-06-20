@@ -27,14 +27,14 @@ class SocialstreamTest extends TestCase
     public static function socialMediaProviders(): array
     {
         return [
-            'bitbucket'    => [Providers::bitbucket()],
-            'facebook'     => [Providers::facebook()],
-            'github'       => [Providers::github()],
-            'gitlab'       => [Providers::gitlab()],
-            'google'       => [Providers::google()],
-            'linkedin'     => [Providers::linkedin()],
+            'bitbucket' => [Providers::bitbucket()],
+            'facebook' => [Providers::facebook()],
+            'github' => [Providers::github()],
+            'gitlab' => [Providers::gitlab()],
+            'google' => [Providers::google()],
+            'linkedin' => [Providers::linkedin()],
             'linkedinOpenId' => [Providers::linkedinOpenId()],
-            'slack'        => [Providers::slack()],
+            'slack' => [Providers::slack()],
             'twitter-oauth-2' => [Providers::twitterOAuth2()],
             // twitter-oauth-1 excluded: OAuth 1.0 requires live API keys even for redirect
         ];

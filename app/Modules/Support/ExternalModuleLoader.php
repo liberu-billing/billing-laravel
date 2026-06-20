@@ -104,7 +104,7 @@ class ExternalModuleLoader
      *
      * Tries several class naming conventions before giving up.
      *
-     * @param array<string,string> $psr4Map Optional PSR-4 namespace map for vendor packages
+     * @param  array<string,string>  $psr4Map  Optional PSR-4 namespace map for vendor packages
      */
     protected function resolveModule(string $modulePath, array $psr4Map = []): ?ModuleInterface
     {
@@ -126,7 +126,7 @@ class ExternalModuleLoader
     /**
      * Build a list of candidate fully-qualified class names for a given module directory.
      *
-     * @param array<string,string> $psr4Map
+     * @param  array<string,string>  $psr4Map
      * @return string[]
      */
     protected function buildCandidateClasses(string $moduleName, string $modulePath, array $psr4Map): array
