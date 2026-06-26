@@ -43,12 +43,14 @@ class BulkOperationService
 
             foreach ($clientIds as $clientId) {
                 try {
-                    // Create invoice for client
+                    // Invoices belong to a customer and need a unique invoice_number;
+                    // the per-item number is overridable by explicit $invoiceData.
                     Invoice::create(
                         array_merge(
+                            ['invoice_number' => 'INV-'.strtoupper(uniqid())],
                             $invoiceData,
                             [
-                                'client_id' => $clientId,
+                                'customer_id' => $clientId,
                             ]
                         )
                     );
