@@ -11,7 +11,5 @@ readonly class ModuleDisabled
     public function __construct(
         public string $name,
         public ModuleInterface $module,
-    )
-    {
-    }
+    ) {}
 }

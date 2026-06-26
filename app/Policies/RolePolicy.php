@@ -20,7 +20,7 @@ class RolePolicy
         return $user->hasRole(
             [
                 'admin',
-                'super_admin'
+                'super_admin',
             ]
         );
     }
@@ -33,7 +33,7 @@ class RolePolicy
         return $user->hasRole(
             [
                 'admin',
-                'super_admin'
+                'super_admin',
             ]
         );
     }

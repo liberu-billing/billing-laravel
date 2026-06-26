@@ -63,12 +63,12 @@ class Invoice extends Model
                 $attrs = $invoice->getAttributes();
 
                 if (empty($attrs['invoice_number'])) {
-                    $invoice->invoice_number = 'INV-' . str_pad(
-                            (string)(static::max('id') + 1),
-                            6,
-                            '0',
-                            STR_PAD_LEFT
-                        );
+                    $invoice->invoice_number = 'INV-'.str_pad(
+                        (string) (static::max('id') + 1),
+                        6,
+                        '0',
+                        STR_PAD_LEFT
+                    );
                 }
 
                 if (empty($attrs['currency'])) {
@@ -125,7 +125,7 @@ class Invoice extends Model
             'status',
             [
                 'open',
-                'under_review'
+                'under_review',
             ]
         )->latest()->first();
     }
@@ -235,7 +235,7 @@ class Invoice extends Model
 
     protected function remainingAmount(): Attribute
     {
-        return Attribute::make(get: fn(): int|float => $this->total_amount - $this->payments()->sum('amount'));
+        return Attribute::make(get: fn (): int|float => $this->total_amount - $this->payments()->sum('amount'));
     }
 
     public function parentInvoice(): BelongsTo
@@ -261,12 +261,12 @@ class Invoice extends Model
 
     protected function subtotal(): Attribute
     {
-        return Attribute::make(get: fn() => $this->items->sum('total_price'));
+        return Attribute::make(get: fn () => $this->items->sum('total_price'));
     }
 
     protected function finalTotal(): Attribute
     {
-        return Attribute::make(get: fn(): int|float => $this->subtotal + ($this->tax_amount ?? 0) - ($this->discount_amount ?? 0));
+        return Attribute::make(get: fn (): int|float => $this->subtotal + ($this->tax_amount ?? 0) - ($this->discount_amount ?? 0));
     }
 
     public function calculateTax()
@@ -337,9 +337,9 @@ class Invoice extends Model
     public function getFormattedAmount(): string
     {
         return number_format(
-                $this->total_amount,
-                2
-            ) . ' ' . $this->currency;
+            $this->total_amount,
+            2
+        ).' '.$this->currency;
     }
 
     public function isOverdue(): bool
@@ -349,7 +349,7 @@ class Invoice extends Model
 
     public function calculateLateFee(): int|float
     {
-        if (!$this->isOverdue()) {
+        if (! $this->isOverdue()) {
             return 0;
         }
 
@@ -357,7 +357,7 @@ class Invoice extends Model
             'team_id',
             $this->team_id
         )->first();
-        if (!$config) {
+        if (! $config) {
             return 0;
         }
 
@@ -426,16 +426,16 @@ class Invoice extends Model
 
     protected function totalWithLateFee(): Attribute
     {
-        return Attribute::make(get: fn(): float|int|array => $this->final_total + $this->late_fee_amount);
+        return Attribute::make(get: fn (): float|int|array => $this->final_total + $this->late_fee_amount);
     }
 
     protected function formattedTotalWithLateFee(): Attribute
     {
         return Attribute::make(
-            get: fn(): string => number_format(
+            get: fn (): string => number_format(
                 $this->total_with_late_fee,
                 2
-            ) . ' ' . $this->currency
+            ).' '.$this->currency
         );
     }
 
@@ -443,19 +443,19 @@ class Invoice extends Model
     {
         return Attribute::make(
             get: function (): null|float|int {
-            $config = LateFeeConfiguration::where(
-                'team_id',
-                $this->team_id
-            )->first();
-            if (!$config || !$config->max_fee_amount) {
-                return null;
-            }
+                $config = LateFeeConfiguration::where(
+                    'team_id',
+                    $this->team_id
+                )->first();
+                if (! $config || ! $config->max_fee_amount) {
+                    return null;
+                }
 
-            return max(
-                0,
-                $config->max_fee_amount - $this->late_fee_amount
-            );
-        }
+                return max(
+                    0,
+                    $config->max_fee_amount - $this->late_fee_amount
+                );
+            }
         );
     }
 
@@ -522,18 +522,18 @@ class Invoice extends Model
     {
         return Attribute::make(
             get: function ($value) {
-            if ($this->paid_at) {
-                return 'paid';
-            }
-            if ($this->viewed_at) {
-                return 'viewed';
-            }
-            if ($this->sent_at) {
-                return 'sent';
-            }
+                if ($this->paid_at) {
+                    return 'paid';
+                }
+                if ($this->viewed_at) {
+                    return 'viewed';
+                }
+                if ($this->sent_at) {
+                    return 'sent';
+                }
 
-            return $value;
-        }
+                return $value;
+            }
         );
     }
 

@@ -15,9 +15,6 @@ class PaymentConfirmation extends Mailable
 {
     use Queueable, SerializesModels;
 
-    /**
-     * @var Payment
-     */
     public Payment $payment;
 
     public function __construct(Payment $payment)
@@ -28,7 +25,7 @@ class PaymentConfirmation extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Payment Confirmation - Invoice #' . $this->payment->invoice->invoice_number,
+            subject: 'Payment Confirmation - Invoice #'.$this->payment->invoice->invoice_number,
         );
     }
 

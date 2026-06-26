@@ -60,10 +60,10 @@ class AffiliateResource extends Resource
                         ->disabled()
                         ->label('Total Earnings')
                         ->formatStateUsing(
-                            fn($state): string => '$' . number_format(
-                                    $state,
-                                    2
-                                )
+                            fn ($state): string => '$'.number_format(
+                                $state,
+                                2
+                            )
                         ),
                 ]
             );

@@ -12,9 +12,7 @@ class KnowledgeBaseController extends Controller
 {
     public function __construct(
         protected KnowledgeBaseService $knowledgeBaseService
-    )
-    {
-    }
+    ) {}
 
     /**
      * Get all categories
@@ -106,7 +104,7 @@ class KnowledgeBaseController extends Controller
             ->with(
                 [
                     'category',
-                    'author'
+                    'author',
                 ]
             )
             ->firstOrFail();

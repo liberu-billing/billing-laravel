@@ -11,7 +11,7 @@ use DateTimeInterface;
 
 class PaymentPlanService
 {
-    public function __construct(protected BillingService $billingService) { }
+    public function __construct(protected BillingService $billingService) {}
 
     public function createInstallmentInvoice(PaymentPlan $paymentPlan)
     {
@@ -69,7 +69,7 @@ class PaymentPlanService
     {
         $count = $parentInvoice->installments()->count() + 1;
 
-        return $parentInvoice->invoice_number . "-INST{$count}";
+        return $parentInvoice->invoice_number."-INST{$count}";
     }
 
     private function calculateNextDueDate(DateTimeInterface|WeekDay|Month|string|int|float|null $date, $frequency)

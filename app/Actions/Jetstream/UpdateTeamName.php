@@ -15,7 +15,7 @@ class UpdateTeamName implements UpdatesTeamNames
     /**
      * Validate and update the given team's name.
      *
-     * @param array<string, string> $input
+     * @param  array<string, string>  $input
      */
     public function update(User $user, Team $team, array $input): void
     {
@@ -30,7 +30,7 @@ class UpdateTeamName implements UpdatesTeamNames
                 'name' => [
                     'required',
                     'string',
-                    'max:255'
+                    'max:255',
                 ],
             ]
         )->validateWithBag('updateTeamName');

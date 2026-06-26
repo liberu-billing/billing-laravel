@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable([
     'client_id',
     'user_id',
-    'content'
+    'content',
 ])]
 class ClientNote extends Model
 {

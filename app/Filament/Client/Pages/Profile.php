@@ -59,7 +59,7 @@ class Profile extends Page
                         ->password()
                         ->label('Current Password')
                         ->required()
-                        ->visible(fn($get): bool => (bool)$get('password')),
+                        ->visible(fn ($get): bool => (bool) $get('password')),
                     TextInput::make('password')
                         ->password()
                         ->label('New Password')
@@ -67,7 +67,7 @@ class Profile extends Page
                     TextInput::make('password_confirmation')
                         ->password()
                         ->label('Confirm Password')
-                        ->visible(fn($get): bool => (bool)$get('password'))
+                        ->visible(fn ($get): bool => (bool) $get('password'))
                         ->same('password'),
                 ]
             );
@@ -80,7 +80,7 @@ class Profile extends Page
         $user = auth()->user();
 
         if (isset($data['password'])) {
-            if (!Hash::check(
+            if (! Hash::check(
                 $data['current_password'],
                 $user->password
             )) {

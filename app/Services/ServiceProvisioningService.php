@@ -8,7 +8,7 @@ use Exception;
 
 class ServiceProvisioningService
 {
-    public function __construct(protected HostingService $hostingService) { }
+    public function __construct(protected HostingService $hostingService) {}
 
     public function provisionService(Subscription $subscription): HostingAccount|array
     {
@@ -62,7 +62,7 @@ class ServiceProvisioningService
         // For now, we'll just return a success message
         return [
             'status' => 'success',
-            'message' => 'Domain provisioned successfully'
+            'message' => 'Domain provisioned successfully',
         ];
     }
 
@@ -73,7 +73,7 @@ class ServiceProvisioningService
         // For now, we'll just return a success message
         return [
             'status' => 'success',
-            'message' => 'Email service provisioned successfully'
+            'message' => 'Email service provisioned successfully',
         ];
     }
 
@@ -81,10 +81,10 @@ class ServiceProvisioningService
     {
         // Implement logic to generate a unique username
         $baseName = strtolower(
-            (string)preg_replace(
+            (string) preg_replace(
                 '/[^a-z0-9]/i',
                 '',
-                (string)$customer->name
+                (string) $customer->name
             )
         );
         $baseName = substr(
@@ -93,10 +93,10 @@ class ServiceProvisioningService
             8
         );
 
-        return $baseName . random_int(
-                100,
-                999
-            );
+        return $baseName.random_int(
+            100,
+            999
+        );
     }
 
     public function manageService(Subscription $subscription, $action, array $options = [])
@@ -122,7 +122,7 @@ class ServiceProvisioningService
             $subscription->id
         )->first();
 
-        if (!$hostingAccount) {
+        if (! $hostingAccount) {
             throw new Exception('Hosting account not found');
         }
 
@@ -134,7 +134,7 @@ class ServiceProvisioningService
             case 'terminate':
                 return $this->hostingService->terminateAccount($hostingAccount);
             case 'upgrade':
-                if (!isset($options['new_product'])) {
+                if (! isset($options['new_product'])) {
                     throw new Exception('New product required for upgrade');
                 }
 
@@ -144,7 +144,7 @@ class ServiceProvisioningService
                     $options
                 );
             case 'downgrade':
-                if (!isset($options['new_product'])) {
+                if (! isset($options['new_product'])) {
                     throw new Exception('New product required for downgrade');
                 }
 
@@ -154,7 +154,7 @@ class ServiceProvisioningService
                     $options
                 );
             case 'add_addon':
-                if (!isset($options['addon'])) {
+                if (! isset($options['addon'])) {
                     throw new Exception('Addon name required');
                 }
 
@@ -163,7 +163,7 @@ class ServiceProvisioningService
                     $options['addon']
                 );
             case 'remove_addon':
-                if (!isset($options['addon'])) {
+                if (! isset($options['addon'])) {
                     throw new Exception('Addon name required');
                 }
 
@@ -183,7 +183,7 @@ class ServiceProvisioningService
         // For now, we'll just return a success message
         return [
             'status' => 'success',
-            'message' => "Domain {$action} successfully"
+            'message' => "Domain {$action} successfully",
         ];
     }
 
@@ -194,7 +194,7 @@ class ServiceProvisioningService
         // For now, we'll just return a success message
         return [
             'status' => 'success',
-            'message' => "Email service {$action} successfully"
+            'message' => "Email service {$action} successfully",
         ];
     }
 }

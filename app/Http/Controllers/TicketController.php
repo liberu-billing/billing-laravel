@@ -39,15 +39,15 @@ class TicketController extends Controller
                 'title' => [
                     'required',
                     'string',
-                    'max:255'
+                    'max:255',
                 ],
                 'description' => [
                     'required',
-                    'string'
+                    'string',
                 ],
                 'priority' => [
                     'required',
-                    'in:low,medium,high'
+                    'in:low,medium,high',
                 ],
             ]
         );
@@ -64,7 +64,7 @@ class TicketController extends Controller
         $admins = User::role(
             [
                 'admin',
-                'super_admin'
+                'super_admin',
             ]
         )->get();
         Notification::send(
@@ -91,7 +91,7 @@ class TicketController extends Controller
         $ticket->load(
             [
                 'responses.user',
-                'user'
+                'user',
             ]
         );
 
@@ -112,7 +112,7 @@ class TicketController extends Controller
             [
                 'status' => [
                     'required',
-                    'in:open,in_progress,closed'
+                    'in:open,in_progress,closed',
                 ],
             ]
         );

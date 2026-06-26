@@ -44,8 +44,8 @@ class PaymentGatewayService
         $gateway = $payment->paymentGateway;
         $retries = 0;
 
-        if (!$this->validatePaymentMethod($payment->payment_method)) {
-            throw new Exception('Unsupported payment method: ' . $payment->payment_method);
+        if (! $this->validatePaymentMethod($payment->payment_method)) {
+            throw new Exception('Unsupported payment method: '.$payment->payment_method);
         }
 
         while ($retries < $this->maxRetries) {
@@ -64,7 +64,7 @@ class PaymentGatewayService
                     'Payment processed successfully',
                     [
                         'payment_id' => $payment->id,
-                        'attempt' => $retries + 1
+                        'attempt' => $retries + 1,
                     ]
                 );
                 Log::info(
@@ -204,7 +204,7 @@ class PaymentGatewayService
         // Retrieve the Stripe token from the payment data
         $stripeToken = $payment->stripe_token;
 
-        if (!$stripeToken) {
+        if (! $stripeToken) {
             throw new Exception('Stripe token is required for payment processing');
         }
 
@@ -219,7 +219,7 @@ class PaymentGatewayService
                     // Amount in cents
                     'currency' => $payment->currency,
                     'source' => $stripeToken,
-                    'description' => 'Payment for Invoice #' . $payment->invoice_id,
+                    'description' => 'Payment for Invoice #'.$payment->invoice_id,
                 ]
             );
 
@@ -236,7 +236,7 @@ class PaymentGatewayService
             // Handle failed charge
             $payment->update(['status' => 'failed']);
             throw new Exception(
-                'Payment failed: ' . $e->getMessage(),
+                'Payment failed: '.$e->getMessage(),
                 $e->getCode(),
                 $e
             );
@@ -253,7 +253,7 @@ class PaymentGatewayService
         );
 
         try {
-            $amount = (int)($payment->amount * 100);
+            $amount = (int) ($payment->amount * 100);
             $currency = strtoupper($payment->currency);
 
             $response = $client->getPaymentsApi()->createPayment(
@@ -267,7 +267,7 @@ class PaymentGatewayService
                         '',
                         true
                     ),
-                    'reference_id' => (string)$payment->id,
+                    'reference_id' => (string) $payment->id,
                 ]
             );
 
@@ -286,7 +286,7 @@ class PaymentGatewayService
         } catch (ApiException $e) {
             $payment->update(['status' => 'failed']);
             throw new Exception(
-                'Square payment failed: ' . $e->getMessage(),
+                'Square payment failed: '.$e->getMessage(),
                 $e->getCode(),
                 $e
             );
@@ -297,7 +297,7 @@ class PaymentGatewayService
     {
         try {
             $paymentToken = $payment->google_pay_token;
-            if (!$paymentToken) {
+            if (! $paymentToken) {
                 throw new Exception('Google Pay token is required');
             }
 
@@ -315,7 +315,7 @@ class PaymentGatewayService
         } catch (Exception $e) {
             $payment->update(['status' => 'failed']);
             throw new Exception(
-                'Google Pay payment failed: ' . $e->getMessage(),
+                'Google Pay payment failed: '.$e->getMessage(),
                 $e->getCode(),
                 $e
             );
@@ -328,7 +328,7 @@ class PaymentGatewayService
         // This is a placeholder implementation
         return [
             'success' => true,
-            'transaction_id' => 'gp_' . uniqid(),
+            'transaction_id' => 'gp_'.uniqid(),
             'status' => 'completed',
         ];
     }
@@ -352,7 +352,7 @@ class PaymentGatewayService
             $refund = Refund::create(
                 [
                     'charge' => $payment->transaction_id,
-                    'amount' => (int)($amount * 100),
+                    'amount' => (int) ($amount * 100),
                     // Convert to cents
                     'reason' => 'requested_by_customer',
                 ]

@@ -22,7 +22,7 @@ class CustomerController extends Controller
         $customers = Customer::query()
             ->when(
                 $request->search,
-                fn($q) => $q->where(
+                fn ($q) => $q->where(
                     'name',
                     'like',
                     "%{$request->search}%"
@@ -71,7 +71,7 @@ class CustomerController extends Controller
         $validated = $request->validate(
             [
                 'name' => 'string|max:255',
-                'email' => 'email|unique:customers,email,' . $customer->id,
+                'email' => 'email|unique:customers,email,'.$customer->id,
                 'phone_number' => 'nullable|string|max:20',
                 'address' => 'nullable|string',
                 'city' => 'nullable|string|max:100',

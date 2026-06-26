@@ -29,7 +29,7 @@ class PaymentForm extends Component
                         ->label('Card Number')
                         ->numeric()
                         ->maxLength(16)
-                        ->hidden(fn($get): bool => $get('payment_method') !== 'stripe'),
+                        ->hidden(fn ($get): bool => $get('payment_method') !== 'stripe'),
 
                     Grid::make(3)
                         ->schema(
@@ -48,7 +48,7 @@ class PaymentForm extends Component
                                     ->maxLength(4),
                             ]
                         )
-                        ->hidden(fn($get): bool => $get('payment_method') !== 'stripe'),
+                        ->hidden(fn ($get): bool => $get('payment_method') !== 'stripe'),
                 ]
             );
     }

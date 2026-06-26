@@ -51,7 +51,7 @@ class ResellerClubClient
         );
 
         $this->client->post(
-            $this->apiUrl . $action,
+            $this->apiUrl.$action,
             [
                 'form_params' => $params,
             ]

@@ -21,10 +21,10 @@ class PackageGroupService
             )
             ->with(
                 [
-                    'packages' => fn($q) => $q->where(
+                    'packages' => fn ($q) => $q->where(
                         'is_active',
                         true
-                    )
+                    ),
                 ]
             )
             ->orderBy('sort_order');

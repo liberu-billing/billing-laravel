@@ -16,7 +16,7 @@ class CreateNewUserWithTeams implements CreatesNewUsers
     /**
      * Create a newly registered user.
      *
-     * @param array<string, string> $input
+     * @param  array<string, string>  $input
      */
     public function create(array $input): User
     {
@@ -26,25 +26,25 @@ class CreateNewUserWithTeams implements CreatesNewUsers
                 'name' => [
                     'required',
                     'string',
-                    'max:255'
+                    'max:255',
                 ],
                 'email' => [
                     'required',
                     'string',
                     'email',
                     'max:255',
-                    'unique:users'
+                    'unique:users',
                 ],
                 'password' => $this->passwordRules(),
                 'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature() ? [
                     'accepted',
-                    'required'
+                    'required',
                 ] : '',
             ]
         )->validate();
 
         return DB::transaction(
-            fn() => tap(
+            fn () => tap(
                 User::create(
                     [
                         'name' => $input['name'],

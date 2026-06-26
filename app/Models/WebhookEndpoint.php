@@ -43,7 +43,7 @@ class WebhookEndpoint extends Model
 
     public function isSubscribedTo(string $eventType): bool
     {
-        if (!$this->is_active) {
+        if (! $this->is_active) {
             return false;
         }
 

@@ -20,7 +20,7 @@ trait PasswordValidationRules
             'required',
             'string',
             Password::default(),
-            'confirmed'
+            'confirmed',
         ];
     }
 }

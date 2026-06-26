@@ -31,7 +31,7 @@ class QuoteService
                 return $quote->fresh(
                     [
                         'items',
-                        'customer'
+                        'customer',
                     ]
                 );
             }
@@ -62,7 +62,7 @@ class QuoteService
                 return $quote->fresh(
                     [
                         'items',
-                        'customer'
+                        'customer',
                     ]
                 );
             }
@@ -136,7 +136,7 @@ class QuoteService
      */
     public function convertToInvoice(Quote $quote): Invoice
     {
-        if (!$quote->canBeConverted()) {
+        if (! $quote->canBeConverted()) {
             throw new RuntimeException('Only accepted quotes can be converted to invoices.');
         }
 
@@ -145,7 +145,7 @@ class QuoteService
                 $invoice = Invoice::create(
                     [
                         'customer_id' => $quote->customer_id,
-                        'invoice_number' => 'INV-' . strtoupper(uniqid()),
+                        'invoice_number' => 'INV-'.strtoupper(uniqid()),
                         'issue_date' => now()->toDateString(),
                         'due_date' => now()->addDays(30)->toDateString(),
                         'status' => 'pending',
@@ -181,23 +181,23 @@ class QuoteService
         return [
             'draft' => [
                 'count' => $counts->get('draft')->count ?? 0,
-                'value' => $counts->get('draft')->total_value ?? 0
+                'value' => $counts->get('draft')->total_value ?? 0,
             ],
             'sent' => [
                 'count' => $counts->get('sent')->count ?? 0,
-                'value' => $counts->get('sent')->total_value ?? 0
+                'value' => $counts->get('sent')->total_value ?? 0,
             ],
             'accepted' => [
                 'count' => $counts->get('accepted')->count ?? 0,
-                'value' => $counts->get('accepted')->total_value ?? 0
+                'value' => $counts->get('accepted')->total_value ?? 0,
             ],
             'declined' => [
                 'count' => $counts->get('declined')->count ?? 0,
-                'value' => $counts->get('declined')->total_value ?? 0
+                'value' => $counts->get('declined')->total_value ?? 0,
             ],
             'expired' => [
                 'count' => $counts->get('expired')->count ?? 0,
-                'value' => $counts->get('expired')->total_value ?? 0
+                'value' => $counts->get('expired')->total_value ?? 0,
             ],
         ];
     }
@@ -212,7 +212,7 @@ class QuoteService
                 'status',
                 [
                     'sent',
-                    'viewed'
+                    'viewed',
                 ]
             )
             ->whereNotNull('valid_until')

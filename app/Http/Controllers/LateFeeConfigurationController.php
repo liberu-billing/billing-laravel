@@ -41,9 +41,9 @@ class LateFeeConfigurationController extends Controller
                     Rule::in(
                         [
                             'percentage',
-                            'fixed'
+                            'fixed',
                         ]
-                    )
+                    ),
                 ],
                 'fee_amount' => 'required|numeric|min:0',
                 'grace_period_days' => 'required|integer|min:0',
@@ -56,9 +56,9 @@ class LateFeeConfigurationController extends Controller
                             'one-time',
                             'daily',
                             'weekly',
-                            'monthly'
+                            'monthly',
                         ]
-                    )
+                    ),
                 ],
             ]
         );
@@ -98,9 +98,9 @@ class LateFeeConfigurationController extends Controller
                     'success' => true,
                     'preview_amount' => $previewAmount,
                     'formatted_amount' => number_format(
-                            $previewAmount,
-                            2
-                        ) . ' ' . $invoice->currency,
+                        $previewAmount,
+                        2
+                    ).' '.$invoice->currency,
                 ]
             );
         } catch (Exception $e) {

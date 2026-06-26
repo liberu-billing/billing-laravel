@@ -12,9 +12,7 @@ class CannedResponseController extends Controller
 {
     public function __construct(
         protected CannedResponseService $cannedResponseService
-    )
-    {
-    }
+    ) {}
 
     /**
      * Get all canned responses
@@ -47,7 +45,7 @@ class CannedResponseController extends Controller
             $teamId
         );
 
-        if (!$response instanceof CannedResponse) {
+        if (! $response instanceof CannedResponse) {
             return response()->json(
                 [
                     'message' => 'Canned response not found',
@@ -80,7 +78,7 @@ class CannedResponseController extends Controller
             $teamId
         );
 
-        if (!$response instanceof CannedResponse) {
+        if (! $response instanceof CannedResponse) {
             return response()->json(
                 [
                     'message' => 'Canned response not found',

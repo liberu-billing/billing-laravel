@@ -47,17 +47,17 @@ class RefundResource extends Resource
                     Select::make('payment_id')
                         ->label('Payment')
                         ->options(
-                            fn() => Payment::whereIn(
+                            fn () => Payment::whereIn(
                                 'refund_status',
                                 [
                                     'none',
-                                    'partial'
+                                    'partial',
                                 ]
                             )
                                 ->with('invoice')
                                 ->get()
                                 ->mapWithKeys(
-                                    fn($payment): array => [
+                                    fn ($payment): array => [
                                         $payment->id => "Payment #{$payment->id} - Invoice #{$payment->invoice->invoice_number} ({$payment->amount} {$payment->currency})",
                                     ]
                                 )
@@ -85,7 +85,7 @@ class RefundResource extends Resource
                         ->required()
                         ->numeric()
                         ->label('Refund Amount')
-                        ->hint(fn($state, $record): string => $record ? "Maximum refundable amount: {$record->getRemainingRefundableAmount()} {$record->currency}" : '')
+                        ->hint(fn ($state, $record): string => $record ? "Maximum refundable amount: {$record->getRemainingRefundableAmount()} {$record->currency}" : '')
                         ->rules(
                             [
                                 'required',
@@ -125,16 +125,16 @@ class RefundResource extends Resource
                         ->searchable(),
                     TextColumn::make('amount')
                         ->label('Original Amount')
-                        ->money(fn($record) => $record->currency)
+                        ->money(fn ($record) => $record->currency)
                         ->sortable(),
                     TextColumn::make('refunded_amount')
                         ->label('Refunded Amount')
-                        ->money(fn($record) => $record->currency)
+                        ->money(fn ($record) => $record->currency)
                         ->sortable(),
                     TextColumn::make('refund_status')
                         ->badge()
                         ->color(
-                            fn(string $state): string => match ($state) {
+                            fn (string $state): string => match ($state) {
                                 'none' => 'danger',
                                 'partial' => 'warning',
                                 'full' => 'success',
@@ -162,7 +162,7 @@ class RefundResource extends Resource
             ->recordActions(
                 [
                     Action::make('refund')
-                        ->visible(fn(Payment $record): bool => $record->isRefundable())
+                        ->visible(fn (Payment $record): bool => $record->isRefundable())
                         ->schema(
                             [
                                 TextInput::make('amount')
@@ -170,7 +170,7 @@ class RefundResource extends Resource
                                     ->numeric()
                                     ->label('Refund Amount')
                                     ->rules(
-                                        fn(Payment $record): array => [
+                                        fn (Payment $record): array => [
                                             'required',
                                             'numeric',
                                             'min:0.01',
@@ -249,7 +249,7 @@ class RefundResource extends Resource
             ->with(
                 [
                     'invoice',
-                    'paymentGateway'
+                    'paymentGateway',
                 ]
             )
             ->latest();

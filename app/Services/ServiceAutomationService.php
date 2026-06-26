@@ -11,9 +11,7 @@ class ServiceAutomationService
 {
     public function __construct(
         protected WebhookService $webhookService
-    )
-    {
-    }
+    ) {}
 
     /**
      * Auto-suspend services for overdue invoices
@@ -27,7 +25,7 @@ class ServiceAutomationService
             'status',
             [
                 'pending',
-                'overdue'
+                'overdue',
             ]
         )
             ->where(
@@ -62,8 +60,7 @@ class ServiceAutomationService
         string $reason = 'manual',
         ?string $notes = null,
         ?int $userId = null
-    ): ServiceSuspension
-    {
+    ): ServiceSuspension {
         $suspension = ServiceSuspension::create(
             [
                 'subscription_id' => $subscription->id,
@@ -108,7 +105,7 @@ class ServiceAutomationService
     {
         $activeSuspension = $subscription->activeSuspension;
 
-        if (!$activeSuspension) {
+        if (! $activeSuspension) {
             return false;
         }
 
@@ -142,7 +139,7 @@ class ServiceAutomationService
      */
     public function autoUnsuspendOnPayment(Invoice $invoice): bool
     {
-        if ($invoice->status !== 'paid' || !$invoice->subscription) {
+        if ($invoice->status !== 'paid' || ! $invoice->subscription) {
             return false;
         }
 

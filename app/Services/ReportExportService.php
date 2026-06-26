@@ -9,7 +9,7 @@ use InvalidArgumentException;
 
 class ReportExportService
 {
-    public function __construct(protected ReportService $reportService) { }
+    public function __construct(protected ReportService $reportService) {}
 
     public function exportToCsv(Report $report): string
     {

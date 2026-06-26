@@ -26,21 +26,21 @@ class InvoiceController extends Controller
         $invoices = Invoice::query()
             ->when(
                 $request->status,
-                fn($q) => $q->where(
+                fn ($q) => $q->where(
                     'status',
                     $request->status
                 )
             )
             ->when(
                 $request->customer_id,
-                fn($q) => $q->where(
+                fn ($q) => $q->where(
                     'customer_id',
                     $request->customer_id
                 )
             )
             ->when(
                 $request->from_date,
-                fn($q) => $q->where(
+                fn ($q) => $q->where(
                     'issue_date',
                     '>=',
                     $request->from_date
@@ -48,7 +48,7 @@ class InvoiceController extends Controller
             )
             ->when(
                 $request->to_date,
-                fn($q) => $q->where(
+                fn ($q) => $q->where(
                     'issue_date',
                     '<=',
                     $request->to_date
@@ -65,7 +65,7 @@ class InvoiceController extends Controller
             $invoice->load(
                 [
                     'customer',
-                    'items'
+                    'items',
                 ]
             )
         );
@@ -86,7 +86,7 @@ class InvoiceController extends Controller
         );
 
         $itemRows = array_map(
-            static fn(array $item): array => [
+            static fn (array $item): array => [
                 'description' => $item['description'],
                 'quantity' => $item['quantity'],
                 'unit_price' => $item['price'],
@@ -121,7 +121,7 @@ class InvoiceController extends Controller
             $invoice->load(
                 [
                     'customer',
-                    'items'
+                    'items',
                 ]
             )
         )->response()->setStatusCode(201);
@@ -152,7 +152,7 @@ class InvoiceController extends Controller
             $invoice->load(
                 [
                     'customer',
-                    'items'
+                    'items',
                 ]
             )
         );
@@ -182,9 +182,9 @@ class InvoiceController extends Controller
                 'invoice' => $invoice->load(
                     [
                         'customer',
-                        'items'
+                        'items',
                     ]
-                )
+                ),
             ]
         );
 

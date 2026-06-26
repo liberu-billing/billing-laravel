@@ -13,9 +13,7 @@ class WebhookController extends Controller
 {
     public function __construct(
         protected WebhookService $webhookService
-    )
-    {
-    }
+    ) {}
 
     /**
      * Get all webhook endpoints
@@ -27,7 +25,7 @@ class WebhookController extends Controller
         $endpoints = WebhookEndpoint::query()
             ->when(
                 $teamId,
-                fn($q) => $q->where(
+                fn ($q) => $q->where(
                     'team_id',
                     $teamId
                 )

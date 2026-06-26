@@ -15,14 +15,14 @@ use Illuminate\Support\Facades\Log;
 
 class HostingService
 {
-    public function __construct(protected CpanelClient $cpanelClient, protected PleskClient $pleskClient, protected DirectAdminClient $directAdminClient, protected VirtualminClient $virtualminClient, protected LiberuControlPanelClient $liberuControlPanelClient, protected PricingService $pricingService) { }
+    public function __construct(protected CpanelClient $cpanelClient, protected PleskClient $pleskClient, protected DirectAdminClient $directAdminClient, protected VirtualminClient $virtualminClient, protected LiberuControlPanelClient $liberuControlPanelClient, protected PricingService $pricingService) {}
 
     public function provisionAccount(HostingAccount $account, Products_Service $product, array $options = [])
     {
         // Select least loaded server of the specified type
         $server = $this->selectServer($product->hosting_server_id);
 
-        if (!$server) {
+        if (! $server) {
             throw new Exception('No available servers found');
         }
 
@@ -205,7 +205,7 @@ class HostingService
 
         if ($result) {
             $addons = $account->addons ?? [];
-            if (!in_array(
+            if (! in_array(
                 $addon,
                 $addons
             )) {
@@ -241,7 +241,7 @@ class HostingService
             $addons = $account->addons ?? [];
             $addons = array_filter(
                 $addons,
-                fn($a): bool => $a !== $addon
+                fn ($a): bool => $a !== $addon
             );
             $account->addons = array_values($addons);
             $account->save();

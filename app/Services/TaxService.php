@@ -33,7 +33,7 @@ class TaxService
         $taxRates = Cache::remember(
             $cacheKey,
             3600,
-            fn() => $this->getTaxRates(
+            fn () => $this->getTaxRates(
                 $invoice,
                 $customer
             )
@@ -67,7 +67,7 @@ class TaxService
             try {
                 return $this->getTaxRatesFromApi($customer);
             } catch (Exception $e) {
-                Log::error('Tax API error: ' . $e->getMessage());
+                Log::error('Tax API error: '.$e->getMessage());
                 // Fallback to database rates if API fails
             }
         }
@@ -101,7 +101,7 @@ class TaxService
     {
         $response = Http::withHeaders(
             [
-                'Authorization' => 'Bearer ' . $this->taxApiConfig['api_key'],
+                'Authorization' => 'Bearer '.$this->taxApiConfig['api_key'],
             ]
         )->get(
             $this->taxApiConfig['url'],
@@ -145,7 +145,7 @@ class TaxService
 
     protected function getApplicableRate($taxRates, $item)
     {
-        return $taxRates->first(fn($rate): bool => $rate->service_type === $item->productService->type);
+        return $taxRates->first(fn ($rate): bool => $rate->service_type === $item->productService->type);
     }
 
     protected function calculateItemTax($item, $taxRate): float|int
@@ -178,7 +178,7 @@ class TaxService
     protected function formatApiResponse($apiData)
     {
         return collect($apiData)->map(
-            fn($rate): TaxRate => new TaxRate(
+            fn ($rate): TaxRate => new TaxRate(
                 [
                     'rate' => $rate['rate'],
                     'service_type' => $rate['type'],

@@ -20,7 +20,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(
             ModuleManager::class,
-            fn(): ModuleManager => new ModuleManager
+            fn (): ModuleManager => new ModuleManager
         );
     }
 
@@ -45,10 +45,10 @@ class AppServiceProvider extends ServiceProvider
         Password::defaults(
             static function () {
                 return Password::min(12)        // NIST 800-63B: minimum 12 characters
-                ->mixedCase()      // At least one uppercase and one lowercase
-                ->numbers()        // At least one digit
-                ->symbols()        // At least one symbol (@$!%*#?&)
-                ->uncompromised(); // Check against breach database
+                    ->mixedCase()      // At least one uppercase and one lowercase
+                    ->numbers()        // At least one digit
+                    ->symbols()        // At least one symbol (@$!%*#?&)
+                    ->uncompromised(); // Check against breach database
             },
         );
     }

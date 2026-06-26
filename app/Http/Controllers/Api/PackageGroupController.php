@@ -14,9 +14,7 @@ class PackageGroupController extends Controller
 {
     public function __construct(
         protected PackageGroupService $packageGroupService
-    )
-    {
-    }
+    ) {}
 
     /**
      * List package groups

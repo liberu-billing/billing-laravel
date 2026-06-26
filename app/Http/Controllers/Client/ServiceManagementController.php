@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 
 class ServiceManagementController extends Controller
 {
-    public function __construct(protected BillingService $billingService, protected HostingService $hostingService, protected DomainService $domainService) { }
+    public function __construct(protected BillingService $billingService, protected HostingService $hostingService, protected DomainService $domainService) {}
 
     public function index(): Factory|View
     {

@@ -8,11 +8,11 @@ use Illuminate\Support\Facades\DB;
 
 class RefundService
 {
-    public function __construct(protected PaymentGatewayService $paymentGatewayService) { }
+    public function __construct(protected PaymentGatewayService $paymentGatewayService) {}
 
     public function processRefund(Payment $payment, float $amount): array
     {
-        if (!$payment->isRefundable()) {
+        if (! $payment->isRefundable()) {
             throw new Exception('This payment is not refundable.');
         }
 
@@ -40,7 +40,7 @@ class RefundService
 
                 return [
                     'success' => true,
-                    'message' => 'Refund processed successfully.'
+                    'message' => 'Refund processed successfully.',
                 ];
             } else {
                 throw new Exception($refundResult['message']);
@@ -50,7 +50,7 @@ class RefundService
 
             return [
                 'success' => false,
-                'message' => 'Refund failed: ' . $e->getMessage()
+                'message' => 'Refund failed: '.$e->getMessage(),
             ];
         }
     }

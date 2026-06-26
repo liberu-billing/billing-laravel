@@ -13,7 +13,7 @@ class IntegrationService
             'icon' => 'google',
             'scopes' => [
                 'calendar',
-                'calendar.events'
+                'calendar.events',
             ],
         ],
         'slack' => [
@@ -21,7 +21,7 @@ class IntegrationService
             'icon' => 'slack',
             'scopes' => [
                 'channels:read',
-                'chat:write'
+                'chat:write',
             ],
         ],
         'trello' => [
@@ -29,7 +29,7 @@ class IntegrationService
             'icon' => 'trello',
             'scopes' => [
                 'read',
-                'write'
+                'write',
             ],
         ],
     ];

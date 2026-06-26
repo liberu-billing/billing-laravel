@@ -57,21 +57,21 @@ class InvoiceTemplate extends Model
 
     protected function logoUrl(): Attribute
     {
-        return Attribute::make(get: fn() => $this->logo_path ? Storage::disk('public')->url($this->logo_path) : null);
+        return Attribute::make(get: fn () => $this->logo_path ? Storage::disk('public')->url($this->logo_path) : null);
     }
 
     protected function styledHtml(): Attribute
     {
         return Attribute::make(
-            get: fn(): string => sprintf(
-            '<style>
+            get: fn (): string => sprintf(
+                '<style>
                 .invoice-box { color: %1$s; }
                 .invoice-header { border-color: %1$s; }
                 .invoice-items th { background-color: %1$s; color: white; }
                 .invoice-items td { border-color: %1$s; }
             </style>',
-            $this->color_scheme
-        )
+                $this->color_scheme
+            )
         );
     }
 }

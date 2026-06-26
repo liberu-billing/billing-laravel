@@ -14,7 +14,9 @@ use Random\RandomException;
 class LiberuControlPanelClient
 {
     protected Client $client;
+
     protected $server;
+
     protected $apiToken;
 
     public function __construct()
@@ -37,7 +39,7 @@ class LiberuControlPanelClient
         $data = [
             'username' => $username,
             'domain' => $domain,
-            'email' => $username . '@' . $domain,
+            'email' => $username.'@'.$domain,
             'password' => $password,
             'package' => $package,
             'status' => 'active',
@@ -62,7 +64,7 @@ class LiberuControlPanelClient
 
         return $this->makeApiCall(
             'POST',
-            '/api/hosting/accounts/' . $username . '/suspend',
+            '/api/hosting/accounts/'.$username.'/suspend',
             $data
         );
     }
@@ -74,7 +76,7 @@ class LiberuControlPanelClient
     {
         return $this->makeApiCall(
             'POST',
-            '/api/hosting/accounts/' . $username . '/unsuspend',
+            '/api/hosting/accounts/'.$username.'/unsuspend',
             [
                 'username' => $username,
             ]
@@ -93,7 +95,7 @@ class LiberuControlPanelClient
 
         return $this->makeApiCall(
             'PUT',
-            '/api/hosting/accounts/' . $username . '/package',
+            '/api/hosting/accounts/'.$username.'/package',
             $data
         );
     }
@@ -105,7 +107,7 @@ class LiberuControlPanelClient
     {
         return $this->makeApiCall(
             'DELETE',
-            '/api/hosting/accounts/' . $username,
+            '/api/hosting/accounts/'.$username,
             [
                 'username' => $username,
             ]
@@ -124,7 +126,7 @@ class LiberuControlPanelClient
 
         return $this->makeApiCall(
             'POST',
-            '/api/hosting/accounts/' . $username . '/addons',
+            '/api/hosting/accounts/'.$username.'/addons',
             $data
         );
     }
@@ -138,35 +140,35 @@ class LiberuControlPanelClient
 
         return $this->makeApiCall(
             'DELETE',
-            '/api/hosting/accounts/' . $username . '/addons/' . $addon,
+            '/api/hosting/accounts/'.$username.'/addons/'.$addon,
             $data
         );
     }
 
     protected function makeApiCall(string $method, string $endpoint, $data = []): bool
     {
-        if (!$this->server) {
+        if (! $this->server) {
             throw new Exception('Server not configured');
         }
 
         try {
             $options = [
                 'headers' => [
-                    'Authorization' => 'Bearer ' . $this->apiToken,
+                    'Authorization' => 'Bearer '.$this->apiToken,
                     'Accept' => 'application/json',
                     'Content-Type' => 'application/json',
                 ],
                 'verify' => false,
             ];
 
-            if (!empty($data)) {
+            if (! empty($data)) {
                 $options['json'] = $data;
             }
 
             $url = rtrim(
-                    (string)$this->server->api_url,
-                    '/'
-                ) . $endpoint;
+                (string) $this->server->api_url,
+                '/'
+            ).$endpoint;
             $response = $this->client->request(
                 $method,
                 $url,

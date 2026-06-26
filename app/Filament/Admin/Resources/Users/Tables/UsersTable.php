@@ -24,14 +24,14 @@ class UsersTable
                     ImageColumn::make('profile_photo_url')
                         ->label('Photo')
                         ->circular()
-                        ->defaultImageUrl(fn($record): string => 'https://ui-avatars.com/api/?name=' . urlencode((string)$record->name) . '&color=7F9CF5&background=EBF4FF'),
+                        ->defaultImageUrl(fn ($record): string => 'https://ui-avatars.com/api/?name='.urlencode((string) $record->name).'&color=7F9CF5&background=EBF4FF'),
 
                     TextColumn::make('name')
                         ->searchable()
                         ->sortable()
                         ->weight('medium')
                         ->description(
-                            fn($record) => $record->email,
+                            fn ($record) => $record->email,
                             position: 'below'
                         ),
 
@@ -41,7 +41,7 @@ class UsersTable
                         ->color('success')
                         ->searchable()
                         ->sortable()
-                        ->formatStateUsing(fn($state): string => ucfirst((string)$state))
+                        ->formatStateUsing(fn ($state): string => ucfirst((string) $state))
                         ->placeholder('No roles assigned'),
 
                     IconColumn::make('email_verified_at')
@@ -53,8 +53,8 @@ class UsersTable
                         ->falseColor('danger')
                         ->sortable()
                         ->tooltip(
-                            fn($record): string => $record->email_verified_at
-                                ? 'Verified on ' . $record->email_verified_at->format('M d, Y')
+                            fn ($record): string => $record->email_verified_at
+                                ? 'Verified on '.$record->email_verified_at->format('M d, Y')
                                 : 'Not verified'
                         ),
 
@@ -92,16 +92,16 @@ class UsersTable
 
                     Filter::make('verified')
                         ->label('Email Verified')
-                        ->query(fn(Builder $query): Builder => $query->whereNotNull('email_verified_at')),
+                        ->query(fn (Builder $query): Builder => $query->whereNotNull('email_verified_at')),
 
                     Filter::make('unverified')
                         ->label('Email Unverified')
-                        ->query(fn(Builder $query): Builder => $query->whereNull('email_verified_at')),
+                        ->query(fn (Builder $query): Builder => $query->whereNull('email_verified_at')),
 
                     Filter::make('created_at')
                         ->label('Recently Joined')
                         ->query(
-                            fn(Builder $query): Builder => $query->where(
+                            fn (Builder $query): Builder => $query->where(
                                 'created_at',
                                 '>=',
                                 now()->subDays(30)

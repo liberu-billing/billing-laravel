@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 
 class InvoiceDisputeController extends Controller
 {
-    public function __construct(protected DisputeService $disputeService) { }
+    public function __construct(protected DisputeService $disputeService) {}
 
     public function store(Request $request, Invoice $invoice): JsonResponse
     {

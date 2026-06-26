@@ -18,7 +18,6 @@ use Override;
 ])]
 class Client extends Model
 {
-
     #[Override]
     protected function casts(): array
     {

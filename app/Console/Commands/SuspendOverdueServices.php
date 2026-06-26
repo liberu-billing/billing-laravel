@@ -14,8 +14,7 @@ class SuspendOverdueServices extends Command
 {
     public function __construct(
         protected ?ServiceAutomationService $automationService = null
-    )
-    {
+    ) {
         parent::__construct();
         $this->automationService = $automationService ?? app(ServiceAutomationService::class);
     }
@@ -35,7 +34,7 @@ class SuspendOverdueServices extends Command
         ); // Lock for 60 minutes
 
         try {
-            $days = (int)$this->option('days');
+            $days = (int) $this->option('days');
             $this->info("Suspending services with invoices overdue by {$days} days...");
 
             $suspended = $this->automationService->suspendOverdueServices($days);
@@ -47,7 +46,7 @@ class SuspendOverdueServices extends Command
             return Command::SUCCESS;
         } catch (Exception $e) {
             cache()->forget('suspending_overdue_services');
-            $this->error('Error suspending services: ' . $e->getMessage());
+            $this->error('Error suspending services: '.$e->getMessage());
 
             return Command::FAILURE;
         }

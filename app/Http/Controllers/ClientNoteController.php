@@ -40,7 +40,7 @@ class ClientNoteController extends Controller
                         'created_at',
                         [
                             Carbon::now()->startOfWeek(),
-                            Carbon::now()->endOfWeek()
+                            Carbon::now()->endOfWeek(),
                         ]
                     );
                     break;
@@ -49,7 +49,7 @@ class ClientNoteController extends Controller
                         'created_at',
                         [
                             Carbon::now()->startOfMonth(),
-                            Carbon::now()->endOfMonth()
+                            Carbon::now()->endOfMonth(),
                         ]
                     );
                     break;
@@ -59,7 +59,7 @@ class ClientNoteController extends Controller
                             'created_at',
                             [
                                 $request->startDate,
-                                $request->endDate
+                                $request->endDate,
                             ]
                         );
                     }

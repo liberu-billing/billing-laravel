@@ -8,7 +8,7 @@ use Exception;
 
 class DomainPricingService
 {
-    public function __construct(protected EnomClient $enomClient) { }
+    public function __construct(protected EnomClient $enomClient) {}
 
     public function calculateDomainPrice($domainName)
     {
@@ -18,7 +18,7 @@ class DomainPricingService
             $tld
         )->first();
 
-        if (!$tldModel) {
+        if (! $tldModel) {
             throw new Exception("TLD not supported: $tld");
         }
 
@@ -49,9 +49,9 @@ class DomainPricingService
     {
         $parts = explode(
             '.',
-            (string)$domainName
+            (string) $domainName
         );
 
-        return '.' . end($parts);
+        return '.'.end($parts);
     }
 }

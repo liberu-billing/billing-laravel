@@ -36,7 +36,7 @@ class Subscription extends Model
     protected $casts = [
         'start_date' => 'datetime',
         'end_date' => 'datetime',
-        'last_billed_at' => 'datetime'
+        'last_billed_at' => 'datetime',
     ];
 
     #[Override]
@@ -92,7 +92,7 @@ class Subscription extends Model
 
     public function renew(): bool
     {
-        if (!$this->auto_renew || $this->status === 'cancelled') {
+        if (! $this->auto_renew || $this->status === 'cancelled') {
             return false;
         }
 
@@ -137,7 +137,7 @@ class Subscription extends Model
 
     public function needsBilling(): bool
     {
-        if (!$this->last_billed_at) {
+        if (! $this->last_billed_at) {
             return true;
         }
 

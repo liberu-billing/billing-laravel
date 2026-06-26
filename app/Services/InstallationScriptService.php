@@ -27,8 +27,7 @@ class InstallationScriptService
         string $dbName,
         string $dbUser,
         protected mixed $dbPass,
-    )
-    {
+    ) {
         $this->controlPanel = strtolower($controlPanel);
         $this->gitRepo = $this->validateGitRepo($gitRepo);
         $this->domain = $this->validateIdentifier(
@@ -50,13 +49,13 @@ class InstallationScriptService
 
     protected function validateGitRepo(string $repo): string
     {
-        if (!filter_var(
-                $repo,
-                FILTER_VALIDATE_URL
-            ) && !preg_match(
-                '/^git@[a-zA-Z0-9._-]+:[a-zA-Z0-9._\/-]+\.git$/',
-                $repo
-            )) {
+        if (! filter_var(
+            $repo,
+            FILTER_VALIDATE_URL
+        ) && ! preg_match(
+            '/^git@[a-zA-Z0-9._-]+:[a-zA-Z0-9._\/-]+\.git$/',
+            $repo
+        )) {
             throw new Exception('Invalid git repository URL');
         }
 
@@ -65,11 +64,11 @@ class InstallationScriptService
 
     protected function validateIdentifier(string $value, string $name, string $pattern): string
     {
-        if (!preg_match(
+        if (! preg_match(
             $pattern,
             $value
         )) {
-            throw new Exception('Invalid ' . $name . ': only alphanumeric characters, underscores, hyphens, and dots allowed'); // phpcs:ignore WordPress.Security.EscapeOutput -- Laravel exception message, not HTML output
+            throw new Exception('Invalid '.$name.': only alphanumeric characters, underscores, hyphens, and dots allowed'); // phpcs:ignore WordPress.Security.EscapeOutput -- Laravel exception message, not HTML output
         }
 
         return $value;
@@ -84,7 +83,7 @@ class InstallationScriptService
         $gitRepo = escapeshellarg($this->gitRepo);   // phpcs:ignore -- nosemgrep
         $dbName = escapeshellarg($this->dbName);    // phpcs:ignore -- nosemgrep
         $dbUser = escapeshellarg($this->dbUser);    // phpcs:ignore -- nosemgrep
-        $dbPass = escapeshellarg((string)$this->dbPass);    // phpcs:ignore -- nosemgrep
+        $dbPass = escapeshellarg((string) $this->dbPass);    // phpcs:ignore -- nosemgrep
 
         $installDir = "~/laravel-apps/{$domain}";
         $publicHtmlPath = $this->getPublicHtmlPath();
@@ -169,7 +168,7 @@ class InstallationScriptService
                 0755
             );
 
-            $output = shell_exec($scriptPath . ' 2>&1');
+            $output = shell_exec($scriptPath.' 2>&1');
             unlink($scriptPath);
 
             Log::info(

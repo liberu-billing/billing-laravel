@@ -28,7 +28,7 @@ class RoleBasedRedirect
             $user = Auth::user();
             foreach ($this->roleRedirects as $role => $redirect) {
                 if ($user->hasRole($role)) {
-                    if ($request->is($redirect) || $request->is($redirect . '/*')) {
+                    if ($request->is($redirect) || $request->is($redirect.'/*')) {
                         return $next($request);
                     }
                     if ($this->shouldRedirect(
@@ -43,8 +43,8 @@ class RoleBasedRedirect
             $userRoles = $user->getRoleNames();
             if ($userRoles->isNotEmpty()) {
                 $firstRole = $userRoles->first();
-                $roleRedirect = '/' . $firstRole;
-                if ($request->is($roleRedirect) || $request->is($roleRedirect . '/*')) {
+                $roleRedirect = '/'.$firstRole;
+                if ($request->is($roleRedirect) || $request->is($roleRedirect.'/*')) {
                     return $next($request);
                 }
                 if ($this->shouldRedirect(
@@ -74,6 +74,6 @@ class RoleBasedRedirect
     protected function shouldRedirect(Request $request, string $redirect): bool
     {
         // Check if the current request path matches the redirect path
-        return !$request->is($redirect) && !$request->is($redirect . '/*');
+        return ! $request->is($redirect) && ! $request->is($redirect.'/*');
     }
 }

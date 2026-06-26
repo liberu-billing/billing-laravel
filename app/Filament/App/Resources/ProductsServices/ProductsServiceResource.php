@@ -70,11 +70,11 @@ class ProductsServiceResource extends Resource
                         ->keyLabel('Tier/Usage')
                         ->valueLabel('Price')
                         ->visible(
-                            fn(Get $get): bool => in_array(
+                            fn (Get $get): bool => in_array(
                                 $get('pricing_model'),
                                 [
                                     'tiered',
-                                    'usage_based'
+                                    'usage_based',
                                 ]
                             )
                         )
@@ -87,8 +87,8 @@ class ProductsServiceResource extends Resource
                                 'id'
                             )
                         )
-                        ->visible(fn(Get $get): bool => $get('type') === 'domain')
-                        ->required(fn(Get $get): bool => $get('type') === 'domain'),
+                        ->visible(fn (Get $get): bool => $get('type') === 'domain')
+                        ->required(fn (Get $get): bool => $get('type') === 'domain'),
                     Select::make('markup_type')
                         ->label('Markup Type')
                         ->options(
@@ -97,13 +97,13 @@ class ProductsServiceResource extends Resource
                                 'fixed' => 'Fixed Amount',
                             ]
                         )
-                        ->visible(fn(Get $get): bool => $get('type') === 'domain')
-                        ->required(fn(Get $get): bool => $get('type') === 'domain'),
+                        ->visible(fn (Get $get): bool => $get('type') === 'domain')
+                        ->required(fn (Get $get): bool => $get('type') === 'domain'),
                     TextInput::make('markup_value')
                         ->label('Markup Value')
                         ->numeric()
-                        ->visible(fn(Get $get): bool => $get('type') === 'domain')
-                        ->required(fn(Get $get): bool => $get('type') === 'domain'),
+                        ->visible(fn (Get $get): bool => $get('type') === 'domain')
+                        ->required(fn (Get $get): bool => $get('type') === 'domain'),
                 ]
             );
     }

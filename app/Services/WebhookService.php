@@ -122,7 +122,7 @@ class WebhookService
                 $signature = hash_hmac(
                     'sha256',
                     json_encode($payload),
-                    (string)$endpoint->secret
+                    (string) $endpoint->secret
                 );
                 $headers['X-Webhook-Signature'] = $signature;
             }
@@ -141,7 +141,7 @@ class WebhookService
                 return true;
             }
 
-            throw new Exception('HTTP ' . $response->status() . ': ' . $response->body());
+            throw new Exception('HTTP '.$response->status().': '.$response->body());
         } catch (Exception $e) {
             Log::error(
                 'Webhook delivery failed',

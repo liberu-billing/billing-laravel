@@ -22,6 +22,4 @@ use Illuminate\Database\Eloquent\Model;
     'github',
     'youtube',
 ])]
-class SiteSettings extends Model
-{
-}
+class SiteSettings extends Model {}

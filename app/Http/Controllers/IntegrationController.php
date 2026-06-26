@@ -11,9 +11,7 @@ class IntegrationController extends Controller
 {
     public function __construct(
         protected IntegrationService $integrationService
-    )
-    {
-    }
+    ) {}
 
     public function redirect(Request $request, string $provider)
     {

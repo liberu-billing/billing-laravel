@@ -55,7 +55,7 @@ class ProcessInvoiceReminders extends Command
             return Command::SUCCESS;
         } catch (Exception $e) {
             cache()->forget('processing_invoice_reminders');
-            $this->error('Error processing reminders: ' . $e->getMessage());
+            $this->error('Error processing reminders: '.$e->getMessage());
 
             return Command::FAILURE;
         }

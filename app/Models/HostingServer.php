@@ -52,7 +52,7 @@ class HostingServer extends Model
 
     public function hasCapacity(): bool
     {
-        return !$this->isAtCapacity();
+        return ! $this->isAtCapacity();
     }
 
     public function getUsagePercentage(): float|int

@@ -54,7 +54,7 @@ class Quote extends Model
         static::creating(
             static function (Quote $quote): void {
                 if (empty($quote->quote_number)) {
-                    $quote->quote_number = 'QUO-' . strtoupper(Str::random(8));
+                    $quote->quote_number = 'QUO-'.strtoupper(Str::random(8));
                 }
             }
         );

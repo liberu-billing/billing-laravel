@@ -20,7 +20,7 @@ class ModuleAutoloadCommand extends Command
         $composer = file_exists(base_path('composer.phar'))
             ? [
                 PHP_BINARY,
-                'composer.phar'
+                'composer.phar',
             ]
             : ['composer'];
 
@@ -28,7 +28,7 @@ class ModuleAutoloadCommand extends Command
             [
                 ...$composer,
                 'dump-autoload',
-                '--optimize'
+                '--optimize',
             ],
             base_path()
         );
@@ -40,7 +40,7 @@ class ModuleAutoloadCommand extends Command
             }
         );
 
-        if (!$process->isSuccessful()) {
+        if (! $process->isSuccessful()) {
             $this->error('composer dump-autoload failed.');
 
             return self::FAILURE;

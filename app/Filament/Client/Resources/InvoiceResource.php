@@ -53,20 +53,20 @@ class InvoiceResource extends Resource
                                                 ->disabled(),
                                             TextInput::make('total_amount')
                                                 ->disabled()
-                                                ->prefix(fn(Invoice $record) => $record->currency),
+                                                ->prefix(fn (Invoice $record) => $record->currency),
                                             TextInput::make('status')
                                                 ->disabled(),
                                             TextInput::make('remaining_amount')
                                                 ->disabled()
-                                                ->prefix(fn(Invoice $record) => $record->currency)
-                                                ->visible(fn(Invoice $record): bool => $record->status === 'partially_paid'),
+                                                ->prefix(fn (Invoice $record) => $record->currency)
+                                                ->visible(fn (Invoice $record): bool => $record->status === 'partially_paid'),
                                         ]
                                     ),
                             ]
                         ),
 
                     Section::make()
-                        ->visible(fn(Invoice $record): bool => $record->status !== 'paid')
+                        ->visible(fn (Invoice $record): bool => $record->status !== 'paid')
                         ->schema(
                             [
                                 Select::make('payment_method')
@@ -83,7 +83,7 @@ class InvoiceResource extends Resource
                                     ->required()
                                     ->rules(
                                         [
-                                            fn(Invoice $record): string => 'max:' . $record->remaining_amount,
+                                            fn (Invoice $record): string => 'max:'.$record->remaining_amount,
                                             'min:1',
                                         ]
                                     ),
@@ -103,12 +103,12 @@ class InvoiceResource extends Resource
                         ->searchable()
                         ->sortable(),
                     TextColumn::make('total_amount')
-                        ->money(fn(Invoice $record) => $record->currency)
+                        ->money(fn (Invoice $record) => $record->currency)
                         ->sortable(),
                     TextColumn::make('status')
                         ->badge()
                         ->color(
-                            fn(string $state): string => match ($state) {
+                            fn (string $state): string => match ($state) {
                                 'pending' => 'warning',
                                 'paid' => 'success',
                                 'overdue' => 'danger',
@@ -139,7 +139,7 @@ class InvoiceResource extends Resource
                     ViewAction::make(),
                     Action::make('pay')
                         ->icon('heroicon-o-credit-card')
-                        ->visible(fn(Invoice $record): bool => $record->status !== 'paid')
+                        ->visible(fn (Invoice $record): bool => $record->status !== 'paid')
                         ->action(
                             function (Invoice $record, array $data): void {
                                 $record->processPayment(
@@ -164,7 +164,7 @@ class InvoiceResource extends Resource
                                     ->required()
                                     ->rules(
                                         [
-                                            fn(Invoice $record): string => 'max:' . $record->remaining_amount,
+                                            fn (Invoice $record): string => 'max:'.$record->remaining_amount,
                                             'min:1',
                                         ]
                                     ),
@@ -173,8 +173,8 @@ class InvoiceResource extends Resource
                     Action::make('download_pdf')
                         ->icon('heroicon-o-arrow-down-tray')
                         ->action(
-                            fn(Invoice $record) => response()->streamDownload(
-                                fn(): int => print ($record->generatePdf()),
+                            fn (Invoice $record) => response()->streamDownload(
+                                fn (): int => print ($record->generatePdf()),
                                 "invoice-{$record->invoice_number}.pdf"
                             )
                         ),

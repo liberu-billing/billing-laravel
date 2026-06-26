@@ -52,7 +52,7 @@ class KnowledgeBaseArticle extends Model
 
         static::updating(
             static function ($article): void {
-                if ($article->isDirty('is_published') && $article->is_published && !$article->published_at) {
+                if ($article->isDirty('is_published') && $article->is_published && ! $article->published_at) {
                     $article->published_at = now();
                 }
             }

@@ -102,14 +102,14 @@ class DiscountController extends Controller
             $code
         )->first();
 
-        if (!$discount || !$discount->isValid()) {
+        if (! $discount || ! $discount->isValid()) {
             return response()->json(['valid' => false]);
         }
 
         return response()->json(
             [
                 'valid' => true,
-                'discount' => $discount
+                'discount' => $discount,
             ]
         );
     }

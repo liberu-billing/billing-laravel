@@ -15,11 +15,11 @@ class ReportService
             'created_at',
             [
                 $startDate,
-                $endDate
+                $endDate,
             ]
         );
 
-        if (!empty($filters['customer_id'])) {
+        if (! empty($filters['customer_id'])) {
             $query->whereHas(
                 'invoice',
                 function ($q) use ($filters): void {
@@ -31,7 +31,7 @@ class ReportService
             );
         }
 
-        if (!empty($filters['service_id'])) {
+        if (! empty($filters['service_id'])) {
             $query->whereHas(
                 'invoice.items',
                 function ($q) use ($filters): void {
@@ -67,7 +67,7 @@ class ReportService
                 now()
             );
 
-        if (!empty($filters['customer_id'])) {
+        if (! empty($filters['customer_id'])) {
             $query->where(
                 'customer_id',
                 $filters['customer_id']
@@ -100,10 +100,10 @@ class ReportService
                             'created_at',
                             [
                                 $startDate,
-                                $endDate
+                                $endDate,
                             ]
                         );
-                    }
+                    },
                 ]
             )
             ->withSum(
@@ -113,10 +113,10 @@ class ReportService
                             'created_at',
                             [
                                 $startDate,
-                                $endDate
+                                $endDate,
                             ]
                         );
-                    }
+                    },
                 ],
                 'total_price'
             )

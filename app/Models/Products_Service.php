@@ -43,7 +43,7 @@ class Products_Service extends Model
 
     protected function price(): Attribute
     {
-        return Attribute::make(get: fn() => $this->base_price);
+        return Attribute::make(get: fn () => $this->base_price);
     }
 
     public function invoiceItems(): HasMany
@@ -73,7 +73,7 @@ class Products_Service extends Model
 
     public function recordUsage($subscriptionId, $metric, $quantity)
     {
-        if (!in_array(
+        if (! in_array(
             $metric,
             $this->getUsageMetrics()
         )) {

@@ -40,7 +40,7 @@ class ViewUser extends ViewRecord
                                 ImageEntry::make('profile_photo_url')
                                     ->label('Profile Photo')
                                     ->circular()
-                                    ->defaultImageUrl(fn($record): string => 'https://ui-avatars.com/api/?name=' . urlencode((string)$record->name) . '&color=7F9CF5&background=EBF4FF')
+                                    ->defaultImageUrl(fn ($record): string => 'https://ui-avatars.com/api/?name='.urlencode((string) $record->name).'&color=7F9CF5&background=EBF4FF')
                                     ->columnSpanFull(),
 
                                 TextEntry::make('name')
@@ -76,7 +76,7 @@ class ViewUser extends ViewRecord
                                     ->label('Assigned Roles')
                                     ->badge()
                                     ->color('success')
-                                    ->formatStateUsing(fn($state): string => ucfirst((string)$state))
+                                    ->formatStateUsing(fn ($state): string => ucfirst((string) $state))
                                     ->placeholder('No roles assigned')
                                     ->columnSpanFull(),
 
@@ -129,9 +129,9 @@ class ViewUser extends ViewRecord
 
                                 TextEntry::make('two_factor_confirmed_at')
                                     ->label('Two-Factor Enabled')
-                                    ->formatStateUsing(fn($state): string => $state ? 'Yes' : 'No')
+                                    ->formatStateUsing(fn ($state): string => $state ? 'Yes' : 'No')
                                     ->badge()
-                                    ->color(fn($state): string => $state ? 'success' : 'gray'),
+                                    ->color(fn ($state): string => $state ? 'success' : 'gray'),
 
                                 TextEntry::make('profile_photo_path')
                                     ->label('Profile Photo Path')

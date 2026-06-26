@@ -11,7 +11,9 @@ use Illuminate\Support\Facades\Log;
 class CpanelClient
 {
     protected Client $client;
+
     protected $server;
+
     protected $apiToken;
 
     public function __construct()
@@ -37,7 +39,7 @@ class CpanelClient
             'plan' => $package,
             'featurelist' => $package,
             'password' => $this->generatePassword(),
-            'contactemail' => $username . '@' . $domain,
+            'contactemail' => $username.'@'.$domain,
             'quota' => 0,
             // Unlimited
             'maxftp' => 'unlimited',
@@ -138,7 +140,7 @@ class CpanelClient
         $endpoint = '/json-api/modifyacct';
         $params = [
             'user' => $username,
-            'FEATURE-' . strtoupper((string)$addon) => 1,
+            'FEATURE-'.strtoupper((string) $addon) => 1,
         ];
 
         return $this->makeApiCall(
@@ -155,7 +157,7 @@ class CpanelClient
         $endpoint = '/json-api/modifyacct';
         $params = [
             'user' => $username,
-            'FEATURE-' . strtoupper((string)$addon) => 0,
+            'FEATURE-'.strtoupper((string) $addon) => 0,
         ];
 
         return $this->makeApiCall(
@@ -169,7 +171,7 @@ class CpanelClient
      */
     protected function makeApiCall(string $endpoint, $params): bool
     {
-        if (!$this->server) {
+        if (! $this->server) {
             throw new Exception('Server not configured');
         }
 
@@ -178,10 +180,10 @@ class CpanelClient
         try {
             $response = $this->client->request(
                 'GET',
-                'https://' . $this->server->hostname . ':2087' . $endpoint,
+                'https://'.$this->server->hostname.':2087'.$endpoint,
                 [
                     'headers' => [
-                        'Authorization' => 'WHM ' . $this->server->username . ':' . $this->apiToken,
+                        'Authorization' => 'WHM '.$this->server->username.':'.$this->apiToken,
                     ],
                     'query' => $params,
                     'verify' => config(
@@ -192,7 +194,7 @@ class CpanelClient
             );
 
             $result = json_decode(
-                (string)$response->getBody(),
+                (string) $response->getBody(),
                 true,
                 512,
                 JSON_THROW_ON_ERROR
@@ -242,7 +244,7 @@ class CpanelClient
             $hostname,
             FILTER_VALIDATE_IP
         )) {
-            $isPrivate = !filter_var(
+            $isPrivate = ! filter_var(
                 $hostname,
                 FILTER_VALIDATE_IP,
                 FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
@@ -250,7 +252,7 @@ class CpanelClient
             if ($isPrivate) {
                 throw new Exception('Private or reserved IP addresses are not allowed as cPanel hostnames');
             }
-        } elseif (!filter_var(
+        } elseif (! filter_var(
             $hostname,
             FILTER_VALIDATE_DOMAIN,
             FILTER_FLAG_HOSTNAME

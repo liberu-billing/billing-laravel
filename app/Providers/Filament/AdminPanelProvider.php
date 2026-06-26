@@ -103,7 +103,7 @@ class AdminPanelProvider extends PanelProvider
                             ->label('Team Settings')
                             ->icon('heroicon-o-cog-6-tooth')
                             ->url(
-                                fn(): UrlGenerator|string => $this->shouldRegisterMenuItem()
+                                fn (): UrlGenerator|string => $this->shouldRegisterMenuItem()
                                     ? url(Pages\EditTeam::getUrl())
                                     : url($panel->getPath())
                             ),
@@ -114,7 +114,7 @@ class AdminPanelProvider extends PanelProvider
         return $panel;
     }
 
-    public function boot(): void { }
+    public function boot(): void {}
 
     public function shouldRegisterMenuItem(): bool
     {

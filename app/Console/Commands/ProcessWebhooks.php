@@ -14,8 +14,7 @@ class ProcessWebhooks extends Command
 {
     public function __construct(
         protected ?WebhookService $webhookService = null
-    )
-    {
+    ) {
         parent::__construct();
         $this->webhookService = $webhookService ?? app(WebhookService::class);
     }
@@ -46,7 +45,7 @@ class ProcessWebhooks extends Command
             return Command::SUCCESS;
         } catch (Exception $e) {
             cache()->forget('processing_webhooks');
-            $this->error('Error processing webhooks: ' . $e->getMessage());
+            $this->error('Error processing webhooks: '.$e->getMessage());
 
             return Command::FAILURE;
         }

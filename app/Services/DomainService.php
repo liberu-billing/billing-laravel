@@ -10,7 +10,7 @@ use Exception;
 
 class DomainService
 {
-    public function __construct(protected EnomClient $enomClient, protected ResellerClubClient $resellerClubClient) { }
+    public function __construct(protected EnomClient $enomClient, protected ResellerClubClient $resellerClubClient) {}
 
     public function registerDomain(Subscription $subscription, $domainName, $registrar = 'enom')
     {

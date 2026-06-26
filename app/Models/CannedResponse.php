@@ -47,7 +47,7 @@ class CannedResponse extends Model
 
         foreach ($variables as $key => $value) {
             $content = str_replace(
-                '{{' . $key . '}}',
+                '{{'.$key.'}}',
                 $value,
                 $content
             );

@@ -50,7 +50,7 @@ class AppPanelProvider extends PanelProvider
                         ->label('Profile')
                         ->icon('heroicon-o-user-circle')
                         ->url(
-                            fn(): UrlGenerator|string => $this->shouldRegisterMenuItem()
+                            fn (): UrlGenerator|string => $this->shouldRegisterMenuItem()
                                 ? url(EditProfile::getUrl())
                                 : url($panel->getPath())
                         ),
@@ -113,7 +113,7 @@ class AppPanelProvider extends PanelProvider
                             ->label('Team Settings')
                             ->icon('heroicon-o-cog-6-tooth')
                             ->url(
-                                fn(): UrlGenerator|string => $this->shouldRegisterMenuItem()
+                                fn (): UrlGenerator|string => $this->shouldRegisterMenuItem()
                                     ? url(Pages\EditTeam::getUrl())
                                     : url($panel->getPath())
                             ),

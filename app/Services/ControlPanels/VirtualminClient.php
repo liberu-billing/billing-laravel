@@ -14,7 +14,9 @@ use Random\RandomException;
 class VirtualminClient
 {
     protected Client $client;
+
     protected $server;
+
     protected $apiKey;
 
     public function __construct()
@@ -39,7 +41,7 @@ class VirtualminClient
             'domain' => $domain,
             'user' => $username,
             'pass' => $password,
-            'email' => $username . '@' . $domain,
+            'email' => $username.'@'.$domain,
             'plan' => $package,
             'mysql' => '',
             'web' => '',
@@ -135,7 +137,7 @@ class VirtualminClient
 
     protected function makeApiCall(array $params): bool
     {
-        if (!$this->server) {
+        if (! $this->server) {
             throw new Exception('Server not configured');
         }
 
@@ -144,10 +146,10 @@ class VirtualminClient
 
             $response = $this->client->request(
                 'POST',
-                'https://' . $this->server->hostname . ':10000/virtual-server/remote.cgi',
+                'https://'.$this->server->hostname.':10000/virtual-server/remote.cgi',
                 [
                     'headers' => [
-                        'Authorization' => 'Basic ' . base64_encode($this->server->username . ':' . $this->apiKey),
+                        'Authorization' => 'Basic '.base64_encode($this->server->username.':'.$this->apiKey),
                     ],
                     'form_params' => $params,
                     'verify' => false,

@@ -41,10 +41,10 @@ class SubscriptionPlan extends Model
     protected function formattedPrice(): Attribute
     {
         return Attribute::make(
-            get: fn(): string => number_format(
+            get: fn (): string => number_format(
                 $this->price,
                 2
-            ) . ' ' . $this->currency
+            ).' '.$this->currency
         );
     }
 }

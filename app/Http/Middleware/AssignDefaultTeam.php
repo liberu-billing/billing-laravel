@@ -10,13 +10,13 @@ class AssignDefaultTeam
 {
     public function handle(Request $request, Closure $next)
     {
-        if (!Filament::getTenant() && auth()->check()) {
+        if (! Filament::getTenant() && auth()->check()) {
             $user = auth()->user();
             $defaultTeam = $user->currentTeam ?? $user->ownedTeams()->first();
-            if (!$defaultTeam) {
+            if (! $defaultTeam) {
                 $defaultTeam = $user->ownedTeams()->create(
                     [
-                        'name' => $user->name . "'s Team",
+                        'name' => $user->name."'s Team",
                         'personal_team' => true,
                     ]
                 );

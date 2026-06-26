@@ -14,7 +14,7 @@ class DashboardController extends Controller
         return Cache::remember(
             'dashboard.metrics',
             300,
-            fn(): array => [
+            fn (): array => [
                 'revenue' => $this->getRevenueData(),
                 'invoices' => $this->getInvoiceData(),
                 'clients' => $this->getClientData(),
@@ -56,7 +56,7 @@ class DashboardController extends Controller
                     'backgroundColor' => [
                         '#4F46E5',
                         '#10B981',
-                        '#EF4444'
+                        '#EF4444',
                     ],
                 ],
             ],

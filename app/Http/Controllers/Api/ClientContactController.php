@@ -15,9 +15,7 @@ class ClientContactController extends Controller
 {
     public function __construct(
         protected ClientContactService $contactService
-    )
-    {
-    }
+    ) {}
 
     /**
      * List contacts for a customer
@@ -137,7 +135,7 @@ class ClientContactController extends Controller
         return response()->json(
             [
                 'data' => $contact,
-                'message' => 'Contact set as primary.'
+                'message' => 'Contact set as primary.',
             ]
         );
     }

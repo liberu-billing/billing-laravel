@@ -17,7 +17,7 @@ class UpdateUserPassword implements UpdatesUserPasswords
     /**
      * Validate and update the user's password.
      *
-     * @param array<string, string> $input
+     * @param  array<string, string>  $input
      *
      * @throws ValidationException
      * @throws Exception
@@ -31,7 +31,7 @@ class UpdateUserPassword implements UpdatesUserPasswords
                     'current_password' => [
                         'required',
                         'string',
-                        'current_password:web'
+                        'current_password:web',
                     ],
                     'password' => $this->passwordRules(),
                 ],

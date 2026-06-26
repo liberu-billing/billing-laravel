@@ -29,7 +29,7 @@ class FilePolicy
                     'permission',
                     [
                         'write',
-                        'admin'
+                        'admin',
                     ]
                 )
                 ->exists();

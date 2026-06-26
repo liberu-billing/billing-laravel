@@ -11,7 +11,9 @@ use Illuminate\Support\Facades\Log;
 class SoftaculousClient
 {
     protected Client $client;
+
     protected $apiUrl;
+
     protected $apiToken;
 
     public function __construct()
@@ -44,17 +46,17 @@ class SoftaculousClient
         try {
             $response = $this->client->request(
                 'POST',
-                $this->apiUrl . $endpoint,
+                $this->apiUrl.$endpoint,
                 [
                     'headers' => [
-                        'Authorization' => 'Bearer ' . $this->apiToken,
+                        'Authorization' => 'Bearer '.$this->apiToken,
                     ],
                     'form_params' => $params,
                 ]
             );
 
             $result = json_decode(
-                (string)$response->getBody(),
+                (string) $response->getBody(),
                 true,
                 512,
                 JSON_THROW_ON_ERROR
@@ -65,7 +67,7 @@ class SoftaculousClient
                     'Softaculous API call successful',
                     [
                         'endpoint' => $endpoint,
-                        'params' => $params
+                        'params' => $params,
                     ]
                 );
 
@@ -76,7 +78,7 @@ class SoftaculousClient
                     [
                         'endpoint' => $endpoint,
                         'params' => $params,
-                        'response' => $result
+                        'response' => $result,
                     ]
                 );
 
@@ -88,7 +90,7 @@ class SoftaculousClient
                 [
                     'endpoint' => $endpoint,
                     'params' => $params,
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ]
             );
 

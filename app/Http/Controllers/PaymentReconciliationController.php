@@ -11,14 +11,14 @@ use Illuminate\Http\Request;
 
 class PaymentReconciliationController extends Controller
 {
-    public function __construct(protected PaymentReconciliationService $reconciliationService) { }
+    public function __construct(protected PaymentReconciliationService $reconciliationService) {}
 
     public function index(): Factory|View
     {
         $payments = Payment::with(
             [
                 'invoice',
-                'customer'
+                'customer',
             ]
         )
             ->whereIn(
@@ -26,7 +26,7 @@ class PaymentReconciliationController extends Controller
                 [
                     'unmatched',
                     'discrepancy',
-                    'failed'
+                    'failed',
                 ]
             )
             ->latest()
@@ -44,7 +44,7 @@ class PaymentReconciliationController extends Controller
             [
                 'invoice',
                 'customer',
-                'paymentGateway'
+                'paymentGateway',
             ]
         );
         $suggestedInvoices = Invoice::where(

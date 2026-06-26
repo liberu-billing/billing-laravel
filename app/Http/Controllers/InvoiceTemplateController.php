@@ -156,12 +156,12 @@ class InvoiceTemplateController extends Controller
             ->with(
                 [
                     'customer',
-                    'items.productService'
+                    'items.productService',
                 ]
             )
             ->first();
 
-        if (!$invoice) {
+        if (! $invoice) {
             $invoice = new Invoice(
                 [
                     'invoice_number' => 'PREVIEW-001',

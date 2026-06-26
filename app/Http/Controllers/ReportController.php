@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportController extends Controller
 {
-    public function __construct(protected ReportGenerationService $reportService) { }
+    public function __construct(protected ReportGenerationService $reportService) {}
 
     public function index(): Factory|View
     {

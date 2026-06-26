@@ -71,7 +71,7 @@ class User extends Authenticatable implements FilamentUser, HasDefaultTenant, Ha
             $this->profile_photo_path,
             FILTER_VALIDATE_URL
         )
-            ? Attribute::get(fn() => $this->profile_photo_path)
+            ? Attribute::get(fn () => $this->profile_photo_path)
             : $this->getPhotoUrl();
     }
 

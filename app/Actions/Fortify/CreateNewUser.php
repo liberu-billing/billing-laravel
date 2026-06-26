@@ -22,7 +22,7 @@ class CreateNewUser implements CreatesNewUsers
     /**
      * Validate and create a newly registered user.
      *
-     * @param array<string, string> $input
+     * @param  array<string, string>  $input
      *
      * @throws ValidationException
      * @throws Exception
@@ -36,7 +36,7 @@ class CreateNewUser implements CreatesNewUsers
                     'name' => [
                         'required',
                         'string',
-                        'max:255'
+                        'max:255',
                     ],
                     'email' => [
                         'required',
@@ -86,7 +86,7 @@ class CreateNewUser implements CreatesNewUsers
                             try {
                                 $user->assignRole('panel_user');
                             } catch (RoleDoesNotExist) {
-                                Log::warning('Role panel_user does not exist, skipping role assignment for user ' . $user->id);
+                                Log::warning('Role panel_user does not exist, skipping role assignment for user '.$user->id);
                             }
                         }
                     );
@@ -164,7 +164,7 @@ class CreateNewUser implements CreatesNewUsers
         } elseif ($errorCode == 2002) {
             return 'Unable to connect to the database. Please try again later.';
         } else {
-            return 'A database error occurred. Please try again later. Error code: ' . $errorCode;
+            return 'A database error occurred. Please try again later. Error code: '.$errorCode;
         }
     }
 
@@ -176,7 +176,7 @@ class CreateNewUser implements CreatesNewUsers
     protected function configureDefaultTeamContext(): Team
     {
         $team = Team::first();
-        if (!$team) {
+        if (! $team) {
             // Create a default team if none exists (e.g., in a fresh installation)
             $team = Team::forceCreate(
                 [
@@ -199,10 +199,10 @@ class CreateNewUser implements CreatesNewUsers
         return $user->ownedTeams()->create(
             [
                 'name' => explode(
-                              ' ',
-                              $user->name,
-                              2
-                          )[0] . "'s Team",
+                    ' ',
+                    $user->name,
+                    2
+                )[0]."'s Team",
                 'personal_team' => true,
             ]
         );

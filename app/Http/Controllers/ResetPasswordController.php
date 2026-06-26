@@ -18,7 +18,7 @@ class ResetPasswordController extends AuthenticatedSessionController
             'admin.auth.reset-password',
             [
                 'token' => $token,
-                'email' => $request->email
+                'email' => $request->email,
             ]
         );
     }

@@ -17,7 +17,7 @@ class AffiliateReportingService
                 'created_at',
                 [
                     $startDate,
-                    $endDate
+                    $endDate,
                 ]
             )
             ->get();
@@ -30,7 +30,7 @@ class AffiliateReportingService
             'created_at',
             [
                 $startDate,
-                $endDate
+                $endDate,
             ]
         )->count();
 

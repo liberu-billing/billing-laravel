@@ -14,9 +14,6 @@ class InvoiceGenerated extends Mailable
 {
     use Queueable, SerializesModels;
 
-    /**
-     * @var Invoice
-     */
     public Invoice $invoice;
 
     protected $template;
@@ -59,7 +56,7 @@ class InvoiceGenerated extends Mailable
     {
         $replacements = [
             '{{invoice_number}}' => e($this->invoice->invoice_number),
-            '{{amount}}' => e((string)$this->invoice->total_amount),
+            '{{amount}}' => e((string) $this->invoice->total_amount),
             '{{due_date}}' => e($this->invoice->due_date->format('Y-m-d')),
             '{{customer_name}}' => e($this->invoice->customer->name),
         ];

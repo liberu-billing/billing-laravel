@@ -24,7 +24,7 @@ class KnowledgeBaseService
                         $q->whereFullText(
                             [
                                 'title',
-                                'content'
+                                'content',
                             ],
                             $query
                         );
@@ -137,7 +137,7 @@ class KnowledgeBaseService
                             true
                         )
                             ->orderBy('sort_order');
-                    }
+                    },
                 ]
             )
             ->orderBy('sort_order')

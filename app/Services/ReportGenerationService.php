@@ -11,7 +11,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class ReportGenerationService
 {
-    public function __construct(protected BillingService $billingService) { }
+    public function __construct(protected BillingService $billingService) {}
 
     public function generateReport(Report $report): string
     {

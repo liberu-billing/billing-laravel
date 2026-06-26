@@ -14,7 +14,9 @@ use Random\RandomException;
 class PleskClient
 {
     protected Client $client;
+
     protected $server;
+
     protected $apiKey;
 
     public function __construct()
@@ -47,27 +49,27 @@ class PleskClient
                         'property' => [
                             [
                                 'name' => 'ftp_login',
-                                'value' => $username
+                                'value' => $username,
                             ],
                             [
                                 'name' => 'ftp_password',
-                                'value' => $this->generatePassword()
+                                'value' => $this->generatePassword(),
                             ],
                             [
                                 'name' => 'php',
-                                'value' => 'true'
+                                'value' => 'true',
                             ],
                             [
                                 'name' => 'ssl',
-                                'value' => 'true'
+                                'value' => 'true',
                             ],
                             [
                                 'name' => 'webstat',
-                                'value' => 'awstats'
+                                'value' => 'awstats',
                             ],
                             [
                                 'name' => 'www-root',
-                                'value' => "/var/www/vhosts/{$domain}"
+                                'value' => "/var/www/vhosts/{$domain}",
                             ],
                         ],
                     ],
@@ -77,31 +79,31 @@ class PleskClient
                     'limit' => [
                         [
                             'name' => 'disk_space',
-                            'value' => 'unlimited'
+                            'value' => 'unlimited',
                         ],
                         [
                             'name' => 'max_traffic',
-                            'value' => 'unlimited'
+                            'value' => 'unlimited',
                         ],
                         [
                             'name' => 'max_subdom',
-                            'value' => 'unlimited'
+                            'value' => 'unlimited',
                         ],
                         [
                             'name' => 'max_dom',
-                            'value' => 'unlimited'
+                            'value' => 'unlimited',
                         ],
                         [
                             'name' => 'max_db',
-                            'value' => 'unlimited'
+                            'value' => 'unlimited',
                         ],
                         [
                             'name' => 'max_mail',
-                            'value' => 'unlimited'
+                            'value' => 'unlimited',
                         ],
                         [
                             'name' => 'max_wu',
-                            'value' => 'unlimited'
+                            'value' => 'unlimited',
                         ],
                     ],
                 ],
@@ -213,14 +215,14 @@ class PleskClient
 
     protected function makeApiCall($xml): bool
     {
-        if (!$this->server) {
+        if (! $this->server) {
             throw new Exception('Server not configured');
         }
 
         try {
             $response = $this->client->request(
                 'POST',
-                'https://' . $this->server->hostname . ':8443/api/v2/cli/server/',
+                'https://'.$this->server->hostname.':8443/api/v2/cli/server/',
                 [
                     'headers' => [
                         'Content-Type' => 'text/xml',
@@ -234,7 +236,7 @@ class PleskClient
 
             $result = simplexml_load_string($response->getBody()->getContents());
 
-            if ((string)$result->status === 'ok') {
+            if ((string) $result->status === 'ok') {
                 Log::info(
                     'Plesk API call successful',
                     ['server' => $this->server->hostname]
@@ -247,7 +249,7 @@ class PleskClient
                 'Plesk API call failed',
                 [
                     'server' => $this->server->hostname,
-                    'error' => (string)$result->errtext,
+                    'error' => (string) $result->errtext,
                 ]
             );
 
@@ -274,7 +276,7 @@ class PleskClient
         $xml .= $this->arrayToXml($params);
         $xml .= "</{$command}>";
 
-        return $xml . '</packet>';
+        return $xml.'</packet>';
     }
 
     protected function arrayToXml($array): string
@@ -285,7 +287,7 @@ class PleskClient
                 if (isset($value['name']) && isset($value['value'])) {
                     $xml .= "<{$key} name=\"{$value['name']}\">{$value['value']}</{$key}>";
                 } else {
-                    $xml .= "<{$key}>" . $this->arrayToXml($value) . "</{$key}>";
+                    $xml .= "<{$key}>".$this->arrayToXml($value)."</{$key}>";
                 }
             } else {
                 $xml .= "<{$key}>{$value}</{$key}>";

@@ -16,7 +16,7 @@ class PaymentHistoryController extends Controller
             [
                 'payment',
                 'invoice',
-                'customer'
+                'customer',
             ]
         );
 
@@ -45,7 +45,7 @@ class PaymentHistoryController extends Controller
             ->with(
                 [
                     'payment',
-                    'invoice'
+                    'invoice',
                 ]
             )
             ->latest()

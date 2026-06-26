@@ -10,7 +10,7 @@ class TeamsPermission
 {
     public function handle(Request $request, Closure $next)
     {
-        if (!empty($user = auth()->user()) && !empty($user->current_team_id)) {
+        if (! empty($user = auth()->user()) && ! empty($user->current_team_id)) {
             app(PermissionRegistrar::class)->setPermissionsTeamId($user->current_team_id);
             auth()->setUser(
                 auth()->user()->fresh()

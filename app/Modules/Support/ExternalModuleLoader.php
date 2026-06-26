@@ -22,13 +22,12 @@ class ExternalModuleLoader
         $modules = [];
 
         foreach (config(
-                     'modules.external_paths',
-                     []
-                 ) as $path) {
+            'modules.external_paths',
+            []
+        ) as $path) {
             array_push(
                 $modules,
-                ...
-                $this->loadFromPath($path)
+                ...$this->loadFromPath($path)
             );
         }
 
@@ -38,8 +37,7 @@ class ExternalModuleLoader
         )) {
             array_push(
                 $modules,
-                ...
-                $this->loadFromComposer()
+                ...$this->loadFromComposer()
             );
         }
 
@@ -55,11 +53,11 @@ class ExternalModuleLoader
     {
         $realPath = realpath($path);
 
-        if ($realPath === false || !is_dir($realPath) || in_array(
-                $realPath,
-                $this->loadedPaths,
-                true
-            )) {
+        if ($realPath === false || ! is_dir($realPath) || in_array(
+            $realPath,
+            $this->loadedPaths,
+            true
+        )) {
             return [];
         }
 
@@ -86,9 +84,9 @@ class ExternalModuleLoader
     {
         $modules = [];
         $vendorPath = base_path('vendor');
-        $installedJson = $vendorPath . '/composer/installed.json';
+        $installedJson = $vendorPath.'/composer/installed.json';
 
-        if (!File::exists($installedJson)) {
+        if (! File::exists($installedJson)) {
             return [];
         }
 
@@ -105,9 +103,9 @@ class ExternalModuleLoader
                 continue;
             }
 
-            $packagePath = $vendorPath . '/' . ($package['name'] ?? '');
+            $packagePath = $vendorPath.'/'.($package['name'] ?? '');
 
-            if (!is_dir($packagePath)) {
+            if (! is_dir($packagePath)) {
                 continue;
             }
 
@@ -128,7 +126,7 @@ class ExternalModuleLoader
      *
      * Tries several class naming conventions before giving up.
      *
-     * @param array<string,string> $psr4Map Optional PSR-4 namespace map for vendor packages
+     * @param  array<string,string>  $psr4Map  Optional PSR-4 namespace map for vendor packages
      */
     protected function resolveModule(string $modulePath, array $psr4Map = []): ?ModuleInterface
     {
@@ -154,7 +152,7 @@ class ExternalModuleLoader
     /**
      * Build a list of candidate fully-qualified class names for a given module directory.
      *
-     * @param array<string,string> $psr4Map
+     * @param  array<string,string>  $psr4Map
      * @return string[]
      */
     protected function buildCandidateClasses(string $moduleName, string $modulePath, array $psr4Map): array

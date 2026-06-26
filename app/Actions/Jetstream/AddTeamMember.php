@@ -84,13 +84,13 @@ class AddTeamMember implements AddsTeamMembers
                 'email' => [
                     'required',
                     'email',
-                    'exists:users'
+                    'exists:users',
                 ],
                 'role' => Jetstream::hasRoles()
                     ? [
                         'required',
                         'string',
-                        new Role
+                        new Role,
                     ]
                     : null,
             ]

@@ -62,7 +62,7 @@ class HostingAccount extends Model
 
     public function hasDomain(): bool
     {
-        return !empty($this->domain);
+        return ! empty($this->domain);
     }
 
     public function hasAddon($addon): bool

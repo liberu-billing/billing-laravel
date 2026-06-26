@@ -17,7 +17,7 @@ class MakeModuleCommand extends Command
     {
         $name = $this->argument('name');
 
-        if (!preg_match(
+        if (! preg_match(
             '/^[A-Z][A-Za-z0-9]+$/',
             $name
         )) {
@@ -46,7 +46,7 @@ class MakeModuleCommand extends Command
             $srcPath = $modulePath;
         }
 
-        if (File::exists($modulePath) && !$this->option('force')) {
+        if (File::exists($modulePath) && ! $this->option('force')) {
             $this->error("Module '{$name}' already exists. Use --force to overwrite.");
 
             return self::FAILURE;
@@ -123,23 +123,23 @@ class MakeModuleCommand extends Command
     private function createDirectories(string $modulePath): void
     {
         foreach ([
-                     'Filament/Resources',
-                     'Filament/Pages',
-                     'Filament/Widgets',
-                     'Http/Controllers',
-                     'Http/Middleware',
-                     'Models',
-                     'Providers',
-                     'Services',
-                     'config',
-                     'database/migrations',
-                     'database/seeders',
-                     'resources/assets',
-                     'resources/lang',
-                     'resources/views',
-                     'routes',
-                     'tests',
-                 ] as $dir) {
+            'Filament/Resources',
+            'Filament/Pages',
+            'Filament/Widgets',
+            'Http/Controllers',
+            'Http/Middleware',
+            'Models',
+            'Providers',
+            'Services',
+            'config',
+            'database/migrations',
+            'database/seeders',
+            'resources/assets',
+            'resources/lang',
+            'resources/views',
+            'routes',
+            'tests',
+        ] as $dir) {
             File::makeDirectory(
                 "{$modulePath}/{$dir}",
                 0755,
@@ -152,25 +152,25 @@ class MakeModuleCommand extends Command
     private function createModularDirectories(string $modulePath): void
     {
         foreach ([
-                     'src/Filament/Resources',
-                     'src/Filament/Pages',
-                     'src/Filament/Widgets',
-                     'src/Http/Controllers',
-                     'src/Http/Middleware',
-                     'src/Models',
-                     'src/Providers',
-                     'src/Services',
-                     'config',
-                     'database/migrations',
-                     'database/seeders',
-                     'database/factories',
-                     'resources/assets',
-                     'resources/lang',
-                     'resources/views',
-                     'routes',
-                     'tests/Unit',
-                     'tests/Feature',
-                 ] as $dir) {
+            'src/Filament/Resources',
+            'src/Filament/Pages',
+            'src/Filament/Widgets',
+            'src/Http/Controllers',
+            'src/Http/Middleware',
+            'src/Models',
+            'src/Providers',
+            'src/Services',
+            'config',
+            'database/migrations',
+            'database/seeders',
+            'database/factories',
+            'resources/assets',
+            'resources/lang',
+            'resources/views',
+            'routes',
+            'tests/Unit',
+            'tests/Feature',
+        ] as $dir) {
             File::makeDirectory(
                 "{$modulePath}/{$dir}",
                 0755,
@@ -183,14 +183,14 @@ class MakeModuleCommand extends Command
     private function createModularComposerJson(string $name, string $modulePath, string $namespace): void
     {
         $ns = rtrim(
-                $namespace,
-                '\\'
-            ) . '\\';
+            $namespace,
+            '\\'
+        ).'\\';
         File::put(
             "{$modulePath}/composer.json",
             json_encode(
                 [
-                    'name' => 'liberu/' . strtolower($name),
+                    'name' => 'liberu/'.strtolower($name),
                     'description' => "The {$name} module for Liberu Billing.",
                     'type' => 'library',
                     'autoload' => [
@@ -200,7 +200,7 @@ class MakeModuleCommand extends Command
                     ],
                 ],
                 JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
-            ) . "\n"
+            )."\n"
         );
     }
 
@@ -217,7 +217,7 @@ class MakeModuleCommand extends Command
                     'config' => [],
                 ],
                 JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
-            ) . "\n"
+            )."\n"
         );
     }
 
@@ -545,12 +545,12 @@ class MakeModuleCommand extends Command
     private function createMigration(string $name, string $dbPath): void
     {
         $table = strtolower(
-                preg_replace(
-                    '/(?<!^)[A-Z]/',
-                    '_$0',
-                    $name
-                )
-            ) . 's';
+            preg_replace(
+                '/(?<!^)[A-Z]/',
+                '_$0',
+                $name
+            )
+        ).'s';
         $timestamp = now()->format('Y_m_d_His');
 
         File::makeDirectory(

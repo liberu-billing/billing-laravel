@@ -42,6 +42,6 @@ class ClientContact extends Model
 
     protected function fullName(): Attribute
     {
-        return Attribute::make(get: fn(): string => trim("{$this->first_name} {$this->last_name}"));
+        return Attribute::make(get: fn (): string => trim("{$this->first_name} {$this->last_name}"));
     }
 }

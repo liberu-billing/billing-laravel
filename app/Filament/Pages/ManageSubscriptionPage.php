@@ -97,7 +97,7 @@ class ManageSubscriptionPage extends Page
     {
         $product = Products_Service::findOrFail($this->selectedProduct);
 
-        if (!$this->subscription) {
+        if (! $this->subscription) {
             $this->subscription = new Subscription;
         }
 

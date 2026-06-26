@@ -13,8 +13,7 @@ class QuoteController extends Controller
 {
     public function __construct(
         protected QuoteService $quoteService
-    )
-    {
+    ) {
         $this->authorizeResource(
             Quote::class,
             'quote'
@@ -29,14 +28,14 @@ class QuoteController extends Controller
         $quotes = Quote::query()
             ->when(
                 $request->status,
-                fn($q) => $q->where(
+                fn ($q) => $q->where(
                     'status',
                     $request->status
                 )
             )
             ->when(
                 $request->customer_id,
-                fn($q) => $q->where(
+                fn ($q) => $q->where(
                     'customer_id',
                     $request->customer_id
                 )
@@ -58,7 +57,7 @@ class QuoteController extends Controller
                 'data' => $quote->load(
                     [
                         'customer',
-                        'items'
+                        'items',
                     ]
                 ),
             ]
@@ -103,7 +102,7 @@ class QuoteController extends Controller
             $quote->status,
             [
                 'accepted',
-                'declined'
+                'declined',
             ]
         )) {
             return response()->json(
@@ -161,11 +160,11 @@ class QuoteController extends Controller
      */
     public function send(Quote $quote): JsonResponse
     {
-        if (!in_array(
+        if (! in_array(
             $quote->status,
             [
                 'draft',
-                'sent'
+                'sent',
             ]
         )) {
             return response()->json(
@@ -181,7 +180,7 @@ class QuoteController extends Controller
         return response()->json(
             [
                 'data' => $quote,
-                'message' => 'Quote sent successfully.'
+                'message' => 'Quote sent successfully.',
             ]
         );
     }
@@ -191,11 +190,11 @@ class QuoteController extends Controller
      */
     public function accept(Quote $quote): JsonResponse
     {
-        if (!in_array(
+        if (! in_array(
             $quote->status,
             [
                 'sent',
-                'viewed'
+                'viewed',
             ]
         )) {
             return response()->json(
@@ -211,7 +210,7 @@ class QuoteController extends Controller
         return response()->json(
             [
                 'data' => $quote,
-                'message' => 'Quote accepted.'
+                'message' => 'Quote accepted.',
             ]
         );
     }
@@ -221,11 +220,11 @@ class QuoteController extends Controller
      */
     public function decline(Quote $quote): JsonResponse
     {
-        if (!in_array(
+        if (! in_array(
             $quote->status,
             [
                 'sent',
-                'viewed'
+                'viewed',
             ]
         )) {
             return response()->json(
@@ -241,7 +240,7 @@ class QuoteController extends Controller
         return response()->json(
             [
                 'data' => $quote,
-                'message' => 'Quote declined.'
+                'message' => 'Quote declined.',
             ]
         );
     }
@@ -251,7 +250,7 @@ class QuoteController extends Controller
      */
     public function convert(Quote $quote): JsonResponse
     {
-        if (!$quote->canBeConverted()) {
+        if (! $quote->canBeConverted()) {
             return response()->json(
                 [
                     'message' => 'Only accepted quotes can be converted to invoices.',

@@ -20,7 +20,7 @@ class SendEmailNotification implements ShouldQueue
 
     public int $backoff = 300; // 5 minutes
 
-    public function __construct(protected Mailable $mailable, protected string $recipient) { }
+    public function __construct(protected Mailable $mailable, protected string $recipient) {}
 
     public function handle(): void
     {

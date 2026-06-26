@@ -13,7 +13,7 @@ class ScreeningDataEncryptor
 
         if ($response->getContent()) {
             $content = json_decode(
-                (string)$response->getContent(),
+                (string) $response->getContent(),
                 true,
                 512,
                 JSON_THROW_ON_ERROR

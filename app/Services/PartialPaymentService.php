@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 class PartialPaymentService
 {
-    public function __construct(protected PaymentGatewayService $paymentGatewayService) { }
+    public function __construct(protected PaymentGatewayService $paymentGatewayService) {}
 
     public function processPartialPayment(Invoice $invoice, float $amount, int $paymentGatewayId): array
     {
@@ -43,7 +43,7 @@ class PartialPaymentService
                 return [
                     'success' => true,
                     'message' => 'Partial payment processed successfully.',
-                    'payment' => $payment
+                    'payment' => $payment,
                 ];
             } else {
                 throw new Exception($paymentResult['message']);
@@ -53,7 +53,7 @@ class PartialPaymentService
 
             return [
                 'success' => false,
-                'message' => 'Partial payment failed: ' . $e->getMessage()
+                'message' => 'Partial payment failed: '.$e->getMessage(),
             ];
         }
     }

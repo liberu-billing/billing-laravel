@@ -42,7 +42,7 @@ class ModuleCommand extends Command
             $this->outputResult(
                 [
                     'modules' => [],
-                    'count' => 0
+                    'count' => 0,
                 ]
             );
 
@@ -50,7 +50,7 @@ class ModuleCommand extends Command
         }
 
         $rows = $modules->map(
-            fn($m): array => [
+            fn ($m): array => [
                 'name' => $m->getName(),
                 'version' => $m->getVersion(),
                 'status' => $m->isEnabled() ? 'enabled' : 'disabled',
@@ -79,10 +79,10 @@ class ModuleCommand extends Command
                 'Version',
                 'Status',
                 'Description',
-                'Dependencies'
+                'Dependencies',
             ],
             array_map(
-                fn(array $r): array => [
+                fn (array $r): array => [
                     $r['name'],
                     $r['version'],
                     $r['status'] === 'enabled' ? '<fg=green>Enabled</>' : '<fg=red>Disabled</>',
@@ -101,7 +101,7 @@ class ModuleCommand extends Command
         return $this->runModuleAction(
             'enable',
             $name,
-            fn() => $this->moduleManager->enable($name)
+            fn () => $this->moduleManager->enable($name)
         );
     }
 
@@ -110,7 +110,7 @@ class ModuleCommand extends Command
         return $this->runModuleAction(
             'disable',
             $name,
-            fn() => $this->moduleManager->disable($name)
+            fn () => $this->moduleManager->disable($name)
         );
     }
 
@@ -119,19 +119,19 @@ class ModuleCommand extends Command
         return $this->runModuleAction(
             'install',
             $name,
-            fn() => $this->moduleManager->install($name)
+            fn () => $this->moduleManager->install($name)
         );
     }
 
     protected function uninstallModule(?string $name): int
     {
-        if (!$name) {
+        if (! $name) {
             $this->error('Module name is required.');
 
             return self::FAILURE;
         }
 
-        if (!$this->option('force') && !$this->confirm("Uninstall module '{$name}'? This cannot be undone.")) {
+        if (! $this->option('force') && ! $this->confirm("Uninstall module '{$name}'? This cannot be undone.")) {
             $this->info('Cancelled.');
 
             return self::SUCCESS;
@@ -140,13 +140,13 @@ class ModuleCommand extends Command
         return $this->runModuleAction(
             'uninstall',
             $name,
-            fn() => $this->moduleManager->uninstall($name)
+            fn () => $this->moduleManager->uninstall($name)
         );
     }
 
     protected function createModule(?string $name): int
     {
-        if (!$name) {
+        if (! $name) {
             $this->error('Module name is required.');
 
             return self::FAILURE;
@@ -156,14 +156,14 @@ class ModuleCommand extends Command
             'make:module',
             [
                 'name' => $name,
-                '--force' => $this->option('force')
+                '--force' => $this->option('force'),
             ]
         );
     }
 
     protected function showModuleInfo(?string $name): int
     {
-        if (!$name) {
+        if (! $name) {
             $this->error('Module name is required.');
 
             return self::FAILURE;
@@ -248,7 +248,7 @@ class ModuleCommand extends Command
 
     private function runModuleAction(string $verb, ?string $name, callable $action): int
     {
-        if (!$name) {
+        if (! $name) {
             $this->error('Module name is required.');
 
             return self::FAILURE;
@@ -265,7 +265,7 @@ class ModuleCommand extends Command
 
             return self::FAILURE;
         } catch (Exception $e) {
-            $this->error("Failed to {$verb} '{$name}': " . $e->getMessage());
+            $this->error("Failed to {$verb} '{$name}': ".$e->getMessage());
 
             return self::FAILURE;
         }
@@ -288,7 +288,7 @@ class ModuleCommand extends Command
                         $value
                     ) ?: '—';
                 }
-                $this->line(ucfirst((string)$key) . ': ' . (string)$value);
+                $this->line(ucfirst((string) $key).': '.(string) $value);
             }
         }
     }

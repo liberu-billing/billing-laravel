@@ -26,10 +26,10 @@ class SmsService
         try {
             $response = Http::withHeaders(
                 [
-                    'Authorization' => 'Bearer ' . $this->apiKey,
+                    'Authorization' => 'Bearer '.$this->apiKey,
                 ]
             )->post(
-                $this->baseUrl . '/messages',
+                $this->baseUrl.'/messages',
                 [
                     'from' => $this->from,
                     'to' => $this->formatPhoneNumber($to),
@@ -78,14 +78,14 @@ class SmsService
         $cleaned = preg_replace(
             '/[^0-9]/',
             '',
-            (string)$number
+            (string) $number
         );
 
         // Ensure number starts with country code
-        if (strlen((string)$cleaned) === 10) {
-            return '+1' . $cleaned; // Default to US/Canada
+        if (strlen((string) $cleaned) === 10) {
+            return '+1'.$cleaned; // Default to US/Canada
         }
 
-        return '+' . $cleaned;
+        return '+'.$cleaned;
     }
 }

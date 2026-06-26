@@ -48,14 +48,14 @@ class DisputeService
                     $status,
                     [
                         'resolved',
-                        'rejected'
+                        'rejected',
                     ]
                 ) ? now() : null,
                 'resolved_by' => in_array(
                     $status,
                     [
                         'resolved',
-                        'rejected'
+                        'rejected',
                     ]
                 ) ? auth()->id() : null,
             ]

@@ -77,7 +77,7 @@ class BulkOperationService
                 'type' => 'data_export',
                 'parameters' => [
                     'filters' => $filters,
-                    'entity' => 'clients'
+                    'entity' => 'clients',
                 ],
                 'status' => 'pending',
             ]
@@ -103,7 +103,7 @@ class BulkOperationService
                 $data = Client::query();
 
                 // Apply filters
-                if (!empty($filters['team_id'])) {
+                if (! empty($filters['team_id'])) {
                     $data->where(
                         'team_id',
                         $filters['team_id']
@@ -114,11 +114,11 @@ class BulkOperationService
                 $operation->update(['total_items' => $clients->count()]);
 
                 // Generate CSV
-                $filename = 'exports/clients_' . time() . '.csv';
-                $path = storage_path('app/' . $filename);
+                $filename = 'exports/clients_'.time().'.csv';
+                $path = storage_path('app/'.$filename);
 
                 // Ensure directory exists
-                if (!file_exists(dirname($path))) {
+                if (! file_exists(dirname($path))) {
                     mkdir(
                         dirname($path),
                         0755,
@@ -139,7 +139,7 @@ class BulkOperationService
                         'Name',
                         'Email',
                         'Phone',
-                        'Created At'
+                        'Created At',
                     ],
                     escape: '\\'
                 );
@@ -212,9 +212,9 @@ class BulkOperationService
             // Count total rows
             $totalRows = 0;
             while (fgetcsv(
-                    $file,
-                    escape: '\\'
-                ) !== false) {
+                $file,
+                escape: '\\'
+            ) !== false) {
                 $totalRows++;
             }
             rewind($file);
@@ -226,9 +226,9 @@ class BulkOperationService
             $operation->update(['total_items' => $totalRows]);
 
             while (($row = fgetcsv(
-                    $file,
-                    escape: '\\'
-                )) !== false) {
+                $file,
+                escape: '\\'
+            )) !== false) {
                 try {
                     Client::create(
                         [
@@ -261,8 +261,7 @@ class BulkOperationService
         array $recipientFilters,
         int $createdBy,
         ?int $teamId = null
-    ): EmailCampaign
-    {
+    ): EmailCampaign {
         return EmailCampaign::create(
             [
                 'team_id' => $teamId,
@@ -312,14 +311,14 @@ class BulkOperationService
     {
         $query = Client::query();
 
-        if (!empty($filters['team_id'])) {
+        if (! empty($filters['team_id'])) {
             $query->where(
                 'team_id',
                 $filters['team_id']
             );
         }
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where(
                 'status',
                 $filters['status']

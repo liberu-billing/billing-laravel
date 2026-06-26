@@ -18,7 +18,7 @@ class ClientBillingReportService
             ->with(
                 [
                     'items',
-                    'payments'
+                    'payments',
                 ]
             )
             ->orderBy(
@@ -43,7 +43,7 @@ class ClientBillingReportService
         }
 
         return $query->get()->map(
-            fn($invoice): array => [
+            fn ($invoice): array => [
                 'invoice_number' => $invoice->invoice_number,
                 'date' => $invoice->created_at->format('Y-m-d'),
                 'due_date' => $invoice->due_date->format('Y-m-d'),

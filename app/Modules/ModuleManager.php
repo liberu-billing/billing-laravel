@@ -31,17 +31,17 @@ class ModuleManager
 
     public function enabled(): Collection
     {
-        return $this->modules->filter(fn($module) => $module->isEnabled());
+        return $this->modules->filter(fn ($module) => $module->isEnabled());
     }
 
     public function disabled(): Collection
     {
-        return $this->modules->filter(fn($module): bool => !$module->isEnabled());
+        return $this->modules->filter(fn ($module): bool => ! $module->isEnabled());
     }
 
     public function get(string $name): ?ModuleInterface
     {
-        return $this->modules->first(fn($module): bool => $module->getName() === $name);
+        return $this->modules->first(fn ($module): bool => $module->getName() === $name);
     }
 
     public function find(string $name): ?ModuleInterface
@@ -51,18 +51,18 @@ class ModuleManager
 
     public function has(string $name): bool
     {
-        return $this->modules->contains(fn($module): bool => $module->getName() === $name);
+        return $this->modules->contains(fn ($module): bool => $module->getName() === $name);
     }
 
     public function enable(string $name): bool
     {
         $module = $this->get($name);
 
-        if (!$module instanceof ModuleInterface) {
+        if (! $module instanceof ModuleInterface) {
             return false;
         }
 
-        if (!$this->checkDependencies($module)) {
+        if (! $this->checkDependencies($module)) {
             throw new Exception("Module {$name} has unmet dependencies.");
         }
 
@@ -77,7 +77,7 @@ class ModuleManager
             $record->config = $module->getConfig();
             $record->save();
         } catch (Throwable $e) {
-            Log::warning("Failed to persist enabled state for module '{$name}': " . $e->getMessage());
+            Log::warning("Failed to persist enabled state for module '{$name}': ".$e->getMessage());
         }
 
         $this->clearCache();
@@ -89,7 +89,7 @@ class ModuleManager
     {
         $module = $this->get($name);
 
-        if (!$module instanceof ModuleInterface) {
+        if (! $module instanceof ModuleInterface) {
             return false;
         }
 
@@ -104,7 +104,7 @@ class ModuleManager
             $record->enabled = false;
             $record->save();
         } catch (Throwable $e) {
-            Log::warning("Failed to persist disabled state for module '{$name}': " . $e->getMessage());
+            Log::warning("Failed to persist disabled state for module '{$name}': ".$e->getMessage());
         }
 
         $this->clearCache();
@@ -116,11 +116,11 @@ class ModuleManager
     {
         $module = $this->get($name);
 
-        if (!$module instanceof ModuleInterface) {
+        if (! $module instanceof ModuleInterface) {
             return false;
         }
 
-        if (!$this->checkDependencies($module)) {
+        if (! $this->checkDependencies($module)) {
             throw new Exception("Module {$name} has unmet dependencies.");
         }
 
@@ -135,7 +135,7 @@ class ModuleManager
             $record->config = $module->getConfig();
             $record->save();
         } catch (Throwable $e) {
-            Log::warning("Failed to persist install state for module '{$name}': " . $e->getMessage());
+            Log::warning("Failed to persist install state for module '{$name}': ".$e->getMessage());
         }
 
         $this->clearCache();
@@ -147,7 +147,7 @@ class ModuleManager
     {
         $module = $this->get($name);
 
-        if (!$module instanceof ModuleInterface) {
+        if (! $module instanceof ModuleInterface) {
             return false;
         }
 
@@ -162,7 +162,7 @@ class ModuleManager
             $record->enabled = false;
             $record->save();
         } catch (Throwable $e) {
-            Log::warning("Failed to persist uninstall state for module '{$name}': " . $e->getMessage());
+            Log::warning("Failed to persist uninstall state for module '{$name}': ".$e->getMessage());
         }
 
         $this->clearCache();
@@ -182,7 +182,7 @@ class ModuleManager
     {
         $module = $this->get($name);
 
-        if (!$module instanceof ModuleInterface) {
+        if (! $module instanceof ModuleInterface) {
             return [];
         }
 
@@ -198,7 +198,7 @@ class ModuleManager
 
     public function getAllModulesInfo(): array
     {
-        return $this->modules->map(fn($module): array => $this->getModuleInfo($module->getName()))->toArray();
+        return $this->modules->map(fn ($module): array => $this->getModuleInfo($module->getName()))->toArray();
     }
 
     public function clearCache(): void
@@ -215,12 +215,12 @@ class ModuleManager
     {
         $module = $this->get($name);
 
-        if (!$module instanceof ModuleInterface) {
+        if (! $module instanceof ModuleInterface) {
             return [
                 'name' => $name,
                 'healthy' => false,
                 'errors' => ["Module '{$name}' not found."],
-                'warnings' => []
+                'warnings' => [],
             ];
         }
 
@@ -229,14 +229,14 @@ class ModuleManager
 
         foreach ($module->getDependencies() as $dep) {
             $depModule = $this->get($dep);
-            if (!$depModule) {
+            if (! $depModule) {
                 $errors[] = "Missing dependency: {$dep}";
-            } elseif (!$depModule->isEnabled()) {
+            } elseif (! $depModule->isEnabled()) {
                 $warnings[] = "Dependency disabled: {$dep}";
             }
         }
 
-        if ($module->isEnabled() && !$this->checkDependencies($module)) {
+        if ($module->isEnabled() && ! $this->checkDependencies($module)) {
             $errors[] = 'Module is enabled but has unmet dependencies.';
         }
 
@@ -251,7 +251,7 @@ class ModuleManager
     public function checkAllHealth(): array
     {
         return $this->modules
-            ->map(fn($m): array => $this->checkHealth($m->getName()))
+            ->map(fn ($m): array => $this->checkHealth($m->getName()))
             ->keyBy('name')
             ->toArray();
     }
@@ -259,12 +259,12 @@ class ModuleManager
     protected function loadModules(): void
     {
         $cacheEnabled = config(
-                'modules.cache',
-                true
-            ) && !config(
-                'modules.development',
-                false
-            );
+            'modules.cache',
+            true
+        ) && ! config(
+            'modules.development',
+            false
+        );
 
         if ($cacheEnabled) {
             $cached = Cache::get(
@@ -319,12 +319,12 @@ class ModuleManager
         }
 
         foreach ($paths as $modulesPath => $namespace) {
-            if (!File::exists($modulesPath)) {
+            if (! File::exists($modulesPath)) {
                 continue;
             }
 
             foreach (File::directories($modulesPath) as $modulePath) {
-                $moduleName = basename((string)$modulePath);
+                $moduleName = basename((string) $modulePath);
 
                 // Try two conventions:
                 //   1. Dir = "Blog"      → class App\Modules\Blog\BlogModule  (make:module Blog)
@@ -349,7 +349,7 @@ class ModuleManager
                 try {
                     $module = new $moduleClass;
                 } catch (Throwable $e) {
-                    Log::warning("Failed to instantiate module '{$moduleName}': " . $e->getMessage());
+                    Log::warning("Failed to instantiate module '{$moduleName}': ".$e->getMessage());
 
                     continue;
                 }
@@ -377,22 +377,22 @@ class ModuleManager
 
     protected function loadExternalModules(): void
     {
-        if (!config(
-                'modules.load_composer_modules',
-                false
-            ) && empty(
+        if (! config(
+            'modules.load_composer_modules',
+            false
+        ) && empty(
             config(
                 'modules.external_paths',
                 []
             )
-            )) {
+        )) {
             return;
         }
 
         $loader = new ExternalModuleLoader;
 
         foreach ($loader->load() as $module) {
-            if (!$this->has($module->getName())) {
+            if (! $this->has($module->getName())) {
                 $this->register($module);
             }
         }
@@ -402,7 +402,7 @@ class ModuleManager
     {
         foreach ($module->getDependencies() as $dependency) {
             $dependencyModule = $this->get($dependency);
-            if (!$dependencyModule || !$dependencyModule->isEnabled()) {
+            if (! $dependencyModule || ! $dependencyModule->isEnabled()) {
                 return false;
             }
         }
@@ -413,7 +413,7 @@ class ModuleManager
     protected function hasDependents(string $moduleName): bool
     {
         return $this->enabled()->contains(
-            fn($module): bool => in_array(
+            fn ($module): bool => in_array(
                 $moduleName,
                 $module->getDependencies()
             )

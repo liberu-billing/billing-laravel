@@ -97,7 +97,7 @@ class InviteTeamMember implements InvitesTeamMembers
                     ? [
                         'required',
                         'string',
-                        new Role
+                        new Role,
                     ]
                     : null,
             ]

@@ -15,14 +15,12 @@ class CreateUserFromProvider implements CreatesUserFromProvider
 {
     public function __construct(
         private readonly CreatesConnectedAccounts $createsConnectedAccounts
-    )
-    {
-    }
+    ) {}
 
     public function create(string $provider, ProviderUser $providerUser): User
     {
         return DB::transaction(
-            fn() => tap(
+            fn () => tap(
                 User::create(
                     [
                         'name' => $providerUser->getName() ?? $providerUser->getNickname(),

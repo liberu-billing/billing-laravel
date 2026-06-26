@@ -34,12 +34,12 @@ class Handler extends ExceptionHandler
 
                 try {
                     if ($e instanceof Error && (str_contains(
-                                $e->getMessage(),
-                                'Maximum call stack size'
-                            ) || str_contains(
-                                $e->getMessage(),
-                                'Container.php line 1048'
-                            ))) {
+                        $e->getMessage(),
+                        'Maximum call stack size'
+                    ) || str_contains(
+                        $e->getMessage(),
+                        'Container.php line 1048'
+                    ))) {
                         logger()->error(
                             'Recursion or stack overflow detected',
                             [

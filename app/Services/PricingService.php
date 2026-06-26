@@ -45,7 +45,7 @@ class PricingService
         $startDate = $options['start_date'] ?? null;
         $endDate = $options['end_date'] ?? null;
 
-        if (!$subscriptionId || !$startDate || !$endDate) {
+        if (! $subscriptionId || ! $startDate || ! $endDate) {
             return $product->base_price;
         }
 
@@ -62,7 +62,7 @@ class PricingService
                 'recorded_at',
                 [
                     $startDate,
-                    $endDate
+                    $endDate,
                 ]
             )
             ->where(

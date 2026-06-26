@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 
 class ServiceManagementController extends Controller
 {
-    public function __construct(protected ServiceProvisioningService $serviceProvisioningService) { }
+    public function __construct(protected ServiceProvisioningService $serviceProvisioningService) {}
 
     public function provisionService(Request $request)
     {
@@ -27,14 +27,14 @@ class ServiceManagementController extends Controller
             return response()->json(
                 [
                     'message' => 'Service provisioned successfully',
-                    'result' => $result
+                    'result' => $result,
                 ]
             );
         } catch (Exception $e) {
             return response()->json(
                 [
                     'message' => 'Service provisioning failed',
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ],
                 400
             );
@@ -61,14 +61,14 @@ class ServiceManagementController extends Controller
             return response()->json(
                 [
                     'message' => 'Service managed successfully',
-                    'result' => $result
+                    'result' => $result,
                 ]
             );
         } catch (Exception $e) {
             return response()->json(
                 [
                     'message' => 'Service management failed',
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ],
                 400
             );

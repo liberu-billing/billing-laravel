@@ -27,7 +27,7 @@ class SyncEnomDomains extends Command
             $this->domainPricingService->syncTldsFromEnom();
             $this->info('Enom domain synchronization completed successfully.');
         } catch (Exception $e) {
-            $this->error('An error occurred during Enom domain synchronization: ' . $e->getMessage());
+            $this->error('An error occurred during Enom domain synchronization: '.$e->getMessage());
         }
     }
 }

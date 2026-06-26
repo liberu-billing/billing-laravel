@@ -12,11 +12,11 @@ class TicketPolicy
     public function view(User $user, Ticket $ticket): bool
     {
         return $user->hasAnyRole(
-                [
-                    'admin',
-                    'super_admin'
-                ]
-            ) || $ticket->user_id === $user->id;
+            [
+                'admin',
+                'super_admin',
+            ]
+        ) || $ticket->user_id === $user->id;
     }
 
     public function update(User $user, Ticket $ticket): bool
@@ -24,7 +24,7 @@ class TicketPolicy
         return $user->hasAnyRole(
             [
                 'admin',
-                'super_admin'
+                'super_admin',
             ]
         );
     }
@@ -32,10 +32,10 @@ class TicketPolicy
     public function respond(User $user, Ticket $ticket): bool
     {
         return $user->hasAnyRole(
-                [
-                    'admin',
-                    'super_admin'
-                ]
-            ) || $ticket->user_id === $user->id;
+            [
+                'admin',
+                'super_admin',
+            ]
+        ) || $ticket->user_id === $user->id;
     }
 }

@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
-    public function __construct(protected PaymentGatewayService $paymentGatewayService, protected CurrencyService $currencyService) { }
+    public function __construct(protected PaymentGatewayService $paymentGatewayService, protected CurrencyService $currencyService) {}
 
     public function processPayment(Request $request): ?JsonResponse
     {
@@ -35,7 +35,7 @@ class PaymentController extends Controller
         $invoice = Invoice::findOrFail($request->invoice_id);
 
         // Validate payment method
-        if (!$this->paymentGatewayService->validatePaymentMethod($request->payment_method)) {
+        if (! $this->paymentGatewayService->validatePaymentMethod($request->payment_method)) {
             return response()->json(
                 ['message' => 'Unsupported payment method'],
                 422
@@ -80,7 +80,7 @@ class PaymentController extends Controller
             return response()->json(
                 [
                     'message' => 'Payment processed successfully',
-                    'result' => $result
+                    'result' => $result,
                 ]
             );
         } catch (Exception $e) {
@@ -97,7 +97,7 @@ class PaymentController extends Controller
             return response()->json(
                 [
                     'message' => 'Payment processing failed',
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ],
                 400
             );

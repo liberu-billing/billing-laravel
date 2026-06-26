@@ -30,8 +30,7 @@ class BillingService
         ?PaymentGatewayService $paymentGatewayService = null,
         ?PricingService $pricingService = null,
         ?SmsService $smsService = null
-    )
-    {
+    ) {
         $this->paymentPlanService = $paymentPlanService ?? new PaymentPlanService($this);
         $this->paymentGatewayService = $paymentGatewayService ?? new PaymentGatewayService;
         $this->pricingService = $pricingService ?? new PricingService;
@@ -207,10 +206,10 @@ class BillingService
         //     ->first();
         $discount = null;
 
-        if (!$discount || !$discount->isValid()) {
+        if (! $discount || ! $discount->isValid()) {
             return [
                 'success' => false,
-                'message' => 'Invalid or expired discount code'
+                'message' => 'Invalid or expired discount code',
             ];
         }
 
@@ -231,7 +230,7 @@ class BillingService
 
         return [
             'success' => true,
-            'discount_amount' => $discountAmount
+            'discount_amount' => $discountAmount,
         ];
     }
 
@@ -370,7 +369,7 @@ class BillingService
                             'unsuspend'
                         );
                     } catch (Exception $e) {
-                        Log::warning("Could not unsuspend service for subscription {$subscription->id}: " . $e->getMessage());
+                        Log::warning("Could not unsuspend service for subscription {$subscription->id}: ".$e->getMessage());
                     }
                 } else {
                     try {
@@ -379,11 +378,11 @@ class BillingService
                             'suspend'
                         );
                     } catch (Exception $e) {
-                        Log::warning("Could not suspend service for subscription {$subscription->id}: " . $e->getMessage());
+                        Log::warning("Could not suspend service for subscription {$subscription->id}: ".$e->getMessage());
                     }
                 }
             } catch (Exception $e) {
-                Log::error("Failed to process billing for subscription {$subscription->id}: " . $e->getMessage());
+                Log::error("Failed to process billing for subscription {$subscription->id}: ".$e->getMessage());
             }
         }
     }
@@ -447,12 +446,12 @@ class BillingService
         // Assuming the customer has a default payment method stored
         $paymentMethod = $customer->defaultPaymentMethod;
 
-        if (!$paymentMethod) {
+        if (! $paymentMethod) {
             $this->handleFailedPayment($invoice);
 
             return [
                 'success' => false,
-                'message' => 'No default payment method found'
+                'message' => 'No default payment method found',
             ];
         }
 
@@ -498,14 +497,14 @@ class BillingService
 
                 return [
                     'success' => true,
-                    'payment' => $payment
+                    'payment' => $payment,
                 ];
             } else {
                 $this->handleFailedPayment($invoice);
 
                 return [
                     'success' => false,
-                    'message' => $result['message']
+                    'message' => $result['message'],
                 ];
             }
         } catch (Exception $e) {
@@ -513,7 +512,7 @@ class BillingService
 
             return [
                 'success' => false,
-                'message' => 'Payment processing failed: ' . $e->getMessage()
+                'message' => 'Payment processing failed: '.$e->getMessage(),
             ];
         }
     }
@@ -522,11 +521,11 @@ class BillingService
     {
         // If payment fails and grace period is over, suspend hosting
         if ($invoice->due_date->addDays(
-                config(
-                    'billing.grace_period',
-                    3
-                )
-            )->isPast() && $invoice->subscription) {
+            config(
+                'billing.grace_period',
+                3
+            )
+        )->isPast() && $invoice->subscription) {
             $hostingAccount = $invoice->subscription->hostingAccount;
             if ($hostingAccount && $hostingAccount->status === 'active') {
                 $this->serviceProvisioningService->manageService(
@@ -673,7 +672,7 @@ class BillingService
                     ]
                 );
             } catch (Exception $e) {
-                Log::error("Failed to send overdue reminder for invoice {$invoice->id}: " . $e->getMessage());
+                Log::error("Failed to send overdue reminder for invoice {$invoice->id}: ".$e->getMessage());
             }
         }
     }
@@ -743,8 +742,8 @@ class BillingService
 
     protected function getInvoiceReminderMessage(Invoice $invoice, int $daysUntilDue): string
     {
-        return "Reminder: Invoice #{$invoice->invoice_number} for " .
-            "{$invoice->getFormattedAmount()} is due in {$daysUntilDue} days. " .
+        return "Reminder: Invoice #{$invoice->invoice_number} for ".
+            "{$invoice->getFormattedAmount()} is due in {$daysUntilDue} days. ".
             'Please ensure timely payment to avoid late fees.';
     }
 
@@ -813,7 +812,7 @@ class BillingService
 
     private function generateInvoiceNumber(): string
     {
-        return 'INV-' . strtoupper(uniqid());
+        return 'INV-'.strtoupper(uniqid());
     }
 
     public function handlePartialPayment(Invoice $invoice, float $amount, int $paymentGatewayId): array

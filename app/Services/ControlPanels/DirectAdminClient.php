@@ -12,7 +12,9 @@ use Random\RandomException;
 class DirectAdminClient
 {
     protected Client $client;
+
     protected $server;
+
     protected $loginKey;
 
     public function __construct()
@@ -36,7 +38,7 @@ class DirectAdminClient
             'action' => 'create',
             'add' => 'Submit',
             'username' => $username,
-            'email' => $username . '@' . $domain,
+            'email' => $username.'@'.$domain,
             'passwd' => $password,
             'passwd2' => $password,
             'domain' => $domain,
@@ -166,17 +168,17 @@ class DirectAdminClient
 
     protected function makeApiCall(string $endpoint, $params): bool
     {
-        if (!$this->server) {
+        if (! $this->server) {
             throw new Exception('Server not configured');
         }
 
         try {
             $response = $this->client->request(
                 'POST',
-                'https://' . $this->server->hostname . ':2222' . $endpoint,
+                'https://'.$this->server->hostname.':2222'.$endpoint,
                 [
                     'headers' => [
-                        'Authorization' => 'Basic ' . base64_encode($this->server->username . ':' . $this->loginKey),
+                        'Authorization' => 'Basic '.base64_encode($this->server->username.':'.$this->loginKey),
                     ],
                     'form_params' => $params,
                     'verify' => false,
