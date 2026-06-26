@@ -9,7 +9,7 @@ use Spatie\Menu\Laravel\Menu as SpatieMenu;
 
 class MenuService
 {
-    public function buildMenu()
+    public function buildMenu(): SpatieMenu|\Spatie\Menu\Menu
     {
         $menuItems = Menu::whereNull('parent_id')->orderBy('order')->get();
 
