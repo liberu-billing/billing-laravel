@@ -21,9 +21,17 @@ use Illuminate\Support\Carbon;
     'invoice_dispute_id',
     'user_id',
     'message',
+    'attachments',
 ])]
 class DisputeMessage extends Model
 {
+    protected function casts(): array
+    {
+        return [
+            'attachments' => 'array',
+        ];
+    }
+
     public function invoiceDispute(): BelongsTo
     {
         return $this->belongsTo(InvoiceDispute::class);

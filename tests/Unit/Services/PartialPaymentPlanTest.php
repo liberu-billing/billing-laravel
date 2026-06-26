@@ -46,17 +46,11 @@ class PartialPaymentPlanTest extends TestCase
     // ---------------------------------------------------------------------
 
     /**
-     * BUG: processPartialPayment can never record a payment. It builds the
-     * Payment WITHOUT payment_method (PartialPaymentService:23-31), but
-     * payments.payment_method is a NOT NULL enum (create_payments_table:20),
-     * so payment->save() (line 37) throws and the DB transaction rolls back.
-     * On top of that, even if the save succeeded, a non-full payment would
-     * then fail because updateInvoiceStatus sets status='partially_paid',
-     * which is not in the invoices.status enum('pending','paid','overdue')
-     * (create_invoices_table:23 / PartialPaymentService:68). Net effect: the
-     * method always returns success=false and persists nothing.
+     * A successful partial payment persists the Payment (with payment_method)
+     * and transitions the invoice to 'partially_paid' (now a valid status
+     * enum value, see add_partially_paid_to_invoices_status_enum migration).
      */
-    public function test_partial_payment_never_persists_due_to_missing_payment_method(): void
+    public function test_partial_payment_persists_and_marks_invoice_partially_paid(): void
     {
         $gateway = $this->gateway();
         $invoice = Invoice::factory()->create([
@@ -67,10 +61,10 @@ class PartialPaymentPlanTest extends TestCase
         $result = $this->partialPaymentServiceWithSuccessfulGateway()
             ->processPartialPayment($invoice, 40.00, $gateway->id);
 
-        $this->assertFalse($result['success']);
-        // Transaction rolled back: no payment persisted, invoice untouched.
-        $this->assertDatabaseCount('payments', 0);
-        $this->assertEquals('pending', $invoice->fresh()->status);
+        $this->assertTrue($result['success']);
+        $this->assertDatabaseCount('payments', 1);
+        $this->assertEquals(40.00, (float) $result['payment']->amount);
+        $this->assertEquals('partially_paid', $invoice->fresh()->status);
     }
 
     public function test_remaining_amount_reflects_recorded_payments(): void

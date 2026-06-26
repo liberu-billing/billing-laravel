@@ -29,6 +29,7 @@ class PartialPaymentService
                     'payment_gateway_id' => $paymentGatewayId,
                     'amount' => $amount,
                     'currency' => $invoice->currency,
+                    'payment_method' => 'credit card',
                     'payment_date' => now(),
                 ]
             );

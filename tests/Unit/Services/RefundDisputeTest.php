@@ -11,7 +11,6 @@ use App\Services\DisputeService;
 use App\Services\PaymentGatewayService;
 use App\Services\RefundService;
 use Exception;
-use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Mockery;
@@ -197,13 +196,7 @@ class RefundDisputeTest extends TestCase
         $this->assertSame('disputed', $invoice->fresh()->status);
     }
 
-    /**
-     * BUG: DisputeService::addMessage (DisputeService.php:82) writes an `attachments`
-     * column that the dispute_messages migration (2026_06_26_000213) never creates,
-     * so addMessage throws on every call. This test pins the broken behavior; flip it
-     * to assert persistence once the column is added.
-     */
-    public function test_add_message_fails_due_to_missing_attachments_column(): void
+    public function test_add_message_persists_message_with_attachments(): void
     {
         Mail::fake();
         $customer = Customer::factory()->create();
@@ -216,8 +209,13 @@ class RefundDisputeTest extends TestCase
             'description' => 'y',
         ]);
 
-        $this->expectException(QueryException::class);
+        $message = (new DisputeService)->addMessage($dispute, [
+            'message' => 'Please review',
+            'attachments' => ['receipt.pdf', 'screenshot.png'],
+        ]);
 
-        (new DisputeService)->addMessage($dispute, ['message' => 'Please review']);
+        $this->assertNotNull($message->id);
+        $this->assertSame('Please review', $message->message);
+        $this->assertSame(['receipt.pdf', 'screenshot.png'], $message->fresh()->attachments);
     }
 }
