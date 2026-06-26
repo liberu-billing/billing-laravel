@@ -133,8 +133,8 @@ class TaxCurrencyDiscountTest extends TestCase
             'is_active' => true,
         ]);
 
-        // Correct would be 30.00 (100@10% + 100@20%); the double-apply bug yields 3.0.
-        $this->assertEquals(3.0, (float) app(TaxService::class)->calculateTax($invoice));
+        // Tiered: 100 @ 10% + 100 (excess) @ 20% = 30.00.
+        $this->assertEquals(30.0, (float) app(TaxService::class)->calculateTax($invoice));
     }
 
     public function test_calculate_tax_skips_items_with_no_matching_rate(): void
@@ -268,7 +268,7 @@ class TaxCurrencyDiscountTest extends TestCase
      * ignoring tax_amount. The invoice's own final_total accessor includes tax,
      * so the two diverge after a discount is applied.
      */
-    public function test_apply_discount_drops_tax_from_total_amount(): void
+    public function test_apply_discount_keeps_tax_in_total_amount(): void
     {
         $team = Team::factory()->create();
         $customer = Customer::factory()->create();
@@ -289,12 +289,10 @@ class TaxCurrencyDiscountTest extends TestCase
         app(BillingService::class)->applyDiscount($invoice, 'PCT10B');
         $fresh = $invoice->fresh();
 
-        // total_amount = subtotal(100) - discount(10) = 90, tax dropped
-        $this->assertEquals(90.00, (float) $fresh->total_amount);
-        // final_total accessor = subtotal + tax - discount = 100 + 10 - 10 = 100
-        $this->assertEquals(100.00, (float) $fresh->final_total);
-        // They diverge — documents the bug.
-        $this->assertNotEquals((float) $fresh->total_amount, (float) $fresh->final_total);
+        // total_amount = subtotal(100) + tax(10) - discount(10) = 100, tax retained
+        $this->assertEquals(100.00, (float) $fresh->total_amount);
+        // matches the final_total accessor = subtotal + tax - discount
+        $this->assertEquals((float) $fresh->final_total, (float) $fresh->total_amount);
     }
 
     // ---------------------------------------------------------------- Currency

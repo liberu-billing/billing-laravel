@@ -227,7 +227,8 @@ class BillingService
             [
                 'discount_id' => $discount->id,
                 'discount_amount' => $discountAmount,
-                'total_amount' => $invoice->subtotal - $discountAmount,
+                // Keep tax in the total (matches Invoice::final_total = subtotal + tax - discount).
+                'total_amount' => $invoice->subtotal + ($invoice->tax_amount ?? 0) - $discountAmount,
             ]
         );
 

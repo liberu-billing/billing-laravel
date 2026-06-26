@@ -112,7 +112,7 @@ class PartialPaymentPlanTest extends TestCase
      * uncaught Exception instead of returning the ['success'=>false] failure
      * array the catch block produces for every other error.
      */
-    public function test_partial_payment_exceeding_remaining_throws_instead_of_returning_failure(): void
+    public function test_partial_payment_exceeding_remaining_returns_failure(): void
     {
         $gateway = $this->gateway();
         $invoice = Invoice::factory()->create([
@@ -122,12 +122,13 @@ class PartialPaymentPlanTest extends TestCase
 
         $service = new PartialPaymentService(app(PaymentGatewayService::class));
 
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Invalid partial payment amount');
-        $service->processPartialPayment($invoice, 150.00, $gateway->id);
+        $result = $service->processPartialPayment($invoice, 150.00, $gateway->id);
+
+        $this->assertFalse($result['success']);
+        $this->assertStringContainsString('Invalid partial payment amount', $result['message']);
     }
 
-    public function test_partial_payment_of_zero_throws(): void
+    public function test_partial_payment_of_zero_returns_failure(): void
     {
         $gateway = $this->gateway();
         $invoice = Invoice::factory()->create([
@@ -137,9 +138,10 @@ class PartialPaymentPlanTest extends TestCase
 
         $service = new PartialPaymentService(app(PaymentGatewayService::class));
 
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Invalid partial payment amount');
-        $service->processPartialPayment($invoice, 0.0, $gateway->id);
+        $result = $service->processPartialPayment($invoice, 0.0, $gateway->id);
+
+        $this->assertFalse($result['success']);
+        $this->assertStringContainsString('Invalid partial payment amount', $result['message']);
     }
 
     /**
@@ -287,10 +289,10 @@ class PartialPaymentPlanTest extends TestCase
         Carbon::setTestNow();
     }
 
-    public function test_payment_plan_installments_relationship_does_not_match_child_invoices(): void
+    public function test_payment_plan_installments_relationship_matches_child_invoices(): void
     {
         // Create a throwaway invoice first so the plan id and parent invoice id
-        // diverge, exposing the relationship key mismatch.
+        // diverge — proves the relationship keys on invoice_id, not the plan id.
         Invoice::factory()->create(['is_installment' => false]);
 
         $invoice = Invoice::factory()->create([
@@ -304,11 +306,9 @@ class PartialPaymentPlanTest extends TestCase
 
         app(PaymentPlanService::class)->createInstallmentInvoice($plan->fresh());
 
-        // The child invoice exists and is linked to the parent invoice...
+        // PaymentPlan::installments() keys parent_invoice_id against the plan's
+        // invoice_id, so it now finds the child installment invoice.
         $this->assertEquals(1, $invoice->fresh()->installments()->count());
-
-        // ...but PaymentPlan::installments() keys on parent_invoice_id = plan.id,
-        // so it finds nothing. Documents the bug in PaymentPlan.php:58-64.
-        $this->assertEquals(0, $plan->fresh()->installments()->count());
+        $this->assertEquals(1, $plan->fresh()->installments()->count());
     }
 }

@@ -14,7 +14,10 @@ class PartialPaymentService
     public function processPartialPayment(Invoice $invoice, float $amount, int $paymentGatewayId): array
     {
         if ($amount <= 0 || $amount > $invoice->remaining_amount) {
-            throw new Exception('Invalid partial payment amount.');
+            return [
+                'success' => false,
+                'message' => 'Invalid partial payment amount.',
+            ];
         }
 
         DB::beginTransaction();
