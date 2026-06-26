@@ -55,4 +55,13 @@ class AppPanelTenancyTest extends TestCase
 
         $this->assertFalse(HostingAccountResource::canViewAny());
     }
+
+    public function test_user_cannot_access_another_teams_tenant(): void
+    {
+        $user = User::factory()->withPersonalTeam()->create();
+        $otherTeam = User::factory()->withPersonalTeam()->create()->currentTeam;
+
+        $this->assertTrue($user->canAccessTenant($user->currentTeam));
+        $this->assertFalse($user->canAccessTenant($otherTeam));
+    }
 }
