@@ -40,7 +40,7 @@ class PartialPaymentService
                 $payment->transaction_id = $paymentResult['transaction_id'];
                 $payment->save();
 
-                $this->updateInvoiceStatus($invoice);
+                $invoice->updateStatus();
 
                 DB::commit();
 
@@ -60,18 +60,5 @@ class PartialPaymentService
                 'message' => 'Partial payment failed: '.$e->getMessage(),
             ];
         }
-    }
-
-    private function updateInvoiceStatus(Invoice $invoice): void
-    {
-        $totalPaid = $invoice->payments->sum('amount');
-
-        if ($totalPaid >= $invoice->total_amount) {
-            $invoice->status = 'paid';
-        } elseif ($totalPaid > 0) {
-            $invoice->status = 'partially_paid';
-        }
-
-        $invoice->save();
     }
 }

@@ -36,7 +36,7 @@ class AffiliateService
                 [
                     'amount' => $commissionAmount,
                     'type' => 'commission',
-                    'description' => "Commission for payment #{$payment->id}",
+                    'invoice_id' => $payment->invoice_id,
                 ]
             );
         }
