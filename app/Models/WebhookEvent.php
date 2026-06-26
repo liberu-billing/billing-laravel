@@ -62,12 +62,15 @@ class WebhookEvent extends Model
 
     public function markAsFailed(string $error, int $retryIntervalSeconds = 60): void
     {
+        // Exponential backoff: each retry waits interval * 2^(prior attempts).
+        $delaySeconds = $retryIntervalSeconds * (2 ** $this->attempts);
+
         $this->update(
             [
                 'status' => 'failed',
                 'last_error' => $error,
                 'attempts' => $this->attempts + 1,
-                'next_retry_at' => now()->addSeconds($retryIntervalSeconds),
+                'next_retry_at' => now()->addSeconds($delaySeconds),
             ]
         );
     }
