@@ -36,7 +36,7 @@ class InvoiceApiTest extends TestCase
     {
         Sanctum::actingAs($this->user);
 
-        Invoice::factory()->count(3)->create();
+        Invoice::factory()->count(3)->create(['team_id' => $this->user->currentTeam->id]);
 
         $response = $this->getJson('/api/invoices');
 
@@ -52,7 +52,7 @@ class InvoiceApiTest extends TestCase
     {
         Sanctum::actingAs($this->user);
 
-        $invoice = Invoice::factory()->create();
+        $invoice = Invoice::factory()->create(['team_id' => $this->user->currentTeam->id]);
 
         $response = $this->getJson("/api/invoices/{$invoice->id}");
 
@@ -99,7 +99,7 @@ class InvoiceApiTest extends TestCase
     {
         Sanctum::actingAs($this->user);
 
-        Invoice::factory()->count(20)->create();
+        Invoice::factory()->count(20)->create(['team_id' => $this->user->currentTeam->id]);
 
         $response = $this->getJson('/api/invoices?per_page=10');
 
@@ -111,8 +111,9 @@ class InvoiceApiTest extends TestCase
     {
         Sanctum::actingAs($this->user);
 
-        Invoice::factory()->create(['status' => 'paid']);
-        Invoice::factory()->create(['status' => 'pending']);
+        $teamId = $this->user->currentTeam->id;
+        Invoice::factory()->create(['status' => 'paid', 'team_id' => $teamId]);
+        Invoice::factory()->create(['status' => 'pending', 'team_id' => $teamId]);
 
         $response = $this->getJson('/api/invoices?status=paid');
 
@@ -120,5 +121,14 @@ class InvoiceApiTest extends TestCase
         foreach ($response->json('data') as $invoice) {
             $this->assertEquals('paid', $invoice['status']);
         }
+    }
+
+    public function test_cannot_view_another_teams_invoice(): void
+    {
+        Sanctum::actingAs($this->user);
+        $otherTeam = User::factory()->withPersonalTeam()->create()->currentTeam;
+        $theirs = Invoice::factory()->create(['team_id' => $otherTeam->id]);
+
+        $this->getJson("/api/invoices/{$theirs->id}")->assertStatus(404);
     }
 }

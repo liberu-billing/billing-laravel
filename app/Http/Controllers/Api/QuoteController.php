@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Quote;
+use App\Models\User;
 use App\Services\QuoteService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -26,6 +27,7 @@ class QuoteController extends Controller
     public function index(Request $request): JsonResponse
     {
         $quotes = Quote::query()
+            ->where('team_id', $this->currentTeamId($request))
             ->when(
                 $request->status,
                 fn ($q) => $q->where(
@@ -50,8 +52,10 @@ class QuoteController extends Controller
     /**
      * Get a single quote
      */
-    public function show(Quote $quote): JsonResponse
+    public function show(Request $request, Quote $quote): JsonResponse
     {
+        $this->assertSameTeam($request, $quote);
+
         return response()->json(
             [
                 'data' => $quote->load(
@@ -85,6 +89,7 @@ class QuoteController extends Controller
             ]
         );
 
+        $validated['team_id'] = $this->currentTeamId($request);
         $quote = $this->quoteService->createQuote($validated);
 
         return response()->json(
@@ -98,6 +103,8 @@ class QuoteController extends Controller
      */
     public function update(Request $request, Quote $quote): JsonResponse
     {
+        $this->assertSameTeam($request, $quote);
+
         if (in_array(
             $quote->status,
             [
@@ -139,8 +146,10 @@ class QuoteController extends Controller
     /**
      * Delete a draft quote
      */
-    public function destroy(Quote $quote): Response
+    public function destroy(Request $request, Quote $quote): Response
     {
+        $this->assertSameTeam($request, $quote);
+
         if ($quote->status !== 'draft') {
             return response()->json(
                 [
@@ -275,9 +284,25 @@ class QuoteController extends Controller
      */
     public function statistics(Request $request): JsonResponse
     {
-        $teamId = $request->input('team_id');
+        // Derive the team from the authenticated user — never trust request input
+        // (was `$request->input('team_id')`, allowing cross-team enumeration).
+        $teamId = $this->currentTeamId($request);
         $stats = $this->quoteService->getStatistics($teamId);
 
         return response()->json(['data' => $stats]);
+    }
+
+    /** Block cross-tenant access: another team's quote is treated as not found. */
+    private function assertSameTeam(Request $request, Quote $quote): void
+    {
+        abort_unless($quote->team_id === $this->currentTeamId($request), 404);
+    }
+
+    private function currentTeamId(Request $request): ?int
+    {
+        /** @var User|null $user */
+        $user = $request->user();
+
+        return $user?->current_team_id;
     }
 }

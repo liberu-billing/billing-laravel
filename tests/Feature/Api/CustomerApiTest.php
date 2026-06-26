@@ -55,7 +55,7 @@ class CustomerApiTest extends TestCase
     public function test_authenticated_user_can_view_customer(): void
     {
         Sanctum::actingAs($this->user);
-        $customer = Customer::factory()->create();
+        $customer = Customer::factory()->create(['team_id' => $this->user->currentTeam->id]);
 
         $response = $this->getJson("/api/customers/{$customer->id}");
 
@@ -66,7 +66,7 @@ class CustomerApiTest extends TestCase
     public function test_authenticated_user_can_update_customer(): void
     {
         Sanctum::actingAs($this->user);
-        $customer = Customer::factory()->create();
+        $customer = Customer::factory()->create(['team_id' => $this->user->currentTeam->id]);
 
         $response = $this->putJson("/api/customers/{$customer->id}", [
             'name' => 'Updated Name',
@@ -80,7 +80,7 @@ class CustomerApiTest extends TestCase
     public function test_authenticated_user_can_delete_customer(): void
     {
         Sanctum::actingAs($this->user);
-        $customer = Customer::factory()->create();
+        $customer = Customer::factory()->create(['team_id' => $this->user->currentTeam->id]);
 
         $response = $this->deleteJson("/api/customers/{$customer->id}");
 
@@ -96,5 +96,17 @@ class CustomerApiTest extends TestCase
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['email']);
+    }
+
+    public function test_cannot_view_or_modify_another_teams_customer(): void
+    {
+        Sanctum::actingAs($this->user);
+        $otherTeam = User::factory()->withPersonalTeam()->create()->currentTeam;
+        $theirs = Customer::factory()->create(['team_id' => $otherTeam->id]);
+
+        $this->getJson("/api/customers/{$theirs->id}")->assertStatus(404);
+        $this->putJson("/api/customers/{$theirs->id}", ['name' => 'Hack'])->assertStatus(404);
+        $this->deleteJson("/api/customers/{$theirs->id}")->assertStatus(404);
+        $this->assertDatabaseHas('customers', ['id' => $theirs->id, 'name' => $theirs->name]);
     }
 }
