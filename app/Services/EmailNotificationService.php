@@ -13,8 +13,6 @@ class EmailNotificationService
 {
     protected $maxRetries = 3;
 
-    protected $retryDelay = 300; // 5 minutes
-
     public function send(Mailable $mailable, string $recipient): bool
     {
         try {
@@ -92,7 +90,10 @@ class EmailNotificationService
                     return false;
                 }
 
-                sleep($this->retryDelay);
+                // No in-request backoff sleep: blocking the caller for minutes is
+                // never acceptable. Durable retry/backoff lives in the queued
+                // SendEmailNotification job ($tries + $backoff); sendNow() is the
+                // synchronous best-effort path and retries immediately.
             }
         }
 
