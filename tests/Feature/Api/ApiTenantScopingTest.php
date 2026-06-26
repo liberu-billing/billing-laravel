@@ -51,6 +51,24 @@ class ApiTenantScopingTest extends TestCase
         $this->getJson("/api/quotes/{$quote->id}")->assertStatus(404);
     }
 
+    public function test_cannot_transition_another_teams_quote(): void
+    {
+        $otherTeam = User::factory()->withPersonalTeam()->create()->currentTeam;
+        $customer = Customer::factory()->create(['team_id' => $otherTeam->id]);
+        $quote = Quote::create([
+            'team_id' => $otherTeam->id,
+            'customer_id' => $customer->id,
+            'quote_number' => 'Q-X3',
+            'title' => 'Theirs',
+            'status' => 'sent',
+            'currency' => 'USD',
+        ]);
+
+        $this->postJson("/api/quotes/{$quote->id}/accept")->assertStatus(404);
+        $this->postJson("/api/quotes/{$quote->id}/send")->assertStatus(404);
+        $this->assertEquals('sent', $quote->fresh()->status);
+    }
+
     public function test_quote_statistics_only_reflect_own_team(): void
     {
         $otherTeam = User::factory()->withPersonalTeam()->create()->currentTeam;

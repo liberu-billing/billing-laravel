@@ -167,8 +167,10 @@ class QuoteController extends Controller
     /**
      * Send a quote to the client
      */
-    public function send(Quote $quote): JsonResponse
+    public function send(Request $request, Quote $quote): JsonResponse
     {
+        $this->assertSameTeam($request, $quote);
+
         if (! in_array(
             $quote->status,
             [
@@ -197,8 +199,10 @@ class QuoteController extends Controller
     /**
      * Accept a quote
      */
-    public function accept(Quote $quote): JsonResponse
+    public function accept(Request $request, Quote $quote): JsonResponse
     {
+        $this->assertSameTeam($request, $quote);
+
         if (! in_array(
             $quote->status,
             [
@@ -227,8 +231,10 @@ class QuoteController extends Controller
     /**
      * Decline a quote
      */
-    public function decline(Quote $quote): JsonResponse
+    public function decline(Request $request, Quote $quote): JsonResponse
     {
+        $this->assertSameTeam($request, $quote);
+
         if (! in_array(
             $quote->status,
             [
@@ -257,8 +263,10 @@ class QuoteController extends Controller
     /**
      * Convert an accepted quote to an invoice
      */
-    public function convert(Quote $quote): JsonResponse
+    public function convert(Request $request, Quote $quote): JsonResponse
     {
+        $this->assertSameTeam($request, $quote);
+
         if (! $quote->canBeConverted()) {
             return response()->json(
                 [
