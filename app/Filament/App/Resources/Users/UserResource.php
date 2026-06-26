@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Filament\App\Resources\Users;
 
+use App\Filament\Admin\Resources\Users\Schemas\UserForm;
+use App\Filament\Admin\Resources\Users\Tables\UsersTable;
 use App\Filament\App\Resources\Users\Pages\CreateUser;
 use App\Filament\App\Resources\Users\Pages\EditUser;
 use App\Filament\App\Resources\Users\Pages\ListUsers;
-use App\Filament\Admin\Resources\Users\Schemas\UserForm;
-use App\Filament\Admin\Resources\Users\Tables\UsersTable;
 use App\Models\User;
 use BackedEnum;
 use Filament\Resources\Resource;
