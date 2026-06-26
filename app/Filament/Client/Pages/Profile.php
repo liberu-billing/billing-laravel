@@ -30,8 +30,6 @@ class Profile extends Page
             [
                 'name' => auth()->user()->name,
                 'email' => auth()->user()->email,
-                'company' => auth()->user()->company,
-                'phone' => auth()->user()->phone,
             ]
         );
     }
@@ -49,15 +47,10 @@ class Profile extends Page
                         ->required()
                         ->maxLength(255)
                         ->unique(
-                            'clients',
+                            'users',
                             'email',
                             ignorable: auth()->user()
                         ),
-                    TextInput::make('company')
-                        ->maxLength(255),
-                    TextInput::make('phone')
-                        ->tel()
-                        ->maxLength(20),
                     TextInput::make('current_password')
                         ->password()
                         ->label('Current Password')
@@ -82,9 +75,14 @@ class Profile extends Page
 
         $user = auth()->user();
 
-        if (isset($data['password'])) {
+        $update = [
+            'name' => $data['name'],
+            'email' => $data['email'],
+        ];
+
+        if (! empty($data['password'])) {
             if (! Hash::check(
-                $data['current_password'],
+                $data['current_password'] ?? '',
                 $user->password
             )) {
                 $this->addError(
@@ -94,10 +92,10 @@ class Profile extends Page
 
                 return;
             }
-            $data['password'] = Hash::make($data['password']);
+            $update['password'] = Hash::make($data['password']);
         }
 
-        $user->update($data);
+        $user->update($update);
 
         Notification::make()
             ->title('Profile updated successfully')

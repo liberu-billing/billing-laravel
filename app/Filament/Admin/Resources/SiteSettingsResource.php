@@ -26,6 +26,9 @@ class SiteSettingsResource extends Resource
     #[Override]
     protected static ?string $model = SiteSettings::class;
 
+    // Site settings are global, not team-owned; opt out of the panel's tenant scoping.
+    protected static bool $isScopedToTenant = false;
+
     #[Override]
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-cog-8-tooth';
 

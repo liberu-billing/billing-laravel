@@ -198,9 +198,12 @@ class InvoiceResource extends Resource
     #[Override]
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->where(
-            'client_id',
-            auth()->id()
+        // Invoices belong to a Customer (no client_id column exists). The client
+        // panel authenticates a User, so scope to invoices of the Customer whose
+        // email matches the logged-in user.
+        return parent::getEloquentQuery()->whereHas(
+            'customer',
+            fn (Builder $query) => $query->where('email', auth()->user()->email)
         );
     }
 }

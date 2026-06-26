@@ -7,11 +7,10 @@ namespace App\Filament\App\Resources\Users;
 use App\Filament\App\Resources\Users\Pages\CreateUser;
 use App\Filament\App\Resources\Users\Pages\EditUser;
 use App\Filament\App\Resources\Users\Pages\ListUsers;
+use App\Filament\Admin\Resources\Users\Schemas\UserForm;
+use App\Filament\Admin\Resources\Users\Tables\UsersTable;
 use App\Models\User;
 use BackedEnum;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
@@ -32,42 +31,13 @@ class UserResource extends Resource
     #[Override]
     public static function form(Schema $schema): Schema
     {
-        return $schema
-            ->components(
-                [
-                    //
-                ]
-            );
+        return UserForm::configure($schema);
     }
 
     #[Override]
     public static function table(Table $table): Table
     {
-        return $table
-            ->columns(
-                [
-                    //
-                ]
-            )
-            ->filters(
-                [
-                    //
-                ]
-            )
-            ->recordActions(
-                [
-                    EditAction::make(),
-                ]
-            )
-            ->toolbarActions(
-                [
-                    BulkActionGroup::make(
-                        [
-                            DeleteBulkAction::make(),
-                        ]
-                    ),
-                ]
-            );
+        return UsersTable::configure($table);
     }
 
     #[Override]

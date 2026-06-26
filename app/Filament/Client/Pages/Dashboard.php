@@ -12,7 +12,4 @@ class Dashboard extends BaseDashboard
 {
     #[Override]
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-home';
-
-    #[Override]
-    protected string $view = 'filament.pages.dashboard';
 }

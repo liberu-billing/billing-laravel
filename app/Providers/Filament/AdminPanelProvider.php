@@ -6,11 +6,11 @@ use App\Filament\App\Pages;
 use App\Http\Middleware\TeamsPermission;
 use App\Models\Team;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
+use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Navigation\MenuItem;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -84,7 +84,13 @@ class AdminPanelProvider extends PanelProvider
             )
             ->plugins(
                 [
-                    FilamentShieldPlugin::make()->navigationGroup('Administration'),
+                    // Roles are global (Shield tenancy disabled: tenant_model = null),
+                    // so the Role model has no `team` ownership relationship. Without
+                    // scopeToTenant(false) the tenant-scoped admin panel scopes
+                    // RoleResource by `team` and throws on every page.
+                    FilamentShieldPlugin::make()
+                        ->navigationGroup('Administration')
+                        ->scopeToTenant(false),
                 ]
             );
 
@@ -98,7 +104,7 @@ class AdminPanelProvider extends PanelProvider
                 ->tenantProfile(Pages\EditTeam::class)
                 ->userMenuItems(
                     [
-                        MenuItem::make()
+                        Action::make('teamSettings')
                             ->label('Team Settings')
                             ->icon('heroicon-o-cog-6-tooth')
                             ->url(

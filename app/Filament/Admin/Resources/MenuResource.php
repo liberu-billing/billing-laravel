@@ -26,6 +26,9 @@ class MenuResource extends Resource
     #[Override]
     protected static ?string $model = Menu::class;
 
+    // Menus are global, not team-owned; opt out of the panel's tenant scoping.
+    protected static bool $isScopedToTenant = false;
+
     #[Override]
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-bars-3';
 

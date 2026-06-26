@@ -9,11 +9,12 @@ use App\Filament\App\Pages\EditProfile;
 use App\Http\Middleware\TeamsPermission;
 use App\Listeners\SwitchTeam;
 use App\Models\Team;
+use Filament\Actions\Action;
 use Filament\Events\TenantSet;
+use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Navigation\MenuItem;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -45,7 +46,7 @@ class AppPanelProvider extends PanelProvider
             )
             ->userMenuItems(
                 [
-                    MenuItem::make()
+                    Action::make('profile')
                         ->label('Profile')
                         ->icon('heroicon-o-user-circle')
                         ->url(
@@ -108,7 +109,7 @@ class AppPanelProvider extends PanelProvider
                 ->tenantProfile(Pages\EditTeam::class)
                 ->userMenuItems(
                     [
-                        MenuItem::make()
+                        Action::make('teamSettings')
                             ->label('Team Settings')
                             ->icon('heroicon-o-cog-6-tooth')
                             ->url(
@@ -133,6 +134,9 @@ class AppPanelProvider extends PanelProvider
 
     public function shouldRegisterMenuItem(): bool
     {
-        return true;
+        // Guard tenant-scoped menu URLs: on the tenant registration page (/app/new)
+        // there is no current tenant, so EditProfile::getUrl() would throw a
+        // "Missing parameter: tenant" UrlGenerationException.
+        return auth()->user()?->currentTeam && Filament::hasTenancy() && Filament::getTenant();
     }
 }
