@@ -174,7 +174,7 @@ class InvoiceResource extends Resource
                         ->icon('heroicon-o-arrow-down-tray')
                         ->action(
                             fn (Invoice $record) => response()->streamDownload(
-                                fn (): int => print ($record->generatePdf()),
+                                fn (): int => print ($record->generatePdf()->output()),
                                 "invoice-{$record->invoice_number}.pdf"
                             )
                         ),

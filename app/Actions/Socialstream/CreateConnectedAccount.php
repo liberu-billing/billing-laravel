@@ -5,16 +5,22 @@ declare(strict_types=1);
 namespace App\Actions\Socialstream;
 
 use App\Models\User;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Carbon;
 use JoelButcher\Socialstream\ConnectedAccount as SocialstreamConnectedAccount;
 use JoelButcher\Socialstream\Contracts\CreatesConnectedAccounts;
 use Laravel\Socialite\Contracts\User as ProviderUser;
+use Laravel\Socialite\One\User as OneUser;
+use Laravel\Socialite\Two\User as TwoUser;
 
 class CreateConnectedAccount implements CreatesConnectedAccounts
 {
-    public function create(User $user, string $provider, ProviderUser $providerUser): SocialstreamConnectedAccount
+    public function create(Authenticatable $user, string $provider, ProviderUser $providerUser): SocialstreamConnectedAccount
     {
-        return $user->connectedAccounts()->create(
+        assert($user instanceof User);
+
+        /** @var SocialstreamConnectedAccount $account */
+        $account = $user->connectedAccounts()->create(
             [
                 'provider' => $provider,
                 'provider_id' => $providerUser->getId(),
@@ -22,16 +28,15 @@ class CreateConnectedAccount implements CreatesConnectedAccounts
                 'nickname' => $providerUser->getNickname(),
                 'email' => $providerUser->getEmail(),
                 'avatar_path' => $providerUser->getAvatar(),
-                'token' => $providerUser->token,
-                'secret' => $providerUser->tokenSecret ?? null,
-                'refresh_token' => $providerUser->refreshToken ?? null,
-                'expires_at' => property_exists(
-                    $providerUser,
-                    'expiresIn'
-                ) && $providerUser->expiresIn !== null
+                'token' => $providerUser instanceof TwoUser ? $providerUser->token : '',
+                'secret' => $providerUser instanceof OneUser ? $providerUser->tokenSecret : null,
+                'refresh_token' => $providerUser instanceof TwoUser ? $providerUser->refreshToken : null,
+                'expires_at' => $providerUser instanceof TwoUser && $providerUser->expiresIn !== null
                     ? Carbon::now()->addSeconds($providerUser->expiresIn)
                     : null,
             ]
         );
+
+        return $account;
     }
 }

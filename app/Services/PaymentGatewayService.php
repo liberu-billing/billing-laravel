@@ -7,8 +7,10 @@ use App\Models\Payment;
 use App\Models\PaymentGateway;
 use Exception;
 use Illuminate\Support\Facades\Log;
-use Square\Exceptions\ApiException;
-use Square\SquareClient;
+use Square\Legacy\Exceptions\ApiException;
+use Square\Legacy\Models\CreatePaymentRequest;
+use Square\Legacy\Models\Money;
+use Square\Legacy\SquareClient;
 use Stripe\Charge;
 use Stripe\Exception\ApiErrorException;
 use Stripe\Exception\CardException;
@@ -215,8 +217,7 @@ class PaymentGatewayService
             // Create a charge using the Stripe token
             $charge = Charge::create(
                 [
-                    'amount' => $payment->amount * 100,
-                    // Amount in cents
+                    'amount' => (int) ($payment->amount * 100),
                     'currency' => $payment->currency,
                     'source' => $stripeToken,
                     'description' => 'Payment for Invoice #'.$payment->invoice_id,
@@ -256,20 +257,18 @@ class PaymentGatewayService
             $amount = (int) ($payment->amount * 100);
             $currency = strtoupper($payment->currency);
 
-            $response = $client->getPaymentsApi()->createPayment(
-                [
-                    'source_id' => $payment->square_token,
-                    'amount_money' => [
-                        'amount' => $amount,
-                        'currency' => $currency,
-                    ],
-                    'idempotency_key' => uniqid(
-                        '',
-                        true
-                    ),
-                    'reference_id' => (string) $payment->id,
-                ]
+            $amountMoney = new Money;
+            $amountMoney->setAmount($amount);
+            $amountMoney->setCurrency($currency);
+
+            $createPaymentRequest = new CreatePaymentRequest(
+                (string) $payment->square_token,
+                uniqid('', true)
             );
+            $createPaymentRequest->setAmountMoney($amountMoney);
+            $createPaymentRequest->setReferenceId((string) $payment->id);
+
+            $response = $client->getPaymentsApi()->createPayment($createPaymentRequest);
 
             if ($response->isSuccess()) {
                 $payment->update(

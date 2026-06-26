@@ -85,21 +85,16 @@ abstract class BaseModule implements ModuleInterface
 
         $this->executeHook('before_enable');
 
-        if (method_exists(
-            $this,
-            'onEnable'
-        )) {
-            try {
-                $this->onEnable();
-            } catch (Throwable $e) {
-                $message = "Failed to enable module {$this->getName()}: ".$e->getMessage();
-                Log::error($message);
-                throw new RuntimeException(
-                    $message,
-                    0,
-                    $e
-                );
-            }
+        try {
+            $this->onEnable();
+        } catch (Throwable $e) {
+            $message = "Failed to enable module {$this->getName()}: ".$e->getMessage();
+            Log::error($message);
+            throw new RuntimeException(
+                $message,
+                0,
+                $e
+            );
         }
 
         $this->executeHook('after_enable');
@@ -124,15 +119,10 @@ abstract class BaseModule implements ModuleInterface
 
         $this->executeHook('before_disable');
 
-        if (method_exists(
-            $this,
-            'onDisable'
-        )) {
-            try {
-                $this->onDisable();
-            } catch (Throwable $e) {
-                Log::warning("onDisable failed for {$this->getName()}: ".$e->getMessage());
-            }
+        try {
+            $this->onDisable();
+        } catch (Throwable $e) {
+            Log::warning("onDisable failed for {$this->getName()}: ".$e->getMessage());
         }
 
         $this->executeHook('after_disable');

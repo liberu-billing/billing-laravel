@@ -13,7 +13,7 @@ class PruneAuditLogs extends Command
 {
     public function handle(): void
     {
-        $days = $this->option('days');
+        $days = (int) $this->option('days');
         $count = AuditLog::where(
             'created_at',
             '<',

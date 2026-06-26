@@ -11,6 +11,9 @@ use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
 use Override;
 
+/**
+ * @property Schema $form
+ */
 class EditProfile extends Page
 {
     #[Override]

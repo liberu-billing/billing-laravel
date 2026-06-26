@@ -155,8 +155,8 @@ class ServiceManagementController extends Controller
         $oldAmount = $subscription->productService->price;
         $newAmount = $newService->price;
 
-        $proratedRefund = ($oldAmount / $totalDays) * $daysRemaining;
-        $proratedCharge = ($newAmount / $totalDays) * $daysRemaining;
+        $proratedRefund = ((float) $oldAmount / $totalDays) * $daysRemaining;
+        $proratedCharge = ((float) $newAmount / $totalDays) * $daysRemaining;
 
         return $proratedCharge - $proratedRefund;
     }

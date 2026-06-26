@@ -6,10 +6,29 @@ namespace App\Models;
 
 use App\Traits\HasTeam;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Override;
 
+/**
+ * @property int $id
+ * @property string $code
+ * @property string $name
+ * @property string|null $description
+ * @property string $type
+ * @property string $value
+ * @property string|null $currency
+ * @property Carbon|null $start_date
+ * @property Carbon|null $end_date
+ * @property int|null $max_uses
+ * @property int $used_count
+ * @property bool $is_active
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Collection<int, Invoice> $invoices
+ */
 #[Fillable([
     'code',
     'name',

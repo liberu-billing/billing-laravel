@@ -9,6 +9,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.5",
+        "barryvdh/laravel-dompdf": "^3.1",
         "bezhansalleh/filament-shield": "~4.0",
         "bursteri/socialstream": "^7.0",
         "filament/filament": "^5.0",
@@ -24,10 +25,13 @@
         "laravel/tinker": "^3.0",
         "livewire/livewire": "^4.0",
         "orangehill/iseed": "^3.0",
+        "phpoffice/phpspreadsheet": "^5.8",
         "spatie/laravel-menu": "^4.2",
         "spatie/laravel-permission": "^7.0",
         "spiral/roadrunner-cli": "^2.6.0",
-        "spiral/roadrunner-http": "^3.3.0"
+        "spiral/roadrunner-http": "^3.3.0",
+        "square/square": "^45.1",
+        "stripe/stripe-php": "^20.3"
     },
     "require-dev": {
         "driftingly/rector-laravel": "^2.0",

@@ -196,7 +196,8 @@ class CreateNewUser implements CreatesNewUsers
      */
     protected function createTeam(User $user): Team
     {
-        return $user->ownedTeams()->create(
+        /** @var Team $team */
+        $team = $user->ownedTeams()->create(
             [
                 'name' => explode(
                     ' ',
@@ -206,5 +207,7 @@ class CreateNewUser implements CreatesNewUsers
                 'personal_team' => true,
             ]
         );
+
+        return $team;
     }
 }

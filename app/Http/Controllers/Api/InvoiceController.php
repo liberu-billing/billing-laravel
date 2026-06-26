@@ -5,10 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\InvoiceResource;
 use App\Models\Invoice;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Support\Facades\PDF;
 use Symfony\Component\HttpFoundation\Response;
 
 class InvoiceController extends Controller

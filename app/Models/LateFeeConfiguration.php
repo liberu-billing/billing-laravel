@@ -5,9 +5,23 @@ namespace App\Models;
 use App\Traits\HasTeam;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use InvalidArgumentException;
 use Override;
 
+/**
+ * @property int $id
+ * @property int $team_id
+ * @property string $fee_type
+ * @property numeric-string $fee_amount
+ * @property int $grace_period_days
+ * @property numeric-string|null $max_fee_amount
+ * @property bool $is_compound
+ * @property string $frequency
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Team|null $team
+ */
 #[Fillable([
     'team_id',
     'fee_type',

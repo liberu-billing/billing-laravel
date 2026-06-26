@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 
 class PaymentReconciliationService
 {
-    public function reconcilePayment(Payment $payment): false
+    public function reconcilePayment(Payment $payment): bool
     {
         try {
             // Try to match payment with invoice

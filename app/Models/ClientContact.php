@@ -6,8 +6,26 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 use Override;
 
+/**
+ * @property int $id
+ * @property int $customer_id
+ * @property string $first_name
+ * @property string $last_name
+ * @property string $email
+ * @property string|null $phone
+ * @property string|null $title
+ * @property bool $is_primary
+ * @property bool $can_view_invoices
+ * @property bool $can_make_payments
+ * @property bool $can_manage_services
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ * @property-read Customer|null $customer
+ * @property-read string $full_name
+ */
 #[Fillable([
     'customer_id',
     'first_name',

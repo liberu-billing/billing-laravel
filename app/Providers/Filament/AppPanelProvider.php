@@ -19,7 +19,6 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Widgets;
-use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -50,7 +49,7 @@ class AppPanelProvider extends PanelProvider
                         ->label('Profile')
                         ->icon('heroicon-o-user-circle')
                         ->url(
-                            fn (): UrlGenerator|string => $this->shouldRegisterMenuItem()
+                            fn (): string => $this->shouldRegisterMenuItem()
                                 ? url(EditProfile::getUrl())
                                 : url($panel->getPath())
                         ),
@@ -113,7 +112,7 @@ class AppPanelProvider extends PanelProvider
                             ->label('Team Settings')
                             ->icon('heroicon-o-cog-6-tooth')
                             ->url(
-                                fn (): UrlGenerator|string => $this->shouldRegisterMenuItem()
+                                fn (): string => $this->shouldRegisterMenuItem()
                                     ? url(Pages\EditTeam::getUrl())
                                     : url($panel->getPath())
                             ),

@@ -2,9 +2,11 @@
 
 namespace App\Http\Resources\Api;
 
+use App\Models\Invoice;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Override;
 
+/** @mixin Invoice */
 class InvoiceResource extends JsonResource
 {
     #[Override]

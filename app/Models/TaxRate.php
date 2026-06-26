@@ -7,8 +7,28 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 use Override;
 
+/**
+ * @property int $id
+ * @property int $team_id
+ * @property string $name
+ * @property string $country
+ * @property string|null $state
+ * @property string $rate
+ * @property string|null $service_type
+ * @property bool $is_active
+ * @property Carbon|null $effective_date
+ * @property Carbon|null $expiry_date
+ * @property string|null $threshold_amount
+ * @property string|null $threshold_rate
+ * @property string|null $tax_category
+ * @property string|null $description
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ * @property-read Team|null $team
+ */
 #[Fillable([
     'name',
     'country',

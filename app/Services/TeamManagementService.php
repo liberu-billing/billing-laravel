@@ -8,6 +8,17 @@ use Illuminate\Support\Facades\DB;
 
 class TeamManagementService
 {
+    public function createPersonalTeamForUser(User $user): void
+    {
+        /** @var Team $team */
+        $team = $user->ownedTeams()->create([
+            'name' => explode(' ', $user->name, 2)[0]."'s Team",
+            'personal_team' => true,
+        ]);
+
+        $user->switchTeam($team);
+    }
+
     public function assignUserToDefaultTeam(User $user): void
     {
         DB::transaction(

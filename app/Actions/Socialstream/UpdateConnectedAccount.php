@@ -4,15 +4,16 @@ declare(strict_types=1);
 
 namespace App\Actions\Socialstream;
 
-use App\Models\User;
 use Illuminate\Support\Carbon;
 use JoelButcher\Socialstream\ConnectedAccount;
 use JoelButcher\Socialstream\Contracts\UpdatesConnectedAccounts;
 use Laravel\Socialite\Contracts\User as ProviderUser;
+use Laravel\Socialite\One\User as OneUser;
+use Laravel\Socialite\Two\User as TwoUser;
 
 class UpdateConnectedAccount implements UpdatesConnectedAccounts
 {
-    public function update(User $user, ConnectedAccount $account, string $provider, ProviderUser $providerUser): ConnectedAccount
+    public function update(mixed $user, ConnectedAccount $account, string $provider, ProviderUser $providerUser): ConnectedAccount
     {
         $account->forceFill(
             [
@@ -20,13 +21,10 @@ class UpdateConnectedAccount implements UpdatesConnectedAccounts
                 'nickname' => $providerUser->getNickname(),
                 'email' => $providerUser->getEmail(),
                 'avatar_path' => $providerUser->getAvatar(),
-                'token' => $providerUser->token,
-                'secret' => $providerUser->tokenSecret ?? null,
-                'refresh_token' => $providerUser->refreshToken ?? null,
-                'expires_at' => property_exists(
-                    $providerUser,
-                    'expiresIn'
-                ) && $providerUser->expiresIn !== null
+                'token' => $providerUser instanceof TwoUser ? $providerUser->token : '',
+                'secret' => $providerUser instanceof OneUser ? $providerUser->tokenSecret : null,
+                'refresh_token' => $providerUser instanceof TwoUser ? $providerUser->refreshToken : null,
+                'expires_at' => $providerUser instanceof TwoUser && $providerUser->expiresIn !== null
                     ? Carbon::now()->addSeconds($providerUser->expiresIn)
                     : null,
             ]

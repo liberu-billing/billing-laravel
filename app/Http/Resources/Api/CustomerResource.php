@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Resources\Api;
 
+use App\Models\Customer;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Override;
 
+/** @mixin Customer */
 class CustomerResource extends JsonResource
 {
     #[Override]

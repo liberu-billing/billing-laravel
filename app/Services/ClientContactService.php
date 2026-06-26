@@ -23,6 +23,7 @@ class ClientContactService
      */
     public function createContact(Customer $customer, array $data): ClientContact
     {
+        /** @var ClientContact */
         return DB::transaction(
             function () use ($customer, $data) {
                 if (! empty($data['is_primary'])) {
@@ -90,6 +91,7 @@ class ClientContactService
      */
     public function getPrimaryContact(Customer $customer): ?ClientContact
     {
+        /** @var ClientContact|null */
         return $customer->contacts()->where(
             'is_primary',
             true

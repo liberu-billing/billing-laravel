@@ -9,7 +9,24 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property int $invoice_id
+ * @property string|null $description
+ * @property int|null $product_service_id
+ * @property int $quantity
+ * @property string $unit_price
+ * @property string $total_price
+ * @property string $currency
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Currency|null $currency
+ * @property-read Invoice|null $invoice
+ * @property-read Products_Service|null $productService
+ * @property-read Products_Service|null $product
+ */
 #[Fillable([
     'invoice_id',
     'product_service_id',
@@ -44,5 +61,10 @@ class Invoice_Item extends Model
             Products_Service::class,
             'product_service_id'
         );
+    }
+
+    public function product(): BelongsTo
+    {
+        return $this->productService();
     }
 }

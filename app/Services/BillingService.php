@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Customer;
+use App\Models\Discount;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\RecurringBillingConfiguration;
@@ -131,9 +132,7 @@ class BillingService
         $daysRemaining = now()->diffInDays($subscription->end_date);
         $totalDays = $subscription->start_date->diffInDays($subscription->end_date); //
 
-        $this->pricingService = $pricingService ?? new PricingService;
-
-        return ($subscription->price / $totalDays) * $daysRemaining;
+        return ((float) $subscription->price / $totalDays) * $daysRemaining;
 
     }
 
@@ -201,10 +200,9 @@ class BillingService
 
     public function applyDiscount(Invoice $invoice, string $discountCode): array
     {
-        // $discount = Discount::where('code', $discountCode)
-        //     ->where('is_active', true)
-        //     ->first();
-        $discount = null;
+        $discount = Discount::where('code', $discountCode)
+            ->where('is_active', true)
+            ->first();
 
         if (! $discount || ! $discount->isValid()) {
             return [
@@ -649,7 +647,7 @@ class BillingService
     //     }
     // }
 
-    public function sendOverdueReminders(): void
+    public function sendOverdueReminders(): int
     {
         $overdueInvoices = Invoice::where(
             'status',
@@ -662,6 +660,8 @@ class BillingService
             )
             ->get();
 
+        $count = 0;
+
         foreach ($overdueInvoices as $invoice) {
             try {
                 $this->sendOverdueReminderEmail($invoice);
@@ -671,10 +671,13 @@ class BillingService
                         'last_reminder_date' => Carbon::now(),
                     ]
                 );
+                $count++;
             } catch (Exception $e) {
                 Log::error("Failed to send overdue reminder for invoice {$invoice->id}: ".$e->getMessage());
             }
         }
+
+        return $count;
     }
 
     public function sendUpcomingDueReminders(): void
@@ -699,7 +702,7 @@ class BillingService
             $customer = $invoice->customer;
 
             if ($customer->sms_notifications_enabled && $customer->phone_number) {
-                $daysUntilDue = now()->diffInDays($invoice->due_date);
+                $daysUntilDue = (int) now()->diffInDays($invoice->due_date);
                 $message = $this->getInvoiceReminderMessage(
                     $invoice,
                     $daysUntilDue
@@ -745,6 +748,112 @@ class BillingService
         return "Reminder: Invoice #{$invoice->invoice_number} for ".
             "{$invoice->getFormattedAmount()} is due in {$daysUntilDue} days. ".
             'Please ensure timely payment to avoid late fees.';
+    }
+
+    public function sendUpcomingInvoiceReminders(): int
+    {
+        $upcomingInvoices = Invoice::where(
+            'status',
+            'pending'
+        )
+            ->where('due_date', '>', now())
+            ->where('due_date', '<=', now()->addDays(7))
+            ->whereNull('upcoming_reminder_sent')
+            ->get();
+
+        $count = 0;
+
+        foreach ($upcomingInvoices as $invoice) {
+            try {
+                $customer = $invoice->customer;
+
+                if ($customer && $customer->sms_notifications_enabled && $customer->phone_number) {
+                    $daysUntilDue = (int) now()->diffInDays($invoice->due_date);
+                    $message = $this->getInvoiceReminderMessage($invoice, $daysUntilDue);
+                    $this->smsService->send($customer->phone_number, $message);
+                }
+
+                $invoice->update(['upcoming_reminder_sent' => true]);
+                $count++;
+            } catch (Exception $e) {
+                Log::error("Failed to send upcoming invoice reminder for invoice {$invoice->id}: ".$e->getMessage());
+            }
+        }
+
+        return $count;
+    }
+
+    /**
+     * @param  array<string, mixed>  $parameters
+     * @return array<int, array<string, mixed>>
+     */
+    public function getBillingSummary(array $parameters): array
+    {
+        $query = Invoice::query();
+
+        if (isset($parameters['start_date'])) {
+            $query->where('issue_date', '>=', $parameters['start_date']);
+        }
+
+        if (isset($parameters['end_date'])) {
+            $query->where('issue_date', '<=', $parameters['end_date']);
+        }
+
+        return $query->get()->map(fn (Invoice $inv) => [
+            'invoice_number' => $inv->invoice_number,
+            'customer_id' => $inv->customer_id,
+            'issue_date' => $inv->issue_date->format('Y-m-d'),
+            'due_date' => $inv->due_date->format('Y-m-d'),
+            'total_amount' => $inv->total_amount,
+            'status' => $inv->status,
+            'currency' => $inv->currency,
+        ])->all();
+    }
+
+    /**
+     * @param  array<string, mixed>  $parameters
+     * @return array<int, array<string, mixed>>
+     */
+    public function getRevenueReport(array $parameters): array
+    {
+        $query = Invoice::where('status', 'paid');
+
+        if (isset($parameters['start_date'])) {
+            $query->where('paid_at', '>=', $parameters['start_date']);
+        }
+
+        if (isset($parameters['end_date'])) {
+            $query->where('paid_at', '<=', $parameters['end_date']);
+        }
+
+        return $query->get()->map(fn (Invoice $inv) => [
+            'invoice_number' => $inv->invoice_number,
+            'customer_id' => $inv->customer_id,
+            'paid_at' => $inv->paid_at?->format('Y-m-d'),
+            'total_amount' => $inv->total_amount,
+            'currency' => $inv->currency,
+        ])->all();
+    }
+
+    /**
+     * @param  array<string, mixed>  $parameters
+     * @return array<int, array<string, mixed>>
+     */
+    public function getCustomerActivityReport(array $parameters): array
+    {
+        $query = Customer::query();
+
+        if (isset($parameters['customer_id'])) {
+            $query->where('id', $parameters['customer_id']);
+        }
+
+        return $query->get()->map(fn (Customer $customer) => [
+            'customer_id' => $customer->id,
+            'name' => $customer->name,
+            'email' => $customer->email,
+            'invoice_count' => $customer->invoices()->count(),
+            'total_billed' => $customer->invoices()->sum('total_amount'),
+        ])->all();
     }
 
     public function processLateFees(): void

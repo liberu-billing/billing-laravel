@@ -15,7 +15,7 @@ class AffiliateService
             $product = $payment->invoice->items->first()->product;
             $commissionRate = $referrer->getCommissionRate(
                 $product->id,
-                $product->category_id
+                $product->product_type_id
             );
             $commissionAmount = $payment->amount * ($commissionRate / 100);
 

@@ -5,8 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 use Override;
 
+/**
+ * @property int $id
+ * @property int $webhook_endpoint_id
+ * @property string $event_type
+ * @property array $payload
+ * @property string $status
+ * @property int $attempts
+ * @property string|null $last_error
+ * @property Carbon|null $sent_at
+ * @property Carbon|null $next_retry_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read WebhookEndpoint|null $webhookEndpoint
+ */
 #[Fillable([
     'webhook_endpoint_id',
     'event_type',

@@ -16,7 +16,7 @@ class AuditLogService
                 'user_id' => Auth::id(),
                 'event' => $event,
                 'auditable_type' => $model instanceof Model ? $model::class : null,
-                'auditable_id' => $model?->id,
+                'auditable_id' => $model?->getKey(),
                 'old_values' => $oldValues,
                 'new_values' => $newValues,
                 'ip_address' => Request::ip(),

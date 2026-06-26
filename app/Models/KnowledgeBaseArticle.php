@@ -5,9 +5,30 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Override;
 
+/**
+ * @property int $id
+ * @property int $category_id
+ * @property int $author_id
+ * @property string $title
+ * @property string $slug
+ * @property string|null $summary
+ * @property string $content
+ * @property int $sort_order
+ * @property bool $is_published
+ * @property bool $is_featured
+ * @property int $view_count
+ * @property int $helpful_count
+ * @property int $not_helpful_count
+ * @property Carbon|null $published_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read KnowledgeBaseCategory|null $category
+ * @property-read User|null $author
+ */
 #[Fillable([
     'category_id',
     'author_id',

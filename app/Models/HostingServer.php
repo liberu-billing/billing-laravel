@@ -6,11 +6,30 @@ namespace App\Models;
 
 use App\Traits\HasTeam;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Override;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $hostname
+ * @property string|null $username
+ * @property string|null $ip_address
+ * @property string $control_panel
+ * @property string $api_token
+ * @property string $api_url
+ * @property bool $is_active
+ * @property int $max_accounts
+ * @property int $active_accounts
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Collection<int, HostingAccount> $hostingAccounts
+ * @property-read Team|null $team
+ */
 #[Fillable([
     'name',
     'hostname',

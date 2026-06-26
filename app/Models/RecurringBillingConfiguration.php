@@ -7,8 +7,20 @@ use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 use Override;
 
+/**
+ * @property int $id
+ * @property int|null $invoice_id
+ * @property string $frequency
+ * @property int|null $billing_day
+ * @property Carbon $next_billing_date
+ * @property bool $is_active
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Invoice|null $invoice
+ */
 #[Fillable([
     'invoice_id',
     'frequency',

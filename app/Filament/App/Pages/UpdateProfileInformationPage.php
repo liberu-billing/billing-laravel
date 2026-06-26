@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\Auth;
 use Override;
 use UnitEnum;
 
+/**
+ * @property Schema $form
+ */
 class UpdateProfileInformationPage extends Page
 {
     #[Override]

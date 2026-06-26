@@ -41,6 +41,7 @@ class SavedSearchController extends Controller
             ]
         );
 
+        /** @var SavedSearch $search */
         $search = auth()->user()->savedSearches()->create(
             [
                 'name' => 'Shared Search',

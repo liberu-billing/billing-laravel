@@ -5,7 +5,20 @@ namespace App\Models;
 use App\Traits\HasTeam;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $type
+ * @property string $subject
+ * @property string $body
+ * @property int|null $team_id
+ * @property bool $is_default
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Team|null $team
+ */
 #[Fillable([
     'name',
     'type',

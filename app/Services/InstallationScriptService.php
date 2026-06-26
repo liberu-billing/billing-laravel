@@ -74,9 +74,6 @@ class InstallationScriptService
         return $value;
     }
 
-    /**
-     * @SuppressWarnings(PHPMD.DiscouragedFunctions)
-     */
     public function generateScript(): string
     {
         $domain = escapeshellarg($this->domain);    // phpcs:ignore -- nosemgrep

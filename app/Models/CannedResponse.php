@@ -5,8 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 use Override;
 
+/**
+ * @property int $id
+ * @property int|null $team_id
+ * @property string $title
+ * @property string $shortcode
+ * @property string $content
+ * @property string|null $category
+ * @property bool $is_active
+ * @property int $usage_count
+ * @property Carbon|null $last_used_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Team|null $team
+ */
 #[Fillable([
     'team_id',
     'title',

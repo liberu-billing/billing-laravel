@@ -95,7 +95,7 @@ class ManageSubscriptionPage extends Page
 
     public function save(): void
     {
-        $product = Products_Service::findOrFail($this->selectedProduct);
+        $product = Products_Service::findOrFail((int) $this->selectedProduct);
 
         if (! $this->subscription) {
             $this->subscription = new Subscription;
@@ -109,7 +109,7 @@ class ManageSubscriptionPage extends Page
                 'renewal_period' => $this->renewalPeriod,
                 'auto_renew' => $this->autoRenew,
                 'price' => $product->price,
-                'currency' => $product->currency,
+                'currency' => $this->subscription->currency ?: 'USD',
                 'status' => 'active',
             ]
         );

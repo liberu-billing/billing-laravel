@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Override;
 
+/**
+ * @property Schema $form
+ */
 class Profile extends Page
 {
     #[Override]

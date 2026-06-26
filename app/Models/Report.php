@@ -8,8 +8,23 @@ use App\Traits\HasTeam;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 use Override;
 
+/**
+ * @property int $id
+ * @property int $team_id
+ * @property string $name
+ * @property string $type
+ * @property Carbon|null $start_date
+ * @property Carbon|null $end_date
+ * @property array|null $filters
+ * @property string|null $format
+ * @property array|null $parameters
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Team|null $team
+ */
 #[Fillable([
     'name',
     'type',

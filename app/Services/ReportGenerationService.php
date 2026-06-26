@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Customer;
 use App\Models\Report;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Exception;
@@ -111,20 +112,12 @@ class ReportGenerationService
 
         $headers = array_keys(reset($data));
         foreach ($headers as $col => $header) {
-            $sheet->setCellValueByColumnAndRow(
-                $col + 1,
-                1,
-                $header
-            );
+            $sheet->setCellValue([$col + 1, 1], $header);
         }
 
         foreach ($data as $row => $rowData) {
             foreach ($rowData as $col => $value) {
-                $sheet->setCellValueByColumnAndRow(
-                    $col + 1,
-                    $row + 2,
-                    $value
-                );
+                $sheet->setCellValue([$col + 1, $row + 2], $value);
             }
         }
 

@@ -3,12 +3,38 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Override;
 
+/**
+ * @property int $id
+ * @property int|null $team_id
+ * @property int $customer_id
+ * @property string $quote_number
+ * @property string $title
+ * @property string $status
+ * @property Carbon|null $valid_until
+ * @property string $subtotal
+ * @property string $tax_amount
+ * @property string $total
+ * @property string $currency
+ * @property string|null $notes
+ * @property string|null $terms
+ * @property Carbon|null $sent_at
+ * @property Carbon|null $viewed_at
+ * @property Carbon|null $accepted_at
+ * @property Carbon|null $declined_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Team|null $team
+ * @property-read Customer|null $customer
+ * @property-read Collection<int, QuoteItem> $items
+ */
 #[Fillable([
     'team_id',
     'customer_id',

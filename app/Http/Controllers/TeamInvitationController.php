@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\TeamInvitation as MailTeamInvitation;
 use App\Models\Team;
+use App\Models\TeamInvitation;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -53,12 +54,12 @@ class TeamInvitationController extends Controller
             ]
         );
 
-        $invitation = Invitation::where(
+        $invitation = TeamInvitation::where(
             'token',
             $request->token
         )->firstOrFail();
         $team = Team::findOrFail($invitation->team_id);
-        $team->members()->attach($invitation->user_id);
+        $team->users()->attach($invitation->user_id);
 
         $invitation->update(['accepted' => true]);
 

@@ -6,8 +6,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Override;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property float $base_price
+ * @property float $enom_cost
+ * @property string $markup_type
+ * @property float $markup_value
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ */
 #[Fillable([
     'name',
     'base_price',

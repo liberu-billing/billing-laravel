@@ -40,6 +40,7 @@ class InviteTeamMember implements InvitesTeamMembers
             $role
         );
 
+        /** @var \App\Models\TeamInvitation $invitation */
         $invitation = $team->teamInvitations()->create(
             [
                 'email' => $email,

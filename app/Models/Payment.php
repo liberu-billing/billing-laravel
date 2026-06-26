@@ -10,8 +10,38 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 use Override;
 
+/**
+ * @property int $id
+ * @property int $invoice_id
+ * @property int $payment_gateway_id
+ * @property int|null $customer_id
+ * @property Carbon $payment_date
+ * @property float $amount
+ * @property string $currency
+ * @property string $payment_method
+ * @property string $transaction_id
+ * @property string $refund_status
+ * @property string|null $status
+ * @property float|null $refunded_amount
+ * @property string|null $refund_reason
+ * @property string|null $reconciliation_status
+ * @property string|null $reconciliation_notes
+ * @property string|null $stripe_token
+ * @property string|null $square_token
+ * @property string|null $google_pay_token
+ * @property int|null $team_id
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Invoice|null $invoice
+ * @property-read PaymentGateway|null $paymentGateway
+ * @property-read Currency|null $currency
+ * @property-read Affiliate|null $affiliate
+ * @property-read string $reconciliation_status_badge
+ * @property-read string $refund_status_badge
+ */
 #[Fillable([
     'invoice_id',
     'payment_gateway_id',

@@ -9,19 +9,70 @@ use App\Services\CurrencyService;
 use App\Services\PaymentGatewayService;
 use App\Services\TaxService;
 use App\Traits\HasTeam;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\CarbonInterface;
 use Exception;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
 use Override;
-use stdClass;
 
+/**
+ * @property int $id
+ * @property int $customer_id
+ * @property int|null $subscription_id
+ * @property string $invoice_number
+ * @property Carbon $issue_date
+ * @property Carbon $due_date
+ * @property numeric-string $total_amount
+ * @property string $currency
+ * @property string $status
+ * @property Carbon|null $sent_at
+ * @property Carbon|null $viewed_at
+ * @property Carbon|null $paid_at
+ * @property array|null $status_history
+ * @property numeric-string $late_fee_amount
+ * @property Carbon|null $last_late_fee_date
+ * @property bool|null $upcoming_reminder_sent
+ * @property int|null $reminder_count
+ * @property Carbon|null $last_reminder_date
+ * @property int|null $discount_id
+ * @property numeric-string|null $discount_amount
+ * @property int|null $parent_invoice_id
+ * @property bool $is_installment
+ * @property numeric-string|null $tax_amount
+ * @property bool|null $is_recurring
+ * @property int|null $invoice_template_id
+ * @property string|null $notes
+ * @property int|null $team_id
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read int|float $remaining_amount
+ * @property-read int|float $subtotal
+ * @property-read int|float $final_total
+ * @property-read float|int|array $total_with_late_fee
+ * @property-read string $formatted_total_with_late_fee
+ * @property-read float|int|null $remaining_late_fee
+ * @property-read Customer|null $customer
+ * @property-read Subscription|null $subscription
+ * @property-read Currency|null $currency
+ * @property-read Discount|null $discount
+ * @property-read Invoice|null $parentInvoice
+ * @property-read InvoiceTemplate|null $template
+ * @property-read Collection<int, InvoiceDispute> $disputes
+ * @property-read Collection<int, Invoice> $installments
+ * @property-read Collection<int, Payment> $payments
+ * @property-read Collection<int, Invoice_Item> $items
+ * @property-read PaymentPlan|null $paymentPlan
+ * @property-read RecurringBillingConfiguration|null $recurringConfiguration
+ */
 #[Fillable([
     'customer_id',
     'subscription_id',
@@ -119,8 +170,9 @@ class Invoice extends Model
         return $this->hasMany(InvoiceDispute::class);
     }
 
-    public function activeDispute(): ?stdClass
+    public function activeDispute(): ?InvoiceDispute
     {
+        /** @var InvoiceDispute|null */
         return $this->disputes()->whereIn(
             'status',
             [
@@ -328,7 +380,7 @@ class Invoice extends Model
     public function convertAmountTo(string $targetCurrency): float
     {
         return app(CurrencyService::class)->convert(
-            $this->total_amount,
+            (float) $this->total_amount,
             $this->currency,
             $targetCurrency
         );
@@ -337,7 +389,7 @@ class Invoice extends Model
     public function getFormattedAmount(): string
     {
         return number_format(
-            $this->total_amount,
+            (float) $this->total_amount,
             2
         ).' '.$this->currency;
     }
@@ -408,7 +460,7 @@ class Invoice extends Model
     {
         $fee = $this->calculateLateFee();
         if ($fee > 0) {
-            $this->late_fee_amount += $fee;
+            $this->late_fee_amount = (string) round((float) $this->late_fee_amount + $fee, 2);
             $this->last_late_fee_date = now();
             $this->save();
 
@@ -426,7 +478,7 @@ class Invoice extends Model
 
     protected function totalWithLateFee(): Attribute
     {
-        return Attribute::make(get: fn (): float|int|array => $this->final_total + $this->late_fee_amount);
+        return Attribute::make(get: fn (): float|int => $this->final_total + $this->late_fee_amount);
     }
 
     protected function formattedTotalWithLateFee(): Attribute
@@ -556,6 +608,11 @@ class Invoice extends Model
                 'is_active' => true,
             ]
         );
+    }
+
+    public function generatePdf(): \Barryvdh\DomPDF\PDF
+    {
+        return Pdf::loadView('invoices.pdf', ['invoice' => $this]);
     }
 
     private function calculateNextBillingDate($frequency, $billingDay = null): CarbonInterface

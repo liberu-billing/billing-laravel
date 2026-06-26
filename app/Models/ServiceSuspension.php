@@ -5,8 +5,27 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 use Override;
 
+/**
+ * @property int $id
+ * @property int $subscription_id
+ * @property int|null $invoice_id
+ * @property string $reason
+ * @property string|null $notes
+ * @property Carbon $suspended_at
+ * @property Carbon|null $unsuspended_at
+ * @property int|null $suspended_by
+ * @property int|null $unsuspended_by
+ * @property bool $is_active
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Subscription|null $subscription
+ * @property-read Invoice|null $invoice
+ * @property-read User|null $suspendedBy
+ * @property-read User|null $unsuspendedBy
+ */
 #[Fillable([
     'subscription_id',
     'invoice_id',

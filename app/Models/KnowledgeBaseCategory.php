@@ -3,12 +3,29 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Override;
 
+/**
+ * @property int $id
+ * @property int|null $parent_id
+ * @property string $name
+ * @property string $slug
+ * @property string|null $description
+ * @property int $sort_order
+ * @property bool $is_active
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read KnowledgeBaseCategory|null $parent
+ * @property-read Collection<int, KnowledgeBaseCategory> $children
+ * @property-read Collection<int, KnowledgeBaseArticle> $articles
+ * @property-read Collection<int, KnowledgeBaseArticle> $publishedArticles
+ */
 #[Fillable([
     'parent_id',
     'name',
