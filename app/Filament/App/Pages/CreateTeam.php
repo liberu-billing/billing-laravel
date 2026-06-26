@@ -7,28 +7,34 @@ use Filament\Pages\Tenancy\RegisterTenant;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 class CreateTeam extends RegisterTenant
 {
-    #[\Override]
+    #[Override]
     protected Width|string|null $maxWidth = '2xl';
 
-    #[\Override]
+    #[Override]
     public function form(Schema $schema): Schema
     {
         return $schema
-            ->components([
-                TextInput::make('name')
-                    ->label('Team Name')
-                    ->required()
-                    ->maxLength(255),
-            ]);
+            ->components(
+                [
+                    TextInput::make('name')
+                        ->label('Team Name')
+                        ->required()
+                        ->maxLength(255),
+                ]
+            );
     }
 
-    #[\Override]
+    #[Override]
     protected function handleRegistration(array $data): Model
     {
-        return app(\App\Actions\Jetstream\CreateTeam::class)->create(auth()->user(), $data);
+        return app(\App\Actions\Jetstream\CreateTeam::class)->create(
+            auth()->user(),
+            $data
+        );
     }
 
     public function getBreadcrumbs(): array

@@ -9,6 +9,7 @@ use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Log;
+use Random\RandomException;
 
 class VirtualminClient
 {
@@ -29,6 +30,9 @@ class VirtualminClient
         $this->apiKey = $server->api_token;
     }
 
+    /**
+     * @throws Exception
+     */
     public function createAccount(string $username, string $domain, $package): bool
     {
         $password = $this->generatePassword();
@@ -49,6 +53,9 @@ class VirtualminClient
         return $this->makeApiCall($params);
     }
 
+    /**
+     * @throws Exception
+     */
     public function suspendAccount($username): bool
     {
         $params = [
@@ -60,6 +67,9 @@ class VirtualminClient
         return $this->makeApiCall($params);
     }
 
+    /**
+     * @throws Exception
+     */
     public function unsuspendAccount($username): bool
     {
         $params = [
@@ -70,6 +80,9 @@ class VirtualminClient
         return $this->makeApiCall($params);
     }
 
+    /**
+     * @throws Exception
+     */
     public function changePackage($username, $newPackage): bool
     {
         $params = [
@@ -81,6 +94,9 @@ class VirtualminClient
         return $this->makeApiCall($params);
     }
 
+    /**
+     * @throws Exception
+     */
     public function terminateAccount($username): bool
     {
         $params = [
@@ -91,6 +107,9 @@ class VirtualminClient
         return $this->makeApiCall($params);
     }
 
+    /**
+     * @throws Exception
+     */
     public function addAddon($username, $addon): bool
     {
         $params = [
@@ -102,6 +121,9 @@ class VirtualminClient
         return $this->makeApiCall($params);
     }
 
+    /**
+     * @throws Exception
+     */
     public function removeAddon($username, $addon): bool
     {
         $params = [
@@ -122,44 +144,65 @@ class VirtualminClient
         try {
             $params['json'] = '1'; // Request JSON response
 
-            $response = $this->client->request('POST', 'https://'.$this->server->hostname.':10000/virtual-server/remote.cgi', [
-                'headers' => [
-                    'Authorization' => 'Basic '.base64_encode($this->server->username.':'.$this->apiKey),
-                ],
-                'form_params' => $params,
-                'verify' => false,
-            ]);
+            $response = $this->client->request(
+                'POST',
+                'https://'.$this->server->hostname.':10000/virtual-server/remote.cgi',
+                [
+                    'headers' => [
+                        'Authorization' => 'Basic '.base64_encode($this->server->username.':'.$this->apiKey),
+                    ],
+                    'form_params' => $params,
+                    'verify' => false,
+                ]
+            );
 
-            $result = json_decode($response->getBody()->getContents(), true);
+            $result = json_decode(
+                $response->getBody()->getContents(),
+                true,
+                512,
+                JSON_THROW_ON_ERROR
+            );
 
             if (isset($result['status']) && $result['status'] === 'success') {
-                Log::info('Virtualmin API call successful', [
-                    'program' => $params['program'],
-                    'server' => $this->server->hostname,
-                ]);
+                Log::info(
+                    'Virtualmin API call successful',
+                    [
+                        'program' => $params['program'],
+                        'server' => $this->server->hostname,
+                    ]
+                );
 
                 return true;
             }
 
-            Log::error('Virtualmin API call failed', [
-                'program' => $params['program'],
-                'server' => $this->server->hostname,
-                'error' => $result['error'] ?? 'Unknown error',
-            ]);
+            Log::error(
+                'Virtualmin API call failed',
+                [
+                    'program' => $params['program'],
+                    'server' => $this->server->hostname,
+                    'error' => $result['error'] ?? 'Unknown error',
+                ]
+            );
 
             return false;
 
         } catch (GuzzleException $e) {
-            Log::error('Virtualmin API call error', [
-                'program' => $params['program'] ?? 'unknown',
-                'server' => $this->server->hostname,
-                'error' => $e->getMessage(),
-            ]);
+            Log::error(
+                'Virtualmin API call error',
+                [
+                    'program' => $params['program'] ?? 'unknown',
+                    'server' => $this->server->hostname,
+                    'error' => $e->getMessage(),
+                ]
+            );
 
             return false;
         }
     }
 
+    /**
+     * @throws RandomException
+     */
     protected function generatePassword(): string
     {
         return bin2hex(random_bytes(12));

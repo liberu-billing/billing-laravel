@@ -3,6 +3,7 @@
 namespace App\Actions\Fortify;
 
 use App\Models\User;
+use App\Services\TeamManagementService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -20,20 +21,43 @@ class CreateNewUserWithTeams implements CreatesNewUsers
      */
     public function create(array $input): User
     {
-        Validator::make($input, [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => $this->passwordRules(),
-            'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature() ? ['accepted', 'required'] : '',
-        ])->validate();
+        Validator::make(
+            $input,
+            [
+                'name' => [
+                    'required',
+                    'string',
+                    'max:255',
+                ],
+                'email' => [
+                    'required',
+                    'string',
+                    'email',
+                    'max:255',
+                    'unique:users',
+                ],
+                'password' => $this->passwordRules(),
+                'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature() ? [
+                    'accepted',
+                    'required',
+                ] : '',
+            ]
+        )->validate();
 
-        return DB::transaction(fn () => tap(User::create([
-            'name' => $input['name'],
-            'email' => $input['email'],
-            'password' => Hash::make($input['password']),
-        ]), function (User $user): void {
-            $this->createTeam($user);
-        }));
+        return DB::transaction(
+            fn () => tap(
+                User::create(
+                    [
+                        'name' => $input['name'],
+                        'email' => $input['email'],
+                        'password' => Hash::make($input['password']),
+                    ]
+                ),
+                function (User $user): void {
+                    $this->createTeam($user);
+                }
+            )
+        );
     }
 
     /**

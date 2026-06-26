@@ -6,7 +6,6 @@ use App\Models\Customer;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-/** @SuppressWarnings(PHPMD.UnusedFormalParameter) */
 class CustomerPolicy
 {
     use HandlesAuthorization;

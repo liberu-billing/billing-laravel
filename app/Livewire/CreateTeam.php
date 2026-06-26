@@ -6,6 +6,7 @@ use App\Actions\Jetstream\CreateTeam as CreateTeamAction;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Jetstream\Contracts\CreatesTeams;
 use Laravel\Jetstream\Http\Livewire\CreateTeamForm;
+use Override;
 
 class CreateTeam extends CreateTeamForm
 {
@@ -17,7 +18,7 @@ class CreateTeam extends CreateTeamForm
         'state.name' => 'name',
     ];
 
-    #[\Override]
+    #[Override]
     public function createTeam(CreatesTeams $creator): void
     {
         $this->validate();
@@ -27,6 +28,9 @@ class CreateTeam extends CreateTeamForm
             ['name' => $this->state['name']]
         );
 
-        redirect()->route('filament.pages.edit-team', ['team' => $team]);
+        redirect()->route(
+            'filament.pages.edit-team',
+            ['team' => $team]
+        );
     }
 }

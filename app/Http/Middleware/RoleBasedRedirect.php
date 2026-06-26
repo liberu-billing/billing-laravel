@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 
 class RoleBasedRedirect
 {
-    protected $roleRedirects = [
+    protected array $roleRedirects = [
         'admin' => '/admin',
         'staff' => '/staff',
         'buyer' => '/buyer',
@@ -31,7 +31,10 @@ class RoleBasedRedirect
                     if ($request->is($redirect) || $request->is($redirect.'/*')) {
                         return $next($request);
                     }
-                    if ($this->shouldRedirect($request, $redirect)) {
+                    if ($this->shouldRedirect(
+                        $request,
+                        $redirect
+                    )) {
                         return redirect($redirect);
                     }
                 }
@@ -44,7 +47,10 @@ class RoleBasedRedirect
                 if ($request->is($roleRedirect) || $request->is($roleRedirect.'/*')) {
                     return $next($request);
                 }
-                if ($this->shouldRedirect($request, $roleRedirect)) {
+                if ($this->shouldRedirect(
+                    $request,
+                    $roleRedirect
+                )) {
                     return redirect($roleRedirect);
                 }
             }

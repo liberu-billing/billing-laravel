@@ -12,17 +12,28 @@ class CannedResponseService
      */
     public function getAll(?int $teamId = null, ?string $category = null): Collection
     {
-        $query = CannedResponse::where('is_active', true);
+        $query = CannedResponse::where(
+            'is_active',
+            true
+        );
 
         if ($teamId) {
-            $query->where(function ($q) use ($teamId): void {
-                $q->where('team_id', $teamId)
-                    ->orWhereNull('team_id'); // Include global responses
-            });
+            $query->where(
+                function ($q) use ($teamId): void {
+                    $q->where(
+                        'team_id',
+                        $teamId
+                    )
+                        ->orWhereNull('team_id'); // Include global responses
+                }
+            );
         }
 
         if ($category) {
-            $query->where('category', $category);
+            $query->where(
+                'category',
+                $category
+            );
         }
 
         return $query->orderBy('title')->get();
@@ -33,14 +44,25 @@ class CannedResponseService
      */
     public function getByShortcode(string $shortcode, ?int $teamId = null): ?CannedResponse
     {
-        $query = CannedResponse::where('shortcode', $shortcode)
-            ->where('is_active', true);
+        $query = CannedResponse::where(
+            'shortcode',
+            $shortcode
+        )
+            ->where(
+                'is_active',
+                true
+            );
 
         if ($teamId) {
-            $query->where(function ($q) use ($teamId): void {
-                $q->where('team_id', $teamId)
-                    ->orWhereNull('team_id');
-            });
+            $query->where(
+                function ($q) use ($teamId): void {
+                    $q->where(
+                        'team_id',
+                        $teamId
+                    )
+                        ->orWhereNull('team_id');
+                }
+            );
         }
 
         return $query->first();
@@ -61,21 +83,46 @@ class CannedResponseService
      */
     public function search(string $query, ?int $teamId = null): Collection
     {
-        $queryBuilder = CannedResponse::where('is_active', true)
-            ->where(function ($q) use ($query): void {
-                $q->where('title', 'like', "%{$query}%")
-                    ->orWhere('content', 'like', "%{$query}%")
-                    ->orWhere('shortcode', 'like', "%{$query}%");
-            });
+        $queryBuilder = CannedResponse::where(
+            'is_active',
+            true
+        )
+            ->where(
+                function ($q) use ($query): void {
+                    $q->where(
+                        'title',
+                        'like',
+                        "%{$query}%"
+                    )
+                        ->orWhere(
+                            'content',
+                            'like',
+                            "%{$query}%"
+                        )
+                        ->orWhere(
+                            'shortcode',
+                            'like',
+                            "%{$query}%"
+                        );
+                }
+            );
 
         if ($teamId) {
-            $queryBuilder->where(function ($q) use ($teamId): void {
-                $q->where('team_id', $teamId)
-                    ->orWhereNull('team_id');
-            });
+            $queryBuilder->where(
+                function ($q) use ($teamId): void {
+                    $q->where(
+                        'team_id',
+                        $teamId
+                    )
+                        ->orWhereNull('team_id');
+                }
+            );
         }
 
-        return $queryBuilder->orderBy('usage_count', 'desc')->get();
+        return $queryBuilder->orderBy(
+            'usage_count',
+            'desc'
+        )->get();
     }
 
     /**
@@ -86,10 +133,15 @@ class CannedResponseService
         $query = CannedResponse::query();
 
         if ($teamId) {
-            $query->where(function ($q) use ($teamId): void {
-                $q->where('team_id', $teamId)
-                    ->orWhereNull('team_id');
-            });
+            $query->where(
+                function ($q) use ($teamId): void {
+                    $q->where(
+                        'team_id',
+                        $teamId
+                    )
+                        ->orWhereNull('team_id');
+                }
+            );
         }
 
         return $query->distinct('category')
@@ -103,14 +155,22 @@ class CannedResponseService
      */
     public function getMostUsed(int $limit = 10, ?int $teamId = null): Collection
     {
-        $query = CannedResponse::where('is_active', true)
+        $query = CannedResponse::where(
+            'is_active',
+            true
+        )
             ->orderByDesc('usage_count');
 
         if ($teamId) {
-            $query->where(function ($q) use ($teamId): void {
-                $q->where('team_id', $teamId)
-                    ->orWhereNull('team_id');
-            });
+            $query->where(
+                function ($q) use ($teamId): void {
+                    $q->where(
+                        'team_id',
+                        $teamId
+                    )
+                        ->orWhereNull('team_id');
+                }
+            );
         }
 
         return $query->limit($limit)->get();

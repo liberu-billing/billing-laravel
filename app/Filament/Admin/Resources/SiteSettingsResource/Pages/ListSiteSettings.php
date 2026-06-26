@@ -7,13 +7,14 @@ namespace App\Filament\Admin\Resources\SiteSettingsResource\Pages;
 use App\Filament\Admin\Resources\SiteSettingsResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
+use Override;
 
 class ListSiteSettings extends ListRecords
 {
-    #[\Override]
+    #[Override]
     protected static string $resource = SiteSettingsResource::class;
 
-    #[\Override]
+    #[Override]
     protected function getHeaderActions(): array
     {
         return [

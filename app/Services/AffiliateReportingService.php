@@ -13,11 +13,26 @@ class AffiliateReportingService
         $endDate = Carbon::parse($endDate)->endOfDay();
 
         $transactions = $affiliate->transactions()
-            ->whereBetween('created_at', [$startDate, $endDate])
+            ->whereBetween(
+                'created_at',
+                [
+                    $startDate,
+                    $endDate,
+                ]
+            )
             ->get();
 
-        $totalEarnings = $transactions->where('type', 'commission')->sum('amount');
-        $totalReferrals = $affiliate->referrals()->whereBetween('created_at', [$startDate, $endDate])->count();
+        $totalEarnings = $transactions->where(
+            'type',
+            'commission'
+        )->sum('amount');
+        $totalReferrals = $affiliate->referrals()->whereBetween(
+            'created_at',
+            [
+                $startDate,
+                $endDate,
+            ]
+        )->count();
 
         return [
             'affiliate' => $affiliate,

@@ -12,20 +12,26 @@ class UpcomingInvoiceReminder extends Mailable
 
     public function __construct(public $data, public $template) {}
 
-    public function build()
+    public function build(): self
     {
         return $this->subject($this->parseTemplate($this->template->subject))
             ->view('emails.upcoming-invoice-reminder')
-            ->with([
-                'content' => $this->parseTemplate($this->template->body),
-                'data' => $this->data,
-            ]);
+            ->with(
+                [
+                    'content' => $this->parseTemplate($this->template->body),
+                    'data' => $this->data,
+                ]
+            );
     }
 
     private function parseTemplate($text)
     {
         foreach ($this->data as $key => $value) {
-            $text = str_replace('{{'.$key.'}}', $value, $text);
+            $text = str_replace(
+                '{{'.$key.'}}',
+                $value,
+                $text
+            );
         }
 
         return $text;

@@ -7,13 +7,14 @@ namespace App\Filament\App\Resources\HostingAccounts\Pages;
 use App\Filament\App\Resources\HostingAccounts\HostingAccountResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
+use Override;
 
 class ListHostingAccounts extends ListRecords
 {
-    #[\Override]
+    #[Override]
     protected static string $resource = HostingAccountResource::class;
 
-    #[\Override]
+    #[Override]
     protected function getActions(): array
     {
         return [

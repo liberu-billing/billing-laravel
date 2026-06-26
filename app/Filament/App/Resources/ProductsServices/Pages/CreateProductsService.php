@@ -6,9 +6,10 @@ namespace App\Filament\App\Resources\ProductsServices\Pages;
 
 use App\Filament\App\Resources\ProductsServices\ProductsServiceResource;
 use Filament\Resources\Pages\CreateRecord;
+use Override;
 
 class CreateProductsService extends CreateRecord
 {
-    #[\Override]
+    #[Override]
     protected static string $resource = ProductsServiceResource::class;
 }

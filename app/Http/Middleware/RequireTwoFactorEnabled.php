@@ -17,7 +17,10 @@ class RequireTwoFactorEnabled
     {
         if (! $request->user() || ! $request->user()->two_factor_secret) {
             return redirect()->route('profile.show')
-                ->with('error', 'Two-factor authentication must be enabled to access this area.');
+                ->with(
+                    'error',
+                    'Two-factor authentication must be enabled to access this area.'
+                );
         }
 
         return $next($request);

@@ -15,31 +15,33 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Override;
+use UnitEnum;
 
 class PaymentGatewayResource extends Resource
 {
-    #[\Override]
+    #[Override]
     protected static ?string $model = PaymentGateway::class;
 
-    #[\Override]
+    #[Override]
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCreditCard;
 
-    #[\Override]
-    protected static string|\UnitEnum|null $navigationGroup = 'Settings';
+    #[Override]
+    protected static string|UnitEnum|null $navigationGroup = 'Settings';
 
-    #[\Override]
+    #[Override]
     public static function form(Schema $schema): Schema
     {
         return PaymentGatewayForm::configure($schema);
     }
 
-    #[\Override]
+    #[Override]
     public static function table(Table $table): Table
     {
         return PaymentGatewaysTable::configure($table);
     }
 
-    #[\Override]
+    #[Override]
     public static function getRelations(): array
     {
         return [
@@ -47,7 +49,7 @@ class PaymentGatewayResource extends Resource
         ];
     }
 
-    #[\Override]
+    #[Override]
     public static function getPages(): array
     {
         return [

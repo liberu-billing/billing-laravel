@@ -9,17 +9,17 @@ use App\Filament\App\Pages\EditProfile;
 use App\Http\Middleware\TeamsPermission;
 use App\Listeners\SwitchTeam;
 use App\Models\Team;
+use Filament\Actions\Action;
 use Filament\Events\TenantSet;
+use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Navigation\MenuItem;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Widgets;
-use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -39,56 +39,86 @@ class AppPanelProvider extends PanelProvider
             ->path('app')
             ->login()
             ->viteTheme('resources/css/filament/admin/theme.css')
-            ->colors([
-                'primary' => Color::Gray,
-            ])
-            ->userMenuItems([
-                MenuItem::make()
-                    ->label('Profile')
-                    ->icon('heroicon-o-user-circle')
-                    ->url(fn (): UrlGenerator|string => $this->shouldRegisterMenuItem()
-                        ? url(EditProfile::getUrl())
-                        : url($panel->getPath())),
-            ])
-            ->discoverResources(in: app_path('Filament/App/Resources'), for: 'App\\Filament\\App\\Resources')
-            ->discoverPages(in: app_path('Filament/App/Pages'), for: 'App\\Filament\\App\\Pages')
-            ->pages([
-                Dashboard::class,
-                EditProfile::class,
-            ])
-            ->discoverWidgets(in: app_path('Filament/App/Widgets/Home'), for: 'App\\Filament\\App\\Widgets\\Home')
-            ->widgets([
-                Widgets\AccountWidget::class,
-            ])
-            ->middleware([
-                EncryptCookies::class,
-                AddQueuedCookiesToResponse::class,
-                StartSession::class,
-                AuthenticateSession::class,
-                ShareErrorsFromSession::class,
-                PreventRequestForgery::class,
-                SubstituteBindings::class,
-                DisableBladeIconComponents::class,
-                DispatchServingFilamentEvent::class,
-            ])
-            ->authMiddleware([
-                Authenticate::class,
-                TeamsPermission::class,
-            ]);
+            ->colors(
+                [
+                    'primary' => Color::Gray,
+                ]
+            )
+            ->userMenuItems(
+                [
+                    Action::make('profile')
+                        ->label('Profile')
+                        ->icon('heroicon-o-user-circle')
+                        ->url(
+                            fn (): string => $this->shouldRegisterMenuItem()
+                                ? url(EditProfile::getUrl())
+                                : url($panel->getPath())
+                        ),
+                ]
+            )
+            ->discoverResources(
+                in: app_path('Filament/App/Resources'),
+                for: 'App\\Filament\\App\\Resources'
+            )
+            ->discoverPages(
+                in: app_path('Filament/App/Pages'),
+                for: 'App\\Filament\\App\\Pages'
+            )
+            ->pages(
+                [
+                    Dashboard::class,
+                    EditProfile::class,
+                ]
+            )
+            ->discoverWidgets(
+                in: app_path('Filament/App/Widgets/Home'),
+                for: 'App\\Filament\\App\\Widgets\\Home'
+            )
+            ->widgets(
+                [
+                    Widgets\AccountWidget::class,
+                ]
+            )
+            ->middleware(
+                [
+                    EncryptCookies::class,
+                    AddQueuedCookiesToResponse::class,
+                    StartSession::class,
+                    AuthenticateSession::class,
+                    ShareErrorsFromSession::class,
+                    PreventRequestForgery::class,
+                    SubstituteBindings::class,
+                    DisableBladeIconComponents::class,
+                    DispatchServingFilamentEvent::class,
+                ]
+            )
+            ->authMiddleware(
+                [
+                    Authenticate::class,
+                    TeamsPermission::class,
+                ]
+            );
 
         if (Features::hasTeamFeatures()) {
             $panel
-                ->tenant(Team::class, ownershipRelationship: 'team')
+                ->tenant(
+                    Team::class,
+                    ownershipRelationship: 'team'
+                )
                 ->tenantRegistration(Pages\CreateTeam::class)
                 ->tenantProfile(Pages\EditTeam::class)
-                ->userMenuItems([
-                    MenuItem::make()
-                        ->label('Team Settings')
-                        ->icon('heroicon-o-cog-6-tooth')
-                        ->url(fn (): UrlGenerator|string => $this->shouldRegisterMenuItem()
-                            ? url(Pages\EditTeam::getUrl())
-                            : url($panel->getPath())),
-                ]);
+                ->userMenuItems(
+                    [
+                        Action::make('teamSettings')
+                            ->label('Team Settings')
+                            ->icon('heroicon-o-cog-6-tooth')
+                            ->url(
+                                fn (): string => $this->shouldRegisterMenuItem()
+                                    ? url(Pages\EditTeam::getUrl())
+                                    : url($panel->getPath())
+                            ),
+                    ]
+                );
         }
 
         return $panel;
@@ -96,11 +126,17 @@ class AppPanelProvider extends PanelProvider
 
     public function boot(): void
     {
-        Event::listen(TenantSet::class, SwitchTeam::class);
+        Event::listen(
+            TenantSet::class,
+            SwitchTeam::class
+        );
     }
 
     public function shouldRegisterMenuItem(): bool
     {
-        return true;
+        // Guard tenant-scoped menu URLs: on the tenant registration page (/app/new)
+        // there is no current tenant, so EditProfile::getUrl() would throw a
+        // "Missing parameter: tenant" UrlGenerationException.
+        return auth()->user()?->currentTeam && Filament::hasTenancy() && Filament::getTenant();
     }
 }

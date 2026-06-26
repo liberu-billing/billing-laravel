@@ -3,24 +3,27 @@
 namespace App\Filament\App\Pages;
 
 use App\Models\User;
+use BackedEnum;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
+use Override;
+use UnitEnum;
 
 class PersonalAccessTokensPage extends Page
 {
-    #[\Override]
+    #[Override]
     protected string $view = 'filament.pages.profile.personal-access-tokens';
 
-    #[\Override]
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-key';
+    #[Override]
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-key';
 
-    #[\Override]
-    protected static string|\UnitEnum|null $navigationGroup = 'Account';
+    #[Override]
+    protected static string|UnitEnum|null $navigationGroup = 'Account';
 
-    #[\Override]
+    #[Override]
     protected static ?int $navigationSort = 3;
 
-    #[\Override]
+    #[Override]
     protected static ?string $title = 'Personal Access Tokens';
 
     public User $user;
@@ -37,16 +40,19 @@ class PersonalAccessTokensPage extends Page
 
     public function deleteApiToken(string $name): void
     {
-        $this->user->tokens()->where('name', $name)->first()->delete();
+        $this->user->tokens()->where(
+            'name',
+            $name
+        )->first()->delete();
     }
 
-    #[\Override]
+    #[Override]
     public function getHeading(): string
     {
         return static::$title;
     }
 
-    #[\Override]
+    #[Override]
     public static function shouldRegisterNavigation(): bool
     {
         return true;

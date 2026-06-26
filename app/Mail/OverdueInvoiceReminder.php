@@ -15,10 +15,7 @@ class OverdueInvoiceReminder extends Mailable
 {
     use Queueable, SerializesModels;
 
-    /**
-     * @var Invoice
-     */
-    public $invoice;
+    public Invoice $invoice;
 
     public function __construct(Invoice $invoice)
     {

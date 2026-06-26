@@ -6,9 +6,10 @@ namespace App\Filament\App\Resources\HostingAccounts\Pages;
 
 use App\Filament\App\Resources\HostingAccounts\HostingAccountResource;
 use Filament\Resources\Pages\CreateRecord;
+use Override;
 
 class CreateHostingAccount extends CreateRecord
 {
-    #[\Override]
+    #[Override]
     protected static string $resource = HostingAccountResource::class;
 }

@@ -19,7 +19,7 @@ class InvoiceTemplatePolicy
 
     public function view(User $user, InvoiceTemplate $template): bool
     {
-        return $user->currentTeam->id === $template->team_id;
+        return $user->current_team_id === $template->team_id;
     }
 
     public function create(User $user): bool
@@ -29,11 +29,11 @@ class InvoiceTemplatePolicy
 
     public function update(User $user, InvoiceTemplate $template): bool
     {
-        return $user->currentTeam->id === $template->team_id;
+        return $user->current_team_id === $template->team_id;
     }
 
     public function delete(User $user, InvoiceTemplate $template): bool
     {
-        return $user->currentTeam->id === $template->team_id;
+        return $user->current_team_id === $template->team_id;
     }
 }

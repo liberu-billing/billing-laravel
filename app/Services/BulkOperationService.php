@@ -6,6 +6,7 @@ use App\Models\BulkOperation;
 use App\Models\Client;
 use App\Models\EmailCampaign;
 use App\Models\Invoice;
+use Exception;
 
 class BulkOperationService
 {
@@ -14,17 +15,19 @@ class BulkOperationService
      */
     public function bulkGenerateInvoices(array $clientIds, array $invoiceData, int $userId, ?int $teamId = null): BulkOperation
     {
-        return BulkOperation::create([
-            'user_id' => $userId,
-            'team_id' => $teamId,
-            'type' => 'invoice_generation',
-            'parameters' => [
-                'client_ids' => $clientIds,
-                'invoice_data' => $invoiceData,
-            ],
-            'total_items' => count($clientIds),
-            'status' => 'pending',
-        ]);
+        return BulkOperation::create(
+            [
+                'user_id' => $userId,
+                'team_id' => $teamId,
+                'type' => 'invoice_generation',
+                'parameters' => [
+                    'client_ids' => $clientIds,
+                    'invoice_data' => $invoiceData,
+                ],
+                'total_items' => count($clientIds),
+                'status' => 'pending',
+            ]
+        );
     }
 
     /**
@@ -41,18 +44,23 @@ class BulkOperationService
             foreach ($clientIds as $clientId) {
                 try {
                     // Create invoice for client
-                    Invoice::create(array_merge($invoiceData, [
-                        'client_id' => $clientId,
-                    ]));
+                    Invoice::create(
+                        array_merge(
+                            $invoiceData,
+                            [
+                                'client_id' => $clientId,
+                            ]
+                        )
+                    );
 
                     $operation->incrementProcessed();
-                } catch (\Exception) {
+                } catch (Exception) {
                     $operation->incrementFailed();
                 }
             }
 
             $operation->markAsCompleted();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $operation->markAsFailed($e->getMessage());
         }
     }
@@ -62,13 +70,18 @@ class BulkOperationService
      */
     public function exportClients(array $filters, int $userId, ?int $teamId = null): BulkOperation
     {
-        $operation = BulkOperation::create([
-            'user_id' => $userId,
-            'team_id' => $teamId,
-            'type' => 'data_export',
-            'parameters' => ['filters' => $filters, 'entity' => 'clients'],
-            'status' => 'pending',
-        ]);
+        $operation = BulkOperation::create(
+            [
+                'user_id' => $userId,
+                'team_id' => $teamId,
+                'type' => 'data_export',
+                'parameters' => [
+                    'filters' => $filters,
+                    'entity' => 'clients',
+                ],
+                'status' => 'pending',
+            ]
+        );
 
         $this->processDataExport($operation);
 
@@ -91,7 +104,10 @@ class BulkOperationService
 
                 // Apply filters
                 if (! empty($filters['team_id'])) {
-                    $data->where('team_id', $filters['team_id']);
+                    $data->where(
+                        'team_id',
+                        $filters['team_id']
+                    );
                 }
 
                 $clients = $data->get();
@@ -103,23 +119,43 @@ class BulkOperationService
 
                 // Ensure directory exists
                 if (! file_exists(dirname($path))) {
-                    mkdir(dirname($path), 0755, true);
+                    mkdir(
+                        dirname($path),
+                        0755,
+                        true
+                    );
                 }
 
-                $file = fopen($path, 'w');
+                $file = fopen(
+                    $path,
+                    'w'
+                );
 
                 // Headers
-                fputcsv($file, ['ID', 'Name', 'Email', 'Phone', 'Created At'], escape: '\\');
+                fputcsv(
+                    $file,
+                    [
+                        'ID',
+                        'Name',
+                        'Email',
+                        'Phone',
+                        'Created At',
+                    ],
+                    escape: '\\'
+                );
 
                 foreach ($clients as $client) {
-                    fputcsv($file, [
-                        $client->id,
-                        $client->name,
-                        $client->email,
-                        $client->phone ?? '',
-                        $client->created_at,
-                    ],
-                        escape: '\\');
+                    fputcsv(
+                        $file,
+                        [
+                            $client->id,
+                            $client->name,
+                            $client->email,
+                            $client->phone ?? '',
+                            $client->created_at,
+                        ],
+                        escape: '\\'
+                    );
                     $operation->incrementProcessed();
                 }
 
@@ -128,7 +164,7 @@ class BulkOperationService
             }
 
             $operation->markAsCompleted();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $operation->markAsFailed($e->getMessage());
         }
     }
@@ -138,13 +174,15 @@ class BulkOperationService
      */
     public function importClients(string $filePath, int $userId, ?int $teamId = null): BulkOperation
     {
-        $operation = BulkOperation::create([
-            'user_id' => $userId,
-            'team_id' => $teamId,
-            'type' => 'client_import',
-            'parameters' => ['file_path' => $filePath],
-            'status' => 'pending',
-        ]);
+        $operation = BulkOperation::create(
+            [
+                'user_id' => $userId,
+                'team_id' => $teamId,
+                'type' => 'client_import',
+                'parameters' => ['file_path' => $filePath],
+                'status' => 'pending',
+            ]
+        );
 
         $this->processClientImport($operation);
 
@@ -160,38 +198,55 @@ class BulkOperationService
 
         try {
             $filePath = $operation->parameters['file_path'];
-            $file = fopen($filePath, 'r');
+            $file = fopen(
+                $filePath,
+                'r'
+            );
 
             // Skip header row
-            $headers = fgetcsv($file, escape: '\\');
+            $headers = fgetcsv(
+                $file,
+                escape: '\\'
+            );
 
             // Count total rows
             $totalRows = 0;
-            while (fgetcsv($file, escape: '\\') !== false) {
+            while (fgetcsv(
+                $file,
+                escape: '\\'
+            ) !== false) {
                 $totalRows++;
             }
             rewind($file);
-            fgetcsv($file, escape: '\\'); // Skip header again
+            fgetcsv(
+                $file,
+                escape: '\\'
+            ); // Skip header again
 
             $operation->update(['total_items' => $totalRows]);
 
-            while (($row = fgetcsv($file, escape: '\\')) !== false) {
+            while (($row = fgetcsv(
+                $file,
+                escape: '\\'
+            )) !== false) {
                 try {
-                    Client::create([
-                        'name' => $row[0] ?? '',
-                        'email' => $row[1] ?? '',
-                        'phone' => $row[2] ?? null,
-                        'team_id' => $operation->team_id,
-                    ]);
+                    Client::create(
+                        [
+                            'name' => $row[0] ?? '',
+                            'email' => $row[1] ?? '',
+                            'phone' => $row[2] ?? null,
+                            'team_id' => $operation->team_id,
+                        ]
+                    );
                     $operation->incrementProcessed();
-                } catch (\Exception) {
+                } catch (Exception) {
                     $operation->incrementFailed();
                 }
             }
 
             fclose($file);
             $operation->markAsCompleted();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $operation->markAsFailed($e->getMessage());
         }
     }
@@ -207,15 +262,17 @@ class BulkOperationService
         int $createdBy,
         ?int $teamId = null
     ): EmailCampaign {
-        return EmailCampaign::create([
-            'team_id' => $teamId,
-            'created_by' => $createdBy,
-            'name' => $name,
-            'subject' => $subject,
-            'content' => $content,
-            'recipient_filters' => $recipientFilters,
-            'status' => 'draft',
-        ]);
+        return EmailCampaign::create(
+            [
+                'team_id' => $teamId,
+                'created_by' => $createdBy,
+                'name' => $name,
+                'subject' => $subject,
+                'content' => $content,
+                'recipient_filters' => $recipientFilters,
+                'status' => 'draft',
+            ]
+        );
     }
 
     /**
@@ -236,13 +293,13 @@ class BulkOperationService
                     // Mail::to($recipient->email)->send(new CampaignEmail($campaign));
 
                     $campaign->incrementSent();
-                } catch (\Exception) {
+                } catch (Exception) {
                     $campaign->incrementFailed();
                 }
             }
 
             $campaign->markAsSent();
-        } catch (\Exception) {
+        } catch (Exception) {
             // Log error
         }
     }
@@ -255,11 +312,17 @@ class BulkOperationService
         $query = Client::query();
 
         if (! empty($filters['team_id'])) {
-            $query->where('team_id', $filters['team_id']);
+            $query->where(
+                'team_id',
+                $filters['team_id']
+            );
         }
 
         if (! empty($filters['status'])) {
-            $query->where('status', $filters['status']);
+            $query->where(
+                'status',
+                $filters['status']
+            );
         }
 
         return $query->get();

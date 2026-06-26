@@ -19,13 +19,23 @@ class RemoveTeamMember implements RemovesTeamMembers
      */
     public function remove(User $user, Team $team, User $teamMember): void
     {
-        $this->authorize($user, $team, $teamMember);
+        $this->authorize(
+            $user,
+            $team,
+            $teamMember
+        );
 
-        $this->ensureUserDoesNotOwnTeam($teamMember, $team);
+        $this->ensureUserDoesNotOwnTeam(
+            $teamMember,
+            $team
+        );
 
         $team->removeUser($teamMember);
 
-        TeamMemberRemoved::dispatch($team, $teamMember);
+        TeamMemberRemoved::dispatch(
+            $team,
+            $teamMember
+        );
     }
 
     /**
@@ -33,7 +43,10 @@ class RemoveTeamMember implements RemovesTeamMembers
      */
     protected function authorize(User $user, Team $team, User $teamMember): void
     {
-        if (! Gate::forUser($user)->check('removeTeamMember', $team) &&
+        if (! Gate::forUser($user)->check(
+            'removeTeamMember',
+            $team
+        ) &&
             $user->id !== $teamMember->id) {
             throw new AuthorizationException;
         }
@@ -44,10 +57,12 @@ class RemoveTeamMember implements RemovesTeamMembers
      */
     protected function ensureUserDoesNotOwnTeam(User $teamMember, Team $team): void
     {
-        if ($teamMember->id === $team->owner->id) {
-            throw ValidationException::withMessages([
-                'team' => [__('You may not leave a team that you created.')],
-            ])->errorBag('removeTeamMember');
+        if ($teamMember->id === $team->user_id) {
+            throw ValidationException::withMessages(
+                [
+                    'team' => [__('You may not leave a team that you created.')],
+                ]
+            )->errorBag('removeTeamMember');
         }
     }
 }

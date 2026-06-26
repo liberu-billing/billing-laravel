@@ -7,13 +7,14 @@ namespace App\Filament\Admin\Resources\SiteSettingsResource\Pages;
 use App\Filament\Admin\Resources\SiteSettingsResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Override;
 
 class EditSiteSettings extends EditRecord
 {
-    #[\Override]
+    #[Override]
     protected static string $resource = SiteSettingsResource::class;
 
-    #[\Override]
+    #[Override]
     protected function getHeaderActions(): array
     {
         return [

@@ -12,13 +12,19 @@ trait Configurable
     {
         $moduleName = strtolower($this->getName());
 
-        return Config::get("{$moduleName}.{$key}", $default);
+        return Config::get(
+            "{$moduleName}.{$key}",
+            $default
+        );
     }
 
     public function setConfig(string $key, mixed $value): void
     {
         $moduleName = strtolower($this->getName());
-        Config::set("{$moduleName}.{$key}", $value);
+        Config::set(
+            "{$moduleName}.{$key}",
+            $value
+        );
     }
 
     public function hasConfig(string $key): bool
@@ -32,13 +38,25 @@ trait Configurable
     {
         $moduleName = strtolower($this->getName());
 
-        return Config::get($moduleName, []);
+        return Config::get(
+            $moduleName,
+            []
+        );
     }
 
     public function mergeConfig(array $config): void
     {
         $moduleName = strtolower($this->getName());
-        $existing = Config::get($moduleName, []);
-        Config::set($moduleName, array_merge($existing, $config));
+        $existing = Config::get(
+            $moduleName,
+            []
+        );
+        Config::set(
+            $moduleName,
+            array_merge(
+                $existing,
+                $config
+            )
+        );
     }
 }

@@ -20,13 +20,15 @@ class PartialPaymentService
         DB::beginTransaction();
 
         try {
-            $payment = new Payment([
-                'invoice_id' => $invoice->id,
-                'payment_gateway_id' => $paymentGatewayId,
-                'amount' => $amount,
-                'currency' => $invoice->currency,
-                'payment_date' => now(),
-            ]);
+            $payment = new Payment(
+                [
+                    'invoice_id' => $invoice->id,
+                    'payment_gateway_id' => $paymentGatewayId,
+                    'amount' => $amount,
+                    'currency' => $invoice->currency,
+                    'payment_date' => now(),
+                ]
+            );
 
             $paymentResult = $this->paymentGatewayService->processPayment($payment);
 
@@ -38,14 +40,21 @@ class PartialPaymentService
 
                 DB::commit();
 
-                return ['success' => true, 'message' => 'Partial payment processed successfully.', 'payment' => $payment];
+                return [
+                    'success' => true,
+                    'message' => 'Partial payment processed successfully.',
+                    'payment' => $payment,
+                ];
             } else {
                 throw new Exception($paymentResult['message']);
             }
         } catch (Exception $e) {
             DB::rollBack();
 
-            return ['success' => false, 'message' => 'Partial payment failed: '.$e->getMessage()];
+            return [
+                'success' => false,
+                'message' => 'Partial payment failed: '.$e->getMessage(),
+            ];
         }
     }
 

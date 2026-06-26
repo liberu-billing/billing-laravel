@@ -22,15 +22,15 @@ class ModuleCommand extends Command
     public function handle(): int
     {
         return match ($this->argument('action')) {
-            'list'      => $this->listModules(),
-            'enable'    => $this->enableModule($this->argument('name')),
-            'disable'   => $this->disableModule($this->argument('name')),
-            'install'   => $this->installModule($this->argument('name')),
+            'list' => $this->listModules(),
+            'enable' => $this->enableModule($this->argument('name')),
+            'disable' => $this->disableModule($this->argument('name')),
+            'install' => $this->installModule($this->argument('name')),
             'uninstall' => $this->uninstallModule($this->argument('name')),
-            'create'    => $this->createModule($this->argument('name')),
-            'info'      => $this->showModuleInfo($this->argument('name')),
-            'health'    => $this->healthCheck($this->argument('name')),
-            default     => $this->showHelp(),
+            'create' => $this->createModule($this->argument('name')),
+            'info' => $this->showModuleInfo($this->argument('name')),
+            'health' => $this->healthCheck($this->argument('name')),
+            default => $this->showHelp(),
         };
     }
 
@@ -39,34 +39,58 @@ class ModuleCommand extends Command
         $modules = $this->moduleManager->all();
 
         if ($modules->isEmpty()) {
-            $this->outputResult(['modules' => [], 'count' => 0]);
+            $this->outputResult(
+                [
+                    'modules' => [],
+                    'count' => 0,
+                ]
+            );
 
             return self::SUCCESS;
         }
 
-        $rows = $modules->map(fn ($m): array => [
-            'name'        => $m->getName(),
-            'version'     => $m->getVersion(),
-            'status'      => $m->isEnabled() ? 'enabled' : 'disabled',
-            'description' => $m->getDescription(),
-            'dependencies' => implode(', ', $m->getDependencies()),
-        ])->values()->all();
+        $rows = $modules->map(
+            fn ($m): array => [
+                'name' => $m->getName(),
+                'version' => $m->getVersion(),
+                'status' => $m->isEnabled() ? 'enabled' : 'disabled',
+                'description' => $m->getDescription(),
+                'dependencies' => implode(
+                    ', ',
+                    $m->getDependencies()
+                ),
+            ]
+        )->values()->all();
 
         if ($this->option('format') === 'json') {
-            $this->line(json_encode(['modules' => $rows], JSON_PRETTY_PRINT));
+            $this->line(
+                json_encode(
+                    ['modules' => $rows],
+                    JSON_PRETTY_PRINT
+                )
+            );
 
             return self::SUCCESS;
         }
 
         $this->table(
-            ['Name', 'Version', 'Status', 'Description', 'Dependencies'],
-            array_map(fn (array $r): array => [
-                $r['name'],
-                $r['version'],
-                $r['status'] === 'enabled' ? '<fg=green>Enabled</>' : '<fg=red>Disabled</>',
-                $r['description'],
-                $r['dependencies'] ?: '—',
-            ], $rows)
+            [
+                'Name',
+                'Version',
+                'Status',
+                'Description',
+                'Dependencies',
+            ],
+            array_map(
+                fn (array $r): array => [
+                    $r['name'],
+                    $r['version'],
+                    $r['status'] === 'enabled' ? '<fg=green>Enabled</>' : '<fg=red>Disabled</>',
+                    $r['description'],
+                    $r['dependencies'] ?: '—',
+                ],
+                $rows
+            )
         );
 
         return self::SUCCESS;
@@ -74,17 +98,29 @@ class ModuleCommand extends Command
 
     protected function enableModule(?string $name): int
     {
-        return $this->runModuleAction('enable', $name, fn () => $this->moduleManager->enable($name));
+        return $this->runModuleAction(
+            'enable',
+            $name,
+            fn () => $this->moduleManager->enable($name)
+        );
     }
 
     protected function disableModule(?string $name): int
     {
-        return $this->runModuleAction('disable', $name, fn () => $this->moduleManager->disable($name));
+        return $this->runModuleAction(
+            'disable',
+            $name,
+            fn () => $this->moduleManager->disable($name)
+        );
     }
 
     protected function installModule(?string $name): int
     {
-        return $this->runModuleAction('install', $name, fn () => $this->moduleManager->install($name));
+        return $this->runModuleAction(
+            'install',
+            $name,
+            fn () => $this->moduleManager->install($name)
+        );
     }
 
     protected function uninstallModule(?string $name): int
@@ -101,7 +137,11 @@ class ModuleCommand extends Command
             return self::SUCCESS;
         }
 
-        return $this->runModuleAction('uninstall', $name, fn () => $this->moduleManager->uninstall($name));
+        return $this->runModuleAction(
+            'uninstall',
+            $name,
+            fn () => $this->moduleManager->uninstall($name)
+        );
     }
 
     protected function createModule(?string $name): int
@@ -112,7 +152,13 @@ class ModuleCommand extends Command
             return self::FAILURE;
         }
 
-        return $this->call('make:module', ['name' => $name, '--force' => $this->option('force')]);
+        return $this->call(
+            'make:module',
+            [
+                'name' => $name,
+                '--force' => $this->option('force'),
+            ]
+        );
     }
 
     protected function showModuleInfo(?string $name): int
@@ -143,7 +189,12 @@ class ModuleCommand extends Command
             : $this->moduleManager->checkAllHealth();
 
         if ($this->option('format') === 'json') {
-            $this->line(json_encode($results, JSON_PRETTY_PRINT));
+            $this->line(
+                json_encode(
+                    $results,
+                    JSON_PRETTY_PRINT
+                )
+            );
 
             return self::SUCCESS;
         }
@@ -223,11 +274,19 @@ class ModuleCommand extends Command
     private function outputResult(array $data): void
     {
         if ($this->option('format') === 'json') {
-            $this->line(json_encode($data, JSON_PRETTY_PRINT));
+            $this->line(
+                json_encode(
+                    $data,
+                    JSON_PRETTY_PRINT
+                )
+            );
         } else {
             foreach ($data as $key => $value) {
                 if (is_array($value)) {
-                    $value = implode(', ', $value) ?: '—';
+                    $value = implode(
+                        ', ',
+                        $value
+                    ) ?: '—';
                 }
                 $this->line(ucfirst((string) $key).': '.(string) $value);
             }

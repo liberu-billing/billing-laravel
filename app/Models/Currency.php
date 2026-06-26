@@ -5,9 +5,22 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property string $code
+ * @property string $name
+ * @property string $exchange_rate
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Collection<int, Invoice> $invoices
+ * @property-read Collection<int, Invoice_Item> $invoiceItems
+ * @property-read Collection<int, Payment> $payments
+ */
 #[Fillable([
     'code',
     'name',
@@ -15,20 +28,30 @@ use Illuminate\Database\Eloquent\Model;
 ])]
 class Currency extends Model
 {
-    use HasFactory;
-
-    public function invoices()
+    public function invoices(): HasMany
     {
-        return $this->hasMany(Invoice::class, 'currency', 'code');
+        return $this->hasMany(
+            Invoice::class,
+            'currency',
+            'code'
+        );
     }
 
-    public function invoiceItems()
+    public function invoiceItems(): HasMany
     {
-        return $this->hasMany(Invoice_Item::class, 'currency', 'code');
+        return $this->hasMany(
+            Invoice_Item::class,
+            'currency',
+            'code'
+        );
     }
 
-    public function payments()
+    public function payments(): HasMany
     {
-        return $this->hasMany(Payment::class, 'currency', 'code');
+        return $this->hasMany(
+            Payment::class,
+            'currency',
+            'code'
+        );
     }
 }

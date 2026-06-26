@@ -27,7 +27,11 @@ class SuspendOverdueServices extends Command
             return Command::FAILURE;
         }
 
-        cache()->put('suspending_overdue_services', true, 60); // Lock for 60 minutes
+        cache()->put(
+            'suspending_overdue_services',
+            true,
+            60
+        ); // Lock for 60 minutes
 
         try {
             $days = (int) $this->option('days');

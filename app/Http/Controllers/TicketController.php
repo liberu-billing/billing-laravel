@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Notifications\NewTicketNotification;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
 
@@ -20,7 +21,10 @@ class TicketController extends Controller
             ? Ticket::with('user')->latest()->paginate(10)
             : $user->tickets()->latest()->paginate(10);
 
-        return view('tickets.index', compact('tickets'));
+        return view(
+            'tickets.index',
+            compact('tickets')
+        );
     }
 
     public function create(): Factory|View
@@ -28,46 +32,96 @@ class TicketController extends Controller
         return view('tickets.create');
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'description' => ['required', 'string'],
-            'priority' => ['required', 'in:low,medium,high'],
-        ]);
+        $validated = $request->validate(
+            [
+                'title' => [
+                    'required',
+                    'string',
+                    'max:255',
+                ],
+                'description' => [
+                    'required',
+                    'string',
+                ],
+                'priority' => [
+                    'required',
+                    'in:low,medium,high',
+                ],
+            ]
+        );
 
-        $ticket = Ticket::create([
-            'user_id' => auth()->id(),
-            'title' => $validated['title'],
-            'description' => $validated['description'],
-            'priority' => $validated['priority'],
-        ]);
+        $ticket = Ticket::create(
+            [
+                'user_id' => auth()->id(),
+                'title' => $validated['title'],
+                'description' => $validated['description'],
+                'priority' => $validated['priority'],
+            ]
+        );
 
-        $admins = User::role(['admin', 'super_admin'])->get();
-        Notification::send($admins, new NewTicketNotification($ticket));
+        $admins = User::role(
+            [
+                'admin',
+                'super_admin',
+            ]
+        )->get();
+        Notification::send(
+            $admins,
+            new NewTicketNotification($ticket)
+        );
 
-        return redirect()->route('tickets.show', $ticket)
-            ->with('success', 'Ticket created successfully.');
+        return redirect()->route(
+            'tickets.show',
+            $ticket
+        )
+            ->with(
+                'success',
+                'Ticket created successfully.'
+            );
     }
 
     public function show(Ticket $ticket): Factory|View
     {
-        $this->authorize('view', $ticket);
-        $ticket->load(['responses.user', 'user']);
+        $this->authorize(
+            'view',
+            $ticket
+        );
+        $ticket->load(
+            [
+                'responses.user',
+                'user',
+            ]
+        );
 
-        return view('tickets.show', compact('ticket'));
+        return view(
+            'tickets.show',
+            compact('ticket')
+        );
     }
 
     public function update(Request $request, Ticket $ticket)
     {
-        $this->authorize('update', $ticket);
+        $this->authorize(
+            'update',
+            $ticket
+        );
 
-        $validated = $request->validate([
-            'status' => ['required', 'in:open,in_progress,closed'],
-        ]);
+        $validated = $request->validate(
+            [
+                'status' => [
+                    'required',
+                    'in:open,in_progress,closed',
+                ],
+            ]
+        );
 
         $ticket->update($validated);
 
-        return redirect()->back()->with('success', 'Ticket status updated.');
+        return redirect()->back()->with(
+            'success',
+            'Ticket status updated.'
+        );
     }
 }

@@ -20,10 +20,12 @@ class EmailTracker
 
             if ($campaign && $lead) {
                 // Record that the email was sent
-                $campaign->emailStats()->create([
-                    'lead_id' => $lead->id,
-                    'sent_at' => now(),
-                ]);
+                $campaign->emailStats()->create(
+                    [
+                        'lead_id' => $lead->id,
+                        'sent_at' => now(),
+                    ]
+                );
             }
         }
     }

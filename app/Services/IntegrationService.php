@@ -11,17 +11,26 @@ class IntegrationService
         'google' => [
             'name' => 'Google Calendar',
             'icon' => 'google',
-            'scopes' => ['calendar', 'calendar.events'],
+            'scopes' => [
+                'calendar',
+                'calendar.events',
+            ],
         ],
         'slack' => [
             'name' => 'Slack',
             'icon' => 'slack',
-            'scopes' => ['channels:read', 'chat:write'],
+            'scopes' => [
+                'channels:read',
+                'chat:write',
+            ],
         ],
         'trello' => [
             'name' => 'Trello',
             'icon' => 'trello',
-            'scopes' => ['read', 'write'],
+            'scopes' => [
+                'read',
+                'write',
+            ],
         ],
     ];
 
@@ -44,7 +53,10 @@ class IntegrationService
 
     public function disconnect(string $provider, User $user)
     {
-        return $user->integrations()->where('provider', $provider)->delete();
+        return $user->integrations()->where(
+            'provider',
+            $provider
+        )->delete();
     }
 
     public function getProviders(): array

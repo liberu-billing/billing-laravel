@@ -7,13 +7,14 @@ namespace App\Filament\App\Resources\Affiliates\Pages;
 use App\Filament\App\Resources\Affiliates\AffiliateResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Override;
 
 class EditAffiliate extends EditRecord
 {
-    #[\Override]
+    #[Override]
     protected static string $resource = AffiliateResource::class;
 
-    #[\Override]
+    #[Override]
     protected function getActions(): array
     {
         return [

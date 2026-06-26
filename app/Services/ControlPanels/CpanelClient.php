@@ -27,6 +27,9 @@ class CpanelClient
         $this->apiToken = $server->api_token;
     }
 
+    /**
+     * @throws Exception
+     */
     public function createAccount(string $username, string $domain, $package): bool
     {
         $endpoint = '/json-api/createacct';
@@ -37,7 +40,8 @@ class CpanelClient
             'featurelist' => $package,
             'password' => $this->generatePassword(),
             'contactemail' => $username.'@'.$domain,
-            'quota' => 0, // Unlimited
+            'quota' => 0,
+            // Unlimited
             'maxftp' => 'unlimited',
             'maxsql' => 'unlimited',
             'maxpop' => 'unlimited',
@@ -45,15 +49,22 @@ class CpanelClient
             'maxsub' => 'unlimited',
             'maxpark' => 'unlimited',
             'maxaddon' => 'unlimited',
-            'bwlimit' => 0, // Unlimited
+            'bwlimit' => 0,
+            // Unlimited
             'customip' => $this->server->ip_address ?? '',
             'shell' => 'n',
             'owner' => $this->server->username,
         ];
 
-        return $this->makeApiCall($endpoint, $params);
+        return $this->makeApiCall(
+            $endpoint,
+            $params
+        );
     }
 
+    /**
+     * @throws Exception
+     */
     public function suspendAccount($username): bool
     {
         $endpoint = '/json-api/suspendacct';
@@ -63,9 +74,15 @@ class CpanelClient
             'leave-ftp' => 0,
         ];
 
-        return $this->makeApiCall($endpoint, $params);
+        return $this->makeApiCall(
+            $endpoint,
+            $params
+        );
     }
 
+    /**
+     * @throws Exception
+     */
     public function unsuspendAccount($username): bool
     {
         $endpoint = '/json-api/unsuspendacct';
@@ -73,9 +90,15 @@ class CpanelClient
             'user' => $username,
         ];
 
-        return $this->makeApiCall($endpoint, $params);
+        return $this->makeApiCall(
+            $endpoint,
+            $params
+        );
     }
 
+    /**
+     * @throws Exception
+     */
     public function changePackage($username, $newPackage): bool
     {
         $endpoint = '/json-api/changepackage';
@@ -84,9 +107,15 @@ class CpanelClient
             'pkg' => $newPackage,
         ];
 
-        return $this->makeApiCall($endpoint, $params);
+        return $this->makeApiCall(
+            $endpoint,
+            $params
+        );
     }
 
+    /**
+     * @throws Exception
+     */
     public function terminateAccount($username): bool
     {
         $endpoint = '/json-api/removeacct';
@@ -95,9 +124,15 @@ class CpanelClient
             'keepdns' => 0,
         ];
 
-        return $this->makeApiCall($endpoint, $params);
+        return $this->makeApiCall(
+            $endpoint,
+            $params
+        );
     }
 
+    /**
+     * @throws Exception
+     */
     public function addAddon($username, $addon): bool
     {
         // cPanel addons are typically features added to an account
@@ -108,9 +143,15 @@ class CpanelClient
             'FEATURE-'.strtoupper((string) $addon) => 1,
         ];
 
-        return $this->makeApiCall($endpoint, $params);
+        return $this->makeApiCall(
+            $endpoint,
+            $params
+        );
     }
 
+    /**
+     * @throws Exception
+     */
     public function removeAddon($username, $addon): bool
     {
         $endpoint = '/json-api/modifyacct';
@@ -119,9 +160,15 @@ class CpanelClient
             'FEATURE-'.strtoupper((string) $addon) => 0,
         ];
 
-        return $this->makeApiCall($endpoint, $params);
+        return $this->makeApiCall(
+            $endpoint,
+            $params
+        );
     }
 
+    /**
+     * @throws Exception
+     */
     protected function makeApiCall(string $endpoint, $params): bool
     {
         if (! $this->server) {
@@ -131,39 +178,60 @@ class CpanelClient
         $this->validateHostname($this->server->hostname);
 
         try {
-            $response = $this->client->request('GET', 'https://'.$this->server->hostname.':2087'.$endpoint, [
-                'headers' => [
-                    'Authorization' => 'WHM '.$this->server->username.':'.$this->apiToken,
-                ],
-                'query' => $params,
-                'verify' => config('services.cpanel.ssl_verify', true),
-            ]);
+            $response = $this->client->request(
+                'GET',
+                'https://'.$this->server->hostname.':2087'.$endpoint,
+                [
+                    'headers' => [
+                        'Authorization' => 'WHM '.$this->server->username.':'.$this->apiToken,
+                    ],
+                    'query' => $params,
+                    'verify' => config(
+                        'services.cpanel.ssl_verify',
+                        true
+                    ),
+                ]
+            );
 
-            $result = json_decode((string) $response->getBody(), true);
+            $result = json_decode(
+                (string) $response->getBody(),
+                true,
+                512,
+                JSON_THROW_ON_ERROR
+            );
 
             if (isset($result['metadata']['result']) && $result['metadata']['result'] === 1) {
-                Log::info('cPanel API call successful', [
-                    'endpoint' => $endpoint,
-                    'server' => $this->server->hostname,
-                ]);
+                Log::info(
+                    'cPanel API call successful',
+                    [
+                        'endpoint' => $endpoint,
+                        'server' => $this->server->hostname,
+                    ]
+                );
 
                 return true;
             }
 
-            Log::error('cPanel API call failed', [
-                'endpoint' => $endpoint,
-                'server' => $this->server->hostname,
-                'error' => $result['metadata']['reason'] ?? 'Unknown error',
-            ]);
+            Log::error(
+                'cPanel API call failed',
+                [
+                    'endpoint' => $endpoint,
+                    'server' => $this->server->hostname,
+                    'error' => $result['metadata']['reason'] ?? 'Unknown error',
+                ]
+            );
 
             return false;
 
         } catch (GuzzleException $e) {
-            Log::error('cPanel API call error', [
-                'endpoint' => $endpoint,
-                'server' => $this->server->hostname,
-                'error' => $e->getMessage(),
-            ]);
+            Log::error(
+                'cPanel API call error',
+                [
+                    'endpoint' => $endpoint,
+                    'server' => $this->server->hostname,
+                    'error' => $e->getMessage(),
+                ]
+            );
 
             return false;
         }
@@ -172,7 +240,10 @@ class CpanelClient
     protected function validateHostname(string $hostname): void
     {
         // Reject private/loopback IPs to prevent SSRF
-        if (filter_var($hostname, FILTER_VALIDATE_IP)) {
+        if (filter_var(
+            $hostname,
+            FILTER_VALIDATE_IP
+        )) {
             $isPrivate = ! filter_var(
                 $hostname,
                 FILTER_VALIDATE_IP,
@@ -181,7 +252,11 @@ class CpanelClient
             if ($isPrivate) {
                 throw new Exception('Private or reserved IP addresses are not allowed as cPanel hostnames');
             }
-        } elseif (! filter_var($hostname, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME)) {
+        } elseif (! filter_var(
+            $hostname,
+            FILTER_VALIDATE_DOMAIN,
+            FILTER_FLAG_HOSTNAME
+        )) {
             throw new Exception('Invalid cPanel hostname');
         }
     }

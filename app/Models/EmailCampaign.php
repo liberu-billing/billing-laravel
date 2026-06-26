@@ -3,9 +3,34 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
+use Override;
 
+/**
+ * @property int $id
+ * @property int|null $team_id
+ * @property int $created_by
+ * @property string $name
+ * @property string $subject
+ * @property string $content
+ * @property array|null $recipient_filters
+ * @property string $status
+ * @property int $total_recipients
+ * @property int $sent_count
+ * @property int $failed_count
+ * @property Carbon|null $scheduled_at
+ * @property Carbon|null $started_sending_at
+ * @property Carbon|null $completed_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Team|null $team
+ * @property-read User|null $creator
+ * @property-read Collection<int, EmailCampaignStat> $emailStats
+ */
 #[Fillable([
     'team_id',
     'created_by',
@@ -23,7 +48,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class EmailCampaign extends Model
 {
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
 
@@ -43,23 +68,35 @@ class EmailCampaign extends Model
 
     public function creator(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->belongsTo(
+            User::class,
+            'created_by'
+        );
+    }
+
+    public function emailStats(): HasMany
+    {
+        return $this->hasMany(EmailCampaignStat::class);
     }
 
     public function markAsSending(): void
     {
-        $this->update([
-            'status' => 'sending',
-            'started_sending_at' => now(),
-        ]);
+        $this->update(
+            [
+                'status' => 'sending',
+                'started_sending_at' => now(),
+            ]
+        );
     }
 
     public function markAsSent(): void
     {
-        $this->update([
-            'status' => 'sent',
-            'completed_at' => now(),
-        ]);
+        $this->update(
+            [
+                'status' => 'sent',
+                'completed_at' => now(),
+            ]
+        );
     }
 
     public function incrementSent(): void
@@ -80,6 +117,9 @@ class EmailCampaign extends Model
 
         $total = $this->sent_count + $this->failed_count;
 
-        return round(($total / $this->total_recipients) * 100, 2);
+        return round(
+            ($total / $this->total_recipients) * 100,
+            2
+        );
     }
 }

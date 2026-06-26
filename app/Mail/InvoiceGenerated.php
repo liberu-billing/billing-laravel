@@ -14,17 +14,17 @@ class InvoiceGenerated extends Mailable
 {
     use Queueable, SerializesModels;
 
-    /**
-     * @var Invoice
-     */
-    public $invoice;
+    public Invoice $invoice;
 
     protected $template;
 
     public function __construct(Invoice $invoice)
     {
         $this->invoice = $invoice;
-        $this->template = EmailTemplate::getTemplate('invoice_generated', $invoice->team_id);
+        $this->template = EmailTemplate::getTemplate(
+            'invoice_generated',
+            $invoice->team_id
+        );
     }
 
     public function envelope(): Envelope
@@ -43,7 +43,10 @@ class InvoiceGenerated extends Mailable
             with: [
                 'content' => $this->template ?
                     $this->parseTemplate($this->template->body) :
-                    view('emails.invoice-generated', ['invoice' => $this->invoice])->render(),
+                    view(
+                        'emails.invoice-generated',
+                        ['invoice' => $this->invoice]
+                    )->render(),
                 'invoice' => $this->invoice,
             ],
         );
@@ -58,7 +61,10 @@ class InvoiceGenerated extends Mailable
             '{{customer_name}}' => e($this->invoice->customer->name),
         ];
 
-        return strtr($text, $replacements);
+        return strtr(
+            $text,
+            $replacements
+        );
     }
 
     public function attachments(): array

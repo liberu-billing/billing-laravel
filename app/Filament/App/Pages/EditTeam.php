@@ -8,6 +8,7 @@ use Filament\Facades\Filament;
 use Filament\Forms\Components\TextInput;
 use Filament\Pages\Tenancy\EditTenantProfile;
 use Filament\Schemas\Schema;
+use Override;
 
 class EditTeam extends EditTenantProfile
 {
@@ -20,35 +21,45 @@ class EditTeam extends EditTenantProfile
         return 'Edit Team';
     }
 
-    #[\Override]
+    #[Override]
     public function form(Schema $schema): Schema
     {
         return $schema
-            ->components([
-                TextInput::make('name')
-                    ->label('Team Name')
-                    ->required()
-                    ->maxLength(255),
-            ]);
+            ->components(
+                [
+                    TextInput::make('name')
+                        ->label('Team Name')
+                        ->required()
+                        ->maxLength(255),
+                ]
+            );
     }
 
     public function submit()
     {
         $this->validate();
 
-        $team = Team::forceCreate([
-            'user_id' => Filament::auth()->id(),
-            'name' => $this->name,
-            'personal_team' => false,
-        ]);
+        $team = Team::forceCreate(
+            [
+                'user_id' => Filament::auth()->id(),
+                'name' => $this->name,
+                'personal_team' => false,
+            ]
+        );
 
-        $this->user()->teams()->attach($team, ['role' => 'admin']);
+        $this->user()->teams()->attach(
+            $team,
+            ['role' => 'admin']
+        );
         $this->user()->switchTeam($team);
 
-        return redirect()->route('filament.pages.edit-team', ['team' => $team]);
+        return redirect()->route(
+            'filament.pages.edit-team',
+            ['team' => $team]
+        );
     }
 
-    #[\Override]
+    #[Override]
     public function getBreadcrumbs(): array
     {
         return [
