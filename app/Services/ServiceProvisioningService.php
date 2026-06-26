@@ -42,10 +42,17 @@ class ServiceProvisioningService
 
         // Provision the account on the control panel
         try {
-            $this->hostingService->provisionAccount(
+            $result = $this->hostingService->provisionAccount(
                 $hostingAccount,
                 $service
             );
+
+            // A falsy result means the control panel rejected the request
+            // without throwing — don't leave the account stuck at "pending".
+            if (! $result) {
+                $hostingAccount->status = 'failed';
+                $hostingAccount->save();
+            }
 
             return $hostingAccount;
         } catch (Exception $e) {

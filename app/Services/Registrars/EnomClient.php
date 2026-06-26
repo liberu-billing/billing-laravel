@@ -24,9 +24,9 @@ class EnomClient
     }
 
     /**
-     * @return array{expiration_date: Carbon|null}
+     * @return array{expiration_date: Carbon|null}|null
      */
-    public function registerDomain($domainName, $customerId): array
+    public function registerDomain($domainName, $customerId): ?array
     {
         // ponytail: stub — implement eNom API call to register domain
         $this->makeApiCall('Register', ['SLD' => $domainName, 'customerid' => $customerId]);
@@ -35,9 +35,9 @@ class EnomClient
     }
 
     /**
-     * @return array{new_expiration_date: Carbon|null}
+     * @return array{new_expiration_date: Carbon|null}|null
      */
-    public function renewDomain($domainName, $period): array
+    public function renewDomain($domainName, $period): ?array
     {
         // ponytail: stub — implement eNom API call to renew domain
         $this->makeApiCall('Extend', ['SLD' => $domainName, 'NumYears' => $period]);
@@ -46,9 +46,9 @@ class EnomClient
     }
 
     /**
-     * @return array{expiration_date: Carbon|null}
+     * @return array{expiration_date: Carbon|null}|null
      */
-    public function transferDomain($domainName, $authCode, $customerId): array
+    public function transferDomain($domainName, $authCode, $customerId): ?array
     {
         // ponytail: stub — implement eNom API call to transfer domain
         $this->makeApiCall('TP_CreateOrder', ['SLD' => $domainName, 'AuthInfo' => $authCode, 'customerid' => $customerId]);

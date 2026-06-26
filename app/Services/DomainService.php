@@ -26,11 +26,17 @@ class DomainService
             $subscription->domain_expiration_date = $result['expiration_date'];
             $subscription->save();
 
-            // Update or create HostingAccount
-            $hostingAccount = HostingAccount::updateOrCreate(
-                ['subscription_id' => $subscription->id],
-                ['domain' => $domainName]
-            );
+            // Reflect the domain on an existing HostingAccount if one is already
+            // provisioned. We do not create one here: username/package/status are
+            // NOT NULL and are owned by the provisioning flow, not domain registration.
+            $hostingAccount = HostingAccount::where(
+                'subscription_id',
+                $subscription->id
+            )->first();
+            if ($hostingAccount) {
+                $hostingAccount->domain = $domainName;
+                $hostingAccount->save();
+            }
         }
 
         return $result;
