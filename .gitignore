@@ -28,3 +28,8 @@ Homestead.json
 .phpunit.result.cache
 rr
 .rr.yaml
+/storage/*
+.claude
+.idea
+boost.json
+CLAUDE.md
