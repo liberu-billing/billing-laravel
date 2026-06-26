@@ -7,7 +7,6 @@ namespace App\Models;
 use App\Traits\HasTeam;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -27,7 +26,11 @@ class Invoice_Item extends Model
 
     public function currency(): BelongsTo
     {
-        return $this->belongsTo(Currency::class, 'currency', 'code');
+        return $this->belongsTo(
+            Currency::class,
+            'currency',
+            'code'
+        );
     }
 
     public function invoice(): BelongsTo
@@ -37,6 +40,9 @@ class Invoice_Item extends Model
 
     public function productService(): BelongsTo
     {
-        return $this->belongsTo(Products_Service::class, 'product_service_id');
+        return $this->belongsTo(
+            Products_Service::class,
+            'product_service_id'
+        );
     }
 }

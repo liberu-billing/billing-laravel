@@ -13,8 +13,14 @@ class PricingService
 
         return match ($product->pricing_model) {
             'fixed' => $basePrice,
-            'tiered' => $this->calculateTieredPrice($product, $options),
-            'usage_based' => $this->calculateUsageBasedPrice($product, $options),
+            'tiered' => $this->calculateTieredPrice(
+                $product,
+                $options
+            ),
+            'usage_based' => $this->calculateUsageBasedPrice(
+                $product,
+                $options
+            ),
             default => $basePrice,
         };
     }
@@ -39,7 +45,7 @@ class PricingService
         $startDate = $options['start_date'] ?? null;
         $endDate = $options['end_date'] ?? null;
 
-        if (! $subscriptionId || ! $startDate || ! $endDate) {
+        if (!$subscriptionId || !$startDate || !$endDate) {
             return $product->base_price;
         }
 
@@ -48,18 +54,36 @@ class PricingService
         $totalPrice = $basePrice;
 
         // Get usage records for the billing period
-        $usage = UsageRecord::where('subscription_id', $subscriptionId)
-            ->whereBetween('recorded_at', [$startDate, $endDate])
-            ->where('processed', false)
+        $usage = UsageRecord::where(
+            'subscription_id',
+            $subscriptionId
+        )
+            ->whereBetween(
+                'recorded_at',
+                [
+                    $startDate,
+                    $endDate
+                ]
+            )
+            ->where(
+                'processed',
+                false
+            )
             ->get();
 
         foreach ($usageConfig as $metric => $pricing) {
-            $metricUsage = $usage->where('metric_name', $metric)->sum('quantity');
+            $metricUsage = $usage->where(
+                'metric_name',
+                $metric
+            )->sum('quantity');
 
             if ($pricing['type'] === 'per_unit') {
                 $totalPrice += $metricUsage * $pricing['rate'];
             } elseif ($pricing['type'] === 'tiered') {
-                $totalPrice += $this->calculateTieredMetricPrice($metricUsage, $pricing['tiers']);
+                $totalPrice += $this->calculateTieredMetricPrice(
+                    $metricUsage,
+                    $pricing['tiers']
+                );
             }
         }
 
@@ -72,7 +96,10 @@ class PricingService
         $remainingUsage = $usage;
 
         foreach ($tiers as $tier) {
-            $tierUsage = min($remainingUsage, $tier['max_usage']);
+            $tierUsage = min(
+                $remainingUsage,
+                $tier['max_usage']
+            );
             $price += $tierUsage * $tier['rate'];
             $remainingUsage -= $tierUsage;
 

@@ -22,7 +22,7 @@ class CreateNewUser implements CreatesNewUsers
     /**
      * Validate and create a newly registered user.
      *
-     * @param  array<string, string>  $input
+     * @param array<string, string> $input
      *
      * @throws ValidationException
      * @throws Exception
@@ -30,18 +30,25 @@ class CreateNewUser implements CreatesNewUsers
     public function create(array $input): User
     {
         try {
-            Validator::make($input, [
-                'name' => ['required', 'string', 'max:255'],
-                'email' => [
-                    'required',
-                    'string',
-                    'email',
-                    'max:255',
-                    Rule::unique(User::class),
-                ],
-                'password' => $this->passwordRules(),
-                // 'role' => ['required', 'string', Rule::in(['tenant', 'buyer', 'seller', 'landlord', 'contractor'])],
-            ])->validate();
+            Validator::make(
+                $input,
+                [
+                    'name' => [
+                        'required',
+                        'string',
+                        'max:255'
+                    ],
+                    'email' => [
+                        'required',
+                        'string',
+                        'email',
+                        'max:255',
+                        Rule::unique(User::class),
+                    ],
+                    'password' => $this->passwordRules(),
+                    // 'role' => ['required', 'string', Rule::in(['tenant', 'buyer', 'seller', 'landlord', 'contractor'])],
+                ]
+            )->validate();
             // $user = DB::transaction(function () use ($input) {
             //     return tap(,
             //     , function (User $user) use ($input) {
@@ -58,53 +65,87 @@ class CreateNewUser implements CreatesNewUsers
             //     'role' => $input['role'],
             // ]);
 
-            return DB::transaction(function () use ($input) {
-                $team = $this->configureDefaultTeamContext();
+            return DB::transaction(
+                function () use ($input) {
+                    $team = $this->configureDefaultTeamContext();
 
-                return tap(User::create([
-                    'name' => $input['name'],
-                    'email' => $input['email'],
-                    'password' => Hash::make($input['password']),
-                ]), function (User $user) use ($team): void {
-                    $team->users()->attach($user);
-                    $team = $this->createTeam($user);
-                    $user->switchTeam($team);
-                    setPermissionsTeamId($team->id);
-                    $user = User::find($user->id);
-                    try {
-                        $user->assignRole('panel_user');
-                    } catch (RoleDoesNotExist) {
-                        Log::warning('Role panel_user does not exist, skipping role assignment for user '.$user->id);
-                    }
-                });
-            });
+                    return tap(
+                        User::create(
+                            [
+                                'name' => $input['name'],
+                                'email' => $input['email'],
+                                'password' => Hash::make($input['password']),
+                            ]
+                        ),
+                        function (User $user) use ($team): void {
+                            $team->users()->attach($user);
+                            $team = $this->createTeam($user);
+                            $user->switchTeam($team);
+                            setPermissionsTeamId($team->id);
+                            $user = User::find($user->id);
+                            try {
+                                $user->assignRole('panel_user');
+                            } catch (RoleDoesNotExist) {
+                                Log::warning('Role panel_user does not exist, skipping role assignment for user ' . $user->id);
+                            }
+                        }
+                    );
+                }
+            );
         } catch (ValidationException $e) {
-            Log::error('User creation validation failed', [
-                'errors' => $e->errors(),
-                'input' => array_diff_key($input, array_flip(['password'])),
-            ]);
+            Log::error(
+                'User creation validation failed',
+                [
+                    'errors' => $e->errors(),
+                    'input' => array_diff_key(
+                        $input,
+                        array_flip(['password'])
+                    ),
+                ]
+            );
             throw $e;
         } catch (QueryException $e) {
-            Log::error('Database error during user creation', [
-                'message' => $e->getMessage(),
-                'code' => $e->getCode(),
-                'sql' => $e->getSql(),
-                'bindings' => $e->getBindings(),
-            ]);
-            throw new Exception($this->getDatabaseErrorMessage($e), $e->getCode(), $e);
+            Log::error(
+                'Database error during user creation',
+                [
+                    'message' => $e->getMessage(),
+                    'code' => $e->getCode(),
+                    'sql' => $e->getSql(),
+                    'bindings' => $e->getBindings(),
+                ]
+            );
+            throw new Exception(
+                $this->getDatabaseErrorMessage($e),
+                $e->getCode(),
+                $e
+            );
         } catch (RoleDoesNotExist $e) {
-            Log::error('Invalid role specified during user creation', [
-                'role' => $input['role'] ?? 'not provided',
-                'message' => $e->getMessage(),
-            ]);
-            throw new Exception('Invalid role specified. Please choose a valid role.', $e->getCode(), $e);
+            Log::error(
+                'Invalid role specified during user creation',
+                [
+                    'role' => $input['role'] ?? 'not provided',
+                    'message' => $e->getMessage(),
+                ]
+            );
+            throw new Exception(
+                'Invalid role specified. Please choose a valid role.',
+                $e->getCode(),
+                $e
+            );
         } catch (Exception $e) {
-            Log::error('Unexpected error during user creation', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'exception_class' => $e::class,
-            ]);
-            throw new Exception('An unexpected error occurred. Please try again later.', $e->getCode(), $e);
+            Log::error(
+                'Unexpected error during user creation',
+                [
+                    'message' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                    'exception_class' => $e::class,
+                ]
+            );
+            throw new Exception(
+                'An unexpected error occurred. Please try again later.',
+                $e->getCode(),
+                $e
+            );
         }
     }
 
@@ -113,14 +154,17 @@ class CreateNewUser implements CreatesNewUsers
         $errorCode = $e->getCode();
         $errorMessage = $e->getMessage();
 
-        if (str_contains($errorMessage, 'Duplicate entry')) {
+        if (str_contains(
+            $errorMessage,
+            'Duplicate entry'
+        )) {
             return 'A user with this email already exists. Please use a different email address.';
         } elseif ($errorCode == 1045) {
             return 'Database access denied. Please contact the administrator.';
         } elseif ($errorCode == 2002) {
             return 'Unable to connect to the database. Please try again later.';
         } else {
-            return 'A database error occurred. Please try again later. Error code: '.$errorCode;
+            return 'A database error occurred. Please try again later. Error code: ' . $errorCode;
         }
     }
 
@@ -132,13 +176,15 @@ class CreateNewUser implements CreatesNewUsers
     protected function configureDefaultTeamContext(): Team
     {
         $team = Team::first();
-        if (! $team) {
+        if (!$team) {
             // Create a default team if none exists (e.g., in a fresh installation)
-            $team = Team::forceCreate([
-                'user_id' => 0,
-                'name' => 'Default Team',
-                'personal_team' => false,
-            ]);
+            $team = Team::forceCreate(
+                [
+                    'user_id' => 0,
+                    'name' => 'Default Team',
+                    'personal_team' => false,
+                ]
+            );
         }
         setPermissionsTeamId($team->id);
 
@@ -150,9 +196,15 @@ class CreateNewUser implements CreatesNewUsers
      */
     protected function createTeam(User $user): Team
     {
-        return $user->ownedTeams()->create([
-            'name' => explode(' ', $user->name, 2)[0]."'s Team",
-            'personal_team' => true,
-        ]);
+        return $user->ownedTeams()->create(
+            [
+                'name' => explode(
+                              ' ',
+                              $user->name,
+                              2
+                          )[0] . "'s Team",
+                'personal_team' => true,
+            ]
+        );
     }
 }

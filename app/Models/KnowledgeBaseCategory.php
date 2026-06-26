@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use Override;
 
 #[Fillable([
     'parent_id',
@@ -18,7 +19,7 @@ use Illuminate\Support\Str;
 ])]
 class KnowledgeBaseCategory extends Model
 {
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [
@@ -26,38 +27,51 @@ class KnowledgeBaseCategory extends Model
         ];
     }
 
-    #[\Override]
+    #[Override]
     protected static function boot(): void
     {
         parent::boot();
 
         static::creating(
             static function ($category): void {
-            if (empty($category->slug)) {
-                $category->slug = Str::slug($category->name);
+                if (empty($category->slug)) {
+                    $category->slug = Str::slug($category->name);
+                }
             }
-        });
+        );
     }
 
     public function parent(): BelongsTo
     {
-        return $this->belongsTo(__CLASS__, 'parent_id');
+        return $this->belongsTo(
+            __CLASS__,
+            'parent_id'
+        );
     }
 
     public function children(): HasMany
     {
-        return $this->hasMany(__CLASS__, 'parent_id')
+        return $this->hasMany(
+            __CLASS__,
+            'parent_id'
+        )
             ->orderBy('sort_order');
     }
 
     public function articles(): HasMany
     {
-        return $this->hasMany(KnowledgeBaseArticle::class, 'category_id')
+        return $this->hasMany(
+            KnowledgeBaseArticle::class,
+            'category_id'
+        )
             ->orderBy('sort_order');
     }
 
     public function publishedArticles(): HasMany
     {
-        return $this->articles()->where('is_published', true);
+        return $this->articles()->where(
+            'is_published',
+            true
+        );
     }
 }

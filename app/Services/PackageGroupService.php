@@ -15,12 +15,25 @@ class PackageGroupService
     public function getActiveGroups(?int $teamId = null): Collection
     {
         $query = PackageGroup::query()
-            ->where('is_active', true)
-            ->with(['packages' => fn ($q) => $q->where('is_active', true)])
+            ->where(
+                'is_active',
+                true
+            )
+            ->with(
+                [
+                    'packages' => fn($q) => $q->where(
+                        'is_active',
+                        true
+                    )
+                ]
+            )
             ->orderBy('sort_order');
 
         if ($teamId) {
-            $query->where('team_id', $teamId);
+            $query->where(
+                'team_id',
+                $teamId
+            );
         }
 
         return $query->get();
@@ -57,9 +70,11 @@ class PackageGroupService
      */
     public function addPackage(PackageGroup $group, SubscriptionPlan $plan, int $sortOrder = 0): void
     {
-        $group->packages()->syncWithoutDetaching([
-            $plan->id => ['sort_order' => $sortOrder],
-        ]);
+        $group->packages()->syncWithoutDetaching(
+            [
+                $plan->id => ['sort_order' => $sortOrder],
+            ]
+        );
     }
 
     /**
@@ -75,10 +90,15 @@ class PackageGroupService
      */
     public function reorderPackages(PackageGroup $group, array $orderedPlanIds): void
     {
-        DB::transaction(function () use ($group, $orderedPlanIds): void {
-            foreach ($orderedPlanIds as $index => $planId) {
-                $group->packages()->updateExistingPivot($planId, ['sort_order' => $index]);
+        DB::transaction(
+            function () use ($group, $orderedPlanIds): void {
+                foreach ($orderedPlanIds as $index => $planId) {
+                    $group->packages()->updateExistingPivot(
+                        $planId,
+                        ['sort_order' => $index]
+                    );
+                }
             }
-        });
+        );
     }
 }

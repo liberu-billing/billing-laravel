@@ -28,28 +28,42 @@ class ClientPanelProvider extends PanelProvider
             ->id('client')
             ->path('client')
             ->login()
-            ->colors([
-                'primary' => Color::Blue,
-            ])
-            ->discoverResources(in: app_path('Filament/Client/Resources'), for: 'App\\Filament\\Client\\Resources')
-            ->discoverPages(in: app_path('Filament/Client/Pages'), for: 'App\\Filament\\Client\\Pages')
-            ->pages([
-                Dashboard::class,
-                Profile::class,
-            ])
-            ->middleware([
-                EncryptCookies::class,
-                AddQueuedCookiesToResponse::class,
-                StartSession::class,
-                AuthenticateSession::class,
-                ShareErrorsFromSession::class,
-                PreventRequestForgery::class,
-                SubstituteBindings::class,
-                DisableBladeIconComponents::class,
-                DispatchServingFilamentEvent::class,
-            ])
-            ->authMiddleware([
-                Authenticate::class,
-            ]);
+            ->colors(
+                [
+                    'primary' => Color::Blue,
+                ]
+            )
+            ->discoverResources(
+                in: app_path('Filament/Client/Resources'),
+                for: 'App\\Filament\\Client\\Resources'
+            )
+            ->discoverPages(
+                in: app_path('Filament/Client/Pages'),
+                for: 'App\\Filament\\Client\\Pages'
+            )
+            ->pages(
+                [
+                    Dashboard::class,
+                    Profile::class,
+                ]
+            )
+            ->middleware(
+                [
+                    EncryptCookies::class,
+                    AddQueuedCookiesToResponse::class,
+                    StartSession::class,
+                    AuthenticateSession::class,
+                    ShareErrorsFromSession::class,
+                    PreventRequestForgery::class,
+                    SubstituteBindings::class,
+                    DisableBladeIconComponents::class,
+                    DispatchServingFilamentEvent::class,
+                ]
+            )
+            ->authMiddleware(
+                [
+                    Authenticate::class,
+                ]
+            );
     }
 }

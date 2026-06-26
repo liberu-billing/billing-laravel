@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Override;
 
 #[Fillable([
     'name',
@@ -32,7 +33,7 @@ class Products_Service extends Model
         return ProductsServiceFactory::new();
     }
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [
@@ -42,17 +43,23 @@ class Products_Service extends Model
 
     protected function price(): Attribute
     {
-        return Attribute::make(get: fn () => $this->base_price);
+        return Attribute::make(get: fn() => $this->base_price);
     }
 
     public function invoiceItems(): HasMany
     {
-        return $this->hasMany(Invoice_Item::class, 'product_service_id');
+        return $this->hasMany(
+            Invoice_Item::class,
+            'product_service_id'
+        );
     }
 
     public function usageRecords(): HasManyThrough
     {
-        return $this->hasManyThrough(UsageRecord::class, Subscription::class);
+        return $this->hasManyThrough(
+            UsageRecord::class,
+            Subscription::class
+        );
     }
 
     public function getUsageMetrics(): array
@@ -66,15 +73,20 @@ class Products_Service extends Model
 
     public function recordUsage($subscriptionId, $metric, $quantity)
     {
-        if (! in_array($metric, $this->getUsageMetrics())) {
+        if (!in_array(
+            $metric,
+            $this->getUsageMetrics()
+        )) {
             throw new Exception("Invalid usage metric: {$metric}");
         }
 
-        return UsageRecord::create([
-            'subscription_id' => $subscriptionId,
-            'metric_name' => $metric,
-            'quantity' => $quantity,
-            'recorded_at' => now(),
-        ]);
+        return UsageRecord::create(
+            [
+                'subscription_id' => $subscriptionId,
+                'metric_name' => $metric,
+                'quantity' => $quantity,
+                'recorded_at' => now(),
+            ]
+        );
     }
 }

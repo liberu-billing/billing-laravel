@@ -21,12 +21,26 @@ class ExternalModuleLoader
     {
         $modules = [];
 
-        foreach (config('modules.external_paths', []) as $path) {
-            array_push($modules, ...$this->loadFromPath($path));
+        foreach (config(
+                     'modules.external_paths',
+                     []
+                 ) as $path) {
+            array_push(
+                $modules,
+                ...
+                $this->loadFromPath($path)
+            );
         }
 
-        if (config('modules.load_composer_modules', false)) {
-            array_push($modules, ...$this->loadFromComposer());
+        if (config(
+            'modules.load_composer_modules',
+            false
+        )) {
+            array_push(
+                $modules,
+                ...
+                $this->loadFromComposer()
+            );
         }
 
         return $modules;
@@ -41,7 +55,11 @@ class ExternalModuleLoader
     {
         $realPath = realpath($path);
 
-        if ($realPath === false || ! is_dir($realPath) || in_array($realPath, $this->loadedPaths, true)) {
+        if ($realPath === false || !is_dir($realPath) || in_array(
+                $realPath,
+                $this->loadedPaths,
+                true
+            )) {
             return [];
         }
 
@@ -68,13 +86,16 @@ class ExternalModuleLoader
     {
         $modules = [];
         $vendorPath = base_path('vendor');
-        $installedJson = $vendorPath.'/composer/installed.json';
+        $installedJson = $vendorPath . '/composer/installed.json';
 
-        if (! File::exists($installedJson)) {
+        if (!File::exists($installedJson)) {
             return [];
         }
 
-        $installed = json_decode(File::get($installedJson), true);
+        $installed = json_decode(
+            File::get($installedJson),
+            true
+        );
         $packages = $installed['packages'] ?? $installed;
 
         foreach ($packages as $package) {
@@ -84,13 +105,16 @@ class ExternalModuleLoader
                 continue;
             }
 
-            $packagePath = $vendorPath.'/'.($package['name'] ?? '');
+            $packagePath = $vendorPath . '/' . ($package['name'] ?? '');
 
-            if (! is_dir($packagePath)) {
+            if (!is_dir($packagePath)) {
                 continue;
             }
 
-            $module = $this->resolveModule($packagePath, $package['autoload']['psr-4'] ?? []);
+            $module = $this->resolveModule(
+                $packagePath,
+                $package['autoload']['psr-4'] ?? []
+            );
             if ($module !== null) {
                 $modules[] = $module;
             }
@@ -104,12 +128,16 @@ class ExternalModuleLoader
      *
      * Tries several class naming conventions before giving up.
      *
-     * @param  array<string,string>  $psr4Map  Optional PSR-4 namespace map for vendor packages
+     * @param array<string,string> $psr4Map Optional PSR-4 namespace map for vendor packages
      */
     protected function resolveModule(string $modulePath, array $psr4Map = []): ?ModuleInterface
     {
         $moduleName = basename($modulePath);
-        $candidates = $this->buildCandidateClasses($moduleName, $modulePath, $psr4Map);
+        $candidates = $this->buildCandidateClasses(
+            $moduleName,
+            $modulePath,
+            $psr4Map
+        );
 
         foreach ($candidates as $class) {
             if (class_exists($class)) {
@@ -126,7 +154,7 @@ class ExternalModuleLoader
     /**
      * Build a list of candidate fully-qualified class names for a given module directory.
      *
-     * @param  array<string,string>  $psr4Map
+     * @param array<string,string> $psr4Map
      * @return string[]
      */
     protected function buildCandidateClasses(string $moduleName, string $modulePath, array $psr4Map): array
@@ -139,7 +167,10 @@ class ExternalModuleLoader
         ];
 
         foreach ($psr4Map as $namespace => $path) {
-            $namespace = rtrim($namespace, '\\');
+            $namespace = rtrim(
+                $namespace,
+                '\\'
+            );
             $candidates[] = "{$namespace}\\{$moduleName}Module";
             $candidates[] = "{$namespace}\\{$moduleName}";
         }

@@ -6,7 +6,11 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['client_id', 'user_id', 'content'])]
+#[Fillable([
+    'client_id',
+    'user_id',
+    'content'
+])]
 class ClientNote extends Model
 {
     public function client(): BelongsTo

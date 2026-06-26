@@ -11,18 +11,36 @@ class ReportService
 {
     public function generateRevenueReport($startDate, $endDate, array $filters = [])
     {
-        $query = Payment::whereBetween('created_at', [$startDate, $endDate]);
+        $query = Payment::whereBetween(
+            'created_at',
+            [
+                $startDate,
+                $endDate
+            ]
+        );
 
-        if (! empty($filters['customer_id'])) {
-            $query->whereHas('invoice', function ($q) use ($filters): void {
-                $q->where('customer_id', $filters['customer_id']);
-            });
+        if (!empty($filters['customer_id'])) {
+            $query->whereHas(
+                'invoice',
+                function ($q) use ($filters): void {
+                    $q->where(
+                        'customer_id',
+                        $filters['customer_id']
+                    );
+                }
+            );
         }
 
-        if (! empty($filters['service_id'])) {
-            $query->whereHas('invoice.items', function ($q) use ($filters): void {
-                $q->where('product_service_id', $filters['service_id']);
-            });
+        if (!empty($filters['service_id'])) {
+            $query->whereHas(
+                'invoice.items',
+                function ($q) use ($filters): void {
+                    $q->where(
+                        'product_service_id',
+                        $filters['service_id']
+                    );
+                }
+            );
         }
 
         return $query->select(
@@ -30,17 +48,30 @@ class ReportService
             DB::raw('SUM(amount) as total'),
             'currency'
         )
-            ->groupBy('date', 'currency')
+            ->groupBy(
+                'date',
+                'currency'
+            )
             ->get();
     }
 
     public function generateOutstandingBalanceReport(array $filters = [])
     {
-        $query = Invoice::where('status', 'pending')
-            ->where('due_date', '<', now());
+        $query = Invoice::where(
+            'status',
+            'pending'
+        )
+            ->where(
+                'due_date',
+                '<',
+                now()
+            );
 
-        if (! empty($filters['customer_id'])) {
-            $query->where('customer_id', $filters['customer_id']);
+        if (!empty($filters['customer_id'])) {
+            $query->where(
+                'customer_id',
+                $filters['customer_id']
+            );
         }
 
         return $query->select(
@@ -49,19 +80,46 @@ class ReportService
             'currency'
         )
             ->with('customer:id,name,email')
-            ->groupBy('customer_id', 'currency')
+            ->groupBy(
+                'customer_id',
+                'currency'
+            )
             ->get();
     }
 
     public function generateServiceReport($startDate, $endDate, array $filters = [])
     {
-        return Products_Service::select('id', 'name')
-            ->withCount(['invoiceItems' => function ($query) use ($startDate, $endDate): void {
-                $query->whereBetween('created_at', [$startDate, $endDate]);
-            }])
-            ->withSum(['invoiceItems' => function ($query) use ($startDate, $endDate): void {
-                $query->whereBetween('created_at', [$startDate, $endDate]);
-            }], 'total_price')
+        return Products_Service::select(
+            'id',
+            'name'
+        )
+            ->withCount(
+                [
+                    'invoiceItems' => function ($query) use ($startDate, $endDate): void {
+                        $query->whereBetween(
+                            'created_at',
+                            [
+                                $startDate,
+                                $endDate
+                            ]
+                        );
+                    }
+                ]
+            )
+            ->withSum(
+                [
+                    'invoiceItems' => function ($query) use ($startDate, $endDate): void {
+                        $query->whereBetween(
+                            'created_at',
+                            [
+                                $startDate,
+                                $endDate
+                            ]
+                        );
+                    }
+                ],
+                'total_price'
+            )
             ->get();
     }
 }

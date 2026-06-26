@@ -22,17 +22,22 @@ class ReminderSettingsController extends Controller
             ]
         );
 
-        return view('reminder-settings.edit', compact('settings'));
+        return view(
+            'reminder-settings.edit',
+            compact('settings')
+        );
     }
 
     public function update(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'days_before_reminder' => 'required|integer|min:1',
-            'reminder_frequency' => 'required|integer|min:1',
-            'max_reminders' => 'required|integer|min:1',
-            'is_active' => 'boolean',
-        ]);
+        $validated = $request->validate(
+            [
+                'days_before_reminder' => 'required|integer|min:1',
+                'reminder_frequency' => 'required|integer|min:1',
+                'max_reminders' => 'required|integer|min:1',
+                'is_active' => 'boolean',
+            ]
+        );
 
         $settings = ReminderSetting::firstOrCreate(
             ['team_id' => auth()->user()->currentTeam->id]
@@ -40,6 +45,9 @@ class ReminderSettingsController extends Controller
 
         $settings->update($validated);
 
-        return redirect()->back()->with('success', 'Reminder settings updated successfully');
+        return redirect()->back()->with(
+            'success',
+            'Reminder settings updated successfully'
+        );
     }
 }

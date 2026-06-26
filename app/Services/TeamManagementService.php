@@ -10,20 +10,25 @@ class TeamManagementService
 {
     public function assignUserToDefaultTeam(User $user): void
     {
-        DB::transaction(function () use ($user): void {
-            $team = Team::firstOrCreate(
-                ['name' => $user->name."'s Team"],
-                [
-                    'user_id' => $user->id,
-                    'personal_team' => true,
-                ]
-            );
+        DB::transaction(
+            function () use ($user): void {
+                $team = Team::firstOrCreate(
+                    ['name' => $user->name . "'s Team"],
+                    [
+                        'user_id' => $user->id,
+                        'personal_team' => true,
+                    ]
+                );
 
-            if (! $user->belongsToTeam($team)) {
-                $user->teams()->attach($team, ['role' => 'admin']);
+                if (!$user->belongsToTeam($team)) {
+                    $user->teams()->attach(
+                        $team,
+                        ['role' => 'admin']
+                    );
+                }
+
+                $user->forceFill(['current_team_id' => $team->id])->save();
             }
-
-            $user->forceFill(['current_team_id' => $team->id])->save();
-        });
+        );
     }
 }

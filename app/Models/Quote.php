@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use Override;
 
 #[Fillable([
     'team_id',
@@ -28,7 +29,7 @@ use Illuminate\Support\Str;
 ])]
 class Quote extends Model
 {
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
 
@@ -45,17 +46,18 @@ class Quote extends Model
 
     }
 
-    #[\Override]
+    #[Override]
     protected static function boot(): void
     {
         parent::boot();
 
         static::creating(
             static function (Quote $quote): void {
-            if (empty($quote->quote_number)) {
-                $quote->quote_number = 'QUO-'.strtoupper(Str::random(8));
+                if (empty($quote->quote_number)) {
+                    $quote->quote_number = 'QUO-' . strtoupper(Str::random(8));
+                }
             }
-        });
+        );
     }
 
     public function team(): BelongsTo

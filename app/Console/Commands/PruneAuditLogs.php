@@ -14,7 +14,11 @@ class PruneAuditLogs extends Command
     public function handle(): void
     {
         $days = $this->option('days');
-        $count = AuditLog::where('created_at', '<', now()->subDays($days))->delete();
+        $count = AuditLog::where(
+            'created_at',
+            '<',
+            now()->subDays($days)
+        )->delete();
 
         $this->info("Deleted {$count} audit logs older than {$days} days.");
     }

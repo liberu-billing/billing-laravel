@@ -2,10 +2,8 @@
 
 namespace App\Services;
 
-use App\Mail\OverdueInvoiceReminder;
 use App\Models\Customer;
 use App\Models\Invoice;
-use App\Models\Invoice_Item;
 use App\Models\Payment;
 use App\Models\RecurringBillingConfiguration;
 use App\Models\Subscription;
@@ -14,7 +12,6 @@ use App\Models\UsageRecord;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 
 class BillingService
 {
@@ -33,7 +30,8 @@ class BillingService
         ?PaymentGatewayService $paymentGatewayService = null,
         ?PricingService $pricingService = null,
         ?SmsService $smsService = null
-    ) {
+    )
+    {
         $this->paymentPlanService = $paymentPlanService ?? new PaymentPlanService($this);
         $this->paymentGatewayService = $paymentGatewayService ?? new PaymentGatewayService;
         $this->pricingService = $pricingService ?? new PricingService;
@@ -42,17 +40,19 @@ class BillingService
 
     public function createSubscription(Customer $customer, SubscriptionPlan $plan, string $billingCycle): Subscription
     {
-        $subscription = new Subscription([
-            'customer_id' => $customer->id,
-            'subscription_plan_id' => $plan->id,
-            'start_date' => now(),
-            'end_date' => $this->calculateEndDate($billingCycle),
-            'renewal_period' => $billingCycle,
-            'status' => 'pending',
-            'price' => $plan->price,
-            'currency' => $plan->currency,
-            'auto_renew' => true,
-        ]);
+        $subscription = new Subscription(
+            [
+                'customer_id' => $customer->id,
+                'subscription_plan_id' => $plan->id,
+                'start_date' => now(),
+                'end_date' => $this->calculateEndDate($billingCycle),
+                'renewal_period' => $billingCycle,
+                'status' => 'pending',
+                'price' => $plan->price,
+                'currency' => $plan->currency,
+                'auto_renew' => true,
+            ]
+        );
 
         $subscription->save();
 
@@ -74,21 +74,25 @@ class BillingService
         // Generate upgrade invoice
         $invoice = $this->generateInvoice($subscription);
 
-        $subscription->update([
-            'subscription_plan_id' => $newPlan->id,
-            'price' => $newPlan->price,
-        ]);
+        $subscription->update(
+            [
+                'subscription_plan_id' => $newPlan->id,
+                'price' => $newPlan->price,
+            ]
+        );
 
         return $invoice;
     }
 
     public function cancelSubscription(Subscription $subscription): bool
     {
-        $subscription->update([
-            'status' => 'cancelled',
-            'auto_renew' => false,
-            'cancelled_at' => now(),
-        ]);
+        $subscription->update(
+            [
+                'status' => 'cancelled',
+                'auto_renew' => false,
+                'cancelled_at' => now(),
+            ]
+        );
 
         // Handle any refunds if necessary
         if ($subscription->end_date->isFuture()) {
@@ -164,21 +168,29 @@ class BillingService
         );
 
         // Mark usage records as processed
-        UsageRecord::where('subscription_id', $subscription->id)
-            ->where('processed', false)
+        UsageRecord::where(
+            'subscription_id',
+            $subscription->id
+        )
+            ->where(
+                'processed',
+                false
+            )
             ->update(['processed' => true]);
 
         // Create invoice with calculated amount
-        $invoice = Invoice::create([
-            'customer_id' => $subscription->customer_id,
-            'subscription_id' => $subscription->id,
-            'invoice_number' => $this->generateInvoiceNumber(),
-            'issue_date' => now(),
-            'total_amount' => $amount,
-            'currency' => $subscription->currency ?? 'USD',
-            'status' => 'pending',
-            'due_date' => now()->addDays(30),
-        ]);
+        $invoice = Invoice::create(
+            [
+                'customer_id' => $subscription->customer_id,
+                'subscription_id' => $subscription->id,
+                'invoice_number' => $this->generateInvoiceNumber(),
+                'issue_date' => now(),
+                'total_amount' => $amount,
+                'currency' => $subscription->currency ?? 'USD',
+                'status' => 'pending',
+                'due_date' => now()->addDays(30),
+            ]
+        );
 
         return $invoice;
     }
@@ -195,21 +207,32 @@ class BillingService
         //     ->first();
         $discount = null;
 
-        if (! $discount || ! $discount->isValid()) {
-            return ['success' => false, 'message' => 'Invalid or expired discount code'];
+        if (!$discount || !$discount->isValid()) {
+            return [
+                'success' => false,
+                'message' => 'Invalid or expired discount code'
+            ];
         }
 
-        $discountAmount = $this->calculateDiscountAmount($invoice, $discount);
+        $discountAmount = $this->calculateDiscountAmount(
+            $invoice,
+            $discount
+        );
 
-        $invoice->update([
-            'discount_id' => $discount->id,
-            'discount_amount' => $discountAmount,
-            'total_amount' => $invoice->subtotal - $discountAmount,
-        ]);
+        $invoice->update(
+            [
+                'discount_id' => $discount->id,
+                'discount_amount' => $discountAmount,
+                'total_amount' => $invoice->subtotal - $discountAmount,
+            ]
+        );
 
         $discount->increment('used_count');
 
-        return ['success' => true, 'discount_amount' => $discountAmount];
+        return [
+            'success' => true,
+            'discount_amount' => $discountAmount
+        ];
     }
 
     private function calculateDiscountAmount(Invoice $invoice, $discount)
@@ -284,7 +307,10 @@ class BillingService
             throw new Exception('Invoice already has a payment plan');
         }
 
-        return $invoice->createPaymentPlan($totalInstallments, $frequency);
+        return $invoice->createPaymentPlan(
+            $totalInstallments,
+            $frequency
+        );
     }
 
     public function processPaymentPlans(): void
@@ -317,8 +343,15 @@ class BillingService
 
     protected function processSubscriptionBilling()
     {
-        $dueSubscriptions = Subscription::where('end_date', '<=', Carbon::now())
-            ->where('status', 'active')
+        $dueSubscriptions = Subscription::where(
+            'end_date',
+            '<=',
+            Carbon::now()
+        )
+            ->where(
+                'status',
+                'active'
+            )
             ->get();
 
         foreach ($dueSubscriptions as $subscription) {
@@ -332,27 +365,40 @@ class BillingService
                     $invoice->update(['status' => 'paid']);
                     $subscription->renew();
                     try {
-                        $this->serviceProvisioningService->manageService($subscription, 'unsuspend');
+                        $this->serviceProvisioningService->manageService(
+                            $subscription,
+                            'unsuspend'
+                        );
                     } catch (Exception $e) {
-                        Log::warning("Could not unsuspend service for subscription {$subscription->id}: ".$e->getMessage());
+                        Log::warning("Could not unsuspend service for subscription {$subscription->id}: " . $e->getMessage());
                     }
                 } else {
                     try {
-                        $this->serviceProvisioningService->manageService($subscription, 'suspend');
+                        $this->serviceProvisioningService->manageService(
+                            $subscription,
+                            'suspend'
+                        );
                     } catch (Exception $e) {
-                        Log::warning("Could not suspend service for subscription {$subscription->id}: ".$e->getMessage());
+                        Log::warning("Could not suspend service for subscription {$subscription->id}: " . $e->getMessage());
                     }
                 }
             } catch (Exception $e) {
-                Log::error("Failed to process billing for subscription {$subscription->id}: ".$e->getMessage());
+                Log::error("Failed to process billing for subscription {$subscription->id}: " . $e->getMessage());
             }
         }
     }
 
     protected function processRecurringInvoices()
     {
-        $configurations = RecurringBillingConfiguration::where('is_active', true)
-            ->where('next_billing_date', '<=', now())
+        $configurations = RecurringBillingConfiguration::where(
+            'is_active',
+            true
+        )
+            ->where(
+                'next_billing_date',
+                '<=',
+                now()
+            )
             ->get();
 
         foreach ($configurations as $config) {
@@ -362,9 +408,11 @@ class BillingService
             $newInvoice = $this->generateRecurringInvoice($originalInvoice);
 
             // Update next billing date
-            $config->update([
-                'next_billing_date' => $config->calculateNextBillingDate(),
-            ]);
+            $config->update(
+                [
+                    'next_billing_date' => $config->calculateNextBillingDate(),
+                ]
+            );
 
             // Process automatic payment
             $this->processAutomaticPayment($newInvoice);
@@ -399,19 +447,24 @@ class BillingService
         // Assuming the customer has a default payment method stored
         $paymentMethod = $customer->defaultPaymentMethod;
 
-        if (! $paymentMethod) {
+        if (!$paymentMethod) {
             $this->handleFailedPayment($invoice);
 
-            return ['success' => false, 'message' => 'No default payment method found'];
+            return [
+                'success' => false,
+                'message' => 'No default payment method found'
+            ];
         }
 
-        $payment = new Payment([
-            'invoice_id' => $invoice->id,
-            'payment_gateway_id' => $paymentMethod->payment_gateway_id,
-            'amount' => $invoice->total_amount,
-            'currency' => $invoice->currency,
-            'payment_method' => $paymentMethod->type,
-        ]);
+        $payment = new Payment(
+            [
+                'invoice_id' => $invoice->id,
+                'payment_gateway_id' => $paymentMethod->payment_gateway_id,
+                'amount' => $invoice->total_amount,
+                'currency' => $invoice->currency,
+                'payment_method' => $paymentMethod->type,
+            ]
+        );
 
         try {
             $result = $paymentGatewayService->processPayment($payment);
@@ -433,30 +486,47 @@ class BillingService
                             'unsuspend'
                         );
 
-                        Log::info('Hosting account unsuspended after successful payment', [
-                            'invoice_id' => $invoice->id,
-                            'hosting_account_id' => $hostingAccount->id,
-                        ]);
+                        Log::info(
+                            'Hosting account unsuspended after successful payment',
+                            [
+                                'invoice_id' => $invoice->id,
+                                'hosting_account_id' => $hostingAccount->id,
+                            ]
+                        );
                     }
                 }
 
-                return ['success' => true, 'payment' => $payment];
+                return [
+                    'success' => true,
+                    'payment' => $payment
+                ];
             } else {
                 $this->handleFailedPayment($invoice);
 
-                return ['success' => false, 'message' => $result['message']];
+                return [
+                    'success' => false,
+                    'message' => $result['message']
+                ];
             }
         } catch (Exception $e) {
             $this->handleFailedPayment($invoice);
 
-            return ['success' => false, 'message' => 'Payment processing failed: '.$e->getMessage()];
+            return [
+                'success' => false,
+                'message' => 'Payment processing failed: ' . $e->getMessage()
+            ];
         }
     }
 
     protected function handleFailedPayment(Invoice $invoice)
     {
         // If payment fails and grace period is over, suspend hosting
-        if ($invoice->due_date->addDays(config('billing.grace_period', 3))->isPast() && $invoice->subscription) {
+        if ($invoice->due_date->addDays(
+                config(
+                    'billing.grace_period',
+                    3
+                )
+            )->isPast() && $invoice->subscription) {
             $hostingAccount = $invoice->subscription->hostingAccount;
             if ($hostingAccount && $hostingAccount->status === 'active') {
                 $this->serviceProvisioningService->manageService(
@@ -464,10 +534,13 @@ class BillingService
                     'suspend'
                 );
 
-                Log::info('Hosting account suspended due to failed payment', [
-                    'invoice_id' => $invoice->id,
-                    'hosting_account_id' => $hostingAccount->id,
-                ]);
+                Log::info(
+                    'Hosting account suspended due to failed payment',
+                    [
+                        'invoice_id' => $invoice->id,
+                        'hosting_account_id' => $hostingAccount->id,
+                    ]
+                );
             }
         }
 
@@ -579,28 +652,48 @@ class BillingService
 
     public function sendOverdueReminders(): void
     {
-        $overdueInvoices = Invoice::where('status', 'pending')
-            ->where('due_date', '<', Carbon::now())
+        $overdueInvoices = Invoice::where(
+            'status',
+            'pending'
+        )
+            ->where(
+                'due_date',
+                '<',
+                Carbon::now()
+            )
             ->get();
 
         foreach ($overdueInvoices as $invoice) {
             try {
                 $this->sendOverdueReminderEmail($invoice);
-                $invoice->update([
-                    'reminder_count' => ($invoice->reminder_count ?? 0) + 1,
-                    'last_reminder_date' => Carbon::now(),
-                ]);
+                $invoice->update(
+                    [
+                        'reminder_count' => ($invoice->reminder_count ?? 0) + 1,
+                        'last_reminder_date' => Carbon::now(),
+                    ]
+                );
             } catch (Exception $e) {
-                Log::error("Failed to send overdue reminder for invoice {$invoice->id}: ".$e->getMessage());
+                Log::error("Failed to send overdue reminder for invoice {$invoice->id}: " . $e->getMessage());
             }
         }
     }
 
     public function sendUpcomingDueReminders(): void
     {
-        $upcomingInvoices = Invoice::where('status', 'pending')
-            ->where('due_date', '>', now())
-            ->where('due_date', '<=', now()->addDays(7))
+        $upcomingInvoices = Invoice::where(
+            'status',
+            'pending'
+        )
+            ->where(
+                'due_date',
+                '>',
+                now()
+            )
+            ->where(
+                'due_date',
+                '<=',
+                now()->addDays(7)
+            )
             ->get();
 
         foreach ($upcomingInvoices as $invoice) {
@@ -608,18 +701,24 @@ class BillingService
 
             if ($customer->sms_notifications_enabled && $customer->phone_number) {
                 $daysUntilDue = now()->diffInDays($invoice->due_date);
-                $message = $this->getInvoiceReminderMessage($invoice, $daysUntilDue);
+                $message = $this->getInvoiceReminderMessage(
+                    $invoice,
+                    $daysUntilDue
+                );
 
                 $this->smsService->send(
                     $customer->phone_number,
                     $message
                 );
 
-                Log::info('Upcoming due date reminder SMS sent', [
-                    'invoice_id' => $invoice->id,
-                    'customer_id' => $customer->id,
-                    'days_until_due' => $daysUntilDue,
-                ]);
+                Log::info(
+                    'Upcoming due date reminder SMS sent',
+                    [
+                        'invoice_id' => $invoice->id,
+                        'customer_id' => $customer->id,
+                        'days_until_due' => $daysUntilDue,
+                    ]
+                );
             }
         }
     }
@@ -644,15 +743,22 @@ class BillingService
 
     protected function getInvoiceReminderMessage(Invoice $invoice, int $daysUntilDue): string
     {
-        return "Reminder: Invoice #{$invoice->invoice_number} for ".
-               "{$invoice->getFormattedAmount()} is due in {$daysUntilDue} days. ".
-               'Please ensure timely payment to avoid late fees.';
+        return "Reminder: Invoice #{$invoice->invoice_number} for " .
+            "{$invoice->getFormattedAmount()} is due in {$daysUntilDue} days. " .
+            'Please ensure timely payment to avoid late fees.';
     }
 
     public function processLateFees(): void
     {
-        $pendingInvoices = Invoice::where('status', 'pending')
-            ->where('due_date', '<', Carbon::now())
+        $pendingInvoices = Invoice::where(
+            'status',
+            'pending'
+        )
+            ->where(
+                'due_date',
+                '<',
+                Carbon::now()
+            )
             ->get();
 
         foreach ($pendingInvoices as $invoice) {
@@ -666,10 +772,13 @@ class BillingService
                     // $this->sendLateFeeNotification($invoice, $fee);
                 }
             } catch (Exception $e) {
-                Log::error('Failed to process late fee', [
-                    'invoice_id' => $invoice->id,
-                    'error' => $e->getMessage(),
-                ]);
+                Log::error(
+                    'Failed to process late fee',
+                    [
+                        'invoice_id' => $invoice->id,
+                        'error' => $e->getMessage(),
+                    ]
+                );
             }
         }
     }
@@ -704,20 +813,27 @@ class BillingService
 
     private function generateInvoiceNumber(): string
     {
-        return 'INV-'.strtoupper(uniqid());
+        return 'INV-' . strtoupper(uniqid());
     }
 
     public function handlePartialPayment(Invoice $invoice, float $amount, int $paymentGatewayId): array
     {
         $partialPaymentService = new PartialPaymentService(new PaymentGatewayService);
 
-        return $partialPaymentService->processPartialPayment($invoice, $amount, $paymentGatewayId);
+        return $partialPaymentService->processPartialPayment(
+            $invoice,
+            $amount,
+            $paymentGatewayId
+        );
     }
 
     public function handleRefund(Payment $payment, float $amount): array
     {
         $refundService = new RefundService(new PaymentGatewayService);
 
-        return $refundService->processRefund($payment, $amount);
+        return $refundService->processRefund(
+            $payment,
+            $amount
+        );
     }
 }

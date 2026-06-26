@@ -11,5 +11,7 @@ readonly class ModuleUninstalled
     public function __construct(
         public string $name,
         public ModuleInterface $module,
-    ) {}
+    )
+    {
+    }
 }

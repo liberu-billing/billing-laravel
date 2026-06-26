@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 #[Fillable([
     'customer_id',
@@ -21,7 +22,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class ClientContact extends Model
 {
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
 
@@ -41,6 +42,6 @@ class ClientContact extends Model
 
     protected function fullName(): Attribute
     {
-        return Attribute::make(get: fn (): string => trim("{$this->first_name} {$this->last_name}"));
+        return Attribute::make(get: fn(): string => trim("{$this->first_name} {$this->last_name}"));
     }
 }

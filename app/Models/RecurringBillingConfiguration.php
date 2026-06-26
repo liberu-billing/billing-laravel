@@ -5,9 +5,9 @@ namespace App\Models;
 use App\Traits\HasTeam;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 #[Fillable([
     'invoice_id',
@@ -20,7 +20,7 @@ class RecurringBillingConfiguration extends Model
 {
     use HasTeam;
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

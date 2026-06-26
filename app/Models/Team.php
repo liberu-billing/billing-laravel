@@ -10,6 +10,7 @@ use Laravel\Jetstream\Events\TeamDeleted;
 use Laravel\Jetstream\Events\TeamUpdated;
 use Laravel\Jetstream\Team as JetstreamTeam;
 use Laravel\Prompts\Note;
+use Override;
 
 #[Fillable([
     'name',
@@ -25,7 +26,7 @@ class Team extends JetstreamTeam
      *
      * @var array<int, string>
      */
-    #[\Override]
+    #[Override]
     protected $fillable = [
         'name',
         'personal_team',
@@ -37,7 +38,7 @@ class Team extends JetstreamTeam
      *
      * @var array<string, class-string>
      */
-    #[\Override]
+    #[Override]
     protected $dispatchesEvents = [
         'created' => TeamCreated::class,
         'updated' => TeamUpdated::class,
@@ -49,7 +50,7 @@ class Team extends JetstreamTeam
      *
      * @return array<string, string>
      */
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

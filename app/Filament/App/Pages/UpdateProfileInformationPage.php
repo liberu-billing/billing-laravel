@@ -2,26 +2,29 @@
 
 namespace App\Filament\App\Pages;
 
+use BackedEnum;
 use Filament\Forms\Components\TextInput;
 use Filament\Pages\Page;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
+use Override;
+use UnitEnum;
 
 class UpdateProfileInformationPage extends Page
 {
-    #[\Override]
+    #[Override]
     protected string $view = 'filament.pages.profile.update-profile-information';
 
-    #[\Override]
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-user';
+    #[Override]
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-user';
 
-    #[\Override]
-    protected static string|\UnitEnum|null $navigationGroup = 'Account';
+    #[Override]
+    protected static string|UnitEnum|null $navigationGroup = 'Account';
 
-    #[\Override]
+    #[Override]
     protected static ?int $navigationSort = 0;
 
-    #[\Override]
+    #[Override]
     protected static ?string $title = 'Profile';
 
     public $name;
@@ -30,24 +33,28 @@ class UpdateProfileInformationPage extends Page
 
     public function mount(): void
     {
-        $this->form->fill([
-            'name' => Auth::user()->name,
-            'email' => Auth::user()->email,
-        ]);
+        $this->form->fill(
+            [
+                'name' => Auth::user()->name,
+                'email' => Auth::user()->email,
+            ]
+        );
     }
 
     public function form(Schema $schema): Schema
     {
         return $schema
-            ->components([
-                TextInput::make('name')
-                    ->label('Name')
-                    ->required(),
-                TextInput::make('email')
-                    ->label('Email Address')
-                    ->email()
-                    ->required(),
-            ]);
+            ->components(
+                [
+                    TextInput::make('name')
+                        ->label('Name')
+                        ->required(),
+                    TextInput::make('email')
+                        ->label('Email Address')
+                        ->email()
+                        ->required(),
+                ]
+            );
     }
 
     public function submit(): void
@@ -56,21 +63,26 @@ class UpdateProfileInformationPage extends Page
 
         $user = Auth::user();
 
-        $user->forceFill([
-            'name' => $state['name'],
-            'email' => $state['email'],
-        ])->save();
+        $user->forceFill(
+            [
+                'name' => $state['name'],
+                'email' => $state['email'],
+            ]
+        )->save();
 
-        session()->flash('status', 'Your profile has been updated.');
+        session()->flash(
+            'status',
+            'Your profile has been updated.'
+        );
     }
 
-    #[\Override]
+    #[Override]
     public function getHeading(): string
     {
         return static::$title;
     }
 
-    #[\Override]
+    #[Override]
     public static function shouldRegisterNavigation(): bool
     {
         return true;

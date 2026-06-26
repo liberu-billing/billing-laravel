@@ -6,9 +6,10 @@ namespace App\Filament\Admin\Resources\SiteSettingsResource\Pages;
 
 use App\Filament\Admin\Resources\SiteSettingsResource;
 use Filament\Resources\Pages\CreateRecord;
+use Override;
 
 class CreateSiteSettings extends CreateRecord
 {
-    #[\Override]
+    #[Override]
     protected static string $resource = SiteSettingsResource::class;
 }

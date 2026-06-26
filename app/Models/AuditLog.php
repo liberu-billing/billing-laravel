@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Override;
 
 #[Fillable([
     'user_id',
@@ -19,7 +20,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 ])]
 class AuditLog extends Model
 {
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
 

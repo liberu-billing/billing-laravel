@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 #[Fillable([
     'customer_id',
@@ -23,7 +23,7 @@ class Credit extends Model
         return $this->belongsTo(Customer::class);
     }
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return ['expiry_date' => 'datetime'];

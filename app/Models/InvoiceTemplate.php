@@ -5,10 +5,10 @@ namespace App\Models;
 use App\Traits\HasTeam;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
+use Override;
 
 #[Fillable([
     'name',
@@ -27,7 +27,7 @@ class InvoiceTemplate extends Model
 {
     use HasTeam;
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
 
@@ -44,19 +44,26 @@ class InvoiceTemplate extends Model
 
     public static function getDefault()
     {
-        return static::where('team_id', auth()->user()->currentTeam->id)
-            ->where('is_default', true)
+        return static::where(
+            'team_id',
+            auth()->user()->currentTeam->id
+        )
+            ->where(
+                'is_default',
+                true
+            )
             ->first();
     }
 
     protected function logoUrl(): Attribute
     {
-        return Attribute::make(get: fn () => $this->logo_path ? Storage::disk('public')->url($this->logo_path) : null);
+        return Attribute::make(get: fn() => $this->logo_path ? Storage::disk('public')->url($this->logo_path) : null);
     }
 
     protected function styledHtml(): Attribute
     {
-        return Attribute::make(get: fn (): string => sprintf(
+        return Attribute::make(
+            get: fn(): string => sprintf(
             '<style>
                 .invoice-box { color: %1$s; }
                 .invoice-header { border-color: %1$s; }
@@ -64,6 +71,7 @@ class InvoiceTemplate extends Model
                 .invoice-items td { border-color: %1$s; }
             </style>',
             $this->color_scheme
-        ));
+        )
+        );
     }
 }

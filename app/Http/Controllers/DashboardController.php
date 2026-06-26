@@ -11,11 +11,15 @@ class DashboardController extends Controller
 {
     public function getMetrics()
     {
-        return Cache::remember('dashboard.metrics', 300, fn (): array => [
-            'revenue' => $this->getRevenueData(),
-            'invoices' => $this->getInvoiceData(),
-            'clients' => $this->getClientData(),
-        ]);
+        return Cache::remember(
+            'dashboard.metrics',
+            300,
+            fn(): array => [
+                'revenue' => $this->getRevenueData(),
+                'invoices' => $this->getInvoiceData(),
+                'clients' => $this->getClientData(),
+            ]
+        );
     }
 
     private function getRevenueData(): array
@@ -49,7 +53,11 @@ class DashboardController extends Controller
             'datasets' => [
                 [
                     'data' => $statuses->pluck('count'),
-                    'backgroundColor' => ['#4F46E5', '#10B981', '#EF4444'],
+                    'backgroundColor' => [
+                        '#4F46E5',
+                        '#10B981',
+                        '#EF4444'
+                    ],
                 ],
             ],
         ];
@@ -76,21 +84,27 @@ class DashboardController extends Controller
 
     public function savePreferences(Request $request)
     {
-        $request->validate([
-            'charts' => 'required|array',
-        ]);
+        $request->validate(
+            [
+                'charts' => 'required|array',
+            ]
+        );
 
-        auth()->user()->update([
-            'dashboard_preferences' => $request->charts,
-        ]);
+        auth()->user()->update(
+            [
+                'dashboard_preferences' => $request->charts,
+            ]
+        );
 
         return response()->json(['message' => 'Preferences saved']);
     }
 
     public function getPreferences()
     {
-        return response()->json([
-            'charts' => auth()->user()->dashboard_preferences,
-        ]);
+        return response()->json(
+            [
+                'charts' => auth()->user()->dashboard_preferences,
+            ]
+        );
     }
 }

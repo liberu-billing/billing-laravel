@@ -10,26 +10,36 @@ use Illuminate\Http\Request;
 
 class InvoiceDisputeController extends Controller
 {
-    public function __construct(protected DisputeService $disputeService) {}
+    public function __construct(protected DisputeService $disputeService) { }
 
     public function store(Request $request, Invoice $invoice): JsonResponse
     {
-        $validated = $request->validate([
-            'reason' => 'required|string|max:255',
-            'description' => 'required|string',
-        ]);
+        $validated = $request->validate(
+            [
+                'reason' => 'required|string|max:255',
+                'description' => 'required|string',
+            ]
+        );
 
-        $dispute = $this->disputeService->createDispute($invoice, $validated);
+        $dispute = $this->disputeService->createDispute(
+            $invoice,
+            $validated
+        );
 
-        return response()->json($dispute, 201);
+        return response()->json(
+            $dispute,
+            201
+        );
     }
 
     public function update(Request $request, InvoiceDispute $dispute): JsonResponse
     {
-        $validated = $request->validate([
-            'status' => 'required|in:under_review,resolved,rejected',
-            'resolution_notes' => 'required_if:status,resolved,rejected|string',
-        ]);
+        $validated = $request->validate(
+            [
+                'status' => 'required|in:under_review,resolved,rejected',
+                'resolution_notes' => 'required_if:status,resolved,rejected|string',
+            ]
+        );
 
         $dispute = $this->disputeService->updateDisputeStatus(
             $dispute,
@@ -42,13 +52,21 @@ class InvoiceDisputeController extends Controller
 
     public function addMessage(Request $request, InvoiceDispute $dispute): JsonResponse
     {
-        $validated = $request->validate([
-            'message' => 'required|string',
-            'attachments' => 'nullable|array',
-        ]);
+        $validated = $request->validate(
+            [
+                'message' => 'required|string',
+                'attachments' => 'nullable|array',
+            ]
+        );
 
-        $message = $this->disputeService->addMessage($dispute, $validated);
+        $message = $this->disputeService->addMessage(
+            $dispute,
+            $validated
+        );
 
-        return response()->json($message, 201);
+        return response()->json(
+            $message,
+            201
+        );
     }
 }

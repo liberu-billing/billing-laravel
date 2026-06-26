@@ -3,10 +3,11 @@
 namespace App\Http\Resources\Api;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use Override;
 
 class InvoiceResource extends JsonResource
 {
-    #[\Override]
+    #[Override]
     public function toArray($request): array
     {
         return [

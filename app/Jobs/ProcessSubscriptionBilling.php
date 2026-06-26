@@ -14,15 +14,23 @@ class ProcessSubscriptionBilling implements ShouldQueue
     public function handle(BillingService $billingService): void
     {
         Subscription::query()
-            ->where('status', 'active')
-            ->where('auto_renew', true)
+            ->where(
+                'status',
+                'active'
+            )
+            ->where(
+                'auto_renew',
+                true
+            )
             ->get()
-            ->each(function ($subscription) use ($billingService): void {
-                if ($subscription->needsBilling()) {
-                    $invoice = $billingService->generateInvoice($subscription);
-                    $billingService->processAutomaticPayment($invoice);
-                    $subscription->renew();
+            ->each(
+                function ($subscription) use ($billingService): void {
+                    if ($subscription->needsBilling()) {
+                        $invoice = $billingService->generateInvoice($subscription);
+                        $billingService->processAutomaticPayment($invoice);
+                        $subscription->renew();
+                    }
                 }
-            });
+            );
     }
 }

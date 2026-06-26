@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Override;
 
 #[Fillable([
     'team_id',
@@ -20,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class WebhookEndpoint extends Model
 {
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [
@@ -42,7 +43,7 @@ class WebhookEndpoint extends Model
 
     public function isSubscribedTo(string $eventType): bool
     {
-        if (! $this->is_active) {
+        if (!$this->is_active) {
             return false;
         }
 
@@ -50,6 +51,9 @@ class WebhookEndpoint extends Model
             return true; // Subscribe to all events if none specified
         }
 
-        return in_array($eventType, $this->events);
+        return in_array(
+            $eventType,
+            $this->events
+        );
     }
 }

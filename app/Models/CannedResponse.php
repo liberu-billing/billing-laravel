@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 #[Fillable([
     'team_id',
@@ -18,7 +19,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class CannedResponse extends Model
 {
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
 
@@ -45,7 +46,11 @@ class CannedResponse extends Model
         $content = $this->content;
 
         foreach ($variables as $key => $value) {
-            $content = str_replace('{{'.$key.'}}', $value, $content);
+            $content = str_replace(
+                '{{' . $key . '}}',
+                $value,
+                $content
+            );
         }
 
         return $content;

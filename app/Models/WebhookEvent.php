@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 #[Fillable([
     'webhook_endpoint_id',
@@ -18,7 +19,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class WebhookEvent extends Model
 {
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [
@@ -35,21 +36,25 @@ class WebhookEvent extends Model
 
     public function markAsSent(): void
     {
-        $this->update([
-            'status' => 'sent',
-            'sent_at' => now(),
-            'next_retry_at' => null,
-        ]);
+        $this->update(
+            [
+                'status' => 'sent',
+                'sent_at' => now(),
+                'next_retry_at' => null,
+            ]
+        );
     }
 
     public function markAsFailed(string $error, int $retryIntervalSeconds = 60): void
     {
-        $this->update([
-            'status' => 'failed',
-            'last_error' => $error,
-            'attempts' => $this->attempts + 1,
-            'next_retry_at' => now()->addSeconds($retryIntervalSeconds),
-        ]);
+        $this->update(
+            [
+                'status' => 'failed',
+                'last_error' => $error,
+                'attempts' => $this->attempts + 1,
+                'next_retry_at' => now()->addSeconds($retryIntervalSeconds),
+            ]
+        );
     }
 
     public function shouldRetry(int $maxRetries): bool

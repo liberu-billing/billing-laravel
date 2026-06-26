@@ -14,7 +14,9 @@ class PackageGroupController extends Controller
 {
     public function __construct(
         protected PackageGroupService $packageGroupService
-    ) {}
+    )
+    {
+    }
 
     /**
      * List package groups
@@ -31,9 +33,11 @@ class PackageGroupController extends Controller
      */
     public function show(PackageGroup $packageGroup): JsonResponse
     {
-        return response()->json([
-            'data' => $packageGroup->load(['packages']),
-        ]);
+        return response()->json(
+            [
+                'data' => $packageGroup->load(['packages']),
+            ]
+        );
     }
 
     /**
@@ -41,17 +45,22 @@ class PackageGroupController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'sort_order' => 'nullable|integer|min:0',
-            'is_active' => 'boolean',
-            'team_id' => 'nullable|exists:teams,id',
-        ]);
+        $validated = $request->validate(
+            [
+                'name' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'sort_order' => 'nullable|integer|min:0',
+                'is_active' => 'boolean',
+                'team_id' => 'nullable|exists:teams,id',
+            ]
+        );
 
         $group = $this->packageGroupService->createGroup($validated);
 
-        return response()->json(['data' => $group], Response::HTTP_CREATED);
+        return response()->json(
+            ['data' => $group],
+            Response::HTTP_CREATED
+        );
     }
 
     /**
@@ -59,14 +68,19 @@ class PackageGroupController extends Controller
      */
     public function update(Request $request, PackageGroup $packageGroup): JsonResponse
     {
-        $validated = $request->validate([
-            'name' => 'sometimes|string|max:255',
-            'description' => 'nullable|string',
-            'sort_order' => 'nullable|integer|min:0',
-            'is_active' => 'boolean',
-        ]);
+        $validated = $request->validate(
+            [
+                'name' => 'sometimes|string|max:255',
+                'description' => 'nullable|string',
+                'sort_order' => 'nullable|integer|min:0',
+                'is_active' => 'boolean',
+            ]
+        );
 
-        $group = $this->packageGroupService->updateGroup($packageGroup, $validated);
+        $group = $this->packageGroupService->updateGroup(
+            $packageGroup,
+            $validated
+        );
 
         return response()->json(['data' => $group]);
     }
@@ -86,18 +100,26 @@ class PackageGroupController extends Controller
      */
     public function addPackage(Request $request, PackageGroup $packageGroup): JsonResponse
     {
-        $validated = $request->validate([
-            'subscription_plan_id' => 'required|exists:subscription_plans,id',
-            'sort_order' => 'nullable|integer|min:0',
-        ]);
+        $validated = $request->validate(
+            [
+                'subscription_plan_id' => 'required|exists:subscription_plans,id',
+                'sort_order' => 'nullable|integer|min:0',
+            ]
+        );
 
         $plan = SubscriptionPlan::findOrFail($validated['subscription_plan_id']);
-        $this->packageGroupService->addPackage($packageGroup, $plan, $validated['sort_order'] ?? 0);
+        $this->packageGroupService->addPackage(
+            $packageGroup,
+            $plan,
+            $validated['sort_order'] ?? 0
+        );
 
-        return response()->json([
-            'data' => $packageGroup->fresh(['packages']),
-            'message' => 'Package added to group.',
-        ]);
+        return response()->json(
+            [
+                'data' => $packageGroup->fresh(['packages']),
+                'message' => 'Package added to group.',
+            ]
+        );
     }
 
     /**
@@ -105,12 +127,17 @@ class PackageGroupController extends Controller
      */
     public function removePackage(PackageGroup $packageGroup, SubscriptionPlan $plan): JsonResponse
     {
-        $this->packageGroupService->removePackage($packageGroup, $plan);
+        $this->packageGroupService->removePackage(
+            $packageGroup,
+            $plan
+        );
 
-        return response()->json([
-            'data' => $packageGroup->fresh(['packages']),
-            'message' => 'Package removed from group.',
-        ]);
+        return response()->json(
+            [
+                'data' => $packageGroup->fresh(['packages']),
+                'message' => 'Package removed from group.',
+            ]
+        );
     }
 
     /**
@@ -118,16 +145,23 @@ class PackageGroupController extends Controller
      */
     public function reorder(Request $request, PackageGroup $packageGroup): JsonResponse
     {
-        $validated = $request->validate([
-            'plan_ids' => 'required|array|min:1',
-            'plan_ids.*' => 'integer|exists:subscription_plans,id',
-        ]);
+        $validated = $request->validate(
+            [
+                'plan_ids' => 'required|array|min:1',
+                'plan_ids.*' => 'integer|exists:subscription_plans,id',
+            ]
+        );
 
-        $this->packageGroupService->reorderPackages($packageGroup, $validated['plan_ids']);
+        $this->packageGroupService->reorderPackages(
+            $packageGroup,
+            $validated['plan_ids']
+        );
 
-        return response()->json([
-            'data' => $packageGroup->fresh(['packages']),
-            'message' => 'Packages reordered.',
-        ]);
+        return response()->json(
+            [
+                'data' => $packageGroup->fresh(['packages']),
+                'message' => 'Packages reordered.',
+            ]
+        );
     }
 }

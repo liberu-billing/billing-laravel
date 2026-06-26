@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 #[Fillable([
     'customer_id',
@@ -25,7 +26,7 @@ class HostingAccount extends Model
     use HasFactory;
     use HasTeam;
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
 
@@ -48,7 +49,10 @@ class HostingAccount extends Model
 
     public function server(): BelongsTo
     {
-        return $this->belongsTo(HostingServer::class, 'hosting_server_id');
+        return $this->belongsTo(
+            HostingServer::class,
+            'hosting_server_id'
+        );
     }
 
     public function isActive(): bool
@@ -58,7 +62,7 @@ class HostingAccount extends Model
 
     public function hasDomain(): bool
     {
-        return ! empty($this->domain);
+        return !empty($this->domain);
     }
 
     public function hasAddon($addon): bool

@@ -23,6 +23,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Jetstream\HasTeams;
 use Laravel\Sanctum\HasApiTokens;
+use Override;
 use Spatie\Permission\Traits\HasRoles;
 
 #[Appends([
@@ -54,7 +55,7 @@ class User extends Authenticatable implements FilamentUser, HasDefaultTenant, Ha
     use Notifiable;
     use TwoFactorAuthenticatable;
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [
@@ -66,8 +67,11 @@ class User extends Authenticatable implements FilamentUser, HasDefaultTenant, Ha
 
     protected function profilePhotoUrl(): Attribute
     {
-        return filter_var($this->profile_photo_path, FILTER_VALIDATE_URL)
-            ? Attribute::get(fn () => $this->profile_photo_path)
+        return filter_var(
+            $this->profile_photo_path,
+            FILTER_VALIDATE_URL
+        )
+            ? Attribute::get(fn() => $this->profile_photo_path)
             : $this->getPhotoUrl();
     }
 
@@ -94,7 +98,10 @@ class User extends Authenticatable implements FilamentUser, HasDefaultTenant, Ha
 
     public function latestTeam(): BelongsTo
     {
-        return $this->belongsTo(Team::class, 'current_team_id');
+        return $this->belongsTo(
+            Team::class,
+            'current_team_id'
+        );
     }
 
     public function affiliate(): HasOne
@@ -104,7 +111,10 @@ class User extends Authenticatable implements FilamentUser, HasDefaultTenant, Ha
 
     public function referrer(): BelongsTo
     {
-        return $this->belongsTo(Affiliate::class, 'referred_by');
+        return $this->belongsTo(
+            Affiliate::class,
+            'referred_by'
+        );
     }
 
     public function integrations(): HasMany
@@ -114,6 +124,9 @@ class User extends Authenticatable implements FilamentUser, HasDefaultTenant, Ha
 
     public function hasIntegration(string $provider): bool
     {
-        return $this->integrations()->where('provider', $provider)->exists();
+        return $this->integrations()->where(
+            'provider',
+            $provider
+        )->exists();
     }
 }

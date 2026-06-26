@@ -19,6 +19,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Mail;
+use Override;
+use stdClass;
 
 #[Fillable([
     'customer_id',
@@ -51,61 +53,65 @@ class Invoice extends Model
     use HasFactory;
     use HasTeam;
 
-    #[\Override]
+    #[Override]
     protected static function boot(): void
     {
         parent::boot();
 
         static::creating(
             static function (Invoice $invoice): void {
-            $attrs = $invoice->getAttributes();
+                $attrs = $invoice->getAttributes();
 
-            if (empty($attrs['invoice_number'])) {
-                $invoice->invoice_number = 'INV-'.str_pad(
-                    (string) (static::max('id') + 1),
-                    6,
-                    '0',
-                    STR_PAD_LEFT
-                );
-            }
+                if (empty($attrs['invoice_number'])) {
+                    $invoice->invoice_number = 'INV-' . str_pad(
+                            (string)(static::max('id') + 1),
+                            6,
+                            '0',
+                            STR_PAD_LEFT
+                        );
+                }
 
-            if (empty($attrs['currency'])) {
-                $invoice->currency = 'USD';
-            }
+                if (empty($attrs['currency'])) {
+                    $invoice->currency = 'USD';
+                }
 
-            if (empty($attrs['status'])) {
-                $invoice->status = 'pending';
+                if (empty($attrs['status'])) {
+                    $invoice->status = 'pending';
+                }
             }
-        });
+        );
 
         static::created(
             static function (?Model $invoice): void {
-            app(AuditLogService::class)->log(
-                'invoice_created',
-                $invoice,
-                null,
-                $invoice->toArray()
-            );
-        });
+                app(AuditLogService::class)->log(
+                    'invoice_created',
+                    $invoice,
+                    null,
+                    $invoice->toArray()
+                );
+            }
+        );
 
         static::updated(
             static function (?Model $invoice): void {
-            app(AuditLogService::class)->log(
-                'invoice_updated',
-                $invoice,
-                $invoice->getOriginal(),
-                $invoice->getChanges()
-            );
-        });
+                app(AuditLogService::class)->log(
+                    'invoice_updated',
+                    $invoice,
+                    $invoice->getOriginal(),
+                    $invoice->getChanges()
+                );
+            }
+        );
 
         static::deleted(
             static function (?Model $invoice): void {
-            app(AuditLogService::class)->log(
-                'invoice_deleted',
-                $invoice,
-                $invoice->toArray()
-            );
-        });
+                app(AuditLogService::class)->log(
+                    'invoice_deleted',
+                    $invoice,
+                    $invoice->toArray()
+                );
+            }
+        );
     }
 
     public function disputes(): HasMany
@@ -113,9 +119,15 @@ class Invoice extends Model
         return $this->hasMany(InvoiceDispute::class);
     }
 
-    public function activeDispute(): ?\stdClass
+    public function activeDispute(): ?stdClass
     {
-        return $this->disputes()->whereIn('status', ['open', 'under_review'])->latest()->first();
+        return $this->disputes()->whereIn(
+            'status',
+            [
+                'open',
+                'under_review'
+            ]
+        )->latest()->first();
     }
 
     public function isDisputed(): bool
@@ -123,7 +135,7 @@ class Invoice extends Model
         return $this->activeDispute() !== null;
     }
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
 
@@ -142,7 +154,11 @@ class Invoice extends Model
 
     public function currency(): BelongsTo
     {
-        return $this->belongsTo(Currency::class, 'currency', 'code');
+        return $this->belongsTo(
+            Currency::class,
+            'currency',
+            'code'
+        );
     }
 
     public function subscription(): BelongsTo
@@ -179,13 +195,15 @@ class Invoice extends Model
             throw new Exception('Invalid payment amount');
         }
 
-        $payment = new Payment([
-            'invoice_id' => $this->id,
-            'payment_method' => $paymentMethod,
-            'amount' => $amount,
-            'currency' => $this->currency,
-            'payment_date' => now(),
-        ]);
+        $payment = new Payment(
+            [
+                'invoice_id' => $this->id,
+                'payment_method' => $paymentMethod,
+                'amount' => $amount,
+                'currency' => $this->currency,
+                'payment_date' => now(),
+            ]
+        );
 
         $paymentGatewayService = app(PaymentGatewayService::class);
         $result = $paymentGatewayService->processPayment($payment);
@@ -217,17 +235,23 @@ class Invoice extends Model
 
     protected function remainingAmount(): Attribute
     {
-        return Attribute::make(get: fn (): int|float => $this->total_amount - $this->payments()->sum('amount'));
+        return Attribute::make(get: fn(): int|float => $this->total_amount - $this->payments()->sum('amount'));
     }
 
     public function parentInvoice(): BelongsTo
     {
-        return $this->belongsTo(__CLASS__, 'parent_invoice_id');
+        return $this->belongsTo(
+            __CLASS__,
+            'parent_invoice_id'
+        );
     }
 
     public function installments(): HasMany
     {
-        return $this->hasMany(__CLASS__, 'parent_invoice_id');
+        return $this->hasMany(
+            __CLASS__,
+            'parent_invoice_id'
+        );
     }
 
     public function discount(): BelongsTo
@@ -237,12 +261,12 @@ class Invoice extends Model
 
     protected function subtotal(): Attribute
     {
-        return Attribute::make(get: fn () => $this->items->sum('total_price'));
+        return Attribute::make(get: fn() => $this->items->sum('total_price'));
     }
 
     protected function finalTotal(): Attribute
     {
-        return Attribute::make(get: fn (): int|float => $this->subtotal + ($this->tax_amount ?? 0) - ($this->discount_amount ?? 0));
+        return Attribute::make(get: fn(): int|float => $this->subtotal + ($this->tax_amount ?? 0) - ($this->discount_amount ?? 0));
     }
 
     public function calculateTax()
@@ -252,7 +276,10 @@ class Invoice extends Model
 
     public function template(): BelongsTo
     {
-        return $this->belongsTo(InvoiceTemplate::class, 'invoice_template_id');
+        return $this->belongsTo(
+            InvoiceTemplate::class,
+            'invoice_template_id'
+        );
     }
 
     public function sendInvoiceEmail(): void
@@ -266,18 +293,26 @@ class Invoice extends Model
             throw new Exception('Cannot create payment plan for an installment invoice');
         }
 
-        $installmentAmount = round($this->total_amount / $totalInstallments, 2);
+        $installmentAmount = round(
+            $this->total_amount / $totalInstallments,
+            2
+        );
         $startDate = now();
 
-        return PaymentPlan::create([
-            'invoice_id' => $this->id,
-            'total_installments' => $totalInstallments,
-            'installment_amount' => $installmentAmount,
-            'frequency' => $frequency,
-            'start_date' => $startDate,
-            'next_due_date' => $this->calculateNextDueDate($startDate, $frequency),
-            'status' => 'active',
-        ]);
+        return PaymentPlan::create(
+            [
+                'invoice_id' => $this->id,
+                'total_installments' => $totalInstallments,
+                'installment_amount' => $installmentAmount,
+                'frequency' => $frequency,
+                'start_date' => $startDate,
+                'next_due_date' => $this->calculateNextDueDate(
+                    $startDate,
+                    $frequency
+                ),
+                'status' => 'active',
+            ]
+        );
     }
 
     private function calculateNextDueDate(CarbonInterface $date, $frequency): CarbonInterface
@@ -301,7 +336,10 @@ class Invoice extends Model
 
     public function getFormattedAmount(): string
     {
-        return number_format($this->total_amount, 2).' '.$this->currency;
+        return number_format(
+                $this->total_amount,
+                2
+            ) . ' ' . $this->currency;
     }
 
     public function isOverdue(): bool
@@ -311,12 +349,15 @@ class Invoice extends Model
 
     public function calculateLateFee(): int|float
     {
-        if (! $this->isOverdue()) {
+        if (!$this->isOverdue()) {
             return 0;
         }
 
-        $config = LateFeeConfiguration::where('team_id', $this->team_id)->first();
-        if (! $config) {
+        $config = LateFeeConfiguration::where(
+            'team_id',
+            $this->team_id
+        )->first();
+        if (!$config) {
             return 0;
         }
 
@@ -350,11 +391,17 @@ class Invoice extends Model
         if ($config->max_fee_amount) {
             $totalFees = $this->late_fee_amount + $fee;
             if ($totalFees > $config->max_fee_amount) {
-                $fee = max(0, $config->max_fee_amount - $this->late_fee_amount);
+                $fee = max(
+                    0,
+                    $config->max_fee_amount - $this->late_fee_amount
+                );
             }
         }
 
-        return round($fee, 2);
+        return round(
+            $fee,
+            2
+        );
     }
 
     public function applyLateFee(): float|int
@@ -379,24 +426,37 @@ class Invoice extends Model
 
     protected function totalWithLateFee(): Attribute
     {
-        return Attribute::make(get: fn (): float|int|array => $this->final_total + $this->late_fee_amount);
+        return Attribute::make(get: fn(): float|int|array => $this->final_total + $this->late_fee_amount);
     }
 
     protected function formattedTotalWithLateFee(): Attribute
     {
-        return Attribute::make(get: fn (): string => number_format($this->total_with_late_fee, 2).' '.$this->currency);
+        return Attribute::make(
+            get: fn(): string => number_format(
+                $this->total_with_late_fee,
+                2
+            ) . ' ' . $this->currency
+        );
     }
 
     protected function remainingLateFee(): Attribute
     {
-        return Attribute::make(get: function (): null|float|int {
-            $config = LateFeeConfiguration::where('team_id', $this->team_id)->first();
-            if (! $config || ! $config->max_fee_amount) {
+        return Attribute::make(
+            get: function (): null|float|int {
+            $config = LateFeeConfiguration::where(
+                'team_id',
+                $this->team_id
+            )->first();
+            if (!$config || !$config->max_fee_amount) {
                 return null;
             }
 
-            return max(0, $config->max_fee_amount - $this->late_fee_amount);
-        });
+            return max(
+                0,
+                $config->max_fee_amount - $this->late_fee_amount
+            );
+        }
+        );
     }
 
     public function recurringConfiguration(): HasOne
@@ -410,7 +470,12 @@ class Invoice extends Model
         $this->addToStatusHistory('sent');
         $this->save();
 
-        event(new InvoiceStatusChanged($this, 'sent'));
+        event(
+            new InvoiceStatusChanged(
+                $this,
+                'sent'
+            )
+        );
     }
 
     public function markAsViewed(): void
@@ -419,7 +484,12 @@ class Invoice extends Model
         $this->addToStatusHistory('viewed');
         $this->save();
 
-        event(new InvoiceStatusChanged($this, 'viewed'));
+        event(
+            new InvoiceStatusChanged(
+                $this,
+                'viewed'
+            )
+        );
     }
 
     public function markAsPaid(): void
@@ -429,7 +499,12 @@ class Invoice extends Model
         $this->addToStatusHistory('paid');
         $this->save();
 
-        event(new InvoiceStatusChanged($this, 'paid'));
+        event(
+            new InvoiceStatusChanged(
+                $this,
+                'paid'
+            )
+        );
     }
 
     protected function addToStatusHistory($status): void
@@ -445,7 +520,8 @@ class Invoice extends Model
 
     protected function status(): Attribute
     {
-        return Attribute::make(get: function ($value) {
+        return Attribute::make(
+            get: function ($value) {
             if ($this->paid_at) {
                 return 'paid';
             }
@@ -457,7 +533,8 @@ class Invoice extends Model
             }
 
             return $value;
-        });
+        }
+        );
     }
 
     public function setupRecurringBilling($frequency, $billingDay = null)
@@ -468,12 +545,17 @@ class Invoice extends Model
 
         $this->update(['is_recurring' => true]);
 
-        return $this->recurringConfiguration()->create([
-            'frequency' => $frequency,
-            'billing_day' => $billingDay,
-            'next_billing_date' => $this->calculateNextBillingDate($frequency, $billingDay),
-            'is_active' => true,
-        ]);
+        return $this->recurringConfiguration()->create(
+            [
+                'frequency' => $frequency,
+                'billing_day' => $billingDay,
+                'next_billing_date' => $this->calculateNextBillingDate(
+                    $frequency,
+                    $billingDay
+                ),
+                'is_active' => true,
+            ]
+        );
     }
 
     private function calculateNextBillingDate($frequency, $billingDay = null): CarbonInterface

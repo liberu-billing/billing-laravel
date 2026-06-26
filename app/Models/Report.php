@@ -6,13 +6,14 @@ namespace App\Models;
 
 use App\Traits\HasTeam;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 #[Fillable([
     'name',
-    'type', // revenue, expense, outstanding
+    'type',
+    // revenue, expense, outstanding
     'start_date',
     'end_date',
     'filters',
@@ -26,7 +27,7 @@ class Report extends Model
 {
     use HasTeam;
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

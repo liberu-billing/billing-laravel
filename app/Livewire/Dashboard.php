@@ -15,38 +15,57 @@ class Dashboard extends Component
     public ?array $chartPreferences = null;
 
     protected array $availableCharts = [
-        'revenue' => ['title' => 'Revenue Overview', 'type' => 'line'],
-        'invoices' => ['title' => 'Invoice Status', 'type' => 'pie'],
-        'clients' => ['title' => 'Active Clients', 'type' => 'bar'],
+        'revenue' => [
+            'title' => 'Revenue Overview',
+            'type' => 'line'
+        ],
+        'invoices' => [
+            'title' => 'Invoice Status',
+            'type' => 'pie'
+        ],
+        'clients' => [
+            'title' => 'Active Clients',
+            'type' => 'bar'
+        ],
     ];
 
     public function mount(): void
     {
         $this->chartPreferences = auth()->user()->dashboard_preferences
-            ?? array_fill_keys(array_keys($this->availableCharts), true);
+            ?? array_fill_keys(
+                array_keys($this->availableCharts),
+                true
+            );
 
         $this->activeCharts = array_keys(array_filter($this->chartPreferences));
     }
 
     public function toggleChart(string $chartKey): void
     {
-        $this->chartPreferences[$chartKey] = ! ($this->chartPreferences[$chartKey] ?? false);
+        $this->chartPreferences[$chartKey] = !($this->chartPreferences[$chartKey] ?? false);
         auth()->user()->update(['dashboard_preferences' => $this->chartPreferences]);
         $this->activeCharts = array_keys(array_filter($this->chartPreferences));
     }
 
     public function getMetrics(): array
     {
-        return Cache::remember('dashboard.metrics', 300, fn (): array => [
-            'revenue' => $this->getRevenueData(),
-            'invoices' => $this->getInvoiceData(),
-            'clients' => $this->getClientData(),
-        ]);
+        return Cache::remember(
+            'dashboard.metrics',
+            300,
+            fn(): array => [
+                'revenue' => $this->getRevenueData(),
+                'invoices' => $this->getInvoiceData(),
+                'clients' => $this->getClientData(),
+            ]
+        );
     }
 
     private function getRevenueData(): array
     {
-        $revenue = Invoice::where('status', 'paid')
+        $revenue = Invoice::where(
+            'status',
+            'paid'
+        )
             ->selectRaw('DATE(paid_at) as date, SUM(total_amount) as total')
             ->groupBy('date')
             ->orderBy('date')
@@ -54,7 +73,12 @@ class Dashboard extends Component
 
         return [
             'labels' => $revenue->pluck('date'),
-            'series' => [['name' => 'Revenue', 'data' => $revenue->pluck('total')]],
+            'series' => [
+                [
+                    'name' => 'Revenue',
+                    'data' => $revenue->pluck('total')
+                ]
+            ],
         ];
     }
 
@@ -79,15 +103,23 @@ class Dashboard extends Component
 
         return [
             'labels' => $clients->pluck('date'),
-            'series' => [['name' => 'New Clients', 'data' => $clients->pluck('count')]],
+            'series' => [
+                [
+                    'name' => 'New Clients',
+                    'data' => $clients->pluck('count')
+                ]
+            ],
         ];
     }
 
     public function render(): View
     {
-        return view('livewire.dashboard', [
-            'metrics' => $this->getMetrics(),
-            'availableCharts' => $this->availableCharts,
-        ]);
+        return view(
+            'livewire.dashboard',
+            [
+                'metrics' => $this->getMetrics(),
+                'availableCharts' => $this->availableCharts,
+            ]
+        );
     }
 }

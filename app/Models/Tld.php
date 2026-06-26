@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 #[Fillable([
     'name',
@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Model;
 ])]
 class Tld extends Model
 {
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [

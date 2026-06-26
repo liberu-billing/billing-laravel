@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 #[Fillable([
     'invoice_id',
@@ -48,7 +49,7 @@ class Payment extends Model
     use HasFactory;
     use HasTeam;
 
-    #[\Override]
+    #[Override]
     protected $fillable = [
         'invoice_id',
         'payment_gateway_id',
@@ -62,7 +63,7 @@ class Payment extends Model
         'payment_method_details',
     ];
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
 
@@ -78,13 +79,15 @@ class Payment extends Model
 
     protected function reconciliationStatusBadge(): Attribute
     {
-        return Attribute::make(get: fn (): string => match ($this->reconciliation_status) {
+        return Attribute::make(
+            get: fn(): string => match ($this->reconciliation_status) {
             'reconciled' => '<span class="badge badge-success">Reconciled</span>',
             'unmatched' => '<span class="badge badge-warning">Unmatched</span>',
             'discrepancy' => '<span class="badge badge-danger">Discrepancy</span>',
             'failed' => '<span class="badge badge-danger">Failed</span>',
             default => '<span class="badge badge-secondary">Pending</span>',
-        });
+        }
+        );
     }
 
     public function invoice(): BelongsTo
@@ -99,7 +102,11 @@ class Payment extends Model
 
     public function currency(): BelongsTo
     {
-        return $this->belongsTo(Currency::class, 'currency', 'code');
+        return $this->belongsTo(
+            Currency::class,
+            'currency',
+            'code'
+        );
     }
 
     public function affiliate(): BelongsTo
@@ -119,7 +126,7 @@ class Payment extends Model
 
     public function processRefund(float $amount, ?string $reason = null): bool
     {
-        if (! $this->isRefundable()) {
+        if (!$this->isRefundable()) {
             throw new Exception('This payment is not eligible for refund');
         }
 
@@ -137,21 +144,29 @@ class Payment extends Model
 
     public function getFormattedAmount(): string
     {
-        return number_format($this->amount, 2).' '.$this->currency;
+        return number_format(
+                $this->amount,
+                2
+            ) . ' ' . $this->currency;
     }
 
     public function getFormattedRefundedAmount(): string
     {
-        return number_format($this->refunded_amount ?? 0, 2).' '.$this->currency;
+        return number_format(
+                $this->refunded_amount ?? 0,
+                2
+            ) . ' ' . $this->currency;
     }
 
     protected function refundStatusBadge(): Attribute
     {
-        return Attribute::make(get: fn (): string => match ($this->refund_status) {
+        return Attribute::make(
+            get: fn(): string => match ($this->refund_status) {
             'none' => '<span class="badge badge-danger">No Refund</span>',
             'partial' => '<span class="badge badge-warning">Partial Refund</span>',
             'full' => '<span class="badge badge-success">Full Refund</span>',
             default => '<span class="badge badge-secondary">Unknown</span>',
-        });
+        }
+        );
     }
 }

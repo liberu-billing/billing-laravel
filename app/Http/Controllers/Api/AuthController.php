@@ -13,26 +13,38 @@ class AuthController extends Controller
 {
     public function token(Request $request): JsonResponse
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-            'device_name' => 'required',
-        ]);
+        $request->validate(
+            [
+                'email' => 'required|email',
+                'password' => 'required',
+                'device_name' => 'required',
+            ]
+        );
 
-        $user = User::where('email', $request->email)->first();
+        $user = User::where(
+            'email',
+            $request->email
+        )->first();
 
-        if (! $user || ! Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
-            ]);
+        if (!$user || !Hash::check(
+                $request->password,
+                $user->password
+            )) {
+            throw ValidationException::withMessages(
+                [
+                    'email' => ['The provided credentials are incorrect.'],
+                ]
+            );
         }
 
         $token = $user->createToken($request->device_name);
 
-        return response()->json([
-            'token' => $token->plainTextToken,
-            'user' => $user,
-        ]);
+        return response()->json(
+            [
+                'token' => $token->plainTextToken,
+                'user' => $user,
+            ]
+        );
     }
 
     public function revokeToken(Request $request): JsonResponse

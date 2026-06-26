@@ -18,20 +18,29 @@ class ModuleAutoloadCommand extends Command
         $this->info('Refreshing Composer autoloader...');
 
         $composer = file_exists(base_path('composer.phar'))
-            ? [PHP_BINARY, 'composer.phar']
+            ? [
+                PHP_BINARY,
+                'composer.phar'
+            ]
             : ['composer'];
 
         $process = new Process(
-            [...$composer, 'dump-autoload', '--optimize'],
+            [
+                ...$composer,
+                'dump-autoload',
+                '--optimize'
+            ],
             base_path()
         );
 
         $process->setTimeout(120);
-        $process->run(function (string $type, string $buffer) {
-            $this->output->write($buffer);
-        });
+        $process->run(
+            function (string $type, string $buffer) {
+                $this->output->write($buffer);
+            }
+        );
 
-        if (! $process->isSuccessful()) {
+        if (!$process->isSuccessful()) {
             $this->error('composer dump-autoload failed.');
 
             return self::FAILURE;

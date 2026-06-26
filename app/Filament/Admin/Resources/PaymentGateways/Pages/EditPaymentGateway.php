@@ -7,13 +7,14 @@ namespace App\Filament\Admin\Resources\PaymentGateways\Pages;
 use App\Filament\Admin\Resources\PaymentGateways\PaymentGatewayResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Override;
 
 class EditPaymentGateway extends EditRecord
 {
-    #[\Override]
+    #[Override]
     protected static string $resource = PaymentGatewayResource::class;
 
-    #[\Override]
+    #[Override]
     protected function getHeaderActions(): array
     {
         return [

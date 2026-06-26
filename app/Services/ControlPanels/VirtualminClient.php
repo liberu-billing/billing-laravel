@@ -39,7 +39,7 @@ class VirtualminClient
             'domain' => $domain,
             'user' => $username,
             'pass' => $password,
-            'email' => $username.'@'.$domain,
+            'email' => $username . '@' . $domain,
             'plan' => $package,
             'mysql' => '',
             'web' => '',
@@ -135,20 +135,24 @@ class VirtualminClient
 
     protected function makeApiCall(array $params): bool
     {
-        if (! $this->server) {
+        if (!$this->server) {
             throw new Exception('Server not configured');
         }
 
         try {
             $params['json'] = '1'; // Request JSON response
 
-            $response = $this->client->request('POST', 'https://'.$this->server->hostname.':10000/virtual-server/remote.cgi', [
-                'headers' => [
-                    'Authorization' => 'Basic '.base64_encode($this->server->username.':'.$this->apiKey),
-                ],
-                'form_params' => $params,
-                'verify' => false,
-            ]);
+            $response = $this->client->request(
+                'POST',
+                'https://' . $this->server->hostname . ':10000/virtual-server/remote.cgi',
+                [
+                    'headers' => [
+                        'Authorization' => 'Basic ' . base64_encode($this->server->username . ':' . $this->apiKey),
+                    ],
+                    'form_params' => $params,
+                    'verify' => false,
+                ]
+            );
 
             $result = json_decode(
                 $response->getBody()->getContents(),
@@ -158,28 +162,37 @@ class VirtualminClient
             );
 
             if (isset($result['status']) && $result['status'] === 'success') {
-                Log::info('Virtualmin API call successful', [
-                    'program' => $params['program'],
-                    'server' => $this->server->hostname,
-                ]);
+                Log::info(
+                    'Virtualmin API call successful',
+                    [
+                        'program' => $params['program'],
+                        'server' => $this->server->hostname,
+                    ]
+                );
 
                 return true;
             }
 
-            Log::error('Virtualmin API call failed', [
-                'program' => $params['program'],
-                'server' => $this->server->hostname,
-                'error' => $result['error'] ?? 'Unknown error',
-            ]);
+            Log::error(
+                'Virtualmin API call failed',
+                [
+                    'program' => $params['program'],
+                    'server' => $this->server->hostname,
+                    'error' => $result['error'] ?? 'Unknown error',
+                ]
+            );
 
             return false;
 
         } catch (GuzzleException $e) {
-            Log::error('Virtualmin API call error', [
-                'program' => $params['program'] ?? 'unknown',
-                'server' => $this->server->hostname,
-                'error' => $e->getMessage(),
-            ]);
+            Log::error(
+                'Virtualmin API call error',
+                [
+                    'program' => $params['program'] ?? 'unknown',
+                    'server' => $this->server->hostname,
+                    'error' => $e->getMessage(),
+                ]
+            );
 
             return false;
         }

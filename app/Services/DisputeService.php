@@ -19,47 +19,74 @@ class DisputeService
             throw new Exception('Invoice already has an active dispute');
         }
 
-        $dispute = InvoiceDispute::create([
-            'invoice_id' => $invoice->id,
-            'customer_id' => $invoice->customer_id,
-            'status' => 'open',
-            'reason' => $data['reason'],
-            'description' => $data['description'],
-        ]);
+        $dispute = InvoiceDispute::create(
+            [
+                'invoice_id' => $invoice->id,
+                'customer_id' => $invoice->customer_id,
+                'status' => 'open',
+                'reason' => $data['reason'],
+                'description' => $data['description'],
+            ]
+        );
 
         $invoice->update(['status' => 'disputed']);
-        $this->sendDisputeNotifications($dispute, 'created');
+        $this->sendDisputeNotifications(
+            $dispute,
+            'created'
+        );
 
         return $dispute;
     }
 
     public function updateDisputeStatus(InvoiceDispute $dispute, string $status, ?string $notes = null): InvoiceDispute
     {
-        $dispute->update([
-            'status' => $status,
-            'resolution_notes' => $notes,
-            'resolved_at' => in_array($status, ['resolved', 'rejected']) ? now() : null,
-            'resolved_by' => in_array($status, ['resolved', 'rejected']) ? auth()->id() : null,
-        ]);
+        $dispute->update(
+            [
+                'status' => $status,
+                'resolution_notes' => $notes,
+                'resolved_at' => in_array(
+                    $status,
+                    [
+                        'resolved',
+                        'rejected'
+                    ]
+                ) ? now() : null,
+                'resolved_by' => in_array(
+                    $status,
+                    [
+                        'resolved',
+                        'rejected'
+                    ]
+                ) ? auth()->id() : null,
+            ]
+        );
 
         if ($status === 'resolved') {
             $dispute->invoice->update(['status' => 'pending']);
         }
 
-        $this->sendDisputeNotifications($dispute, 'status_updated');
+        $this->sendDisputeNotifications(
+            $dispute,
+            'status_updated'
+        );
 
         return $dispute;
     }
 
     public function addMessage(InvoiceDispute $dispute, array $data)
     {
-        $message = $dispute->messages()->create([
-            'user_id' => auth()->id(),
-            'message' => $data['message'],
-            'attachments' => $data['attachments'] ?? null,
-        ]);
+        $message = $dispute->messages()->create(
+            [
+                'user_id' => auth()->id(),
+                'message' => $data['message'],
+                'attachments' => $data['attachments'] ?? null,
+            ]
+        );
 
-        $this->sendDisputeNotifications($dispute, 'new_message');
+        $this->sendDisputeNotifications(
+            $dispute,
+            'new_message'
+        );
 
         return $message;
     }
@@ -67,10 +94,19 @@ class DisputeService
     protected function sendDisputeNotifications(InvoiceDispute $dispute, string $type)
     {
         $customer = $dispute->customer;
-        $adminUsers = User::where('team_id', $customer->team_id)
-            ->whereHas('roles', function ($q): void {
-                $q->where('name', 'admin');
-            })->get();
+        $adminUsers = User::where(
+            'team_id',
+            $customer->team_id
+        )
+            ->whereHas(
+                'roles',
+                function ($q): void {
+                    $q->where(
+                        'name',
+                        'admin'
+                    );
+                }
+            )->get();
 
         switch ($type) {
             case 'created':

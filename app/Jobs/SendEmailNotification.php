@@ -20,24 +20,30 @@ class SendEmailNotification implements ShouldQueue
 
     public int $backoff = 300; // 5 minutes
 
-    public function __construct(protected Mailable $mailable, protected string $recipient) {}
+    public function __construct(protected Mailable $mailable, protected string $recipient) { }
 
     public function handle(): void
     {
         try {
             Mail::to($this->recipient)->send($this->mailable);
 
-            Log::info('Queued email sent successfully', [
-                'recipient' => $this->recipient,
-                'mailable_class' => $this->mailable::class,
-            ]);
+            Log::info(
+                'Queued email sent successfully',
+                [
+                    'recipient' => $this->recipient,
+                    'mailable_class' => $this->mailable::class,
+                ]
+            );
         } catch (Exception $e) {
-            Log::error('Failed to send queued email', [
-                'recipient' => $this->recipient,
-                'mailable_class' => $this->mailable::class,
-                'error' => $e->getMessage(),
-                'attempt' => $this->attempts(),
-            ]);
+            Log::error(
+                'Failed to send queued email',
+                [
+                    'recipient' => $this->recipient,
+                    'mailable_class' => $this->mailable::class,
+                    'error' => $e->getMessage(),
+                    'attempt' => $this->attempts(),
+                ]
+            );
 
             throw $e;
         }
@@ -45,10 +51,13 @@ class SendEmailNotification implements ShouldQueue
 
     public function failed(Throwable $exception): void
     {
-        Log::error('Email job failed permanently', [
-            'recipient' => $this->recipient,
-            'mailable_class' => $this->mailable::class,
-            'error' => $exception->getMessage(),
-        ]);
+        Log::error(
+            'Email job failed permanently',
+            [
+                'recipient' => $this->recipient,
+                'mailable_class' => $this->mailable::class,
+                'error' => $exception->getMessage(),
+            ]
+        );
     }
 }

@@ -36,7 +36,7 @@ class DirectAdminClient
             'action' => 'create',
             'add' => 'Submit',
             'username' => $username,
-            'email' => $username.'@'.$domain,
+            'email' => $username . '@' . $domain,
             'passwd' => $password,
             'passwd2' => $password,
             'domain' => $domain,
@@ -57,7 +57,10 @@ class DirectAdminClient
             'dns' => 'ON',
         ];
 
-        return $this->makeApiCall('/CMD_API_ACCOUNT_USER', $params);
+        return $this->makeApiCall(
+            '/CMD_API_ACCOUNT_USER',
+            $params
+        );
     }
 
     /**
@@ -71,7 +74,10 @@ class DirectAdminClient
             'suspend_reason' => 'Non-payment',
         ];
 
-        return $this->makeApiCall('/CMD_API_SELECT_USERS', $params);
+        return $this->makeApiCall(
+            '/CMD_API_SELECT_USERS',
+            $params
+        );
     }
 
     /**
@@ -84,7 +90,10 @@ class DirectAdminClient
             'select0' => $username,
         ];
 
-        return $this->makeApiCall('/CMD_API_SELECT_USERS', $params);
+        return $this->makeApiCall(
+            '/CMD_API_SELECT_USERS',
+            $params
+        );
     }
 
     /**
@@ -98,7 +107,10 @@ class DirectAdminClient
             'package' => $newPackage,
         ];
 
-        return $this->makeApiCall('/CMD_API_MODIFY_USER', $params);
+        return $this->makeApiCall(
+            '/CMD_API_MODIFY_USER',
+            $params
+        );
     }
 
     /**
@@ -112,7 +124,10 @@ class DirectAdminClient
             'select0' => $username,
         ];
 
-        return $this->makeApiCall('/CMD_API_SELECT_USERS', $params);
+        return $this->makeApiCall(
+            '/CMD_API_SELECT_USERS',
+            $params
+        );
     }
 
     /**
@@ -126,7 +141,10 @@ class DirectAdminClient
             'add' => $addon,
         ];
 
-        return $this->makeApiCall('/CMD_API_MODIFY_USER', $params);
+        return $this->makeApiCall(
+            '/CMD_API_MODIFY_USER',
+            $params
+        );
     }
 
     /**
@@ -140,50 +158,69 @@ class DirectAdminClient
             'remove' => $addon,
         ];
 
-        return $this->makeApiCall('/CMD_API_MODIFY_USER', $params);
+        return $this->makeApiCall(
+            '/CMD_API_MODIFY_USER',
+            $params
+        );
     }
 
     protected function makeApiCall(string $endpoint, $params): bool
     {
-        if (! $this->server) {
+        if (!$this->server) {
             throw new Exception('Server not configured');
         }
 
         try {
-            $response = $this->client->request('POST', 'https://'.$this->server->hostname.':2222'.$endpoint, [
-                'headers' => [
-                    'Authorization' => 'Basic '.base64_encode($this->server->username.':'.$this->loginKey),
-                ],
-                'form_params' => $params,
-                'verify' => false,
-            ]);
+            $response = $this->client->request(
+                'POST',
+                'https://' . $this->server->hostname . ':2222' . $endpoint,
+                [
+                    'headers' => [
+                        'Authorization' => 'Basic ' . base64_encode($this->server->username . ':' . $this->loginKey),
+                    ],
+                    'form_params' => $params,
+                    'verify' => false,
+                ]
+            );
 
             $result = $response->getBody()->getContents();
-            parse_str($result, $parsed);
+            parse_str(
+                $result,
+                $parsed
+            );
 
             if (isset($parsed['error']) && $parsed['error'] === '0') {
-                Log::info('DirectAdmin API call successful', [
-                    'endpoint' => $endpoint,
-                    'server' => $this->server->hostname,
-                ]);
+                Log::info(
+                    'DirectAdmin API call successful',
+                    [
+                        'endpoint' => $endpoint,
+                        'server' => $this->server->hostname,
+                    ]
+                );
 
                 return true;
             }
 
-            Log::error('DirectAdmin API call failed', [
-                'endpoint' => $endpoint,
-                'server' => $this->server->hostname,
-                'error' => $parsed['text'] ?? $result,
-            ]);
+            Log::error(
+                'DirectAdmin API call failed',
+                [
+                    'endpoint' => $endpoint,
+                    'server' => $this->server->hostname,
+                    'error' => $parsed['text'] ?? $result,
+                ]
+            );
 
             return false;
 
         } catch (GuzzleException $e) {
-            Log::error('DirectAdmin API call error', [
-                'endpoint' => $endpoint,
-                'server' => $this->server->hostname,
-                'error' => $e->getMessage(),
-            ]);
+            Log::error(
+                'DirectAdmin API call error',
+                [
+                    'endpoint' => $endpoint,
+                    'server' => $this->server->hostname,
+                    'error' => $e->getMessage(),
+                ]
+            );
 
             return false;
         }

@@ -7,13 +7,14 @@ namespace App\Filament\App\Resources\Users\Pages;
 use App\Filament\App\Resources\Users\UserResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
+use Override;
 
 class ListUsers extends ListRecords
 {
-    #[\Override]
+    #[Override]
     protected static string $resource = UserResource::class;
 
-    #[\Override]
+    #[Override]
     protected function getHeaderActions(): array
     {
         return [

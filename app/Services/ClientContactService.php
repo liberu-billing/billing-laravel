@@ -6,6 +6,7 @@ use App\Models\ClientContact;
 use App\Models\Customer;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
 
 class ClientContactService
 {
@@ -22,13 +23,15 @@ class ClientContactService
      */
     public function createContact(Customer $customer, array $data): ClientContact
     {
-        return DB::transaction(function () use ($customer, $data) {
-            if (! empty($data['is_primary'])) {
-                $customer->contacts()->update(['is_primary' => false]);
-            }
+        return DB::transaction(
+            function () use ($customer, $data) {
+                if (!empty($data['is_primary'])) {
+                    $customer->contacts()->update(['is_primary' => false]);
+                }
 
-            return $customer->contacts()->create($data);
-        });
+                return $customer->contacts()->create($data);
+            }
+        );
     }
 
     /**
@@ -36,17 +39,23 @@ class ClientContactService
      */
     public function updateContact(ClientContact $contact, array $data): ClientContact
     {
-        return DB::transaction(function () use ($contact, $data) {
-            if (! empty($data['is_primary'])) {
-                $contact->customer->contacts()
-                    ->where('id', '!=', $contact->id)
-                    ->update(['is_primary' => false]);
+        return DB::transaction(
+            function () use ($contact, $data) {
+                if (!empty($data['is_primary'])) {
+                    $contact->customer->contacts()
+                        ->where(
+                            'id',
+                            '!=',
+                            $contact->id
+                        )
+                        ->update(['is_primary' => false]);
+                }
+
+                $contact->update($data);
+
+                return $contact->fresh();
             }
-
-            $contact->update($data);
-
-            return $contact->fresh();
-        });
+        );
     }
 
     /**
@@ -55,7 +64,7 @@ class ClientContactService
     public function deleteContact(ClientContact $contact): void
     {
         if ($contact->is_primary) {
-            throw new \RuntimeException('Cannot delete the primary contact.');
+            throw new RuntimeException('Cannot delete the primary contact.');
         }
 
         $contact->delete();
@@ -66,12 +75,14 @@ class ClientContactService
      */
     public function makePrimary(ClientContact $contact): ClientContact
     {
-        return DB::transaction(function () use ($contact) {
-            $contact->customer->contacts()->update(['is_primary' => false]);
-            $contact->update(['is_primary' => true]);
+        return DB::transaction(
+            function () use ($contact) {
+                $contact->customer->contacts()->update(['is_primary' => false]);
+                $contact->update(['is_primary' => true]);
 
-            return $contact->fresh();
-        });
+                return $contact->fresh();
+            }
+        );
     }
 
     /**
@@ -79,6 +90,9 @@ class ClientContactService
      */
     public function getPrimaryContact(Customer $customer): ?ClientContact
     {
-        return $customer->contacts()->where('is_primary', true)->first();
+        return $customer->contacts()->where(
+            'is_primary',
+            true
+        )->first();
     }
 }

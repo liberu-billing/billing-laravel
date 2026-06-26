@@ -9,28 +9,46 @@ use InvalidArgumentException;
 
 class ReportExportService
 {
-    public function __construct(protected ReportService $reportService) {}
+    public function __construct(protected ReportService $reportService) { }
 
     public function exportToCsv(Report $report): string
     {
         $data = $this->generateReportData($report);
-        $filename = sprintf('report_%s_%s.csv', $report->type, now()->format('Y-m-d'));
+        $filename = sprintf(
+            'report_%s_%s.csv',
+            $report->type,
+            now()->format('Y-m-d')
+        );
 
-        $handle = fopen('php://temp', 'r+');
+        $handle = fopen(
+            'php://temp',
+            'r+'
+        );
 
         // Add headers
-        fputcsv($handle, array_keys(reset($data)), escape: '\\');
+        fputcsv(
+            $handle,
+            array_keys(reset($data)),
+            escape: '\\'
+        );
 
         // Add data
         foreach ($data as $row) {
-            fputcsv($handle, $row, escape: '\\');
+            fputcsv(
+                $handle,
+                $row,
+                escape: '\\'
+            );
         }
 
         rewind($handle);
         $csv = stream_get_contents($handle);
         fclose($handle);
 
-        Storage::put("reports/{$filename}", $csv);
+        Storage::put(
+            "reports/{$filename}",
+            $csv
+        );
 
         return $filename;
     }
@@ -38,14 +56,24 @@ class ReportExportService
     public function exportToPdf(Report $report): string
     {
         $data = $this->generateReportData($report);
-        $filename = sprintf('report_%s_%s.pdf', $report->type, now()->format('Y-m-d'));
+        $filename = sprintf(
+            'report_%s_%s.pdf',
+            $report->type,
+            now()->format('Y-m-d')
+        );
 
-        $pdf = Pdf::loadView('reports.pdf', [
-            'report' => $report,
-            'data' => $data,
-        ]);
+        $pdf = Pdf::loadView(
+            'reports.pdf',
+            [
+                'report' => $report,
+                'data' => $data,
+            ]
+        );
 
-        Storage::put("reports/{$filename}", $pdf->output());
+        Storage::put(
+            "reports/{$filename}",
+            $pdf->output()
+        );
 
         return $filename;
     }

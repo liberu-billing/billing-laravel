@@ -48,8 +48,11 @@ class SocialLinksWidget extends Widget
             ];
         }
 
-        return view($this->view, [
-            'links' => $links,
-        ]);
+        return view(
+            $this->view,
+            [
+                'links' => $links,
+            ]
+        );
     }
 }

@@ -7,9 +7,9 @@ namespace App\Models;
 use App\Traits\HasTeam;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
+use Override;
 
 #[Fillable([
     'team_id',
@@ -22,16 +22,20 @@ class ReminderSetting extends Model
 {
     use HasTeam;
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [
             'is_active' => 'boolean',
         ];
     }
+
     #[Scope]
     private function isActive(Builder $builder): void
     {
-        $builder->where('is_active', 1);
+        $builder->where(
+            'is_active',
+            1
+        );
     }
 }

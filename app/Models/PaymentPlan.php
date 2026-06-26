@@ -6,10 +6,10 @@ namespace App\Models;
 
 use App\Traits\HasTeam;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Override;
 
 #[Fillable([
     'invoice_id',
@@ -24,7 +24,7 @@ class PaymentPlan extends Model
 {
     use HasTeam;
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [
@@ -40,6 +40,9 @@ class PaymentPlan extends Model
 
     public function installments(): HasMany
     {
-        return $this->hasMany(Invoice::class, 'parent_invoice_id');
+        return $this->hasMany(
+            Invoice::class,
+            'parent_invoice_id'
+        );
     }
 }

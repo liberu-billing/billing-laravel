@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Traits\HasTeam;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 #[Fillable([
@@ -21,12 +20,26 @@ class EmailTemplate extends Model
 
     public static function getTemplate($type, $teamId = null)
     {
-        return static::where('type', $type)
-            ->where(function ($query) use ($teamId): void {
-                $query->where('team_id', $teamId)
-                    ->orWhere('is_default', true);
-            })
-            ->orderBy('team_id', 'desc') // Prioritize team templates
+        return static::where(
+            'type',
+            $type
+        )
+            ->where(
+                function ($query) use ($teamId): void {
+                    $query->where(
+                        'team_id',
+                        $teamId
+                    )
+                        ->orWhere(
+                            'is_default',
+                            true
+                        );
+                }
+            )
+            ->orderBy(
+                'team_id',
+                'desc'
+            ) // Prioritize team templates
             ->first();
     }
 }

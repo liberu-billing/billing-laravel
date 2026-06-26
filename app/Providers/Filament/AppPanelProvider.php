@@ -39,56 +39,86 @@ class AppPanelProvider extends PanelProvider
             ->path('app')
             ->login()
             ->viteTheme('resources/css/filament/admin/theme.css')
-            ->colors([
-                'primary' => Color::Gray,
-            ])
-            ->userMenuItems([
-                MenuItem::make()
-                    ->label('Profile')
-                    ->icon('heroicon-o-user-circle')
-                    ->url(fn (): UrlGenerator|string => $this->shouldRegisterMenuItem()
-                        ? url(EditProfile::getUrl())
-                        : url($panel->getPath())),
-            ])
-            ->discoverResources(in: app_path('Filament/App/Resources'), for: 'App\\Filament\\App\\Resources')
-            ->discoverPages(in: app_path('Filament/App/Pages'), for: 'App\\Filament\\App\\Pages')
-            ->pages([
-                Dashboard::class,
-                EditProfile::class,
-            ])
-            ->discoverWidgets(in: app_path('Filament/App/Widgets/Home'), for: 'App\\Filament\\App\\Widgets\\Home')
-            ->widgets([
-                Widgets\AccountWidget::class,
-            ])
-            ->middleware([
-                EncryptCookies::class,
-                AddQueuedCookiesToResponse::class,
-                StartSession::class,
-                AuthenticateSession::class,
-                ShareErrorsFromSession::class,
-                PreventRequestForgery::class,
-                SubstituteBindings::class,
-                DisableBladeIconComponents::class,
-                DispatchServingFilamentEvent::class,
-            ])
-            ->authMiddleware([
-                Authenticate::class,
-                TeamsPermission::class,
-            ]);
+            ->colors(
+                [
+                    'primary' => Color::Gray,
+                ]
+            )
+            ->userMenuItems(
+                [
+                    MenuItem::make()
+                        ->label('Profile')
+                        ->icon('heroicon-o-user-circle')
+                        ->url(
+                            fn(): UrlGenerator|string => $this->shouldRegisterMenuItem()
+                                ? url(EditProfile::getUrl())
+                                : url($panel->getPath())
+                        ),
+                ]
+            )
+            ->discoverResources(
+                in: app_path('Filament/App/Resources'),
+                for: 'App\\Filament\\App\\Resources'
+            )
+            ->discoverPages(
+                in: app_path('Filament/App/Pages'),
+                for: 'App\\Filament\\App\\Pages'
+            )
+            ->pages(
+                [
+                    Dashboard::class,
+                    EditProfile::class,
+                ]
+            )
+            ->discoverWidgets(
+                in: app_path('Filament/App/Widgets/Home'),
+                for: 'App\\Filament\\App\\Widgets\\Home'
+            )
+            ->widgets(
+                [
+                    Widgets\AccountWidget::class,
+                ]
+            )
+            ->middleware(
+                [
+                    EncryptCookies::class,
+                    AddQueuedCookiesToResponse::class,
+                    StartSession::class,
+                    AuthenticateSession::class,
+                    ShareErrorsFromSession::class,
+                    PreventRequestForgery::class,
+                    SubstituteBindings::class,
+                    DisableBladeIconComponents::class,
+                    DispatchServingFilamentEvent::class,
+                ]
+            )
+            ->authMiddleware(
+                [
+                    Authenticate::class,
+                    TeamsPermission::class,
+                ]
+            );
 
         if (Features::hasTeamFeatures()) {
             $panel
-                ->tenant(Team::class, ownershipRelationship: 'team')
+                ->tenant(
+                    Team::class,
+                    ownershipRelationship: 'team'
+                )
                 ->tenantRegistration(Pages\CreateTeam::class)
                 ->tenantProfile(Pages\EditTeam::class)
-                ->userMenuItems([
-                    MenuItem::make()
-                        ->label('Team Settings')
-                        ->icon('heroicon-o-cog-6-tooth')
-                        ->url(fn (): UrlGenerator|string => $this->shouldRegisterMenuItem()
-                            ? url(Pages\EditTeam::getUrl())
-                            : url($panel->getPath())),
-                ]);
+                ->userMenuItems(
+                    [
+                        MenuItem::make()
+                            ->label('Team Settings')
+                            ->icon('heroicon-o-cog-6-tooth')
+                            ->url(
+                                fn(): UrlGenerator|string => $this->shouldRegisterMenuItem()
+                                    ? url(Pages\EditTeam::getUrl())
+                                    : url($panel->getPath())
+                            ),
+                    ]
+                );
         }
 
         return $panel;
@@ -96,7 +126,10 @@ class AppPanelProvider extends PanelProvider
 
     public function boot(): void
     {
-        Event::listen(TenantSet::class, SwitchTeam::class);
+        Event::listen(
+            TenantSet::class,
+            SwitchTeam::class
+        );
     }
 
     public function shouldRegisterMenuItem(): bool

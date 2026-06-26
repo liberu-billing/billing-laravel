@@ -6,9 +6,10 @@ namespace App\Filament\Admin\Resources\PaymentGateways\Pages;
 
 use App\Filament\Admin\Resources\PaymentGateways\PaymentGatewayResource;
 use Filament\Resources\Pages\CreateRecord;
+use Override;
 
 class CreatePaymentGateway extends CreateRecord
 {
-    #[\Override]
+    #[Override]
     protected static string $resource = PaymentGatewayResource::class;
 }

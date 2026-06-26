@@ -8,6 +8,7 @@ use App\Filament\Admin\Resources\MenuResource\Pages\CreateMenu;
 use App\Filament\Admin\Resources\MenuResource\Pages\EditMenu;
 use App\Filament\Admin\Resources\MenuResource\Pages\ListMenus;
 use App\Models\Menu;
+use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -17,74 +18,89 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Override;
+use UnitEnum;
 
 class MenuResource extends Resource
 {
-    #[\Override]
+    #[Override]
     protected static ?string $model = Menu::class;
 
-    #[\Override]
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-bars-3';
+    #[Override]
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-bars-3';
 
-    #[\Override]
-    protected static string|\UnitEnum|null $navigationGroup = 'Administration';
+    #[Override]
+    protected static string|UnitEnum|null $navigationGroup = 'Administration';
 
-    #[\Override]
+    #[Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
-            ->components([
-                TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-                TextInput::make('url')
-                    ->url()
-                    ->required()
-                    ->maxLength(255),
-                Select::make('parent_id')
-                    ->label('Parent Menu')
-                    ->relationship('parent', 'name')
-                    ->nullable(),
-                TextInput::make('order')
-                    ->numeric()
-                    ->default(0),
-            ]);
+            ->components(
+                [
+                    TextInput::make('name')
+                        ->required()
+                        ->maxLength(255),
+                    TextInput::make('url')
+                        ->url()
+                        ->required()
+                        ->maxLength(255),
+                    Select::make('parent_id')
+                        ->label('Parent Menu')
+                        ->relationship(
+                            'parent',
+                            'name'
+                        )
+                        ->nullable(),
+                    TextInput::make('order')
+                        ->numeric()
+                        ->default(0),
+                ]
+            );
     }
 
-    #[\Override]
+    #[Override]
     public static function table(Table $table): Table
     {
         return $table
-            ->columns([
-                TextColumn::make('name')
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('url')
-                    ->limit(40),
-                TextColumn::make('parent.name')
-                    ->label('Parent')
-                    ->placeholder('—'),
-                TextColumn::make('order')
-                    ->sortable(),
-            ])
+            ->columns(
+                [
+                    TextColumn::make('name')
+                        ->searchable()
+                        ->sortable(),
+                    TextColumn::make('url')
+                        ->limit(40),
+                    TextColumn::make('parent.name')
+                        ->label('Parent')
+                        ->placeholder('—'),
+                    TextColumn::make('order')
+                        ->sortable(),
+                ]
+            )
             ->filters([])
-            ->recordActions([
-                EditAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ]);
+            ->recordActions(
+                [
+                    EditAction::make(),
+                ]
+            )
+            ->toolbarActions(
+                [
+                    BulkActionGroup::make(
+                        [
+                            DeleteBulkAction::make(),
+                        ]
+                    ),
+                ]
+            );
     }
 
-    #[\Override]
+    #[Override]
     public static function getRelations(): array
     {
         return [];
     }
 
-    #[\Override]
+    #[Override]
     public static function getPages(): array
     {
         return [

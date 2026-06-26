@@ -12,16 +12,20 @@ class KnowledgeBaseController extends Controller
 {
     public function __construct(
         protected KnowledgeBaseService $knowledgeBaseService
-    ) {}
+    )
+    {
+    }
 
     /**
      * Get all categories
      */
     public function categories(): JsonResponse
     {
-        return response()->json([
-            'data' => $this->knowledgeBaseService->getCategoryTree(),
-        ]);
+        return response()->json(
+            [
+                'data' => $this->knowledgeBaseService->getCategoryTree(),
+            ]
+        );
     }
 
     /**
@@ -29,11 +33,13 @@ class KnowledgeBaseController extends Controller
      */
     public function search(Request $request): JsonResponse
     {
-        $request->validate([
-            'q' => 'required|string|min:2',
-            'category_id' => 'nullable|exists:knowledge_base_categories,id',
-            'limit' => 'nullable|integer|min:1|max:100',
-        ]);
+        $request->validate(
+            [
+                'q' => 'required|string|min:2',
+                'category_id' => 'nullable|exists:knowledge_base_categories,id',
+                'limit' => 'nullable|integer|min:1|max:100',
+            ]
+        );
 
         $articles = $this->knowledgeBaseService->search(
             $request->q,
@@ -41,9 +47,11 @@ class KnowledgeBaseController extends Controller
             $request->limit ?? 20
         );
 
-        return response()->json([
-            'data' => $articles,
-        ]);
+        return response()->json(
+            [
+                'data' => $articles,
+            ]
+        );
     }
 
     /**
@@ -51,12 +59,17 @@ class KnowledgeBaseController extends Controller
      */
     public function featured(Request $request): JsonResponse
     {
-        $limit = $request->input('limit', 5);
+        $limit = $request->input(
+            'limit',
+            5
+        );
         $articles = $this->knowledgeBaseService->getFeatured($limit);
 
-        return response()->json([
-            'data' => $articles,
-        ]);
+        return response()->json(
+            [
+                'data' => $articles,
+            ]
+        );
     }
 
     /**
@@ -64,12 +77,17 @@ class KnowledgeBaseController extends Controller
      */
     public function popular(Request $request): JsonResponse
     {
-        $limit = $request->input('limit', 10);
+        $limit = $request->input(
+            'limit',
+            10
+        );
         $articles = $this->knowledgeBaseService->getPopular($limit);
 
-        return response()->json([
-            'data' => $articles,
-        ]);
+        return response()->json(
+            [
+                'data' => $articles,
+            ]
+        );
     }
 
     /**
@@ -77,9 +95,20 @@ class KnowledgeBaseController extends Controller
      */
     public function show(string $slug): JsonResponse
     {
-        $article = KnowledgeBaseArticle::where('slug', $slug)
-            ->where('is_published', true)
-            ->with(['category', 'author'])
+        $article = KnowledgeBaseArticle::where(
+            'slug',
+            $slug
+        )
+            ->where(
+                'is_published',
+                true
+            )
+            ->with(
+                [
+                    'category',
+                    'author'
+                ]
+            )
             ->firstOrFail();
 
         // Track view
@@ -88,10 +117,12 @@ class KnowledgeBaseController extends Controller
         // Get related articles
         $related = $this->knowledgeBaseService->getRelated($article);
 
-        return response()->json([
-            'data' => $article,
-            'related' => $related,
-        ]);
+        return response()->json(
+            [
+                'data' => $article,
+                'related' => $related,
+            ]
+        );
     }
 
     /**
@@ -99,15 +130,23 @@ class KnowledgeBaseController extends Controller
      */
     public function markHelpful(string $slug): JsonResponse
     {
-        $article = KnowledgeBaseArticle::where('slug', $slug)
-            ->where('is_published', true)
+        $article = KnowledgeBaseArticle::where(
+            'slug',
+            $slug
+        )
+            ->where(
+                'is_published',
+                true
+            )
             ->firstOrFail();
 
         $this->knowledgeBaseService->markHelpful($article);
 
-        return response()->json([
-            'message' => 'Thank you for your feedback',
-        ]);
+        return response()->json(
+            [
+                'message' => 'Thank you for your feedback',
+            ]
+        );
     }
 
     /**
@@ -115,15 +154,23 @@ class KnowledgeBaseController extends Controller
      */
     public function markNotHelpful(string $slug): JsonResponse
     {
-        $article = KnowledgeBaseArticle::where('slug', $slug)
-            ->where('is_published', true)
+        $article = KnowledgeBaseArticle::where(
+            'slug',
+            $slug
+        )
+            ->where(
+                'is_published',
+                true
+            )
             ->firstOrFail();
 
         $this->knowledgeBaseService->markNotHelpful($article);
 
-        return response()->json([
-            'message' => 'Thank you for your feedback',
-        ]);
+        return response()->json(
+            [
+                'message' => 'Thank you for your feedback',
+            ]
+        );
     }
 
     /**
@@ -133,8 +180,10 @@ class KnowledgeBaseController extends Controller
     {
         $articles = $this->knowledgeBaseService->getByCategory($categoryId);
 
-        return response()->json([
-            'data' => $articles,
-        ]);
+        return response()->json(
+            [
+                'data' => $articles,
+            ]
+        );
     }
 }

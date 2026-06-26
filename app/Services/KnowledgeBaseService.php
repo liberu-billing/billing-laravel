@@ -14,17 +14,39 @@ class KnowledgeBaseService
     public function search(string $query, ?int $categoryId = null, int $limit = 20): Collection
     {
         $queryBuilder = KnowledgeBaseArticle::query()
-            ->where('is_published', true)
-            ->where(function ($q) use ($query): void {
-                if (config('database.default') !== 'sqlite') {
-                    $q->whereFullText(['title', 'content'], $query);
+            ->where(
+                'is_published',
+                true
+            )
+            ->where(
+                function ($q) use ($query): void {
+                    if (config('database.default') !== 'sqlite') {
+                        $q->whereFullText(
+                            [
+                                'title',
+                                'content'
+                            ],
+                            $query
+                        );
+                    }
+                    $q->orWhere(
+                        'title',
+                        'like',
+                        "%{$query}%"
+                    )
+                        ->orWhere(
+                            'content',
+                            'like',
+                            "%{$query}%"
+                        );
                 }
-                $q->orWhere('title', 'like', "%{$query}%")
-                    ->orWhere('content', 'like', "%{$query}%");
-            });
+            );
 
         if ($categoryId) {
-            $queryBuilder->where('category_id', $categoryId);
+            $queryBuilder->where(
+                'category_id',
+                $categoryId
+            );
         }
 
         return $queryBuilder
@@ -39,8 +61,14 @@ class KnowledgeBaseService
      */
     public function getFeatured(int $limit = 5): Collection
     {
-        return KnowledgeBaseArticle::where('is_published', true)
-            ->where('is_featured', true)
+        return KnowledgeBaseArticle::where(
+            'is_published',
+            true
+        )
+            ->where(
+                'is_featured',
+                true
+            )
             ->orderBy('sort_order')
             ->limit($limit)
             ->get();
@@ -51,7 +79,10 @@ class KnowledgeBaseService
      */
     public function getPopular(int $limit = 10): Collection
     {
-        return KnowledgeBaseArticle::where('is_published', true)
+        return KnowledgeBaseArticle::where(
+            'is_published',
+            true
+        )
             ->orderByDesc('view_count')
             ->limit($limit)
             ->get();
@@ -62,8 +93,14 @@ class KnowledgeBaseService
      */
     public function getByCategory(int $categoryId): Collection
     {
-        return KnowledgeBaseArticle::where('category_id', $categoryId)
-            ->where('is_published', true)
+        return KnowledgeBaseArticle::where(
+            'category_id',
+            $categoryId
+        )
+            ->where(
+                'is_published',
+                true
+            )
             ->orderBy('sort_order')
             ->get();
     }
@@ -73,7 +110,10 @@ class KnowledgeBaseService
      */
     public function getCategoriesWithCounts(): Collection
     {
-        return KnowledgeBaseCategory::where('is_active', true)
+        return KnowledgeBaseCategory::where(
+            'is_active',
+            true
+        )
             ->withCount(['publishedArticles'])
             ->orderBy('sort_order')
             ->get();
@@ -84,12 +124,22 @@ class KnowledgeBaseService
      */
     public function getCategoryTree(): Collection
     {
-        return KnowledgeBaseCategory::where('is_active', true)
+        return KnowledgeBaseCategory::where(
+            'is_active',
+            true
+        )
             ->whereNull('parent_id')
-            ->with(['children' => function ($query): void {
-                $query->where('is_active', true)
-                    ->orderBy('sort_order');
-            }])
+            ->with(
+                [
+                    'children' => function ($query): void {
+                        $query->where(
+                            'is_active',
+                            true
+                        )
+                            ->orderBy('sort_order');
+                    }
+                ]
+            )
             ->orderBy('sort_order')
             ->get();
     }
@@ -123,9 +173,19 @@ class KnowledgeBaseService
      */
     public function getRelated(KnowledgeBaseArticle $article, int $limit = 5): Collection
     {
-        return KnowledgeBaseArticle::where('is_published', true)
-            ->where('id', '!=', $article->id)
-            ->where('category_id', $article->category_id)
+        return KnowledgeBaseArticle::where(
+            'is_published',
+            true
+        )
+            ->where(
+                'id',
+                '!=',
+                $article->id
+            )
+            ->where(
+                'category_id',
+                $article->category_id
+            )
             ->orderByDesc('helpful_count')
             ->limit($limit)
             ->get();

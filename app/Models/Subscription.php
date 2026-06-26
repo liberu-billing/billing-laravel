@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Override;
 
 #[Fillable([
     'customer_id',
@@ -31,10 +32,14 @@ class Subscription extends Model
 {
     use HasFactory;
 
-    #[\Override]
-    protected $casts = ['start_date' => 'datetime', 'end_date' => 'datetime', 'last_billed_at' => 'datetime'];
+    #[Override]
+    protected $casts = [
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
+        'last_billed_at' => 'datetime'
+    ];
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
 
@@ -59,7 +64,10 @@ class Subscription extends Model
 
     public function productService(): BelongsTo
     {
-        return $this->belongsTo(Products_Service::class, 'product_service_id');
+        return $this->belongsTo(
+            Products_Service::class,
+            'product_service_id'
+        );
     }
 
     public function invoices(): HasMany
@@ -75,13 +83,16 @@ class Subscription extends Model
     public function activeSuspension(): HasMany
     {
         return $this->hasOne(ServiceSuspension::class)
-            ->where('is_active', true)
+            ->where(
+                'is_active',
+                true
+            )
             ->whereNull('unsuspended_at');
     }
 
     public function renew(): bool
     {
-        if (! $this->auto_renew || $this->status === 'cancelled') {
+        if (!$this->auto_renew || $this->status === 'cancelled') {
             return false;
         }
 
@@ -126,7 +137,7 @@ class Subscription extends Model
 
     public function needsBilling(): bool
     {
-        if (! $this->last_billed_at) {
+        if (!$this->last_billed_at) {
             return true;
         }
 

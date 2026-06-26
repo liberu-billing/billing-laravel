@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\Affiliate;
 use App\Models\Payment;
 
 class AffiliateService
@@ -14,22 +13,32 @@ class AffiliateService
 
         if ($referrer && $referrer->status === 'active') {
             $product = $payment->invoice->items->first()->product;
-            $commissionRate = $referrer->getCommissionRate($product->id, $product->category_id);
+            $commissionRate = $referrer->getCommissionRate(
+                $product->id,
+                $product->category_id
+            );
             $commissionAmount = $payment->amount * ($commissionRate / 100);
 
-            $payment->update([
-                'affiliate_id' => $referrer->id,
-                'affiliate_commission' => $commissionAmount,
-            ]);
+            $payment->update(
+                [
+                    'affiliate_id' => $referrer->id,
+                    'affiliate_commission' => $commissionAmount,
+                ]
+            );
 
-            $referrer->increment('total_earnings', $commissionAmount);
+            $referrer->increment(
+                'total_earnings',
+                $commissionAmount
+            );
 
             // Create a transaction record for the affiliate
-            $referrer->transactions()->create([
-                'amount' => $commissionAmount,
-                'type' => 'commission',
-                'description' => "Commission for payment #{$payment->id}",
-            ]);
+            $referrer->transactions()->create(
+                [
+                    'amount' => $commissionAmount,
+                    'type' => 'commission',
+                    'description' => "Commission for payment #{$payment->id}",
+                ]
+            );
         }
     }
 }

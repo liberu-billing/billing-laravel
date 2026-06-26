@@ -8,51 +8,65 @@ use App\Filament\App\Resources\Users\Pages\CreateUser;
 use App\Filament\App\Resources\Users\Pages\EditUser;
 use App\Filament\App\Resources\Users\Pages\ListUsers;
 use App\Models\User;
+use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Override;
 
 class UserResource extends Resource
 {
-    #[\Override]
+    #[Override]
     protected static ?string $model = User::class;
 
-    #[\Override]
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
+    #[Override]
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    #[\Override]
+    #[Override]
     public static function form(Schema $schema): Schema
     {
         return $schema
-            ->components([
-                //
-            ]);
+            ->components(
+                [
+                    //
+                ]
+            );
     }
 
-    #[\Override]
+    #[Override]
     public static function table(Table $table): Table
     {
         return $table
-            ->columns([
-                //
-            ])
-            ->filters([
-                //
-            ])
-            ->recordActions([
-                EditAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ]);
+            ->columns(
+                [
+                    //
+                ]
+            )
+            ->filters(
+                [
+                    //
+                ]
+            )
+            ->recordActions(
+                [
+                    EditAction::make(),
+                ]
+            )
+            ->toolbarActions(
+                [
+                    BulkActionGroup::make(
+                        [
+                            DeleteBulkAction::make(),
+                        ]
+                    ),
+                ]
+            );
     }
 
-    #[\Override]
+    #[Override]
     public static function getRelations(): array
     {
         return [
@@ -60,7 +74,7 @@ class UserResource extends Resource
         ];
     }
 
-    #[\Override]
+    #[Override]
     public static function getPages(): array
     {
         return [

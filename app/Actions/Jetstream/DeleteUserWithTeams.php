@@ -13,19 +13,21 @@ class DeleteUserWithTeams implements DeletesUsers
     /**
      * Create a new action instance.
      */
-    public function __construct(protected DeletesTeams $deletesTeams) {}
+    public function __construct(protected DeletesTeams $deletesTeams) { }
 
     /**
      * Delete the given user.
      */
     public function delete(User $user): void
     {
-        DB::transaction(function () use ($user): void {
-            $this->deleteTeams($user);
-            $user->deleteProfilePhoto();
-            $user->tokens->each->delete();
-            $user->delete();
-        });
+        DB::transaction(
+            function () use ($user): void {
+                $this->deleteTeams($user);
+                $user->deleteProfilePhoto();
+                $user->tokens->each->delete();
+                $user->delete();
+            }
+        );
     }
 
     /**
@@ -35,8 +37,10 @@ class DeleteUserWithTeams implements DeletesUsers
     {
         $user->teams()->detach();
 
-        $user->ownedTeams->each(function (Team $team): void {
-            $this->deletesTeams->delete($team);
-        });
+        $user->ownedTeams->each(
+            function (Team $team): void {
+                $this->deletesTeams->delete($team);
+            }
+        );
     }
 }

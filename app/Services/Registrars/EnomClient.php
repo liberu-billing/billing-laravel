@@ -42,16 +42,22 @@ class EnomClient
 
     protected function makeApiCall($command, $params)
     {
-        $params = array_merge([
-            'command' => $command,
-            'uid' => $this->username,
-            'pw' => $this->password,
-            'responsetype' => 'xml',
-        ], $params);
+        $params = array_merge(
+            [
+                'command' => $command,
+                'uid' => $this->username,
+                'pw' => $this->password,
+                'responsetype' => 'xml',
+            ],
+            $params
+        );
 
-        $this->client->get($this->apiUrl, [
-            'query' => $params,
-        ]);
+        $this->client->get(
+            $this->apiUrl,
+            [
+                'query' => $params,
+            ]
+        );
 
         // Parse XML response and return result
     }

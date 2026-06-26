@@ -24,35 +24,49 @@ class SmsService
     public function send($to, $message): bool
     {
         try {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer '.$this->apiKey,
-            ])->post($this->baseUrl.'/messages', [
-                'from' => $this->from,
-                'to' => $this->formatPhoneNumber($to),
-                'message' => $message,
-            ]);
+            $response = Http::withHeaders(
+                [
+                    'Authorization' => 'Bearer ' . $this->apiKey,
+                ]
+            )->post(
+                $this->baseUrl . '/messages',
+                [
+                    'from' => $this->from,
+                    'to' => $this->formatPhoneNumber($to),
+                    'message' => $message,
+                ]
+            );
 
             if ($response->successful()) {
-                Log::info('SMS sent successfully', [
-                    'to' => $to,
-                    'message' => $message,
-                ]);
+                Log::info(
+                    'SMS sent successfully',
+                    [
+                        'to' => $to,
+                        'message' => $message,
+                    ]
+                );
 
                 return true;
             }
 
-            Log::error('SMS sending failed', [
-                'to' => $to,
-                'error' => $response->body(),
-            ]);
+            Log::error(
+                'SMS sending failed',
+                [
+                    'to' => $to,
+                    'error' => $response->body(),
+                ]
+            );
 
             return false;
 
         } catch (Exception $e) {
-            Log::error('SMS sending failed', [
-                'to' => $to,
-                'error' => $e->getMessage(),
-            ]);
+            Log::error(
+                'SMS sending failed',
+                [
+                    'to' => $to,
+                    'error' => $e->getMessage(),
+                ]
+            );
 
             return false;
         }
@@ -61,13 +75,17 @@ class SmsService
     protected function formatPhoneNumber($number)
     {
         // Remove any non-numeric characters
-        $cleaned = preg_replace('/[^0-9]/', '', (string) $number);
+        $cleaned = preg_replace(
+            '/[^0-9]/',
+            '',
+            (string)$number
+        );
 
         // Ensure number starts with country code
-        if (strlen((string) $cleaned) === 10) {
-            return '+1'.$cleaned; // Default to US/Canada
+        if (strlen((string)$cleaned) === 10) {
+            return '+1' . $cleaned; // Default to US/Canada
         }
 
-        return '+'.$cleaned;
+        return '+' . $cleaned;
     }
 }

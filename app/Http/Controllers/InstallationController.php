@@ -6,20 +6,23 @@ namespace App\Http\Controllers;
 
 use App\Services\InstallationScriptService;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class InstallationController extends Controller
 {
-    public function install(Request $request): ?\Illuminate\Http\JsonResponse
+    public function install(Request $request): ?JsonResponse
     {
-        $validated = $request->validate([
-            'control_panel' => 'required|string|in:cpanel,plesk,directadmin,virtualmin',
-            'git_repo' => 'required|url',
-            'domain' => 'required|string',
-            'db_name' => 'required|string',
-            'db_user' => 'required|string',
-            'db_password' => 'required|string',
-        ]);
+        $validated = $request->validate(
+            [
+                'control_panel' => 'required|string|in:cpanel,plesk,directadmin,virtualmin',
+                'git_repo' => 'required|url',
+                'domain' => 'required|string',
+                'db_name' => 'required|string',
+                'db_user' => 'required|string',
+                'db_password' => 'required|string',
+            ]
+        );
 
         $installer = new InstallationScriptService(
             $validated['control_panel'],
@@ -35,7 +38,10 @@ class InstallationController extends Controller
 
             return response()->json(['message' => 'Installation completed successfully']);
         } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            return response()->json(
+                ['error' => $e->getMessage()],
+                500
+            );
         }
     }
 }

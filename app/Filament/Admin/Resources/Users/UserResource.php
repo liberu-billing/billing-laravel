@@ -14,44 +14,45 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Override;
 use UnitEnum;
 
 class UserResource extends Resource
 {
-    #[\Override]
+    #[Override]
     protected static ?string $model = User::class;
 
-    #[\Override]
+    #[Override]
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
 
-    #[\Override]
+    #[Override]
     protected static string|UnitEnum|null $navigationGroup = 'Administration';
 
-    #[\Override]
+    #[Override]
     protected static ?string $navigationLabel = 'Users';
 
-    #[\Override]
+    #[Override]
     protected static ?string $recordTitleAttribute = 'name';
 
-    #[\Override]
+    #[Override]
     protected static ?int $navigationSort = 1;
 
-    #[\Override]
+    #[Override]
     protected static ?string $tenantOwnershipRelationshipName = 'teams';
 
-    #[\Override]
+    #[Override]
     public static function form(Schema $schema): Schema
     {
         return UserForm::configure($schema);
     }
 
-    #[\Override]
+    #[Override]
     public static function table(Table $table): Table
     {
         return UsersTable::configure($table);
     }
 
-    #[\Override]
+    #[Override]
     public static function getRelations(): array
     {
         return [
@@ -59,7 +60,7 @@ class UserResource extends Resource
         ];
     }
 
-    #[\Override]
+    #[Override]
     public static function getPages(): array
     {
         return [

@@ -30,18 +30,34 @@ class TaxService
 
         // Try to get tax rates from cache
         $cacheKey = "tax_rates_{$invoice->team_id}_{$customer->country}_{$customer->state}";
-        $taxRates = Cache::remember($cacheKey, 3600, fn () => $this->getTaxRates($invoice, $customer));
+        $taxRates = Cache::remember(
+            $cacheKey,
+            3600,
+            fn() => $this->getTaxRates(
+                $invoice,
+                $customer
+            )
+        );
 
         $totalTax = 0;
         foreach ($invoice->items as $item) {
-            $applicableRate = $this->getApplicableRate($taxRates, $item);
+            $applicableRate = $this->getApplicableRate(
+                $taxRates,
+                $item
+            );
             if ($applicableRate) {
-                $itemTax = $this->calculateItemTax($item, $applicableRate);
+                $itemTax = $this->calculateItemTax(
+                    $item,
+                    $applicableRate
+                );
                 $totalTax += $itemTax;
             }
         }
 
-        return round($totalTax, 2);
+        return round(
+            $totalTax,
+            2
+        );
     }
 
     protected function getTaxRates($invoice, $customer)
@@ -51,32 +67,51 @@ class TaxService
             try {
                 return $this->getTaxRatesFromApi($customer);
             } catch (Exception $e) {
-                Log::error('Tax API error: '.$e->getMessage());
+                Log::error('Tax API error: ' . $e->getMessage());
                 // Fallback to database rates if API fails
             }
         }
 
         // Get rates from database
-        return TaxRate::where('team_id', $invoice->team_id)
-            ->where('is_active', true)
-            ->where('country', $customer->country)
-            ->where(function ($query) use ($customer): void {
-                $query->whereNull('state')
-                    ->orWhere('state', $customer->state);
-            })
+        return TaxRate::where(
+            'team_id',
+            $invoice->team_id
+        )
+            ->where(
+                'is_active',
+                true
+            )
+            ->where(
+                'country',
+                $customer->country
+            )
+            ->where(
+                function ($query) use ($customer): void {
+                    $query->whereNull('state')
+                        ->orWhere(
+                            'state',
+                            $customer->state
+                        );
+                }
+            )
             ->get();
     }
 
     protected function getTaxRatesFromApi($customer)
     {
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer '.$this->taxApiConfig['api_key'],
-        ])->get($this->taxApiConfig['url'], [
-            'country' => $customer->country,
-            'state' => $customer->state,
-            'city' => $customer->city,
-            'postal_code' => $customer->postal_code,
-        ]);
+        $response = Http::withHeaders(
+            [
+                'Authorization' => 'Bearer ' . $this->taxApiConfig['api_key'],
+            ]
+        )->get(
+            $this->taxApiConfig['url'],
+            [
+                'country' => $customer->country,
+                'state' => $customer->state,
+                'city' => $customer->city,
+                'postal_code' => $customer->postal_code,
+            ]
+        );
 
         if ($response->successful()) {
             return $this->formatApiResponse($response->json());
@@ -87,18 +122,30 @@ class TaxService
 
     protected function isExempt($customer)
     {
-        return TaxExemption::where('customer_id', $customer->id)
-            ->where('is_active', true)
-            ->where(function ($query): void {
-                $query->where('expiry_date', '>', now())
-                    ->orWhereNull('expiry_date');
-            })
+        return TaxExemption::where(
+            'customer_id',
+            $customer->id
+        )
+            ->where(
+                'is_active',
+                true
+            )
+            ->where(
+                function ($query): void {
+                    $query->where(
+                        'expiry_date',
+                        '>',
+                        now()
+                    )
+                        ->orWhereNull('expiry_date');
+                }
+            )
             ->exists();
     }
 
     protected function getApplicableRate($taxRates, $item)
     {
-        return $taxRates->first(fn ($rate): bool => $rate->service_type === $item->productService->type);
+        return $taxRates->first(fn($rate): bool => $rate->service_type === $item->productService->type);
     }
 
     protected function calculateItemTax($item, $taxRate): float|int
@@ -107,7 +154,10 @@ class TaxService
 
         // Apply any special tax rules based on amount thresholds
         if ($taxRate->threshold_amount && $taxableAmount > $taxRate->threshold_amount) {
-            $taxableAmount = $this->applyThresholdRules($taxableAmount, $taxRate);
+            $taxableAmount = $this->applyThresholdRules(
+                $taxableAmount,
+                $taxRate
+            );
         }
 
         return $taxableAmount * ($taxRate->rate / 100);
@@ -119,7 +169,7 @@ class TaxService
             $excessAmount = $amount - $taxRate->threshold_amount;
 
             return ($taxRate->threshold_amount * ($taxRate->rate / 100)) +
-                   ($excessAmount * ($taxRate->threshold_rate / 100));
+                ($excessAmount * ($taxRate->threshold_rate / 100));
         }
 
         return $amount;
@@ -127,13 +177,17 @@ class TaxService
 
     protected function formatApiResponse($apiData)
     {
-        return collect($apiData)->map(fn ($rate): TaxRate => new TaxRate([
-            'rate' => $rate['rate'],
-            'service_type' => $rate['type'],
-            'country' => $rate['country'],
-            'state' => $rate['state'] ?? null,
-            'threshold_amount' => $rate['threshold_amount'] ?? null,
-            'threshold_rate' => $rate['threshold_rate'] ?? null,
-        ]));
+        return collect($apiData)->map(
+            fn($rate): TaxRate => new TaxRate(
+                [
+                    'rate' => $rate['rate'],
+                    'service_type' => $rate['type'],
+                    'country' => $rate['country'],
+                    'state' => $rate['state'] ?? null,
+                    'threshold_amount' => $rate['threshold_amount'] ?? null,
+                    'threshold_rate' => $rate['threshold_rate'] ?? null,
+                ]
+            )
+        );
     }
 }

@@ -12,10 +12,11 @@ use App\Actions\Socialstream\ResolveSocialiteUser;
 use App\Actions\Socialstream\UpdateConnectedAccount;
 use Illuminate\Support\ServiceProvider;
 use JoelButcher\Socialstream\Socialstream;
+use Override;
 
 class SocialstreamServiceProvider extends ServiceProvider
 {
-    #[\Override]
+    #[Override]
     public function register(): void
     {
         //
@@ -23,7 +24,7 @@ class SocialstreamServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        if (! class_exists(Socialstream::class)) {
+        if (!class_exists(Socialstream::class)) {
             return;
         }
 

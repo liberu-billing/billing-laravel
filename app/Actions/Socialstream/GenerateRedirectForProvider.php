@@ -16,7 +16,10 @@ class GenerateRedirectForProvider implements GeneratesProviderRedirect
         $driver = app(Socialite::class)->driver($provider);
 
         if (Socialstream::hasRememberSessionFeature()) {
-            session()->put('socialstream.previous_url', url()->previous());
+            session()->put(
+                'socialstream.previous_url',
+                url()->previous()
+            );
         }
 
         return $driver->redirect();

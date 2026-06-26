@@ -28,6 +28,9 @@ class Module extends Model
 
     public static function findByName(string $name): ?self
     {
-        return static::where('name', $name)->first();
+        return static::where(
+            'name',
+            $name
+        )->first();
     }
 }

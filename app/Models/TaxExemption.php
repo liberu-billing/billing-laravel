@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 #[Fillable([
     'customer_id',
@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class TaxExemption extends Model
 {
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [
@@ -34,6 +34,6 @@ class TaxExemption extends Model
     public function isValid(): bool
     {
         return $this->is_active &&
-               ($this->expiry_date === null || $this->expiry_date->isFuture());
+            ($this->expiry_date === null || $this->expiry_date->isFuture());
     }
 }

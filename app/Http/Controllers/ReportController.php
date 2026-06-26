@@ -12,13 +12,19 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportController extends Controller
 {
-    public function __construct(protected ReportGenerationService $reportService) {}
+    public function __construct(protected ReportGenerationService $reportService) { }
 
     public function index(): Factory|View
     {
-        $reports = Report::where('team_id', auth()->user()->currentTeam->id)->get();
+        $reports = Report::where(
+            'team_id',
+            auth()->user()->currentTeam->id
+        )->get();
 
-        return view('reports.index', compact('reports'));
+        return view(
+            'reports.index',
+            compact('reports')
+        );
     }
 
     public function create(): Factory|View
@@ -28,18 +34,22 @@ class ReportController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string',
-            'type' => 'required|string',
-            'format' => 'required|in:pdf,csv,excel',
-            'parameters' => 'required|array',
-            'schedule' => 'nullable|array',
-        ]);
+        $validated = $request->validate(
+            [
+                'name' => 'required|string',
+                'type' => 'required|string',
+                'format' => 'required|in:pdf,csv,excel',
+                'parameters' => 'required|array',
+                'schedule' => 'nullable|array',
+            ]
+        );
 
-        $report = Report::create([
-            ...$validated,
-            'team_id' => auth()->user()->currentTeam->id,
-        ]);
+        $report = Report::create(
+            [
+                ...$validated,
+                'team_id' => auth()->user()->currentTeam->id,
+            ]
+        );
 
         if ($request->generate_now) {
             $filename = $this->reportService->generateReport($report);

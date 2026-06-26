@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 #[Fillable([
     'team_id',
@@ -23,7 +24,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class EmailCampaign extends Model
 {
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
 
@@ -43,23 +44,30 @@ class EmailCampaign extends Model
 
     public function creator(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->belongsTo(
+            User::class,
+            'created_by'
+        );
     }
 
     public function markAsSending(): void
     {
-        $this->update([
-            'status' => 'sending',
-            'started_sending_at' => now(),
-        ]);
+        $this->update(
+            [
+                'status' => 'sending',
+                'started_sending_at' => now(),
+            ]
+        );
     }
 
     public function markAsSent(): void
     {
-        $this->update([
-            'status' => 'sent',
-            'completed_at' => now(),
-        ]);
+        $this->update(
+            [
+                'status' => 'sent',
+                'completed_at' => now(),
+            ]
+        );
     }
 
     public function incrementSent(): void
@@ -80,6 +88,9 @@ class EmailCampaign extends Model
 
         $total = $this->sent_count + $this->failed_count;
 
-        return round(($total / $this->total_recipients) * 100, 2);
+        return round(
+            ($total / $this->total_recipients) * 100,
+            2
+        );
     }
 }

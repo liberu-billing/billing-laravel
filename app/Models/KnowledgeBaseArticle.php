@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
+use Override;
 
 #[Fillable([
     'category_id',
@@ -24,7 +25,7 @@ use Illuminate\Support\Str;
 ])]
 class KnowledgeBaseArticle extends Model
 {
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
 
@@ -36,24 +37,26 @@ class KnowledgeBaseArticle extends Model
 
     }
 
-    #[\Override]
+    #[Override]
     protected static function boot(): void
     {
         parent::boot();
 
         static::creating(
             static function ($article): void {
-            if (empty($article->slug)) {
-                $article->slug = Str::slug($article->title);
+                if (empty($article->slug)) {
+                    $article->slug = Str::slug($article->title);
+                }
             }
-        });
+        );
 
         static::updating(
             static function ($article): void {
-            if ($article->isDirty('is_published') && $article->is_published && ! $article->published_at) {
-                $article->published_at = now();
+                if ($article->isDirty('is_published') && $article->is_published && !$article->published_at) {
+                    $article->published_at = now();
+                }
             }
-        });
+        );
     }
 
     public function category(): BelongsTo
@@ -63,7 +66,10 @@ class KnowledgeBaseArticle extends Model
 
     public function author(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'author_id');
+        return $this->belongsTo(
+            User::class,
+            'author_id'
+        );
     }
 
     public function incrementViewCount(): void
@@ -89,6 +95,9 @@ class KnowledgeBaseArticle extends Model
             return 0;
         }
 
-        return round(($this->helpful_count / $total) * 100, 2);
+        return round(
+            ($this->helpful_count / $total) * 100,
+            2
+        );
     }
 }

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 #[Fillable([
     'user_id',
@@ -22,7 +23,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class BulkOperation extends Model
 {
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
 
@@ -46,27 +47,33 @@ class BulkOperation extends Model
 
     public function markAsProcessing(): void
     {
-        $this->update([
-            'status' => 'processing',
-            'started_at' => now(),
-        ]);
+        $this->update(
+            [
+                'status' => 'processing',
+                'started_at' => now(),
+            ]
+        );
     }
 
     public function markAsCompleted(): void
     {
-        $this->update([
-            'status' => 'completed',
-            'completed_at' => now(),
-        ]);
+        $this->update(
+            [
+                'status' => 'completed',
+                'completed_at' => now(),
+            ]
+        );
     }
 
     public function markAsFailed(string $errorMessage): void
     {
-        $this->update([
-            'status' => 'failed',
-            'error_message' => $errorMessage,
-            'completed_at' => now(),
-        ]);
+        $this->update(
+            [
+                'status' => 'failed',
+                'error_message' => $errorMessage,
+                'completed_at' => now(),
+            ]
+        );
     }
 
     public function incrementProcessed(): void
@@ -85,6 +92,9 @@ class BulkOperation extends Model
             return 0;
         }
 
-        return round(($this->processed_items / $this->total_items) * 100, 2);
+        return round(
+            ($this->processed_items / $this->total_items) * 100,
+            2
+        );
     }
 }

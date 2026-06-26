@@ -26,7 +26,7 @@ class SendInvoiceReminders extends Command
             $this->info('Overdue reminders sent successfully.');
 
         } catch (Exception $e) {
-            $this->error('Error sending reminders: '.$e->getMessage());
+            $this->error('Error sending reminders: ' . $e->getMessage());
 
             return 1;
         }

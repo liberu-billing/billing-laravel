@@ -6,15 +6,16 @@ namespace App\Models;
 
 use App\Traits\HasTeam;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Override;
 
 #[Fillable([
     'code',
     'name',
     'description',
-    'type', // percentage or fixed
+    'type',
+    // percentage or fixed
     'value',
     'currency',
     'start_date',
@@ -27,7 +28,7 @@ class Discount extends Model
 {
     use HasTeam;
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
 

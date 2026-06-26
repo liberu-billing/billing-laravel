@@ -12,7 +12,9 @@ class CannedResponseController extends Controller
 {
     public function __construct(
         protected CannedResponseService $cannedResponseService
-    ) {}
+    )
+    {
+    }
 
     /**
      * Get all canned responses
@@ -22,11 +24,16 @@ class CannedResponseController extends Controller
         $teamId = $request->user()?->current_team_id;
         $category = $request->get('category');
 
-        $responses = $this->cannedResponseService->getAll($teamId, $category);
+        $responses = $this->cannedResponseService->getAll(
+            $teamId,
+            $category
+        );
 
-        return response()->json([
-            'data' => $responses,
-        ]);
+        return response()->json(
+            [
+                'data' => $responses,
+            ]
+        );
     }
 
     /**
@@ -35,17 +42,25 @@ class CannedResponseController extends Controller
     public function show(string $shortcode, Request $request): JsonResponse
     {
         $teamId = $request->user()?->current_team_id;
-        $response = $this->cannedResponseService->getByShortcode($shortcode, $teamId);
+        $response = $this->cannedResponseService->getByShortcode(
+            $shortcode,
+            $teamId
+        );
 
-        if (! $response instanceof CannedResponse) {
-            return response()->json([
-                'message' => 'Canned response not found',
-            ], 404);
+        if (!$response instanceof CannedResponse) {
+            return response()->json(
+                [
+                    'message' => 'Canned response not found',
+                ],
+                404
+            );
         }
 
-        return response()->json([
-            'data' => $response,
-        ]);
+        return response()->json(
+            [
+                'data' => $response,
+            ]
+        );
     }
 
     /**
@@ -53,27 +68,40 @@ class CannedResponseController extends Controller
      */
     public function use(string $shortcode, Request $request): JsonResponse
     {
-        $request->validate([
-            'variables' => 'nullable|array',
-        ]);
+        $request->validate(
+            [
+                'variables' => 'nullable|array',
+            ]
+        );
 
         $teamId = $request->user()?->current_team_id;
-        $response = $this->cannedResponseService->getByShortcode($shortcode, $teamId);
+        $response = $this->cannedResponseService->getByShortcode(
+            $shortcode,
+            $teamId
+        );
 
-        if (! $response instanceof CannedResponse) {
-            return response()->json([
-                'message' => 'Canned response not found',
-            ], 404);
+        if (!$response instanceof CannedResponse) {
+            return response()->json(
+                [
+                    'message' => 'Canned response not found',
+                ],
+                404
+            );
         }
 
         $content = $this->cannedResponseService->use(
             $response,
-            $request->get('variables', [])
+            $request->get(
+                'variables',
+                []
+            )
         );
 
-        return response()->json([
-            'content' => $content,
-        ]);
+        return response()->json(
+            [
+                'content' => $content,
+            ]
+        );
     }
 
     /**
@@ -81,16 +109,23 @@ class CannedResponseController extends Controller
      */
     public function search(Request $request): JsonResponse
     {
-        $request->validate([
-            'q' => 'required|string|min:2',
-        ]);
+        $request->validate(
+            [
+                'q' => 'required|string|min:2',
+            ]
+        );
 
         $teamId = $request->user()?->current_team_id;
-        $responses = $this->cannedResponseService->search($request->q, $teamId);
+        $responses = $this->cannedResponseService->search(
+            $request->q,
+            $teamId
+        );
 
-        return response()->json([
-            'data' => $responses,
-        ]);
+        return response()->json(
+            [
+                'data' => $responses,
+            ]
+        );
     }
 
     /**
@@ -101,9 +136,11 @@ class CannedResponseController extends Controller
         $teamId = $request->user()?->current_team_id;
         $categories = $this->cannedResponseService->getCategories($teamId);
 
-        return response()->json([
-            'data' => $categories,
-        ]);
+        return response()->json(
+            [
+                'data' => $categories,
+            ]
+        );
     }
 
     /**
@@ -112,13 +149,21 @@ class CannedResponseController extends Controller
     public function mostUsed(Request $request): JsonResponse
     {
         $teamId = $request->user()?->current_team_id;
-        $limit = $request->get('limit', 10);
+        $limit = $request->get(
+            'limit',
+            10
+        );
 
-        $responses = $this->cannedResponseService->getMostUsed($limit, $teamId);
+        $responses = $this->cannedResponseService->getMostUsed(
+            $limit,
+            $teamId
+        );
 
-        return response()->json([
-            'data' => $responses,
-        ]);
+        return response()->json(
+            [
+                'data' => $responses,
+            ]
+        );
     }
 
     /**
@@ -126,8 +171,10 @@ class CannedResponseController extends Controller
      */
     public function variables(): JsonResponse
     {
-        return response()->json([
-            'data' => CannedResponseService::getAvailableVariables(),
-        ]);
+        return response()->json(
+            [
+                'data' => CannedResponseService::getAvailableVariables(),
+            ]
+        );
     }
 }

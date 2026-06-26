@@ -7,13 +7,14 @@ namespace App\Filament\App\Resources\PartialPayments\Pages;
 use App\Filament\App\Resources\PartialPayments\PartialPaymentResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
+use Override;
 
 class ListPartialPayments extends ListRecords
 {
-    #[\Override]
+    #[Override]
     protected static string $resource = PartialPaymentResource::class;
 
-    #[\Override]
+    #[Override]
     protected function getActions(): array
     {
         return [

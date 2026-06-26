@@ -6,9 +6,10 @@ namespace App\Filament\Admin\Resources\Users\Pages;
 
 use App\Filament\Admin\Resources\Users\UserResource;
 use Filament\Resources\Pages\CreateRecord;
+use Override;
 
 class CreateUser extends CreateRecord
 {
-    #[\Override]
+    #[Override]
     protected static string $resource = UserResource::class;
 }

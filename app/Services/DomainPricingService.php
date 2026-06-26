@@ -8,14 +8,17 @@ use Exception;
 
 class DomainPricingService
 {
-    public function __construct(protected EnomClient $enomClient) {}
+    public function __construct(protected EnomClient $enomClient) { }
 
     public function calculateDomainPrice($domainName)
     {
         $tld = $this->getTldFromDomain($domainName);
-        $tldModel = Tld::where('name', $tld)->first();
+        $tldModel = Tld::where(
+            'name',
+            $tld
+        )->first();
 
-        if (! $tldModel) {
+        if (!$tldModel) {
             throw new Exception("TLD not supported: $tld");
         }
 
@@ -35,7 +38,8 @@ class DomainPricingService
                     'enom_cost' => $enomPrice,
                     'base_price' => $enomPrice,
                     'markup_type' => 'percentage',
-                    'markup_value' => 10, // Default 10% markup
+                    'markup_value' => 10,
+                    // Default 10% markup
                 ]
             );
         }
@@ -43,8 +47,11 @@ class DomainPricingService
 
     protected function getTldFromDomain($domainName): string
     {
-        $parts = explode('.', (string) $domainName);
+        $parts = explode(
+            '.',
+            (string)$domainName
+        );
 
-        return '.'.end($parts);
+        return '.' . end($parts);
     }
 }

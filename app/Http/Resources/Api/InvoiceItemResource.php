@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Resources\Api;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use Override;
 
 class InvoiceItemResource extends JsonResource
 {
-    #[\Override]
+    #[Override]
     public function toArray($request): array
     {
         return [

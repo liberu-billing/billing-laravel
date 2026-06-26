@@ -7,13 +7,14 @@ namespace App\Filament\App\Resources\HostingAccounts\Pages;
 use App\Filament\App\Resources\HostingAccounts\HostingAccountResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Override;
 
 class EditHostingAccount extends EditRecord
 {
-    #[\Override]
+    #[Override]
     protected static string $resource = HostingAccountResource::class;
 
-    #[\Override]
+    #[Override]
     protected function getActions(): array
     {
         return [

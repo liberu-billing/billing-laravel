@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 #[Fillable([
     'subscription_id',
@@ -19,7 +20,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class ServiceSuspension extends Model
 {
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
         return [
@@ -41,21 +42,29 @@ class ServiceSuspension extends Model
 
     public function suspendedBy(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'suspended_by');
+        return $this->belongsTo(
+            User::class,
+            'suspended_by'
+        );
     }
 
     public function unsuspendedBy(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'unsuspended_by');
+        return $this->belongsTo(
+            User::class,
+            'unsuspended_by'
+        );
     }
 
     public function unsuspend(?int $userId = null): void
     {
-        $this->update([
-            'unsuspended_at' => now(),
-            'unsuspended_by' => $userId,
-            'is_active' => false,
-        ]);
+        $this->update(
+            [
+                'unsuspended_at' => now(),
+                'unsuspended_by' => $userId,
+                'is_active' => false,
+            ]
+        );
     }
 
     public function isSuspended(): bool

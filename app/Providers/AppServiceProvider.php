@@ -10,14 +10,18 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Override;
 use Spatie\Permission\PermissionRegistrar;
 
 class AppServiceProvider extends ServiceProvider
 {
-    #[\Override]
+    #[Override]
     public function register(): void
     {
-        $this->app->singleton(ModuleManager::class, fn (): ModuleManager => new ModuleManager);
+        $this->app->singleton(
+            ModuleManager::class,
+            fn(): ModuleManager => new ModuleManager
+        );
     }
 
     public function boot(): void
@@ -41,10 +45,10 @@ class AppServiceProvider extends ServiceProvider
         Password::defaults(
             static function () {
                 return Password::min(12)        // NIST 800-63B: minimum 12 characters
-                    ->mixedCase()      // At least one uppercase and one lowercase
-                    ->numbers()        // At least one digit
-                    ->symbols()        // At least one symbol (@$!%*#?&)
-                    ->uncompromised(); // Check against breach database
+                ->mixedCase()      // At least one uppercase and one lowercase
+                ->numbers()        // At least one digit
+                ->symbols()        // At least one symbol (@$!%*#?&)
+                ->uncompromised(); // Check against breach database
             },
         );
     }

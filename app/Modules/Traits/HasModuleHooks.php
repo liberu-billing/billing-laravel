@@ -10,24 +10,33 @@ trait HasModuleHooks
 
     public function registerHook(string $hookName, callable $callback, int $priority = 10): void
     {
-        if (! isset($this->hooks[$hookName])) {
+        if (!isset($this->hooks[$hookName])) {
             $this->hooks[$hookName] = [];
         }
 
-        $this->hooks[$hookName][] = ['callback' => $callback, 'priority' => $priority];
+        $this->hooks[$hookName][] = [
+            'callback' => $callback,
+            'priority' => $priority
+        ];
 
-        usort($this->hooks[$hookName], fn ($a, $b) => $a['priority'] <=> $b['priority']);
+        usort(
+            $this->hooks[$hookName],
+            fn($a, $b) => $a['priority'] <=> $b['priority']
+        );
     }
 
     public function executeHook(string $hookName, mixed ...$args): mixed
     {
-        if (! isset($this->hooks[$hookName])) {
+        if (!isset($this->hooks[$hookName])) {
             return null;
         }
 
         $result = null;
         foreach ($this->hooks[$hookName] as $hook) {
-            $result = call_user_func_array($hook['callback'], $args);
+            $result = call_user_func_array(
+                $hook['callback'],
+                $args
+            );
         }
 
         return $result;

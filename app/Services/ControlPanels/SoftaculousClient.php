@@ -33,18 +33,25 @@ class SoftaculousClient
             ),
         ];
 
-        return $this->makeApiCall($endpoint, $params);
+        return $this->makeApiCall(
+            $endpoint,
+            $params
+        );
     }
 
     protected function makeApiCall(string $endpoint, $params): bool
     {
         try {
-            $response = $this->client->request('POST', $this->apiUrl.$endpoint, [
-                'headers' => [
-                    'Authorization' => 'Bearer '.$this->apiToken,
-                ],
-                'form_params' => $params,
-            ]);
+            $response = $this->client->request(
+                'POST',
+                $this->apiUrl . $endpoint,
+                [
+                    'headers' => [
+                        'Authorization' => 'Bearer ' . $this->apiToken,
+                    ],
+                    'form_params' => $params,
+                ]
+            );
 
             $result = json_decode(
                 (string)$response->getBody(),
@@ -54,16 +61,36 @@ class SoftaculousClient
             );
 
             if (isset($result['success']) && $result['success'] === true) {
-                Log::info('Softaculous API call successful', ['endpoint' => $endpoint, 'params' => $params]);
+                Log::info(
+                    'Softaculous API call successful',
+                    [
+                        'endpoint' => $endpoint,
+                        'params' => $params
+                    ]
+                );
 
                 return true;
             } else {
-                Log::error('Softaculous API call failed', ['endpoint' => $endpoint, 'params' => $params, 'response' => $result]);
+                Log::error(
+                    'Softaculous API call failed',
+                    [
+                        'endpoint' => $endpoint,
+                        'params' => $params,
+                        'response' => $result
+                    ]
+                );
 
                 return false;
             }
         } catch (GuzzleException $e) {
-            Log::error('Softaculous API call error', ['endpoint' => $endpoint, 'params' => $params, 'error' => $e->getMessage()]);
+            Log::error(
+                'Softaculous API call error',
+                [
+                    'endpoint' => $endpoint,
+                    'params' => $params,
+                    'error' => $e->getMessage()
+                ]
+            );
 
             return false;
         }

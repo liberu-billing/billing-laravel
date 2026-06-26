@@ -17,28 +17,42 @@ class PaymentReconciliationService
             $invoice = $this->findMatchingInvoice($payment);
 
             if ($invoice) {
-                return $this->processReconciliation($payment, $invoice);
+                return $this->processReconciliation(
+                    $payment,
+                    $invoice
+                );
             }
 
             // Mark as unreconciled if no match found
-            $payment->update([
-                'reconciliation_status' => 'unmatched',
-                'reconciliation_notes' => 'No matching invoice found',
-            ]);
+            $payment->update(
+                [
+                    'reconciliation_status' => 'unmatched',
+                    'reconciliation_notes' => 'No matching invoice found',
+                ]
+            );
 
-            $this->logReconciliationHistory($payment, null, 'unmatched');
+            $this->logReconciliationHistory(
+                $payment,
+                null,
+                'unmatched'
+            );
 
             return false;
         } catch (Exception $e) {
-            Log::error('Payment reconciliation failed', [
-                'payment_id' => $payment->id,
-                'error' => $e->getMessage(),
-            ]);
+            Log::error(
+                'Payment reconciliation failed',
+                [
+                    'payment_id' => $payment->id,
+                    'error' => $e->getMessage(),
+                ]
+            );
 
-            $payment->update([
-                'reconciliation_status' => 'failed',
-                'reconciliation_notes' => $e->getMessage(),
-            ]);
+            $payment->update(
+                [
+                    'reconciliation_status' => 'failed',
+                    'reconciliation_notes' => $e->getMessage(),
+                ]
+            );
 
             return false;
         }
@@ -52,9 +66,18 @@ class PaymentReconciliationService
         }
 
         // Try to match by amount and customer
-        return Invoice::where('customer_id', $payment->customer_id)
-            ->where('total_amount', $payment->amount)
-            ->where('status', 'pending')
+        return Invoice::where(
+            'customer_id',
+            $payment->customer_id
+        )
+            ->where(
+                'total_amount',
+                $payment->amount
+            )
+            ->where(
+                'status',
+                'pending'
+            )
             ->orderBy('due_date')
             ->first();
     }
@@ -62,33 +85,50 @@ class PaymentReconciliationService
     protected function processReconciliation(Payment $payment, Invoice $invoice): bool
     {
         // Check for discrepancies
-        $discrepancy = $this->checkForDiscrepancies($payment, $invoice);
+        $discrepancy = $this->checkForDiscrepancies(
+            $payment,
+            $invoice
+        );
 
         if ($discrepancy) {
-            $payment->update([
-                'reconciliation_status' => 'discrepancy',
-                'reconciliation_notes' => $discrepancy,
-            ]);
+            $payment->update(
+                [
+                    'reconciliation_status' => 'discrepancy',
+                    'reconciliation_notes' => $discrepancy,
+                ]
+            );
 
-            $this->logReconciliationHistory($payment, $invoice, 'discrepancy');
+            $this->logReconciliationHistory(
+                $payment,
+                $invoice,
+                'discrepancy'
+            );
 
             return false;
         }
 
         // Process successful reconciliation
-        $payment->update([
-            'invoice_id' => $invoice->id,
-            'reconciliation_status' => 'reconciled',
-            'reconciliation_notes' => null,
-        ]);
+        $payment->update(
+            [
+                'invoice_id' => $invoice->id,
+                'reconciliation_status' => 'reconciled',
+                'reconciliation_notes' => null,
+            ]
+        );
 
-        $invoice->update([
-            'status' => 'paid',
-            'paid_amount' => $payment->amount,
-            'paid_date' => now(),
-        ]);
+        $invoice->update(
+            [
+                'status' => 'paid',
+                'paid_amount' => $payment->amount,
+                'paid_date' => now(),
+            ]
+        );
 
-        $this->logReconciliationHistory($payment, $invoice, 'reconciled');
+        $this->logReconciliationHistory(
+            $payment,
+            $invoice,
+            'reconciled'
+        );
 
         return true;
     }
@@ -108,21 +148,26 @@ class PaymentReconciliationService
 
     protected function logReconciliationHistory(Payment $payment, ?Invoice $invoice, string $status)
     {
-        PaymentHistory::create([
-            'payment_id' => $payment->id,
-            'invoice_id' => $invoice?->id,
-            'customer_id' => $payment->customer_id,
-            'amount' => $payment->amount,
-            'currency' => $payment->currency,
-            'payment_method' => $payment->payment_method,
-            'transaction_id' => $payment->transaction_id,
-            'status' => $status,
-            'notes' => $payment->reconciliation_notes,
-        ]);
+        PaymentHistory::create(
+            [
+                'payment_id' => $payment->id,
+                'invoice_id' => $invoice?->id,
+                'customer_id' => $payment->customer_id,
+                'amount' => $payment->amount,
+                'currency' => $payment->currency,
+                'payment_method' => $payment->payment_method,
+                'transaction_id' => $payment->transaction_id,
+                'status' => $status,
+                'notes' => $payment->reconciliation_notes,
+            ]
+        );
     }
 
     public function handleManualReconciliation(Payment $payment, Invoice $invoice): bool
     {
-        return $this->processReconciliation($payment, $invoice);
+        return $this->processReconciliation(
+            $payment,
+            $invoice
+        );
     }
 }

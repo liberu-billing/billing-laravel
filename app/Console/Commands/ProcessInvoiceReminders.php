@@ -20,7 +20,10 @@ class ProcessInvoiceReminders extends Command
         if ($serviceProvisioningService == null || $currencyService == null) {
             $this->billingService = null;
         } else {
-            $this->billingService = new BillingService($serviceProvisioningService, $currencyService);
+            $this->billingService = new BillingService(
+                $serviceProvisioningService,
+                $currencyService
+            );
         }
     }
 
@@ -32,7 +35,11 @@ class ProcessInvoiceReminders extends Command
             return Command::FAILURE;
         }
 
-        cache()->put('processing_invoice_reminders', true, 60); // Lock for 60 minutes
+        cache()->put(
+            'processing_invoice_reminders',
+            true,
+            60
+        ); // Lock for 60 minutes
 
         try {
             $this->info('Processing invoice reminders...');
@@ -48,7 +55,7 @@ class ProcessInvoiceReminders extends Command
             return Command::SUCCESS;
         } catch (Exception $e) {
             cache()->forget('processing_invoice_reminders');
-            $this->error('Error processing reminders: '.$e->getMessage());
+            $this->error('Error processing reminders: ' . $e->getMessage());
 
             return Command::FAILURE;
         }

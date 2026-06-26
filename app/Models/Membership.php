@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Laravel\Jetstream\Membership as JetstreamMembership;
+use Override;
 
 class Membership extends JetstreamMembership
 {
@@ -13,6 +14,6 @@ class Membership extends JetstreamMembership
      *
      * @var bool
      */
-    #[\Override]
+    #[Override]
     public $incrementing = true;
 }
