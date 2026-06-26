@@ -139,15 +139,17 @@ class PartialPaymentPlanTest extends TestCase
     }
 
     /**
-     * BillingService::handlePartialPayment news-up `new PaymentGatewayService`
-     * internally (BillingService:936), bypassing the container — so the gateway
-     * cannot be mocked. Combined with the fact that processPartialPayment never
-     * sets payment_method, the real gateway rejects the payment up front
-     * (PaymentGatewayService:49), so this entry point can only ever fail in a
-     * unit test. Documents both the testability gap and the deterministic fail.
+     * BillingService::handlePartialPayment now delegates to an injected
+     * PartialPaymentService (which uses the injected PaymentGatewayService), so
+     * a mocked gateway flows through and the entry point is unit-testable.
      */
-    public function test_handle_partial_payment_cannot_be_unit_tested_and_fails(): void
+    public function test_handle_partial_payment_processes_via_injected_gateway(): void
     {
+        $this->mock(PaymentGatewayService::class, function ($mock): void {
+            $mock->shouldReceive('processPayment')
+                ->andReturn(['success' => true, 'transaction_id' => 'txn-hpp']);
+        });
+
         $gateway = $this->gateway();
         $invoice = Invoice::factory()->create([
             'total_amount' => 100.00,
@@ -156,7 +158,8 @@ class PartialPaymentPlanTest extends TestCase
 
         $result = app(BillingService::class)->handlePartialPayment($invoice, 40.00, $gateway->id);
 
-        $this->assertFalse($result['success']);
+        $this->assertTrue($result['success']);
+        $this->assertEquals('partially_paid', $invoice->fresh()->status);
     }
 
     // ---------------------------------------------------------------------

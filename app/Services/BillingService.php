@@ -24,18 +24,26 @@ class BillingService
 
     protected SmsService $smsService;
 
+    protected PartialPaymentService $partialPaymentService;
+
+    protected RefundService $refundService;
+
     public function __construct(
         protected ServiceProvisioningService $serviceProvisioningService,
         protected CurrencyService $currencyService,
         ?PaymentPlanService $paymentPlanService = null,
         ?PaymentGatewayService $paymentGatewayService = null,
         ?PricingService $pricingService = null,
-        ?SmsService $smsService = null
+        ?SmsService $smsService = null,
+        ?PartialPaymentService $partialPaymentService = null,
+        ?RefundService $refundService = null
     ) {
         $this->paymentPlanService = $paymentPlanService ?? new PaymentPlanService($this);
         $this->paymentGatewayService = $paymentGatewayService ?? new PaymentGatewayService;
         $this->pricingService = $pricingService ?? new PricingService;
         $this->smsService = $smsService ?? new SmsService;
+        $this->partialPaymentService = $partialPaymentService ?? new PartialPaymentService($this->paymentGatewayService);
+        $this->refundService = $refundService ?? new RefundService($this->paymentGatewayService);
     }
 
     public function createSubscription(Customer $customer, SubscriptionPlan $plan, string $billingCycle): Subscription
@@ -934,9 +942,7 @@ class BillingService
 
     public function handlePartialPayment(Invoice $invoice, float $amount, int $paymentGatewayId): array
     {
-        $partialPaymentService = new PartialPaymentService(new PaymentGatewayService);
-
-        return $partialPaymentService->processPartialPayment(
+        return $this->partialPaymentService->processPartialPayment(
             $invoice,
             $amount,
             $paymentGatewayId
@@ -945,9 +951,7 @@ class BillingService
 
     public function handleRefund(Payment $payment, float $amount): array
     {
-        $refundService = new RefundService(new PaymentGatewayService);
-
-        return $refundService->processRefund(
+        return $this->refundService->processRefund(
             $payment,
             $amount
         );
