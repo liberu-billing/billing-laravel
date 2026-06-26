@@ -72,4 +72,22 @@ class BulkOperationServiceTest extends TestCase
 
         @unlink($path);
     }
+
+    public function test_export_neutralizes_csv_formula_injection(): void
+    {
+        $user = User::factory()->create();
+        Client::create(['name' => '=cmd|/c calc!A1', 'email' => 'evil@example.com']);
+
+        $operation = $this->service()->exportClients([], $user->id);
+        $operation->refresh();
+
+        $path = storage_path('app/'.$operation->result_file);
+        $contents = file_get_contents($path);
+
+        // value is prefixed with an apostrophe and the raw formula is no longer at cell start
+        $this->assertStringContainsString("'=cmd", $contents);
+        $this->assertStringNotContainsString(',=cmd', $contents);
+
+        @unlink($path);
+    }
 }

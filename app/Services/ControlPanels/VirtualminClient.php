@@ -152,7 +152,6 @@ class VirtualminClient
                         'Authorization' => 'Basic '.base64_encode($this->server->username.':'.$this->apiKey),
                     ],
                     'form_params' => $params,
-                    'verify' => false,
                 ]
             );
 

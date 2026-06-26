@@ -29,7 +29,7 @@ class UpcomingInvoiceReminder extends Mailable
         foreach ($this->data as $key => $value) {
             $text = str_replace(
                 '{{'.$key.'}}',
-                $value,
+                e($value),
                 $text
             );
         }

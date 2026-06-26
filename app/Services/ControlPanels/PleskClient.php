@@ -230,7 +230,6 @@ class PleskClient
                         'KEY' => $this->apiKey,
                     ],
                     'body' => $xml,
-                    'verify' => false,
                 ]
             );
 

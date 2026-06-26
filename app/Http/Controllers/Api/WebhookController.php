@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\WebhookEndpoint;
 use App\Models\WebhookEvent;
 use App\Services\WebhookService;
+use Closure;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -37,13 +39,35 @@ class WebhookController extends Controller
     }
 
     /**
+     * Validation rules for the endpoint url: valid https + not an internal/SSRF target.
+     *
+     * @return array<int, mixed>
+     */
+    private function urlValidationRules(bool $sometimes = false): array
+    {
+        $rules = [
+            'required',
+            'url:https',
+            function (string $attribute, mixed $value, Closure $fail): void {
+                try {
+                    WebhookService::assertSafeUrl((string) $value);
+                } catch (Exception $e) {
+                    $fail($e->getMessage());
+                }
+            },
+        ];
+
+        return $sometimes ? ['sometimes', ...$rules] : $rules;
+    }
+
+    /**
      * Create a webhook endpoint
      */
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate(
             [
-                'url' => 'required|url',
+                'url' => $this->urlValidationRules(),
                 'secret' => 'nullable|string',
                 'events' => 'nullable|array',
                 'description' => 'nullable|string',
@@ -95,7 +119,7 @@ class WebhookController extends Controller
 
         $validated = $request->validate(
             [
-                'url' => 'sometimes|required|url',
+                'url' => $this->urlValidationRules(sometimes: true),
                 'secret' => 'nullable|string',
                 'events' => 'nullable|array',
                 'description' => 'nullable|string',

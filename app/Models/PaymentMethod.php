@@ -30,6 +30,7 @@ class PaymentMethod extends Model
 {
     protected $casts = [
         'is_default' => 'boolean',
+        'token' => 'encrypted',
     ];
 
     public function customer(): BelongsTo

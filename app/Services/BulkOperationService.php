@@ -149,13 +149,16 @@ class BulkOperationService
                 foreach ($clients as $client) {
                     fputcsv(
                         $file,
-                        [
-                            $client->id,
-                            $client->name,
-                            $client->email,
-                            $client->phone ?? '',
-                            $client->created_at,
-                        ],
+                        array_map(
+                            [$this, 'neutralizeCsvValue'],
+                            [
+                                $client->id,
+                                $client->name,
+                                $client->email,
+                                $client->phone ?? '',
+                                $client->created_at,
+                            ]
+                        ),
                         escape: '\\'
                     );
                     $operation->incrementProcessed();
@@ -169,6 +172,21 @@ class BulkOperationService
         } catch (Exception $e) {
             $operation->markAsFailed($e->getMessage());
         }
+    }
+
+    /**
+     * Neutralize CSV formula injection: prefix risky values with an apostrophe
+     * so spreadsheet apps treat them as text, not formulas.
+     */
+    private function neutralizeCsvValue(mixed $value): string
+    {
+        $value = (string) $value;
+
+        if ($value !== '' && in_array($value[0], ['=', '+', '-', '@', "\t", "\r"], true)) {
+            return "'".$value;
+        }
+
+        return $value;
     }
 
     /**

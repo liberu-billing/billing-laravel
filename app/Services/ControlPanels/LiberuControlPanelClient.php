@@ -158,7 +158,6 @@ class LiberuControlPanelClient
                     'Accept' => 'application/json',
                     'Content-Type' => 'application/json',
                 ],
-                'verify' => false,
             ];
 
             if (! empty($data)) {

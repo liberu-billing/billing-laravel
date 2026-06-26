@@ -46,6 +46,7 @@ class WebhookEndpoint extends Model
             'events' => 'array',
             'is_active' => 'boolean',
             'last_triggered_at' => 'datetime',
+            'secret' => 'encrypted',
         ];
     }
 

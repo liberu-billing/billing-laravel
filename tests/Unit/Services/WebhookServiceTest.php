@@ -204,6 +204,66 @@ class WebhookServiceTest extends TestCase
         $this->assertEqualsWithDelta(120, now()->diffInSeconds($event->next_retry_at, true), 1.0);
     }
 
+    public function test_send_blocks_link_local_metadata_endpoint(): void
+    {
+        Http::fake(['*' => Http::response('', 200)]);
+
+        $endpoint = WebhookEndpoint::create([
+            'url' => 'http://169.254.169.254/latest/meta-data/',
+            'is_active' => true,
+        ]);
+
+        $event = WebhookEvent::create([
+            'webhook_endpoint_id' => $endpoint->id,
+            'event_type' => WebhookService::EVENT_INVOICE_CREATED,
+            'payload' => ['invoice_id' => 1],
+            'status' => 'pending',
+        ]);
+
+        $this->assertFalse($this->webhookService->send($event));
+        Http::assertNothingSent();
+    }
+
+    public function test_send_blocks_localhost_target(): void
+    {
+        Http::fake(['*' => Http::response('', 200)]);
+
+        $endpoint = WebhookEndpoint::create([
+            'url' => 'https://localhost/webhook',
+            'is_active' => true,
+        ]);
+
+        $event = WebhookEvent::create([
+            'webhook_endpoint_id' => $endpoint->id,
+            'event_type' => WebhookService::EVENT_INVOICE_CREATED,
+            'payload' => ['invoice_id' => 1],
+            'status' => 'pending',
+        ]);
+
+        $this->assertFalse($this->webhookService->send($event));
+        Http::assertNothingSent();
+    }
+
+    public function test_send_allows_external_https_target(): void
+    {
+        Http::fake(['*' => Http::response('', 200)]);
+
+        $endpoint = WebhookEndpoint::create([
+            'url' => 'https://example.com/webhook',
+            'is_active' => true,
+        ]);
+
+        $event = WebhookEvent::create([
+            'webhook_endpoint_id' => $endpoint->id,
+            'event_type' => WebhookService::EVENT_INVOICE_CREATED,
+            'payload' => ['invoice_id' => 1],
+            'status' => 'pending',
+        ]);
+
+        $this->assertTrue($this->webhookService->send($event));
+        Http::assertSentCount(1);
+    }
+
     public function test_process_command_flushes_pending_events(): void
     {
         Http::fake(['*' => Http::response('', 200)]);
