@@ -62,24 +62,30 @@ class BillingService
         return $subscription;
     }
 
-    public function upgradeSubscription(Subscription $subscription, SubscriptionPlan $newPlan)
+    public function upgradeSubscription(Subscription $subscription, SubscriptionPlan $newPlan): Invoice
     {
-        // Calculate prorated amount
-        $this->calculateProratedAmount(
-            $subscription->price,
-            $newPlan->price,
-            $subscription->end_date
+        // Charge the prorated difference between the new and old plan for the
+        // days remaining in the current cycle.
+        $proratedAmount = $this->calculateProratedAmount(
+            (float) $subscription->price,
+            (float) $newPlan->price,
+            $subscription
         );
 
-        // Generate upgrade invoice
-        $invoice = $this->generateInvoice($subscription);
+        $invoice = Invoice::create([
+            'customer_id' => $subscription->customer_id,
+            'subscription_id' => $subscription->id,
+            'invoice_number' => $this->generateInvoiceNumber(),
+            'issue_date' => now(),
+            'total_amount' => $proratedAmount,
+            'currency' => $subscription->currency ?? 'USD',
+            'status' => 'pending',
+            'due_date' => now()->addDays(30),
+        ]);
 
-        $subscription->update(
-            [
-                'subscription_plan_id' => $newPlan->id,
-                'price' => $newPlan->price,
-            ]
-        );
+        // NOTE: the subscriptions table has no subscription_plan_id column
+        // (plan link is via product_service_id); only the price is updated here.
+        $subscription->update(['price' => $newPlan->price]);
 
         return $invoice;
     }
@@ -105,15 +111,16 @@ class BillingService
         return true;
     }
 
-    private function calculateProratedAmount($oldPrice, $newPrice, $endDate): float
+    private function calculateProratedAmount(float $oldPrice, float $newPrice, Subscription $subscription): float
     {
-        $daysRemaining = now()->diffInDays($endDate);
-        $totalDays = 30; // Assuming monthly billing
+        // Total length of the current billing cycle, in days.
+        $totalDays = max(1, (int) round($subscription->start_date->diffInDays($subscription->end_date)));
 
-        $oldAmount = ($oldPrice / $totalDays) * $daysRemaining;
-        $newAmount = ($newPrice / $totalDays) * $daysRemaining;
+        // Whole days left before the cycle ends (clamped to [0, totalDays]).
+        $daysRemaining = (int) round(now()->diffInDays($subscription->end_date, false));
+        $daysRemaining = max(0, min($daysRemaining, $totalDays));
 
-        return $newAmount - $oldAmount;
+        return round((($newPrice - $oldPrice) / $totalDays) * $daysRemaining, 2);
     }
 
     private function calculateEndDate(string $billingCycle)
@@ -438,7 +445,6 @@ class BillingService
 
     public function processAutomaticPayment(Invoice $invoice): array
     {
-        $paymentGatewayService = new PaymentGatewayService;
         $customer = $invoice->customer;
 
         // Assuming the customer has a default payment method stored
@@ -464,10 +470,11 @@ class BillingService
         );
 
         try {
-            $result = $paymentGatewayService->processPayment($payment);
+            $result = $this->paymentGatewayService->processPayment($payment);
             if ($result['success']) {
                 $payment->transaction_id = $result['transaction_id'];
                 $payment->status = 'completed';
+                $payment->payment_date = now();
                 $payment->save();
 
                 $invoice->status = 'paid';
