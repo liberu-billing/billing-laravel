@@ -22,6 +22,10 @@ class UserResource extends Resource
     #[Override]
     protected static ?string $model = User::class;
 
+    // User belongs to teams many-to-many (Jetstream HasTeams::teams), not the
+    // singular `team` belongsTo that the panel's ownershipRelationship assumes.
+    protected static ?string $tenantOwnershipRelationshipName = 'teams';
+
     #[Override]
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 

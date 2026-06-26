@@ -28,6 +28,15 @@ class ProductsServiceResource extends Resource
     protected static ?string $model = Products_Service::class;
 
     #[Override]
+    protected static ?string $modelLabel = 'Products Service';
+
+    #[Override]
+    protected static ?string $pluralModelLabel = 'Products Services';
+
+    #[Override]
+    protected static ?string $navigationLabel = 'Products Services';
+
+    #[Override]
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     #[Override]
@@ -157,14 +166,6 @@ class ProductsServiceResource extends Resource
                     ),
                 ]
             );
-    }
-
-    #[Override]
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     #[Override]
