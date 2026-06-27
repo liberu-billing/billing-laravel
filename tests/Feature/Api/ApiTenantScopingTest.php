@@ -24,7 +24,7 @@ class ApiTenantScopingTest extends TestCase
         parent::setUp();
         $this->user = User::factory()->withPersonalTeam()->create();
         Gate::before(fn (): true => true); // isolate tenancy from Shield permissions
-        Sanctum::actingAs($this->user);
+        Sanctum::actingAs($this->user, ['*']);
     }
 
     public function test_cannot_view_another_teams_subscription(): void

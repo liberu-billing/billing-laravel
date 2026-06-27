@@ -31,7 +31,7 @@ class CustomerApiTest extends TestCase
 
     public function test_authenticated_user_can_list_customers(): void
     {
-        Sanctum::actingAs($this->user);
+        Sanctum::actingAs($this->user, ['*']);
         Customer::factory()->count(5)->create();
 
         $response = $this->getJson('/api/customers');
@@ -41,7 +41,7 @@ class CustomerApiTest extends TestCase
 
     public function test_authenticated_user_can_create_customer(): void
     {
-        Sanctum::actingAs($this->user);
+        Sanctum::actingAs($this->user, ['*']);
 
         $response = $this->postJson('/api/customers', [
             'name' => 'Test Customer',
@@ -54,7 +54,7 @@ class CustomerApiTest extends TestCase
 
     public function test_authenticated_user_can_view_customer(): void
     {
-        Sanctum::actingAs($this->user);
+        Sanctum::actingAs($this->user, ['*']);
         $customer = Customer::factory()->create(['team_id' => $this->user->currentTeam->id]);
 
         $response = $this->getJson("/api/customers/{$customer->id}");
@@ -65,7 +65,7 @@ class CustomerApiTest extends TestCase
 
     public function test_authenticated_user_can_update_customer(): void
     {
-        Sanctum::actingAs($this->user);
+        Sanctum::actingAs($this->user, ['*']);
         $customer = Customer::factory()->create(['team_id' => $this->user->currentTeam->id]);
 
         $response = $this->putJson("/api/customers/{$customer->id}", [
@@ -79,7 +79,7 @@ class CustomerApiTest extends TestCase
 
     public function test_authenticated_user_can_delete_customer(): void
     {
-        Sanctum::actingAs($this->user);
+        Sanctum::actingAs($this->user, ['*']);
         $customer = Customer::factory()->create(['team_id' => $this->user->currentTeam->id]);
 
         $response = $this->deleteJson("/api/customers/{$customer->id}");
@@ -90,7 +90,7 @@ class CustomerApiTest extends TestCase
 
     public function test_customer_creation_requires_email(): void
     {
-        Sanctum::actingAs($this->user);
+        Sanctum::actingAs($this->user, ['*']);
 
         $response = $this->postJson('/api/customers', ['name' => 'No Email']);
 
@@ -100,7 +100,7 @@ class CustomerApiTest extends TestCase
 
     public function test_cannot_view_or_modify_another_teams_customer(): void
     {
-        Sanctum::actingAs($this->user);
+        Sanctum::actingAs($this->user, ['*']);
         $otherTeam = User::factory()->withPersonalTeam()->create()->currentTeam;
         $theirs = Customer::factory()->create(['team_id' => $otherTeam->id]);
 
