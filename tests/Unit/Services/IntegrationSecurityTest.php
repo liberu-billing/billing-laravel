@@ -96,6 +96,30 @@ class IntegrationSecurityTest extends TestCase
     }
 
     /**
+     * D2 (pin): the outgoing WHM request must pin DNS to the validated IP via
+     * CURLOPT_RESOLVE, closing the rebind TOCTOU between validate and connect.
+     * (Actual rebind-between-resolve-and-connect is not deterministically testable;
+     * the MockHandler ignores the curl option, so we assert it on the request options.)
+     */
+    public function test_cpanel_request_pins_dns_to_validated_ip(): void
+    {
+        $server = HostingServer::factory()->cpanel()->create(['hostname' => '203.0.113.10']);
+        $client = new CpanelClient;
+        $client->setServer($server);
+
+        $history = [];
+        $this->injectGuzzle($client, [new Response(200, [], '{"metadata":{"result":1}}')], $history);
+
+        $client->createAccount('testuser', 'example.com', 'basic');
+
+        $this->assertCount(1, $history);
+        $this->assertSame(
+            ['203.0.113.10:2087:203.0.113.10'],
+            $history[0]['options']['curl'][CURLOPT_RESOLVE] ?? null
+        );
+    }
+
+    /**
      * D3: createSsoSession must return null when the WHM response URL host does not
      * match the configured server hostname (open-redirect guard).
      */

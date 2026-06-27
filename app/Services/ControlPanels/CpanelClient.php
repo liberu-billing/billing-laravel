@@ -179,7 +179,7 @@ class CpanelClient
             throw new Exception('Server not configured');
         }
 
-        $this->validateHostname($this->server->hostname);
+        $pinnedIp = $this->validateHostname($this->server->hostname);
 
         try {
             // ponytail: real WHM create_user_session call here — sent via the
@@ -200,6 +200,10 @@ class CpanelClient
                         'services.cpanel.ssl_verify',
                         true
                     ),
+                    // ponytail: CURLOPT_RESOLVE pins DNS to the validated IP for this
+                    // request, closing the rebind window (cert still verifies against
+                    // the hostname). Residual: only the first validated IP is used.
+                    'curl' => [CURLOPT_RESOLVE => [$this->server->hostname.':2087:'.$pinnedIp]],
                 ]
             );
 
@@ -265,7 +269,7 @@ class CpanelClient
             throw new Exception('Server not configured');
         }
 
-        $this->validateHostname($this->server->hostname);
+        $pinnedIp = $this->validateHostname($this->server->hostname);
 
         try {
             $response = $this->client->request(
@@ -280,6 +284,10 @@ class CpanelClient
                         'services.cpanel.ssl_verify',
                         true
                     ),
+                    // ponytail: CURLOPT_RESOLVE pins DNS to the validated IP for this
+                    // request, closing the rebind window (cert still verifies against
+                    // the hostname). Residual: only the first validated IP is used.
+                    'curl' => [CURLOPT_RESOLVE => [$this->server->hostname.':2087:'.$pinnedIp]],
                 ]
             );
 
@@ -327,7 +335,11 @@ class CpanelClient
         }
     }
 
-    protected function validateHostname(string $hostname): void
+    /**
+     * Validate the hostname is public and return the validated IP to pin the
+     * request to (closing the DNS-rebind TOCTOU between check and connect).
+     */
+    protected function validateHostname(string $hostname): string
     {
         // Literal IP: reject private/loopback/reserved directly.
         if (filter_var(
@@ -343,7 +355,7 @@ class CpanelClient
                 throw new Exception('Private or reserved IP addresses are not allowed as cPanel hostnames');
             }
 
-            return;
+            return $hostname;
         }
 
         if (! filter_var(
@@ -357,8 +369,8 @@ class CpanelClient
         // Domain: resolve it and reject if ANY address is private/reserved, so a
         // public hostname pointing at an internal/loopback IP can't be used for SSRF.
         // Mirrors WebhookService::assertSafeUrl.
-        // ponytail: IPv4-only (gethostbynamel); a DNS-rebinding TOCTOU gap remains
-        // between this check and the request — pin the resolved IP into the request to close it.
+        // ponytail: IPv4-only (gethostbynamel); the first validated IP is pinned
+        // into the request via CURLOPT_RESOLVE to close the DNS-rebind TOCTOU.
         $ips = gethostbynamel($hostname) ?: [];
 
         if ($ips === []) {
@@ -370,6 +382,8 @@ class CpanelClient
                 throw new Exception('cPanel hostname resolves to a private or reserved address');
             }
         }
+
+        return $ips[0];
     }
 
     protected function generatePassword(): string
