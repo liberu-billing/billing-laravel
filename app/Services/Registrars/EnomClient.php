@@ -71,6 +71,58 @@ class EnomClient
         return 0.0;
     }
 
+    /**
+     * @return array<int, array{id: string, type: string, name: string, content: string, ttl: int}>
+     */
+    public function getDnsRecords(string $domainName): array
+    {
+        // ponytail: real registrar call here — eNom GetHosts; parse XML into records.
+        $this->makeApiCall('GetHosts', ['SLD' => $domainName]);
+
+        return [];
+    }
+
+    /**
+     * @param  array{type: string, name: string, content: string, ttl?: int}  $record
+     */
+    public function addDnsRecord(string $domainName, array $record): bool
+    {
+        // ponytail: real registrar call here — eNom SetHosts (eNom replaces the full host set).
+        $this->makeApiCall('SetHosts', array_merge(['SLD' => $domainName], $record));
+
+        return true;
+    }
+
+    public function deleteDnsRecord(string $domainName, string $recordId): bool
+    {
+        // ponytail: real registrar call here — eNom SetHosts minus the record id.
+        $this->makeApiCall('SetHosts', ['SLD' => $domainName, 'DeleteHostId' => $recordId]);
+
+        return true;
+    }
+
+    /**
+     * @return array<string, array<string, string>>
+     */
+    public function getWhoisContacts(string $domainName): array
+    {
+        // ponytail: real registrar call here — eNom GetWhoisContact; parse XML into contacts.
+        $this->makeApiCall('GetWhoisContact', ['SLD' => $domainName]);
+
+        return [];
+    }
+
+    /**
+     * @param  array<string, array<string, string>>  $contacts
+     */
+    public function updateWhoisContacts(string $domainName, array $contacts): bool
+    {
+        // ponytail: real registrar call here — eNom Contacts (flatten per-contact fields).
+        $this->makeApiCall('Contacts', ['SLD' => $domainName]);
+
+        return true;
+    }
+
     protected function makeApiCall($command, $params): void
     {
         $params = array_merge(

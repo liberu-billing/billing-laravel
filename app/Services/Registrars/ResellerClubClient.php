@@ -50,6 +50,48 @@ class ResellerClubClient
         return ['expiration_date' => null];
     }
 
+    /**
+     * @return array<int, array{id: string, type: string, name: string, content: string, ttl: int}>
+     */
+    public function getDnsRecords(string $domainName): array
+    {
+        // ponytail: real registrar call here — ResellerClub dns/manage/search-records.
+        return [];
+    }
+
+    /**
+     * @param  array{type: string, name: string, content: string, ttl?: int}  $record
+     */
+    public function addDnsRecord(string $domainName, array $record): bool
+    {
+        // ponytail: real registrar call here — ResellerClub dns/manage/add-<type>-record.
+        return true;
+    }
+
+    public function deleteDnsRecord(string $domainName, string $recordId): bool
+    {
+        // ponytail: real registrar call here — ResellerClub dns/manage/delete-record.
+        return true;
+    }
+
+    /**
+     * @return array<string, array<string, string>>
+     */
+    public function getWhoisContacts(string $domainName): array
+    {
+        // ponytail: real registrar call here — ResellerClub domains/details (contact ids).
+        return [];
+    }
+
+    /**
+     * @param  array<string, array<string, string>>  $contacts
+     */
+    public function updateWhoisContacts(string $domainName, array $contacts): bool
+    {
+        // ponytail: real registrar call here — ResellerClub domains/modify-contact.
+        return true;
+    }
+
     protected function makeApiCall(string $action, $params)
     {
         $params = array_merge(

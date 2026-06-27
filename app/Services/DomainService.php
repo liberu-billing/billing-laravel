@@ -87,6 +87,48 @@ class DomainService
         return $result;
     }
 
+    /**
+     * @return array<int, array{id: string, type: string, name: string, content: string, ttl: int}>
+     */
+    public function getDnsRecords(Subscription $subscription): array
+    {
+        return $this->getClientForRegistrar($subscription->domain_registrar)
+            ->getDnsRecords($subscription->domain_name);
+    }
+
+    /**
+     * @param  array{type: string, name: string, content: string, ttl?: int}  $record
+     */
+    public function addDnsRecord(Subscription $subscription, array $record): bool
+    {
+        return $this->getClientForRegistrar($subscription->domain_registrar)
+            ->addDnsRecord($subscription->domain_name, $record);
+    }
+
+    public function deleteDnsRecord(Subscription $subscription, string $recordId): bool
+    {
+        return $this->getClientForRegistrar($subscription->domain_registrar)
+            ->deleteDnsRecord($subscription->domain_name, $recordId);
+    }
+
+    /**
+     * @return array<string, array<string, string>>
+     */
+    public function getWhoisContacts(Subscription $subscription): array
+    {
+        return $this->getClientForRegistrar($subscription->domain_registrar)
+            ->getWhoisContacts($subscription->domain_name);
+    }
+
+    /**
+     * @param  array<string, array<string, string>>  $contacts
+     */
+    public function updateWhoisContacts(Subscription $subscription, array $contacts): bool
+    {
+        return $this->getClientForRegistrar($subscription->domain_registrar)
+            ->updateWhoisContacts($subscription->domain_name, $contacts);
+    }
+
     protected function getClientForRegistrar($registrar): EnomClient|ResellerClubClient
     {
         return match ($registrar) {
