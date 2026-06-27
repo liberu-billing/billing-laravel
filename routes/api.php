@@ -48,8 +48,9 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
     Route::delete('auth/token', [AuthController::class, 'revokeToken']);
     Route::delete('auth/tokens', [AuthController::class, 'revokeAllTokens']);
 
-    // Installation endpoint
-    Route::post('/install', [InstallationController::class, 'install']);
+    // Installation endpoint (operators only)
+    Route::post('/install', [InstallationController::class, 'install'])
+        ->middleware('role:super_admin');
 
     // Invoice endpoints
     Route::middleware('ability:invoices:read')->group(function (): void {

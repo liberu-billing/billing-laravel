@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
+use App\Models\User;
+
 enum TokenAbility: string
 {
     case InvoicesRead = 'invoices:read';
@@ -28,5 +30,25 @@ enum TokenAbility: string
     public static function values(): array
     {
         return array_map(fn (self $ability): string => $ability->value, self::cases());
+    }
+
+    /**
+     * Abilities a user is permitted to request on a token.
+     *
+     * note: starting policy — operators get everything, everyone else is
+     * read-only. Tune this mapping as finer-grained API access is needed.
+     *
+     * @return list<string>
+     */
+    public static function allowedFor(User $user): array
+    {
+        if ($user->hasRole(['super_admin', 'admin', 'staff'])) {
+            return self::values();
+        }
+
+        return array_values(array_filter(
+            self::values(),
+            fn (string $ability): bool => str_ends_with($ability, ':read'),
+        ));
     }
 }
