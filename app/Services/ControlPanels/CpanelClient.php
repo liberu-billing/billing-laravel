@@ -167,6 +167,79 @@ class CpanelClient
     }
 
     /**
+     * Create a one-time WHM login session for the account's cPanel user and
+     * return the seamless login URL (no password prompt). Returns null on
+     * failure.
+     *
+     * @throws Exception
+     */
+    public function createSsoSession(string $username): ?string
+    {
+        if (! $this->server) {
+            throw new Exception('Server not configured');
+        }
+
+        $this->validateHostname($this->server->hostname);
+
+        try {
+            // ponytail: real WHM create_user_session call here — sent via the
+            // instance $client so it stays interceptable (see CpanelSsoTest).
+            $response = $this->client->request(
+                'GET',
+                'https://'.$this->server->hostname.':2087/json-api/create_user_session',
+                [
+                    'headers' => [
+                        'Authorization' => 'WHM '.$this->server->username.':'.$this->apiToken,
+                    ],
+                    'query' => [
+                        'api.version' => 1,
+                        'user' => $username,
+                        'service' => 'cpaneld',
+                    ],
+                    'verify' => config(
+                        'services.cpanel.ssl_verify',
+                        true
+                    ),
+                ]
+            );
+
+            $result = json_decode(
+                (string) $response->getBody(),
+                true,
+                512,
+                JSON_THROW_ON_ERROR
+            );
+
+            if (isset($result['metadata']['result']) && $result['metadata']['result'] === 1) {
+                return $result['data']['url'] ?? null;
+            }
+
+            Log::error(
+                'cPanel SSO session creation failed',
+                [
+                    'server' => $this->server->hostname,
+                    'user' => $username,
+                    'error' => $result['metadata']['reason'] ?? 'Unknown error',
+                ]
+            );
+
+            return null;
+
+        } catch (GuzzleException $e) {
+            Log::error(
+                'cPanel SSO session creation error',
+                [
+                    'server' => $this->server->hostname,
+                    'user' => $username,
+                    'error' => $e->getMessage(),
+                ]
+            );
+
+            return null;
+        }
+    }
+
+    /**
      * @throws Exception
      */
     protected function makeApiCall(string $endpoint, $params): bool
