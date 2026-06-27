@@ -175,14 +175,16 @@ class CreateNewUser implements CreatesNewUsers
      */
     protected function configureDefaultTeamContext(): Team
     {
-        $team = Team::first();
+        // Attach new registrants to the admin-designated default team; fall back to
+        // the first team, then create one on a fresh install.
+        $team = Team::defaultForRegistration() ?? Team::first();
         if (! $team) {
-            // Create a default team if none exists (e.g., in a fresh installation)
             $team = Team::forceCreate(
                 [
                     'user_id' => 0,
                     'name' => 'Default Team',
                     'personal_team' => false,
+                    'is_default_for_registration' => true,
                 ]
             );
         }
