@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Services;
 
+use App\Models\Currency;
 use App\Models\Customer;
 use App\Models\Discount;
 use App\Models\Invoice;
@@ -303,30 +304,39 @@ class TaxCurrencyDiscountTest extends TestCase
     }
 
     /**
-     * BUG DOC: convertCurrency hardcodes fromRate=1, toRate=1, so it returns the
-     * input amount unchanged for ANY currency pair — no real conversion happens.
+     * Was BUG DOC (hardcoded 1:1). Now delegates to CurrencyService and converts via
+     * stored rates: 100 USD * (0.5 / 1) = 50.00 EUR.
      */
-    public function test_billing_convert_currency_is_hardcoded_one_to_one(): void
+    public function test_billing_convert_currency_converts_via_stored_rates(): void
     {
-        // USD→EUR should change the amount, but the stub returns it unchanged.
-        $this->assertEquals(100.00, app(BillingService::class)->convertCurrency(100, 'USD', 'EUR'));
+        $this->seedCurrencies();
+
+        $this->assertEquals(50.00, app(BillingService::class)->convertCurrency(100, 'USD', 'EUR'));
     }
 
     public function test_currency_service_uses_cached_rate(): void
     {
+        $this->seedCurrencies();
         Cache::put('currency_rate_USD_EUR', 0.5, 3600);
 
         $this->assertEquals(50.0, app(CurrencyService::class)->convert(100.0, 'USD', 'EUR'));
     }
 
     /**
-     * BUG DOC: CurrencyService::calculateRate only assigns $rate inside the cache-hit
-     * branch. On a cache miss it falls through to `return $amount * $rate` with $rate
-     * still null, so convert() returns 0.0 instead of a real/converted amount.
-     * (CurrencyService.php:62-68 — rate calculation logic is never implemented.)
+     * Was BUG DOC (returned 0.0 on cache miss). Now an unknown currency fails loudly
+     * instead of silently returning 0.
      */
-    public function test_currency_service_returns_zero_on_cache_miss(): void
+    public function test_currency_service_throws_on_unknown_currency(): void
     {
-        $this->assertEquals(0.0, app(CurrencyService::class)->convert(100.0, 'USD', 'GBP'));
+        $this->seedCurrencies();
+
+        $this->expectException(\RuntimeException::class);
+        app(CurrencyService::class)->convert(100.0, 'USD', 'GBP');
+    }
+
+    private function seedCurrencies(): void
+    {
+        Currency::create(['code' => 'USD', 'name' => 'US Dollar', 'exchange_rate' => '1', 'is_base' => true]);
+        Currency::create(['code' => 'EUR', 'name' => 'Euro', 'exchange_rate' => '0.5']);
     }
 }

@@ -344,16 +344,7 @@ class BillingService
 
     public function convertCurrency($amount, $fromCurrency, $toCurrency)
     {
-        if ($fromCurrency === $toCurrency) {
-            return $amount;
-        }
-
-        // $fromRate = Currency::where('code', $fromCurrency)->first()->exchange_rate;
-        // $toRate = Currency::where('code', $toCurrency)->first()->exchange_rate;
-        $fromRate = 1;
-        $toRate = 1;
-
-        return ($amount / $fromRate) * $toRate;
+        return $this->currencyService->convert((float) $amount, $fromCurrency, $toCurrency);
     }
 
     public function processRecurringBilling(): void
