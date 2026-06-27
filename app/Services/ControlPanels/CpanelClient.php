@@ -211,7 +211,24 @@ class CpanelClient
             );
 
             if (isset($result['metadata']['result']) && $result['metadata']['result'] === 1) {
-                return $result['data']['url'] ?? null;
+                $url = $result['data']['url'] ?? null;
+
+                // The login URL is handed straight to redirect()->away() by the caller,
+                // so it must point at the configured WHM host — otherwise it's an open redirect.
+                if (! is_string($url) || parse_url($url, PHP_URL_HOST) !== $this->server->hostname) {
+                    Log::error(
+                        'cPanel SSO session returned an unexpected host',
+                        [
+                            'server' => $this->server->hostname,
+                            'user' => $username,
+                            'url' => $url,
+                        ]
+                    );
+
+                    return null;
+                }
+
+                return $url;
             }
 
             Log::error(
@@ -312,7 +329,7 @@ class CpanelClient
 
     protected function validateHostname(string $hostname): void
     {
-        // Reject private/loopback IPs to prevent SSRF
+        // Literal IP: reject private/loopback/reserved directly.
         if (filter_var(
             $hostname,
             FILTER_VALIDATE_IP
@@ -325,12 +342,33 @@ class CpanelClient
             if ($isPrivate) {
                 throw new Exception('Private or reserved IP addresses are not allowed as cPanel hostnames');
             }
-        } elseif (! filter_var(
+
+            return;
+        }
+
+        if (! filter_var(
             $hostname,
             FILTER_VALIDATE_DOMAIN,
             FILTER_FLAG_HOSTNAME
         )) {
             throw new Exception('Invalid cPanel hostname');
+        }
+
+        // Domain: resolve it and reject if ANY address is private/reserved, so a
+        // public hostname pointing at an internal/loopback IP can't be used for SSRF.
+        // Mirrors WebhookService::assertSafeUrl.
+        // ponytail: IPv4-only (gethostbynamel); a DNS-rebinding TOCTOU gap remains
+        // between this check and the request — pin the resolved IP into the request to close it.
+        $ips = gethostbynamel($hostname) ?: [];
+
+        if ($ips === []) {
+            throw new Exception('cPanel hostname could not be resolved');
+        }
+
+        foreach ($ips as $ip) {
+            if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+                throw new Exception('cPanel hostname resolves to a private or reserved address');
+            }
         }
     }
 

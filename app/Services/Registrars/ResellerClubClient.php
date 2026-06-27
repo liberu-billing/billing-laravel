@@ -94,12 +94,13 @@ class ResellerClubClient
 
     protected function makeApiCall(string $action, $params)
     {
+        // Trusted credentials must win over caller-supplied params, so merge them LAST.
         $params = array_merge(
+            $params,
             [
                 'auth-userid' => $this->authUserId,
                 'api-key' => $this->apiKey,
-            ],
-            $params
+            ]
         );
 
         $this->client->post(
