@@ -4,8 +4,11 @@ namespace Tests\Unit\Services;
 
 use App\Models\Customer;
 use App\Models\Invoice;
+use App\Models\PaymentGateway;
+use App\Models\PaymentMethod;
 use App\Models\Products_Service;
 use App\Models\Subscription;
+use App\Models\SubscriptionPlan;
 use App\Services\BillingService;
 use App\Services\PaymentGatewayService;
 use Carbon\Carbon;
@@ -60,6 +63,62 @@ class BillingServiceTest extends TestCase
 
         $this->assertDatabaseHas('invoices', [
             'customer_id' => $subscription->customer_id,
+        ]);
+    }
+
+    public function test_upgrade_subscription_charges_prorated_difference(): void
+    {
+        Carbon::setTestNow('2026-07-11'); // 15 of 30 cycle days remaining
+
+        $customer = Customer::factory()->create();
+        $subscription = Subscription::factory()->create([
+            'customer_id' => $customer->id,
+            'price' => 10.00,
+            'start_date' => Carbon::parse('2026-06-26'),
+            'end_date' => Carbon::parse('2026-07-26'),
+        ]);
+        $newPlan = SubscriptionPlan::create([
+            'name' => 'Pro',
+            'code' => 'pro',
+            'price' => 40.00,
+        ]);
+
+        $invoice = $this->billingService->upgradeSubscription($subscription, $newPlan);
+
+        // (40 - 10) / 30 days * 15 days remaining = 15.00
+        $this->assertEquals(15.00, (float) $invoice->total_amount);
+        $this->assertEquals(40.00, (float) $subscription->fresh()->price);
+
+        Carbon::setTestNow();
+    }
+
+    public function test_process_automatic_payment_uses_injected_gateway(): void
+    {
+        $customer = Customer::factory()->create();
+        $gateway = PaymentGateway::create([
+            'name' => 'Test Gateway',
+            'api_key' => 'key',
+            'secret_key' => 'secret',
+        ]);
+        PaymentMethod::create([
+            'customer_id' => $customer->id,
+            'payment_gateway_id' => $gateway->id,
+            'type' => 'card',
+            'is_default' => true,
+        ]);
+        $invoice = Invoice::factory()->create([
+            'customer_id' => $customer->id,
+            'status' => 'pending',
+        ]);
+
+        $result = $this->billingService->processAutomaticPayment($invoice);
+
+        $this->assertTrue($result['success']);
+        $this->assertEquals('paid', $invoice->fresh()->status);
+        $this->assertDatabaseHas('payments', [
+            'invoice_id' => $invoice->id,
+            'status' => 'completed',
+            'transaction_id' => 'test-txn-123',
         ]);
     }
 

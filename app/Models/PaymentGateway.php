@@ -39,6 +39,8 @@ class PaymentGateway extends Model
 
         return [
             'is_active' => 'boolean',
+            'api_key' => 'encrypted',
+            'secret_key' => 'encrypted',
         ];
 
     }

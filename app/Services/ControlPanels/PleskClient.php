@@ -230,7 +230,6 @@ class PleskClient
                         'KEY' => $this->apiKey,
                     ],
                     'body' => $xml,
-                    'verify' => false,
                 ]
             );
 
@@ -284,8 +283,13 @@ class PleskClient
         $xml = '';
         foreach ($array as $key => $value) {
             if (is_array($value)) {
-                if (isset($value['name']) && isset($value['value'])) {
-                    $xml .= "<{$key} name=\"{$value['name']}\">{$value['value']}</{$key}>";
+                if (array_is_list($value)) {
+                    // Repeated element: emit one <key>…</key> per list item
+                    // (e.g. multiple <property>/<limit> blocks), instead of
+                    // collapsing them into invalid <0>/<1> numeric tags.
+                    foreach ($value as $item) {
+                        $xml .= "<{$key}>".(is_array($item) ? $this->arrayToXml($item) : $item)."</{$key}>";
+                    }
                 } else {
                     $xml .= "<{$key}>".$this->arrayToXml($value)."</{$key}>";
                 }

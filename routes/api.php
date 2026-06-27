@@ -52,55 +52,91 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
     Route::post('/install', [InstallationController::class, 'install']);
 
     // Invoice endpoints
-    Route::apiResource('invoices', InvoiceController::class);
-    Route::get('invoices/{invoice}/download', [InvoiceController::class, 'download'])->name('invoices.download');
+    Route::middleware('ability:invoices:read')->group(function (): void {
+        Route::get('invoices', [InvoiceController::class, 'index'])->name('invoices.index');
+        Route::get('invoices/{invoice}/download', [InvoiceController::class, 'download'])->name('invoices.download');
+        Route::get('invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
+    });
+    Route::middleware('ability:invoices:write')->group(function (): void {
+        Route::post('invoices', [InvoiceController::class, 'store'])->name('invoices.store');
+        Route::match(['put', 'patch'], 'invoices/{invoice}', [InvoiceController::class, 'update'])->name('invoices.update');
+        Route::delete('invoices/{invoice}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
+    });
 
     // Subscription endpoints
-    Route::apiResource('subscriptions', SubscriptionController::class);
-    Route::post('subscriptions/{subscription}/cancel', [SubscriptionController::class, 'cancel']);
-    Route::post('subscriptions/{subscription}/renew', [SubscriptionController::class, 'renew']);
+    Route::middleware('ability:subscriptions:read')->group(function (): void {
+        Route::get('subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
+        Route::get('subscriptions/{subscription}', [SubscriptionController::class, 'show'])->name('subscriptions.show');
+    });
+    Route::middleware('ability:subscriptions:write')->group(function (): void {
+        Route::post('subscriptions', [SubscriptionController::class, 'store'])->name('subscriptions.store');
+        Route::match(['put', 'patch'], 'subscriptions/{subscription}', [SubscriptionController::class, 'update'])->name('subscriptions.update');
+        Route::delete('subscriptions/{subscription}', [SubscriptionController::class, 'destroy'])->name('subscriptions.destroy');
+        Route::post('subscriptions/{subscription}/cancel', [SubscriptionController::class, 'cancel']);
+        Route::post('subscriptions/{subscription}/renew', [SubscriptionController::class, 'renew']);
+    });
 
     // Customer endpoints
-    Route::apiResource('customers', CustomerController::class);
-    Route::get('customers/{customer}/invoices', [CustomerController::class, 'invoices']);
-    Route::get('customers/{customer}/subscriptions', [CustomerController::class, 'subscriptions']);
+    Route::middleware('ability:customers:read')->group(function (): void {
+        Route::get('customers', [CustomerController::class, 'index'])->name('customers.index');
+        Route::get('customers/{customer}', [CustomerController::class, 'show'])->name('customers.show');
+        Route::get('customers/{customer}/invoices', [CustomerController::class, 'invoices']);
+        Route::get('customers/{customer}/subscriptions', [CustomerController::class, 'subscriptions']);
+        Route::get('customers/{customer}/contacts', [ClientContactController::class, 'index']);
+        Route::get('customers/{customer}/contacts/{contact}', [ClientContactController::class, 'show']);
+    });
+    Route::middleware('ability:customers:write')->group(function (): void {
+        Route::post('customers', [CustomerController::class, 'store'])->name('customers.store');
+        Route::match(['put', 'patch'], 'customers/{customer}', [CustomerController::class, 'update'])->name('customers.update');
+        Route::delete('customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy');
+        Route::post('customers/{customer}/contacts', [ClientContactController::class, 'store']);
+        Route::put('customers/{customer}/contacts/{contact}', [ClientContactController::class, 'update']);
+        Route::delete('customers/{customer}/contacts/{contact}', [ClientContactController::class, 'destroy']);
+        Route::post('customers/{customer}/contacts/{contact}/make-primary', [ClientContactController::class, 'makePrimary']);
+    });
 
     // Client Notes endpoints
     Route::get('client-notes', [ClientNoteController::class, 'index']);
-    Route::post('client-notes', [ClientNoteController::class, 'store']);
-    Route::delete('client-notes/{note}', [ClientNoteController::class, 'destroy']);
+    Route::middleware('ability:client-notes:write')->group(function (): void {
+        Route::post('client-notes', [ClientNoteController::class, 'store']);
+        Route::delete('client-notes/{note}', [ClientNoteController::class, 'destroy']);
+    });
 
-    // Webhook endpoints
-    Route::apiResource('webhooks', WebhookController::class);
-    Route::post('webhooks/{webhook}/test', [WebhookController::class, 'test']);
-    Route::get('webhooks/{webhook}/events', [WebhookController::class, 'events']);
-    Route::get('webhook-event-types', [WebhookController::class, 'eventTypes']);
-    Route::post('webhook-events/{event}/retry', [WebhookController::class, 'retryEvent']);
+    // Webhook endpoints (single manage ability)
+    Route::middleware('ability:webhooks:manage')->group(function (): void {
+        Route::apiResource('webhooks', WebhookController::class);
+        Route::post('webhooks/{webhook}/test', [WebhookController::class, 'test']);
+        Route::get('webhooks/{webhook}/events', [WebhookController::class, 'events']);
+        Route::get('webhook-event-types', [WebhookController::class, 'eventTypes']);
+        Route::post('webhook-events/{event}/retry', [WebhookController::class, 'retryEvent']);
+    });
 
-    // Canned Response endpoints
-    Route::get('canned-responses', [CannedResponseController::class, 'index']);
-    Route::get('canned-responses/search', [CannedResponseController::class, 'search']);
-    Route::get('canned-responses/categories', [CannedResponseController::class, 'categories']);
-    Route::get('canned-responses/most-used', [CannedResponseController::class, 'mostUsed']);
-    Route::get('canned-responses/variables', [CannedResponseController::class, 'variables']);
-    Route::get('canned-responses/{shortcode}', [CannedResponseController::class, 'show']);
-    Route::post('canned-responses/{shortcode}/use', [CannedResponseController::class, 'use']);
+    // Canned Response endpoints (read-only taxonomy)
+    Route::middleware('ability:canned-responses:read')->group(function (): void {
+        Route::get('canned-responses', [CannedResponseController::class, 'index']);
+        Route::get('canned-responses/search', [CannedResponseController::class, 'search']);
+        Route::get('canned-responses/categories', [CannedResponseController::class, 'categories']);
+        Route::get('canned-responses/most-used', [CannedResponseController::class, 'mostUsed']);
+        Route::get('canned-responses/variables', [CannedResponseController::class, 'variables']);
+        Route::get('canned-responses/{shortcode}', [CannedResponseController::class, 'show']);
+        Route::post('canned-responses/{shortcode}/use', [CannedResponseController::class, 'use']);
+    });
 
     // Quote/Proposal endpoints (Blesta)
-    Route::apiResource('quotes', QuoteController::class);
-    Route::post('quotes/{quote}/send', [QuoteController::class, 'send']);
-    Route::post('quotes/{quote}/accept', [QuoteController::class, 'accept']);
-    Route::post('quotes/{quote}/decline', [QuoteController::class, 'decline']);
-    Route::post('quotes/{quote}/convert', [QuoteController::class, 'convert']);
-    Route::get('quotes-statistics', [QuoteController::class, 'statistics']);
-
-    // Client Contact endpoints (Blesta)
-    Route::get('customers/{customer}/contacts', [ClientContactController::class, 'index']);
-    Route::post('customers/{customer}/contacts', [ClientContactController::class, 'store']);
-    Route::get('customers/{customer}/contacts/{contact}', [ClientContactController::class, 'show']);
-    Route::put('customers/{customer}/contacts/{contact}', [ClientContactController::class, 'update']);
-    Route::delete('customers/{customer}/contacts/{contact}', [ClientContactController::class, 'destroy']);
-    Route::post('customers/{customer}/contacts/{contact}/make-primary', [ClientContactController::class, 'makePrimary']);
+    Route::middleware('ability:quotes:read')->group(function (): void {
+        Route::get('quotes', [QuoteController::class, 'index'])->name('quotes.index');
+        Route::get('quotes/{quote}', [QuoteController::class, 'show'])->name('quotes.show');
+        Route::get('quotes-statistics', [QuoteController::class, 'statistics']);
+    });
+    Route::middleware('ability:quotes:write')->group(function (): void {
+        Route::post('quotes', [QuoteController::class, 'store'])->name('quotes.store');
+        Route::match(['put', 'patch'], 'quotes/{quote}', [QuoteController::class, 'update'])->name('quotes.update');
+        Route::delete('quotes/{quote}', [QuoteController::class, 'destroy'])->name('quotes.destroy');
+        Route::post('quotes/{quote}/send', [QuoteController::class, 'send']);
+        Route::post('quotes/{quote}/accept', [QuoteController::class, 'accept']);
+        Route::post('quotes/{quote}/decline', [QuoteController::class, 'decline']);
+        Route::post('quotes/{quote}/convert', [QuoteController::class, 'convert']);
+    });
 
     // Package Group endpoints (Blesta)
     Route::apiResource('package-groups', PackageGroupController::class);

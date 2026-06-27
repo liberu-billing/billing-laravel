@@ -24,18 +24,26 @@ class BillingService
 
     protected SmsService $smsService;
 
+    protected PartialPaymentService $partialPaymentService;
+
+    protected RefundService $refundService;
+
     public function __construct(
         protected ServiceProvisioningService $serviceProvisioningService,
         protected CurrencyService $currencyService,
         ?PaymentPlanService $paymentPlanService = null,
         ?PaymentGatewayService $paymentGatewayService = null,
         ?PricingService $pricingService = null,
-        ?SmsService $smsService = null
+        ?SmsService $smsService = null,
+        ?PartialPaymentService $partialPaymentService = null,
+        ?RefundService $refundService = null
     ) {
         $this->paymentPlanService = $paymentPlanService ?? new PaymentPlanService($this);
         $this->paymentGatewayService = $paymentGatewayService ?? new PaymentGatewayService;
         $this->pricingService = $pricingService ?? new PricingService;
         $this->smsService = $smsService ?? new SmsService;
+        $this->partialPaymentService = $partialPaymentService ?? new PartialPaymentService($this->paymentGatewayService);
+        $this->refundService = $refundService ?? new RefundService($this->paymentGatewayService);
     }
 
     public function createSubscription(Customer $customer, SubscriptionPlan $plan, string $billingCycle): Subscription
@@ -56,30 +64,47 @@ class BillingService
 
         $subscription->save();
 
-        // Generate initial invoice
-        $this->generateInvoice($subscription);
+        // Flat-rate plan: bill the plan price up front. generateInvoice() is the
+        // usage-metered path and requires a product_service, which a plan-based
+        // subscription does not have.
+        Invoice::create([
+            'customer_id' => $customer->id,
+            'subscription_id' => $subscription->id,
+            'invoice_number' => $this->generateInvoiceNumber(),
+            'issue_date' => now(),
+            'total_amount' => $plan->price,
+            'currency' => $plan->currency,
+            'status' => 'pending',
+            'due_date' => now()->addDays(30),
+        ]);
 
         return $subscription;
     }
 
-    public function upgradeSubscription(Subscription $subscription, SubscriptionPlan $newPlan)
+    public function upgradeSubscription(Subscription $subscription, SubscriptionPlan $newPlan): Invoice
     {
-        // Calculate prorated amount
-        $this->calculateProratedAmount(
-            $subscription->price,
-            $newPlan->price,
-            $subscription->end_date
+        // Charge the prorated difference between the new and old plan for the
+        // days remaining in the current cycle.
+        $proratedAmount = $this->calculateProratedAmount(
+            (float) $subscription->price,
+            (float) $newPlan->price,
+            $subscription
         );
 
-        // Generate upgrade invoice
-        $invoice = $this->generateInvoice($subscription);
+        $invoice = Invoice::create([
+            'customer_id' => $subscription->customer_id,
+            'subscription_id' => $subscription->id,
+            'invoice_number' => $this->generateInvoiceNumber(),
+            'issue_date' => now(),
+            'total_amount' => $proratedAmount,
+            'currency' => $subscription->currency ?? 'USD',
+            'status' => 'pending',
+            'due_date' => now()->addDays(30),
+        ]);
 
-        $subscription->update(
-            [
-                'subscription_plan_id' => $newPlan->id,
-                'price' => $newPlan->price,
-            ]
-        );
+        // NOTE: the subscriptions table has no subscription_plan_id column
+        // (plan link is via product_service_id); only the price is updated here.
+        $subscription->update(['price' => $newPlan->price]);
 
         return $invoice;
     }
@@ -105,15 +130,16 @@ class BillingService
         return true;
     }
 
-    private function calculateProratedAmount($oldPrice, $newPrice, $endDate): float
+    private function calculateProratedAmount(float $oldPrice, float $newPrice, Subscription $subscription): float
     {
-        $daysRemaining = now()->diffInDays($endDate);
-        $totalDays = 30; // Assuming monthly billing
+        // Total length of the current billing cycle, in days.
+        $totalDays = max(1, (int) round($subscription->start_date->diffInDays($subscription->end_date)));
 
-        $oldAmount = ($oldPrice / $totalDays) * $daysRemaining;
-        $newAmount = ($newPrice / $totalDays) * $daysRemaining;
+        // Whole days left before the cycle ends (clamped to [0, totalDays]).
+        $daysRemaining = (int) round(now()->diffInDays($subscription->end_date, false));
+        $daysRemaining = max(0, min($daysRemaining, $totalDays));
 
-        return $newAmount - $oldAmount;
+        return round((($newPrice - $oldPrice) / $totalDays) * $daysRemaining, 2);
     }
 
     private function calculateEndDate(string $billingCycle)
@@ -220,7 +246,8 @@ class BillingService
             [
                 'discount_id' => $discount->id,
                 'discount_amount' => $discountAmount,
-                'total_amount' => $invoice->subtotal - $discountAmount,
+                // Keep tax in the total (matches Invoice::final_total = subtotal + tax - discount).
+                'total_amount' => $invoice->subtotal + ($invoice->tax_amount ?? 0) - $discountAmount,
             ]
         );
 
@@ -317,16 +344,7 @@ class BillingService
 
     public function convertCurrency($amount, $fromCurrency, $toCurrency)
     {
-        if ($fromCurrency === $toCurrency) {
-            return $amount;
-        }
-
-        // $fromRate = Currency::where('code', $fromCurrency)->first()->exchange_rate;
-        // $toRate = Currency::where('code', $toCurrency)->first()->exchange_rate;
-        $fromRate = 1;
-        $toRate = 1;
-
-        return ($amount / $fromRate) * $toRate;
+        return $this->currencyService->convert((float) $amount, $fromCurrency, $toCurrency);
     }
 
     public function processRecurringBilling(): void
@@ -438,7 +456,6 @@ class BillingService
 
     public function processAutomaticPayment(Invoice $invoice): array
     {
-        $paymentGatewayService = new PaymentGatewayService;
         $customer = $invoice->customer;
 
         // Assuming the customer has a default payment method stored
@@ -464,10 +481,11 @@ class BillingService
         );
 
         try {
-            $result = $paymentGatewayService->processPayment($payment);
+            $result = $this->paymentGatewayService->processPayment($payment);
             if ($result['success']) {
                 $payment->transaction_id = $result['transaction_id'];
                 $payment->status = 'completed';
+                $payment->payment_date = now();
                 $payment->save();
 
                 $invoice->status = 'paid';
@@ -926,9 +944,7 @@ class BillingService
 
     public function handlePartialPayment(Invoice $invoice, float $amount, int $paymentGatewayId): array
     {
-        $partialPaymentService = new PartialPaymentService(new PaymentGatewayService);
-
-        return $partialPaymentService->processPartialPayment(
+        return $this->partialPaymentService->processPartialPayment(
             $invoice,
             $amount,
             $paymentGatewayId
@@ -937,9 +953,7 @@ class BillingService
 
     public function handleRefund(Payment $payment, float $amount): array
     {
-        $refundService = new RefundService(new PaymentGatewayService);
-
-        return $refundService->processRefund(
+        return $this->refundService->processRefund(
             $payment,
             $amount
         );

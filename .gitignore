@@ -28,7 +28,8 @@ Homestead.json
 .phpunit.result.cache
 rr
 .rr.yaml
-CLAUDE.md
-/.idea
-/.claude
+/storage/*
+.claude
+.idea
 boost.json
+CLAUDE.md

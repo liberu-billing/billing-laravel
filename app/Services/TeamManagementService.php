@@ -24,11 +24,11 @@ class TeamManagementService
         DB::transaction(
             function () use ($user): void {
                 $team = Team::firstOrCreate(
-                    ['name' => $user->name."'s Team"],
                     [
+                        'name' => $user->name."'s Team",
                         'user_id' => $user->id,
-                        'personal_team' => true,
-                    ]
+                    ],
+                    ['personal_team' => true]
                 );
 
                 if (! $user->belongsToTeam($team)) {

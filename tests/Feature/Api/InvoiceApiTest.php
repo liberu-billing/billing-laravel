@@ -34,9 +34,9 @@ class InvoiceApiTest extends TestCase
 
     public function test_authenticated_user_can_list_invoices(): void
     {
-        Sanctum::actingAs($this->user);
+        Sanctum::actingAs($this->user, ['*']);
 
-        Invoice::factory()->count(3)->create();
+        Invoice::factory()->count(3)->create(['team_id' => $this->user->currentTeam->id]);
 
         $response = $this->getJson('/api/invoices');
 
@@ -50,9 +50,9 @@ class InvoiceApiTest extends TestCase
 
     public function test_authenticated_user_can_view_single_invoice(): void
     {
-        Sanctum::actingAs($this->user);
+        Sanctum::actingAs($this->user, ['*']);
 
-        $invoice = Invoice::factory()->create();
+        $invoice = Invoice::factory()->create(['team_id' => $this->user->currentTeam->id]);
 
         $response = $this->getJson("/api/invoices/{$invoice->id}");
 
@@ -62,7 +62,7 @@ class InvoiceApiTest extends TestCase
 
     public function test_authenticated_user_can_create_invoice(): void
     {
-        Sanctum::actingAs($this->user);
+        Sanctum::actingAs($this->user, ['*']);
 
         $customer = Customer::factory()->create();
 
@@ -87,7 +87,7 @@ class InvoiceApiTest extends TestCase
 
     public function test_invoice_creation_validates_required_fields(): void
     {
-        Sanctum::actingAs($this->user);
+        Sanctum::actingAs($this->user, ['*']);
 
         $response = $this->postJson('/api/invoices', []);
 
@@ -97,9 +97,9 @@ class InvoiceApiTest extends TestCase
 
     public function test_invoice_pagination_works(): void
     {
-        Sanctum::actingAs($this->user);
+        Sanctum::actingAs($this->user, ['*']);
 
-        Invoice::factory()->count(20)->create();
+        Invoice::factory()->count(20)->create(['team_id' => $this->user->currentTeam->id]);
 
         $response = $this->getJson('/api/invoices?per_page=10');
 
@@ -109,10 +109,11 @@ class InvoiceApiTest extends TestCase
 
     public function test_invoices_can_be_filtered_by_status(): void
     {
-        Sanctum::actingAs($this->user);
+        Sanctum::actingAs($this->user, ['*']);
 
-        Invoice::factory()->create(['status' => 'paid']);
-        Invoice::factory()->create(['status' => 'pending']);
+        $teamId = $this->user->currentTeam->id;
+        Invoice::factory()->create(['status' => 'paid', 'team_id' => $teamId]);
+        Invoice::factory()->create(['status' => 'pending', 'team_id' => $teamId]);
 
         $response = $this->getJson('/api/invoices?status=paid');
 
@@ -120,5 +121,14 @@ class InvoiceApiTest extends TestCase
         foreach ($response->json('data') as $invoice) {
             $this->assertEquals('paid', $invoice['status']);
         }
+    }
+
+    public function test_cannot_view_another_teams_invoice(): void
+    {
+        Sanctum::actingAs($this->user, ['*']);
+        $otherTeam = User::factory()->withPersonalTeam()->create()->currentTeam;
+        $theirs = Invoice::factory()->create(['team_id' => $otherTeam->id]);
+
+        $this->getJson("/api/invoices/{$theirs->id}")->assertStatus(404);
     }
 }

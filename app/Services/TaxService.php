@@ -152,12 +152,10 @@ class TaxService
     {
         $taxableAmount = $item->total_price;
 
-        // Apply any special tax rules based on amount thresholds
+        // Tiered/threshold rates compute the full tax themselves; a flat rate
+        // taxes the whole amount. Either way this returns the tax, not a base.
         if ($taxRate->threshold_amount && $taxableAmount > $taxRate->threshold_amount) {
-            $taxableAmount = $this->applyThresholdRules(
-                $taxableAmount,
-                $taxRate
-            );
+            return $this->applyThresholdRules($taxableAmount, $taxRate);
         }
 
         return $taxableAmount * ($taxRate->rate / 100);
@@ -172,7 +170,7 @@ class TaxService
                 ($excessAmount * ($taxRate->threshold_rate / 100));
         }
 
-        return $amount;
+        return $amount * ($taxRate->rate / 100);
     }
 
     protected function formatApiResponse($apiData)

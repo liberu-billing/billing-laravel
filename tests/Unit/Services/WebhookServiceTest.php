@@ -3,8 +3,10 @@
 namespace Tests\Unit\Services;
 
 use App\Models\WebhookEndpoint;
+use App\Models\WebhookEvent;
 use App\Services\WebhookService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class WebhookServiceTest extends TestCase
@@ -84,5 +86,203 @@ class WebhookServiceTest extends TestCase
         $this->assertIsArray($events);
         $this->assertArrayHasKey(WebhookService::EVENT_INVOICE_CREATED, $events);
         $this->assertArrayHasKey(WebhookService::EVENT_PAYMENT_RECEIVED, $events);
+    }
+
+    public function test_dispatch_only_creates_events_for_subscribed_endpoints(): void
+    {
+        $subscribed = WebhookEndpoint::create([
+            'url' => 'https://example.com/subscribed',
+            'is_active' => true,
+            'events' => [WebhookService::EVENT_INVOICE_CREATED],
+        ]);
+
+        $notSubscribed = WebhookEndpoint::create([
+            'url' => 'https://example.com/other',
+            'is_active' => true,
+            'events' => [WebhookService::EVENT_PAYMENT_RECEIVED],
+        ]);
+
+        $inactive = WebhookEndpoint::create([
+            'url' => 'https://example.com/inactive',
+            'is_active' => false,
+            'events' => [WebhookService::EVENT_INVOICE_CREATED],
+        ]);
+
+        $this->webhookService->dispatch(
+            WebhookService::EVENT_INVOICE_CREATED,
+            ['invoice_id' => 1]
+        );
+
+        $this->assertSame(1, WebhookEvent::count());
+        $this->assertDatabaseHas('webhook_events', ['webhook_endpoint_id' => $subscribed->id]);
+        $this->assertDatabaseMissing('webhook_events', ['webhook_endpoint_id' => $notSubscribed->id]);
+        $this->assertDatabaseMissing('webhook_events', ['webhook_endpoint_id' => $inactive->id]);
+    }
+
+    public function test_send_signs_payload_with_verifiable_hmac_sha256(): void
+    {
+        Http::fake(['*' => Http::response('', 200)]);
+
+        $secret = 'top-secret';
+        $endpoint = WebhookEndpoint::create([
+            'url' => 'https://example.com/webhook',
+            'secret' => $secret,
+            'is_active' => true,
+        ]);
+
+        $event = WebhookEvent::create([
+            'webhook_endpoint_id' => $endpoint->id,
+            'event_type' => WebhookService::EVENT_INVOICE_CREATED,
+            'payload' => ['invoice_id' => 42],
+            'status' => 'pending',
+        ]);
+
+        $this->assertTrue($this->webhookService->send($event));
+
+        Http::assertSent(function ($request) use ($secret): bool {
+            $header = $request->header('X-Webhook-Signature')[0] ?? '';
+
+            return $header !== ''
+                && WebhookService::verifySignature($request->body(), $header, $secret);
+        });
+    }
+
+    public function test_successful_delivery_marks_event_sent(): void
+    {
+        Http::fake(['*' => Http::response('ok', 200)]);
+
+        $endpoint = WebhookEndpoint::create([
+            'url' => 'https://example.com/webhook',
+            'is_active' => true,
+        ]);
+
+        $event = WebhookEvent::create([
+            'webhook_endpoint_id' => $endpoint->id,
+            'event_type' => WebhookService::EVENT_INVOICE_CREATED,
+            'payload' => ['invoice_id' => 1],
+            'status' => 'pending',
+        ]);
+
+        $this->assertTrue($this->webhookService->send($event));
+
+        $event->refresh();
+        $this->assertSame('sent', $event->status);
+        $this->assertNotNull($event->sent_at);
+        $this->assertNotNull($endpoint->fresh()->last_triggered_at);
+    }
+
+    public function test_failed_delivery_increments_attempts_with_exponential_backoff(): void
+    {
+        $this->freezeTime();
+        Http::fake(['*' => Http::response('boom', 500)]);
+
+        $endpoint = WebhookEndpoint::create([
+            'url' => 'https://example.com/webhook',
+            'is_active' => true,
+            'max_retries' => 3,
+            'retry_interval' => 60,
+        ]);
+
+        $event = WebhookEvent::create([
+            'webhook_endpoint_id' => $endpoint->id,
+            'event_type' => WebhookService::EVENT_INVOICE_CREATED,
+            'payload' => ['invoice_id' => 1],
+            'status' => 'pending',
+        ]);
+
+        // First failure: backoff = 60 * 2^0 = 60s
+        $this->assertFalse($this->webhookService->send($event));
+        $event->refresh();
+        $this->assertSame('failed', $event->status);
+        $this->assertSame(1, $event->attempts);
+        $this->assertEqualsWithDelta(60, now()->diffInSeconds($event->next_retry_at, true), 1.0);
+
+        // Second failure: backoff = 60 * 2^1 = 120s
+        $this->assertFalse($this->webhookService->send($event));
+        $event->refresh();
+        $this->assertSame(2, $event->attempts);
+        $this->assertEqualsWithDelta(120, now()->diffInSeconds($event->next_retry_at, true), 1.0);
+    }
+
+    public function test_send_blocks_link_local_metadata_endpoint(): void
+    {
+        Http::fake(['*' => Http::response('', 200)]);
+
+        $endpoint = WebhookEndpoint::create([
+            'url' => 'http://169.254.169.254/latest/meta-data/',
+            'is_active' => true,
+        ]);
+
+        $event = WebhookEvent::create([
+            'webhook_endpoint_id' => $endpoint->id,
+            'event_type' => WebhookService::EVENT_INVOICE_CREATED,
+            'payload' => ['invoice_id' => 1],
+            'status' => 'pending',
+        ]);
+
+        $this->assertFalse($this->webhookService->send($event));
+        Http::assertNothingSent();
+    }
+
+    public function test_send_blocks_localhost_target(): void
+    {
+        Http::fake(['*' => Http::response('', 200)]);
+
+        $endpoint = WebhookEndpoint::create([
+            'url' => 'https://localhost/webhook',
+            'is_active' => true,
+        ]);
+
+        $event = WebhookEvent::create([
+            'webhook_endpoint_id' => $endpoint->id,
+            'event_type' => WebhookService::EVENT_INVOICE_CREATED,
+            'payload' => ['invoice_id' => 1],
+            'status' => 'pending',
+        ]);
+
+        $this->assertFalse($this->webhookService->send($event));
+        Http::assertNothingSent();
+    }
+
+    public function test_send_allows_external_https_target(): void
+    {
+        Http::fake(['*' => Http::response('', 200)]);
+
+        $endpoint = WebhookEndpoint::create([
+            'url' => 'https://example.com/webhook',
+            'is_active' => true,
+        ]);
+
+        $event = WebhookEvent::create([
+            'webhook_endpoint_id' => $endpoint->id,
+            'event_type' => WebhookService::EVENT_INVOICE_CREATED,
+            'payload' => ['invoice_id' => 1],
+            'status' => 'pending',
+        ]);
+
+        $this->assertTrue($this->webhookService->send($event));
+        Http::assertSentCount(1);
+    }
+
+    public function test_process_command_flushes_pending_events(): void
+    {
+        Http::fake(['*' => Http::response('', 200)]);
+
+        $endpoint = WebhookEndpoint::create([
+            'url' => 'https://example.com/webhook',
+            'is_active' => true,
+        ]);
+
+        $event = WebhookEvent::create([
+            'webhook_endpoint_id' => $endpoint->id,
+            'event_type' => WebhookService::EVENT_INVOICE_CREATED,
+            'payload' => ['invoice_id' => 1],
+            'status' => 'pending',
+        ]);
+
+        $this->artisan('webhooks:process')->assertSuccessful();
+
+        Http::assertSentCount(1);
+        $this->assertSame('sent', $event->fresh()->status);
     }
 }

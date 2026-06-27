@@ -72,7 +72,7 @@ class PricingService
             ->get();
 
         foreach ($usageConfig as $metric => $pricing) {
-            $metricUsage = $usage->where(
+            $metricUsage = (float) $usage->where(
                 'metric_name',
                 $metric
             )->sum('quantity');
@@ -87,21 +87,34 @@ class PricingService
             }
         }
 
-        return $totalPrice;
+        // Money math: pin to cents so float accumulation can't leak sub-cent dust.
+        return round($totalPrice, 2);
     }
 
-    private function calculateTieredMetricPrice($usage, $tiers): float|int
+    /**
+     * Graduated tiered pricing. `max_usage` is the cumulative ceiling of each
+     * tier (matching calculateTieredPrice), so a tier only bills the slice of
+     * usage between the previous ceiling and its own.
+     *
+     * @param  array<int, array{max_usage: int|float, rate: int|float}>  $tiers
+     */
+    private function calculateTieredMetricPrice(float $usage, array $tiers): float
     {
-        $price = 0;
+        $price = 0.0;
         $remainingUsage = $usage;
+        $previousMax = 0;
+        $lastTier = array_key_last($tiers);
 
-        foreach ($tiers as $tier) {
-            $tierUsage = min(
-                $remainingUsage,
-                $tier['max_usage']
-            );
+        foreach ($tiers as $index => $tier) {
+            // Last tier is unbounded: it absorbs whatever usage is left.
+            $tierWidth = $index === $lastTier
+                ? $remainingUsage
+                : max(0, $tier['max_usage'] - $previousMax);
+
+            $tierUsage = min($remainingUsage, $tierWidth);
             $price += $tierUsage * $tier['rate'];
             $remainingUsage -= $tierUsage;
+            $previousMax = $tier['max_usage'];
 
             if ($remainingUsage <= 0) {
                 break;

@@ -14,6 +14,7 @@ use Override;
     'name',
     'personal_team',
     'user_id',
+    'is_default_for_registration',
 ])]
 class Team extends JetstreamTeam
 {
@@ -29,6 +30,7 @@ class Team extends JetstreamTeam
         'name',
         'personal_team',
         'user_id',
+        'is_default_for_registration',
     ];
 
     /**
@@ -53,6 +55,32 @@ class Team extends JetstreamTeam
     {
         return [
             'personal_team' => 'boolean',
+            'is_default_for_registration' => 'boolean',
         ];
+    }
+
+    /**
+     * Enforce a single default-for-registration team: turning the flag on for one
+     * team clears it on every other. Done via the query builder (not model events)
+     * so it does not recurse through this saving hook.
+     */
+    protected static function booted(): void
+    {
+        static::saving(function (Team $team): void {
+            if ($team->is_default_for_registration && $team->isDirty('is_default_for_registration')) {
+                static::query()
+                    ->where('is_default_for_registration', true)
+                    ->when($team->exists, fn ($query) => $query->whereKeyNot($team->getKey()))
+                    ->update(['is_default_for_registration' => false]);
+            }
+        });
+    }
+
+    /**
+     * The team new registrants are attached to, if an admin has designated one.
+     */
+    public static function defaultForRegistration(): ?self
+    {
+        return static::query()->where('is_default_for_registration', true)->first();
     }
 }

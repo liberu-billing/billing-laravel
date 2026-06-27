@@ -57,9 +57,12 @@ class PaymentPlan extends Model
 
     public function installments(): HasMany
     {
+        // Installment invoices reference the plan's parent invoice, so match
+        // child.parent_invoice_id against this plan's invoice_id (not its id).
         return $this->hasMany(
             Invoice::class,
-            'parent_invoice_id'
+            'parent_invoice_id',
+            'invoice_id'
         );
     }
 }

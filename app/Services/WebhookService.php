@@ -98,6 +98,35 @@ class WebhookService
     }
 
     /**
+     * Reject non-https and SSRF-prone (private/reserved) webhook targets.
+     *
+     * @throws Exception
+     */
+    public static function assertSafeUrl(string $url): void
+    {
+        $host = parse_url($url, PHP_URL_HOST);
+
+        if (parse_url($url, PHP_URL_SCHEME) !== 'https' || ! is_string($host) || $host === '') {
+            throw new Exception('Webhook URL must be a valid https URL');
+        }
+
+        // Resolve the host (or use an IP-literal host directly) and reject any
+        // private/reserved range to prevent SSRF to internal services.
+        // ponytail: IPv4-only (gethostbynamel); AAAA-only hosts fail closed.
+        $ips = filter_var($host, FILTER_VALIDATE_IP) ? [$host] : (gethostbynamel($host) ?: []);
+
+        if ($ips === []) {
+            throw new Exception('Webhook URL host could not be resolved');
+        }
+
+        foreach ($ips as $ip) {
+            if (! filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+                throw new Exception('Webhook URL resolves to a private or reserved address');
+            }
+        }
+    }
+
+    /**
      * Send a webhook event
      */
     public function send(WebhookEvent $event): bool
@@ -105,6 +134,8 @@ class WebhookService
         $endpoint = $event->webhookEndpoint;
 
         try {
+            self::assertSafeUrl($endpoint->url);
+
             $payload = [
                 'event' => $event->event_type,
                 'data' => $event->payload,
@@ -128,6 +159,7 @@ class WebhookService
             }
 
             $response = Http::timeout(30)
+                ->withoutRedirecting()
                 ->withHeaders($headers)
                 ->post(
                     $endpoint->url,

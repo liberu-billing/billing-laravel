@@ -14,7 +14,10 @@ class PartialPaymentService
     public function processPartialPayment(Invoice $invoice, float $amount, int $paymentGatewayId): array
     {
         if ($amount <= 0 || $amount > $invoice->remaining_amount) {
-            throw new Exception('Invalid partial payment amount.');
+            return [
+                'success' => false,
+                'message' => 'Invalid partial payment amount.',
+            ];
         }
 
         DB::beginTransaction();
@@ -26,6 +29,7 @@ class PartialPaymentService
                     'payment_gateway_id' => $paymentGatewayId,
                     'amount' => $amount,
                     'currency' => $invoice->currency,
+                    'payment_method' => 'credit card',
                     'payment_date' => now(),
                 ]
             );
@@ -36,7 +40,7 @@ class PartialPaymentService
                 $payment->transaction_id = $paymentResult['transaction_id'];
                 $payment->save();
 
-                $this->updateInvoiceStatus($invoice);
+                $invoice->updateStatus();
 
                 DB::commit();
 
@@ -56,18 +60,5 @@ class PartialPaymentService
                 'message' => 'Partial payment failed: '.$e->getMessage(),
             ];
         }
-    }
-
-    private function updateInvoiceStatus(Invoice $invoice): void
-    {
-        $totalPaid = $invoice->payments->sum('amount');
-
-        if ($totalPaid >= $invoice->total_amount) {
-            $invoice->status = 'paid';
-        } elseif ($totalPaid > 0) {
-            $invoice->status = 'partially_paid';
-        }
-
-        $invoice->save();
     }
 }

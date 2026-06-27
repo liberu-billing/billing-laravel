@@ -2,22 +2,26 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\TokenAbility;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
     public function token(Request $request): JsonResponse
     {
-        $request->validate(
+        $validated = $request->validate(
             [
                 'email' => 'required|email',
                 'password' => 'required',
                 'device_name' => 'required',
+                'abilities' => 'sometimes|array',
+                'abilities.*' => ['string', Rule::in(TokenAbility::values())],
             ]
         );
 
@@ -37,11 +41,14 @@ class AuthController extends Controller
             );
         }
 
-        $token = $user->createToken($request->device_name);
+        $abilities = $validated['abilities'] ?? TokenAbility::values();
+
+        $token = $user->createToken($request->device_name, $abilities);
 
         return response()->json(
             [
                 'token' => $token->plainTextToken,
+                'abilities' => $abilities,
                 'user' => $user,
             ]
         );

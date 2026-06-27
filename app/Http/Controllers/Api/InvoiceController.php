@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\InvoiceResource;
 use App\Models\Invoice;
+use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -24,6 +25,7 @@ class InvoiceController extends Controller
     public function index(Request $request): AnonymousResourceCollection
     {
         $invoices = Invoice::query()
+            ->where('team_id', $this->currentTeamId($request))
             ->when(
                 $request->status,
                 fn ($q) => $q->where(
@@ -59,8 +61,10 @@ class InvoiceController extends Controller
         return InvoiceResource::collection($invoices);
     }
 
-    public function show(Invoice $invoice): InvoiceResource
+    public function show(Request $request, Invoice $invoice): InvoiceResource
     {
+        $this->assertSameTeam($request, $invoice);
+
         return new InvoiceResource(
             $invoice->load(
                 [
@@ -112,6 +116,7 @@ class InvoiceController extends Controller
             'status',
             'pending'
         );
+        $invoice->team_id = $this->currentTeamId($request);
         $invoice->save();
         $invoice->refresh();
 
@@ -129,6 +134,8 @@ class InvoiceController extends Controller
 
     public function update(Request $request, Invoice $invoice)
     {
+        $this->assertSameTeam($request, $invoice);
+
         if ($invoice->status === 'paid') {
             return response()->json(
                 [
@@ -158,8 +165,10 @@ class InvoiceController extends Controller
         );
     }
 
-    public function destroy(Invoice $invoice)
+    public function destroy(Request $request, Invoice $invoice)
     {
+        $this->assertSameTeam($request, $invoice);
+
         if ($invoice->status !== 'draft') {
             return response()->json(
                 [
@@ -174,8 +183,10 @@ class InvoiceController extends Controller
         return response()->noContent();
     }
 
-    public function download(Invoice $invoice)
+    public function download(Request $request, Invoice $invoice)
     {
+        $this->assertSameTeam($request, $invoice);
+
         $pdf = PDF::loadView(
             'invoices.pdf',
             [
@@ -189,5 +200,19 @@ class InvoiceController extends Controller
         );
 
         return $pdf->download("invoice-{$invoice->invoice_number}.pdf");
+    }
+
+    /** Block cross-tenant access: another team's invoice is treated as not found. */
+    private function assertSameTeam(Request $request, Invoice $invoice): void
+    {
+        abort_unless($invoice->team_id === $this->currentTeamId($request), 404);
+    }
+
+    private function currentTeamId(Request $request): ?int
+    {
+        /** @var User|null $user */
+        $user = $request->user();
+
+        return $user?->current_team_id;
     }
 }

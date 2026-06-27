@@ -119,8 +119,7 @@ class PaymentReconciliationService
         $invoice->update(
             [
                 'status' => 'paid',
-                'paid_amount' => $payment->amount,
-                'paid_date' => now(),
+                'paid_at' => now(),
             ]
         );
 

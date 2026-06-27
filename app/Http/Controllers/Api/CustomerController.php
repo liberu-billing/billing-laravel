@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -20,6 +21,7 @@ class CustomerController extends Controller
     public function index(Request $request): JsonResponse
     {
         $customers = Customer::query()
+            ->where('team_id', $this->currentTeamId($request))
             ->when(
                 $request->search,
                 fn ($q) => $q->where(
@@ -53,7 +55,9 @@ class CustomerController extends Controller
             ]
         );
 
-        $customer = Customer::create($validated);
+        $customer = new Customer($validated);
+        $customer->team_id = $this->currentTeamId($request);
+        $customer->save();
 
         return response()->json(
             $customer,
@@ -61,13 +65,17 @@ class CustomerController extends Controller
         );
     }
 
-    public function show(Customer $customer): JsonResponse
+    public function show(Request $request, Customer $customer): JsonResponse
     {
+        $this->assertSameTeam($request, $customer);
+
         return response()->json($customer);
     }
 
     public function update(Request $request, Customer $customer): JsonResponse
     {
+        $this->assertSameTeam($request, $customer);
+
         $validated = $request->validate(
             [
                 'name' => 'string|max:255',
@@ -86,8 +94,9 @@ class CustomerController extends Controller
         return response()->json($customer);
     }
 
-    public function destroy(Customer $customer): JsonResponse
+    public function destroy(Request $request, Customer $customer): JsonResponse
     {
+        $this->assertSameTeam($request, $customer);
         $customer->delete();
 
         return response()->json(
@@ -96,17 +105,36 @@ class CustomerController extends Controller
         );
     }
 
-    public function invoices(Customer $customer): JsonResponse
+    public function invoices(Request $request, Customer $customer): JsonResponse
     {
+        $this->assertSameTeam($request, $customer);
         $invoices = $customer->invoices()->paginate(15);
 
         return response()->json($invoices);
     }
 
-    public function subscriptions(Customer $customer): JsonResponse
+    public function subscriptions(Request $request, Customer $customer): JsonResponse
     {
+        $this->assertSameTeam($request, $customer);
         $subscriptions = $customer->subscriptions()->paginate(15);
 
         return response()->json($subscriptions);
+    }
+
+    /**
+     * Block cross-tenant access: a customer not owned by the caller's current
+     * team is treated as not found (avoids leaking existence).
+     */
+    private function assertSameTeam(Request $request, Customer $customer): void
+    {
+        abort_unless($customer->team_id === $this->currentTeamId($request), 404);
+    }
+
+    private function currentTeamId(Request $request): ?int
+    {
+        /** @var User|null $user */
+        $user = $request->user();
+
+        return $user?->current_team_id;
     }
 }

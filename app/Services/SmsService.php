@@ -23,6 +23,20 @@ class SmsService
 
     public function send($to, $message): bool
     {
+        if (! config('services.sms.enabled', true)) {
+            Log::info('SMS sending skipped: SMS is disabled', ['to' => $to]);
+
+            return false;
+        }
+
+        $formatted = $this->formatPhoneNumber($to);
+
+        if ($formatted === '' || $formatted === '+') {
+            Log::warning('SMS sending skipped: no phone number', ['to' => $to]);
+
+            return false;
+        }
+
         try {
             $response = Http::withHeaders(
                 [
@@ -32,7 +46,7 @@ class SmsService
                 $this->baseUrl.'/messages',
                 [
                     'from' => $this->from,
-                    'to' => $this->formatPhoneNumber($to),
+                    'to' => $formatted,
                     'message' => $message,
                 ]
             );

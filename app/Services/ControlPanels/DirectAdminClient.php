@@ -181,7 +181,6 @@ class DirectAdminClient
                         'Authorization' => 'Basic '.base64_encode($this->server->username.':'.$this->loginKey),
                     ],
                     'form_params' => $params,
-                    'verify' => false,
                 ]
             );
 

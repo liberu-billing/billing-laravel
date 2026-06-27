@@ -117,12 +117,17 @@ class User extends Authenticatable implements FilamentUser, HasDefaultTenant, Ha
 
     public function canAccessTenant(Model $tenant): bool
     {
-        return true;
+        // Security: without this check any user could load any team's tenant
+        // URL and Filament would scope queries to it, exposing other teams' data.
+        return $this->belongsToTeam($tenant);
     }
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return true;
+        return match ($panel->getId()) {
+            'admin' => $this->hasRole(['admin', 'super_admin']),
+            default => true,
+        };
     }
 
     public function getDefaultTenant(Panel $panel): ?Model

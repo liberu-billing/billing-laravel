@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Subscription;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -20,6 +21,7 @@ class SubscriptionController extends Controller
     public function index(Request $request): JsonResponse
     {
         $subscriptions = Subscription::query()
+            ->where('team_id', $this->currentTeamId($request))
             ->when(
                 $request->customer_id,
                 fn ($q) => $q->where(
@@ -54,7 +56,9 @@ class SubscriptionController extends Controller
             ]
         );
 
-        $subscription = Subscription::create($validated);
+        $subscription = new Subscription($validated);
+        $subscription->team_id = $this->currentTeamId($request);
+        $subscription->save();
 
         return response()->json(
             $subscription,
@@ -62,13 +66,17 @@ class SubscriptionController extends Controller
         );
     }
 
-    public function show(Subscription $subscription): JsonResponse
+    public function show(Request $request, Subscription $subscription): JsonResponse
     {
+        $this->assertSameTeam($request, $subscription);
+
         return response()->json($subscription);
     }
 
     public function update(Request $request, Subscription $subscription): JsonResponse
     {
+        $this->assertSameTeam($request, $subscription);
+
         $validated = $request->validate(
             [
                 'end_date' => 'nullable|date',
@@ -85,8 +93,9 @@ class SubscriptionController extends Controller
         return response()->json($subscription);
     }
 
-    public function destroy(Subscription $subscription): JsonResponse
+    public function destroy(Request $request, Subscription $subscription): JsonResponse
     {
+        $this->assertSameTeam($request, $subscription);
         $subscription->delete();
 
         return response()->json(
@@ -95,17 +104,33 @@ class SubscriptionController extends Controller
         );
     }
 
-    public function cancel(Subscription $subscription): JsonResponse
+    public function cancel(Request $request, Subscription $subscription): JsonResponse
     {
+        $this->assertSameTeam($request, $subscription);
         $subscription->update(['status' => 'cancelled']);
 
         return response()->json($subscription);
     }
 
-    public function renew(Subscription $subscription): JsonResponse
+    public function renew(Request $request, Subscription $subscription): JsonResponse
     {
+        $this->assertSameTeam($request, $subscription);
         $subscription->update(['status' => 'active']);
 
         return response()->json($subscription);
+    }
+
+    /** Block cross-tenant access: another team's subscription is treated as not found. */
+    private function assertSameTeam(Request $request, Subscription $subscription): void
+    {
+        abort_unless($subscription->team_id === $this->currentTeamId($request), 404);
+    }
+
+    private function currentTeamId(Request $request): ?int
+    {
+        /** @var User|null $user */
+        $user = $request->user();
+
+        return $user?->current_team_id;
     }
 }

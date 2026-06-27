@@ -15,7 +15,8 @@ use Override;
 /**
  * @property int $id
  * @property int $customer_id
- * @property int $product_service_id
+ * @property int|null $subscription_plan_id
+ * @property int|null $product_service_id
  * @property int|null $team_id
  * @property Carbon $start_date
  * @property Carbon|null $end_date
@@ -34,6 +35,7 @@ use Override;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Customer|null $customer
+ * @property-read SubscriptionPlan|null $subscriptionPlan
  * @property-read Products_Service|null $productService
  * @property-read Collection<int, Invoice> $invoices
  * @property-read Collection<int, ServiceSuspension> $suspensions
@@ -42,6 +44,7 @@ use Override;
  */
 #[Fillable([
     'customer_id',
+    'subscription_plan_id',
     'product_service_id',
     'start_date',
     'end_date',
@@ -90,6 +93,11 @@ class Subscription extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function subscriptionPlan(): BelongsTo
+    {
+        return $this->belongsTo(SubscriptionPlan::class);
     }
 
     public function productService(): BelongsTo

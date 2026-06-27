@@ -10,8 +10,8 @@ class SiteSettingsService
     public function get($key = null)
     {
         $settings = Cache::remember(
-            config('site-settings.cache_key'),
-            config('site-settings.cache_duration'),
+            config('site-settings.cache_key', 'site_settings'),
+            config('site-settings.cache_duration', 3600),
             fn () => SiteSettings::first() ?? new SiteSettings
         );
 
@@ -20,6 +20,6 @@ class SiteSettingsService
 
     public function clear(): void
     {
-        Cache::forget(config('site-settings.cache_key'));
+        Cache::forget(config('site-settings.cache_key', 'site_settings'));
     }
 }
