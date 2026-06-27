@@ -64,8 +64,19 @@ class BillingService
 
         $subscription->save();
 
-        // Generate initial invoice
-        $this->generateInvoice($subscription);
+        // Flat-rate plan: bill the plan price up front. generateInvoice() is the
+        // usage-metered path and requires a product_service, which a plan-based
+        // subscription does not have.
+        Invoice::create([
+            'customer_id' => $customer->id,
+            'subscription_id' => $subscription->id,
+            'invoice_number' => $this->generateInvoiceNumber(),
+            'issue_date' => now(),
+            'total_amount' => $plan->price,
+            'currency' => $plan->currency,
+            'status' => 'pending',
+            'due_date' => now()->addDays(30),
+        ]);
 
         return $subscription;
     }
