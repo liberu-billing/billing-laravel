@@ -15,7 +15,10 @@ class DomainService
     public function registerDomain(Subscription $subscription, $domainName, $registrar = 'enom')
     {
         $client = $this->getClientForRegistrar($registrar);
-        $result = $client->registerDomain($domainName, $subscription->customer->id);
+        $result = $client->registerDomain(
+            $domainName,
+            $subscription->customer->id
+        );
 
         if ($result) {
             $subscription->domain_name = $domainName;
@@ -36,7 +39,10 @@ class DomainService
     public function renewDomain(Subscription $subscription, $period = 1)
     {
         $client = $this->getClientForRegistrar($subscription->domain_registrar);
-        $result = $client->renewDomain($subscription->domain_name, $period);
+        $result = $client->renewDomain(
+            $subscription->domain_name,
+            $period
+        );
 
         if ($result) {
             $subscription->domain_expiration_date = $result['new_expiration_date'];
@@ -49,7 +55,11 @@ class DomainService
     public function transferDomain(Subscription $subscription, $domainName, $authCode, $newRegistrar)
     {
         $client = $this->getClientForRegistrar($newRegistrar);
-        $result = $client->transferDomain($domainName, $authCode, $subscription->customer->id);
+        $result = $client->transferDomain(
+            $domainName,
+            $authCode,
+            $subscription->customer->id
+        );
 
         if ($result) {
             $subscription->domain_name = $domainName;
@@ -58,7 +68,10 @@ class DomainService
             $subscription->save();
 
             // Update HostingAccount
-            $hostingAccount = HostingAccount::where('subscription_id', $subscription->id)->first();
+            $hostingAccount = HostingAccount::where(
+                'subscription_id',
+                $subscription->id
+            )->first();
             if ($hostingAccount) {
                 $hostingAccount->domain = $domainName;
                 $hostingAccount->save();

@@ -12,7 +12,12 @@ class ScreeningDataEncryptor
         $response = $next($request);
 
         if ($response->getContent()) {
-            $content = json_decode((string) $response->getContent(), true);
+            $content = json_decode(
+                (string) $response->getContent(),
+                true,
+                512,
+                JSON_THROW_ON_ERROR
+            );
 
             $fieldsToEncrypt = [
                 'background_check_status',
@@ -26,7 +31,12 @@ class ScreeningDataEncryptor
                 }
             }
 
-            $response->setContent(json_encode($content));
+            $response->setContent(
+                json_encode(
+                    $content,
+                    JSON_THROW_ON_ERROR
+                )
+            );
         }
 
         return $response;

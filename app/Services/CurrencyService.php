@@ -23,7 +23,12 @@ class CurrencyService
             self::$isProcessing = true;
             $this->processedCurrencies = [];
 
-            return $this->calculateRate($amount, $from, $to, 0);
+            return $this->calculateRate(
+                $amount,
+                $from,
+                $to,
+                0
+            );
         } finally {
             self::$isProcessing = false;
         }

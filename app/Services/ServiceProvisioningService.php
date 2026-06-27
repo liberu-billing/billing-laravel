@@ -27,20 +27,25 @@ class ServiceProvisioningService
         $service = $subscription->productService;
 
         // Create hosting account record
-        $hostingAccount = new HostingAccount([
-            'customer_id' => $subscription->customer_id,
-            'subscription_id' => $subscription->id,
-            'username' => $this->generateUsername($subscription->customer),
-            'domain' => $subscription->domain ?? '',
-            'package' => $service->name,
-            'status' => 'pending',
-        ]);
+        $hostingAccount = new HostingAccount(
+            [
+                'customer_id' => $subscription->customer_id,
+                'subscription_id' => $subscription->id,
+                'username' => $this->generateUsername($subscription->customer),
+                'domain' => $subscription->domain ?? '',
+                'package' => $service->name,
+                'status' => 'pending',
+            ]
+        );
 
         $hostingAccount->save();
 
         // Provision the account on the control panel
         try {
-            $this->hostingService->provisionAccount($hostingAccount, $service);
+            $this->hostingService->provisionAccount(
+                $hostingAccount,
+                $service
+            );
 
             return $hostingAccount;
         } catch (Exception $e) {
@@ -55,7 +60,10 @@ class ServiceProvisioningService
         // Implement domain provisioning logic
         // This would typically involve interacting with a domain registrar API
         // For now, we'll just return a success message
-        return ['status' => 'success', 'message' => 'Domain provisioned successfully'];
+        return [
+            'status' => 'success',
+            'message' => 'Domain provisioned successfully',
+        ];
     }
 
     private function provisionEmail(): array
@@ -63,16 +71,32 @@ class ServiceProvisioningService
         // Implement email provisioning logic
         // This would typically involve creating email accounts on your mail server
         // For now, we'll just return a success message
-        return ['status' => 'success', 'message' => 'Email service provisioned successfully'];
+        return [
+            'status' => 'success',
+            'message' => 'Email service provisioned successfully',
+        ];
     }
 
     private function generateUsername($customer): string
     {
         // Implement logic to generate a unique username
-        $baseName = strtolower((string) preg_replace('/[^a-z0-9]/i', '', (string) $customer->name));
-        $baseName = substr($baseName, 0, 8);
+        $baseName = strtolower(
+            (string) preg_replace(
+                '/[^a-z0-9]/i',
+                '',
+                (string) $customer->name
+            )
+        );
+        $baseName = substr(
+            $baseName,
+            0,
+            8
+        );
 
-        return $baseName.random_int(100, 999);
+        return $baseName.random_int(
+            100,
+            999
+        );
     }
 
     public function manageService(Subscription $subscription, $action, array $options = [])
@@ -80,7 +104,11 @@ class ServiceProvisioningService
         $service = $subscription->productService;
 
         return match ($service->type) {
-            'hosting' => $this->manageHosting($subscription, $action, $options),
+            'hosting' => $this->manageHosting(
+                $subscription,
+                $action,
+                $options
+            ),
             'domain' => $this->manageDomain($action),
             'email' => $this->manageEmail($action),
             default => throw new Exception('Unsupported service type'),
@@ -89,7 +117,10 @@ class ServiceProvisioningService
 
     private function manageHosting(Subscription $subscription, $action, array $options = [])
     {
-        $hostingAccount = HostingAccount::where('subscription_id', $subscription->id)->first();
+        $hostingAccount = HostingAccount::where(
+            'subscription_id',
+            $subscription->id
+        )->first();
 
         if (! $hostingAccount) {
             throw new Exception('Hosting account not found');
@@ -107,25 +138,39 @@ class ServiceProvisioningService
                     throw new Exception('New product required for upgrade');
                 }
 
-                return $this->hostingService->upgradeAccount($hostingAccount, $options['new_product'], $options);
+                return $this->hostingService->upgradeAccount(
+                    $hostingAccount,
+                    $options['new_product'],
+                    $options
+                );
             case 'downgrade':
                 if (! isset($options['new_product'])) {
                     throw new Exception('New product required for downgrade');
                 }
 
-                return $this->hostingService->downgradeAccount($hostingAccount, $options['new_product'], $options);
+                return $this->hostingService->downgradeAccount(
+                    $hostingAccount,
+                    $options['new_product'],
+                    $options
+                );
             case 'add_addon':
                 if (! isset($options['addon'])) {
                     throw new Exception('Addon name required');
                 }
 
-                return $this->hostingService->addAddon($hostingAccount, $options['addon']);
+                return $this->hostingService->addAddon(
+                    $hostingAccount,
+                    $options['addon']
+                );
             case 'remove_addon':
                 if (! isset($options['addon'])) {
                     throw new Exception('Addon name required');
                 }
 
-                return $this->hostingService->removeAddon($hostingAccount, $options['addon']);
+                return $this->hostingService->removeAddon(
+                    $hostingAccount,
+                    $options['addon']
+                );
             default:
                 throw new Exception('Unsupported action for hosting account');
         }
@@ -136,7 +181,10 @@ class ServiceProvisioningService
         // Implement domain management logic
         // This would typically involve interacting with a domain registrar API
         // For now, we'll just return a success message
-        return ['status' => 'success', 'message' => "Domain {$action} successfully"];
+        return [
+            'status' => 'success',
+            'message' => "Domain {$action} successfully",
+        ];
     }
 
     private function manageEmail($action): array
@@ -144,6 +192,9 @@ class ServiceProvisioningService
         // Implement email management logic
         // This would typically involve managing email accounts on your mail server
         // For now, we'll just return a success message
-        return ['status' => 'success', 'message' => "Email service {$action} successfully"];
+        return [
+            'status' => 'success',
+            'message' => "Email service {$action} successfully",
+        ];
     }
 }

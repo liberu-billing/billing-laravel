@@ -10,6 +10,7 @@ use Override;
 class SocialLinksWidget extends Widget
 {
     #[Override]
+    /** @phpstan-ignore property.defaultValue */
     protected string $view = 'filament.app.widgets.social-links-widget';
 
     #[Override]
@@ -48,8 +49,11 @@ class SocialLinksWidget extends Widget
             ];
         }
 
-        return view($this->view, [
-            'links' => $links,
-        ]);
+        return view(
+            $this->view,
+            [
+                'links' => $links,
+            ]
+        );
     }
 }

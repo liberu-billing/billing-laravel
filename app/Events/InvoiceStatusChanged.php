@@ -15,15 +15,9 @@ class InvoiceStatusChanged implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    /**
-     * @var Invoice
-     */
-    public $invoice;
+    public Invoice $invoice;
 
-    /**
-     * @var string
-     */
-    public $status;
+    public string $status;
 
     public function __construct(Invoice $invoice, string $status)
     {
@@ -31,7 +25,7 @@ class InvoiceStatusChanged implements ShouldBroadcast
         $this->status = $status;
     }
 
-    public function broadcastOn()
+    public function broadcastOn(): Channel
     {
         return new Channel('invoices.'.$this->invoice->id);
     }

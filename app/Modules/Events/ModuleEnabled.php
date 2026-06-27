@@ -6,10 +6,10 @@ namespace App\Modules\Events;
 
 use App\Modules\Contracts\ModuleInterface;
 
-class ModuleEnabled
+readonly class ModuleEnabled
 {
     public function __construct(
-        public readonly string $name,
-        public readonly ModuleInterface $module,
+        public string $name,
+        public ModuleInterface $module,
     ) {}
 }

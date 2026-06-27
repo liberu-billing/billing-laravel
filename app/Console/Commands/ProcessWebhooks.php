@@ -27,7 +27,11 @@ class ProcessWebhooks extends Command
             return Command::FAILURE;
         }
 
-        cache()->put('processing_webhooks', true, 60); // Lock for 60 minutes
+        cache()->put(
+            'processing_webhooks',
+            true,
+            60
+        ); // Lock for 60 minutes
 
         try {
             $this->info('Processing pending webhooks...');

@@ -7,8 +7,10 @@ use App\Models\Payment;
 use App\Models\PaymentGateway;
 use Exception;
 use Illuminate\Support\Facades\Log;
-use Square\Exceptions\ApiException;
-use Square\SquareClient;
+use Square\Legacy\Exceptions\ApiException;
+use Square\Legacy\Models\CreatePaymentRequest;
+use Square\Legacy\Models\Money;
+use Square\Legacy\SquareClient;
 use Stripe\Charge;
 use Stripe\Exception\ApiErrorException;
 use Stripe\Exception\CardException;
@@ -33,7 +35,10 @@ class PaymentGatewayService
 
     public function validatePaymentMethod($method): bool
     {
-        return in_array($method, $this->supportedMethods);
+        return in_array(
+            $method,
+            $this->supportedMethods
+        );
     }
 
     public function processPayment(Payment $payment)
@@ -47,36 +52,54 @@ class PaymentGatewayService
 
         while ($retries < $this->maxRetries) {
             try {
-                $result = $this->attemptPayment($payment, $gateway);
+                $result = $this->attemptPayment(
+                    $payment,
+                    $gateway
+                );
 
                 // Trigger reconciliation after successful payment
                 if ($result) {
                     app(PaymentReconciliationService::class)->reconcilePayment($payment);
                 }
 
-                Log::info('Payment processed successfully', ['payment_id' => $payment->id, 'attempt' => $retries + 1]);
-                Log::info('Payment processed successfully', [
-                    'payment_id' => $payment->id,
-                    'attempt' => $retries + 1,
-                    'method' => $payment->payment_method,
-                ]);
+                Log::info(
+                    'Payment processed successfully',
+                    [
+                        'payment_id' => $payment->id,
+                        'attempt' => $retries + 1,
+                    ]
+                );
+                Log::info(
+                    'Payment processed successfully',
+                    [
+                        'payment_id' => $payment->id,
+                        'attempt' => $retries + 1,
+                        'method' => $payment->payment_method,
+                    ]
+                );
 
                 return $result;
             } catch (Exception $e) {
                 $retries++;
-                Log::warning('Payment attempt failed', [
-                    'payment_id' => $payment->id,
-                    'attempt' => $retries,
-                    'method' => $payment->payment_method,
-                    'error' => $e->getMessage(),
-                ]);
+                Log::warning(
+                    'Payment attempt failed',
+                    [
+                        'payment_id' => $payment->id,
+                        'attempt' => $retries,
+                        'method' => $payment->payment_method,
+                        'error' => $e->getMessage(),
+                    ]
+                );
 
                 if ($retries >= $this->maxRetries) {
-                    Log::error('Payment processing failed after max retries', [
-                        'payment_id' => $payment->id,
-                        'error' => $e->getMessage(),
-                        'trace' => $e->getTraceAsString(),
-                    ]);
+                    Log::error(
+                        'Payment processing failed after max retries',
+                        [
+                            'payment_id' => $payment->id,
+                            'error' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString(),
+                        ]
+                    );
                     throw $e;
                 }
 
@@ -89,9 +112,15 @@ class PaymentGatewayService
     {
         return match ($gateway->name) {
             'PayPal' => $this->processPayPalPayment($payment),
-            'Stripe' => $this->processStripePayment($payment, $gateway),
+            'Stripe' => $this->processStripePayment(
+                $payment,
+                $gateway
+            ),
             'Authorize.net' => $this->processAuthorizeNetPayment($payment),
-            'Square' => $this->processSquarePayment($payment, $gateway),
+            'Square' => $this->processSquarePayment(
+                $payment,
+                $gateway
+            ),
             'Google Pay' => $this->processGooglePayPayment($payment),
             default => throw new Exception('Unsupported payment gateway'),
         };
@@ -104,29 +133,42 @@ class PaymentGatewayService
 
         while ($retries < $this->maxRetries) {
             try {
-                $result = $this->attemptRefund($payment, $gateway, $amount);
-                Log::info('Refund processed successfully', [
-                    'payment_id' => $payment->id,
-                    'amount' => $amount,
-                    'attempt' => $retries + 1,
-                ]);
+                $result = $this->attemptRefund(
+                    $payment,
+                    $gateway,
+                    $amount
+                );
+                Log::info(
+                    'Refund processed successfully',
+                    [
+                        'payment_id' => $payment->id,
+                        'amount' => $amount,
+                        'attempt' => $retries + 1,
+                    ]
+                );
 
                 return $result;
             } catch (Exception $e) {
                 $retries++;
-                Log::warning('Refund attempt failed', [
-                    'payment_id' => $payment->id,
-                    'amount' => $amount,
-                    'attempt' => $retries,
-                    'error' => $e->getMessage(),
-                ]);
+                Log::warning(
+                    'Refund attempt failed',
+                    [
+                        'payment_id' => $payment->id,
+                        'amount' => $amount,
+                        'attempt' => $retries,
+                        'error' => $e->getMessage(),
+                    ]
+                );
 
                 if ($retries >= $this->maxRetries) {
-                    Log::error('Refund processing failed after max retries', [
-                        'payment_id' => $payment->id,
-                        'error' => $e->getMessage(),
-                        'trace' => $e->getTraceAsString(),
-                    ]);
+                    Log::error(
+                        'Refund processing failed after max retries',
+                        [
+                            'payment_id' => $payment->id,
+                            'error' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString(),
+                        ]
+                    );
                     throw $e;
                 }
 
@@ -139,7 +181,10 @@ class PaymentGatewayService
     {
         return match ($gateway->name) {
             'PayPal' => $this->processPayPalRefund(),
-            'Stripe' => $this->processStripeRefund($payment, $amount),
+            'Stripe' => $this->processStripeRefund(
+                $payment,
+                $amount
+            ),
             'Authorize.net' => $this->processAuthorizeNetRefund(),
             default => throw new Exception('Unsupported payment gateway for refunds'),
         };
@@ -149,7 +194,10 @@ class PaymentGatewayService
     {
         // Implement PayPal payment processing logic here
         // Include currency handling
-        Currency::where('code', $payment->currency)->firstOrFail();
+        Currency::where(
+            'code',
+            $payment->currency
+        )->firstOrFail();
         // Use $currency->code for PayPal API calls
     }
 
@@ -167,53 +215,68 @@ class PaymentGatewayService
 
         try {
             // Create a charge using the Stripe token
-            $charge = Charge::create([
-                'amount' => $payment->amount * 100, // Amount in cents
-                'currency' => $payment->currency,
-                'source' => $stripeToken,
-                'description' => 'Payment for Invoice #'.$payment->invoice_id,
-            ]);
+            $charge = Charge::create(
+                [
+                    'amount' => (int) ($payment->amount * 100),
+                    'currency' => $payment->currency,
+                    'source' => $stripeToken,
+                    'description' => 'Payment for Invoice #'.$payment->invoice_id,
+                ]
+            );
 
             // Update payment with Stripe charge ID
-            $payment->update([
-                'transaction_id' => $charge->id,
-                'status' => 'completed',
-            ]);
+            $payment->update(
+                [
+                    'transaction_id' => $charge->id,
+                    'status' => 'completed',
+                ]
+            );
 
             return $charge;
         } catch (CardException $e) {
             // Handle failed charge
             $payment->update(['status' => 'failed']);
-            throw new Exception('Payment failed: '.$e->getMessage(), $e->getCode(), $e);
+            throw new Exception(
+                'Payment failed: '.$e->getMessage(),
+                $e->getCode(),
+                $e
+            );
         }
     }
 
     private function processSquarePayment(Payment $payment, PaymentGateway $gateway)
     {
-        $client = new SquareClient([
-            'accessToken' => $gateway->secret_key,
-            'environment' => config('services.square.environment'),
-        ]);
+        $client = new SquareClient(
+            [
+                'accessToken' => $gateway->secret_key,
+                'environment' => config('services.square.environment'),
+            ]
+        );
 
         try {
             $amount = (int) ($payment->amount * 100);
             $currency = strtoupper($payment->currency);
 
-            $response = $client->getPaymentsApi()->createPayment([
-                'source_id' => $payment->square_token,
-                'amount_money' => [
-                    'amount' => $amount,
-                    'currency' => $currency,
-                ],
-                'idempotency_key' => uniqid('', true),
-                'reference_id' => (string) $payment->id,
-            ]);
+            $amountMoney = new Money;
+            $amountMoney->setAmount($amount);
+            $amountMoney->setCurrency($currency);
+
+            $createPaymentRequest = new CreatePaymentRequest(
+                (string) $payment->square_token,
+                uniqid('', true)
+            );
+            $createPaymentRequest->setAmountMoney($amountMoney);
+            $createPaymentRequest->setReferenceId((string) $payment->id);
+
+            $response = $client->getPaymentsApi()->createPayment($createPaymentRequest);
 
             if ($response->isSuccess()) {
-                $payment->update([
-                    'transaction_id' => $response->getResult()->getPayment()->getId(),
-                    'status' => 'completed',
-                ]);
+                $payment->update(
+                    [
+                        'transaction_id' => $response->getResult()->getPayment()->getId(),
+                        'status' => 'completed',
+                    ]
+                );
 
                 return $response->getResult()->getPayment();
             }
@@ -221,7 +284,11 @@ class PaymentGatewayService
             throw new Exception($response->getErrors()[0]->getDetail());
         } catch (ApiException $e) {
             $payment->update(['status' => 'failed']);
-            throw new Exception('Square payment failed: '.$e->getMessage(), $e->getCode(), $e);
+            throw new Exception(
+                'Square payment failed: '.$e->getMessage(),
+                $e->getCode(),
+                $e
+            );
         }
     }
 
@@ -236,15 +303,21 @@ class PaymentGatewayService
             // Process payment through Google Pay API
             $response = $this->processGooglePayToken();
 
-            $payment->update([
-                'transaction_id' => $response['transaction_id'],
-                'status' => $response['status'],
-            ]);
+            $payment->update(
+                [
+                    'transaction_id' => $response['transaction_id'],
+                    'status' => $response['status'],
+                ]
+            );
 
             return $response;
         } catch (Exception $e) {
             $payment->update(['status' => 'failed']);
-            throw new Exception('Google Pay payment failed: '.$e->getMessage(), $e->getCode(), $e);
+            throw new Exception(
+                'Google Pay payment failed: '.$e->getMessage(),
+                $e->getCode(),
+                $e
+            );
         }
     }
 
@@ -263,7 +336,10 @@ class PaymentGatewayService
     {
         // Implement Authorize.net payment processing logic here
         // Include currency handling
-        Currency::where('code', $payment->currency)->firstOrFail();
+        Currency::where(
+            'code',
+            $payment->currency
+        )->firstOrFail();
         // Use $currency->code for Authorize.net API calls
     }
 
@@ -272,11 +348,14 @@ class PaymentGatewayService
         Stripe::setApiKey($payment->paymentGateway->secret_key);
 
         try {
-            $refund = Refund::create([
-                'charge' => $payment->transaction_id,
-                'amount' => (int) ($amount * 100), // Convert to cents
-                'reason' => 'requested_by_customer',
-            ]);
+            $refund = Refund::create(
+                [
+                    'charge' => $payment->transaction_id,
+                    'amount' => (int) ($amount * 100),
+                    // Convert to cents
+                    'reason' => 'requested_by_customer',
+                ]
+            );
 
             return [
                 'success' => true,

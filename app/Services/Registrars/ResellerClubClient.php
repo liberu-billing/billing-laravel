@@ -42,14 +42,20 @@ class ResellerClubClient
 
     protected function makeApiCall(string $action, $params)
     {
-        $params = array_merge([
-            'auth-userid' => $this->authUserId,
-            'api-key' => $this->apiKey,
-        ], $params);
+        $params = array_merge(
+            [
+                'auth-userid' => $this->authUserId,
+                'api-key' => $this->apiKey,
+            ],
+            $params
+        );
 
-        $this->client->post($this->apiUrl.$action, [
-            'form_params' => $params,
-        ]);
+        $this->client->post(
+            $this->apiUrl.$action,
+            [
+                'form_params' => $params,
+            ]
+        );
 
         // Parse JSON response and return result
     }

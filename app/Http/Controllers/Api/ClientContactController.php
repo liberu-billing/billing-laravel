@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Services\ClientContactService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
 
 class ClientContactController extends Controller
@@ -43,21 +44,29 @@ class ClientContactController extends Controller
      */
     public function store(Request $request, Customer $customer): JsonResponse
     {
-        $validated = $request->validate([
-            'first_name' => 'required|string|max:100',
-            'last_name' => 'required|string|max:100',
-            'email' => 'required|email|max:255',
-            'phone' => 'nullable|string|max:30',
-            'title' => 'nullable|string|max:100',
-            'is_primary' => 'boolean',
-            'can_view_invoices' => 'boolean',
-            'can_make_payments' => 'boolean',
-            'can_manage_services' => 'boolean',
-        ]);
+        $validated = $request->validate(
+            [
+                'first_name' => 'required|string|max:100',
+                'last_name' => 'required|string|max:100',
+                'email' => 'required|email|max:255',
+                'phone' => 'nullable|string|max:30',
+                'title' => 'nullable|string|max:100',
+                'is_primary' => 'boolean',
+                'can_view_invoices' => 'boolean',
+                'can_make_payments' => 'boolean',
+                'can_manage_services' => 'boolean',
+            ]
+        );
 
-        $contact = $this->contactService->createContact($customer, $validated);
+        $contact = $this->contactService->createContact(
+            $customer,
+            $validated
+        );
 
-        return response()->json(['data' => $contact], Response::HTTP_CREATED);
+        return response()->json(
+            ['data' => $contact],
+            Response::HTTP_CREATED
+        );
     }
 
     /**
@@ -69,19 +78,24 @@ class ClientContactController extends Controller
             abort(Response::HTTP_NOT_FOUND);
         }
 
-        $validated = $request->validate([
-            'first_name' => 'sometimes|string|max:100',
-            'last_name' => 'sometimes|string|max:100',
-            'email' => 'sometimes|email|max:255',
-            'phone' => 'nullable|string|max:30',
-            'title' => 'nullable|string|max:100',
-            'is_primary' => 'boolean',
-            'can_view_invoices' => 'boolean',
-            'can_make_payments' => 'boolean',
-            'can_manage_services' => 'boolean',
-        ]);
+        $validated = $request->validate(
+            [
+                'first_name' => 'sometimes|string|max:100',
+                'last_name' => 'sometimes|string|max:100',
+                'email' => 'sometimes|email|max:255',
+                'phone' => 'nullable|string|max:30',
+                'title' => 'nullable|string|max:100',
+                'is_primary' => 'boolean',
+                'can_view_invoices' => 'boolean',
+                'can_make_payments' => 'boolean',
+                'can_manage_services' => 'boolean',
+            ]
+        );
 
-        $contact = $this->contactService->updateContact($contact, $validated);
+        $contact = $this->contactService->updateContact(
+            $contact,
+            $validated
+        );
 
         return response()->json(['data' => $contact]);
     }
@@ -97,8 +111,11 @@ class ClientContactController extends Controller
 
         try {
             $this->contactService->deleteContact($contact);
-        } catch (\RuntimeException $e) {
-            return response()->json(['message' => $e->getMessage()], Response::HTTP_UNPROCESSABLE_ENTITY);
+        } catch (RuntimeException $e) {
+            return response()->json(
+                ['message' => $e->getMessage()],
+                Response::HTTP_UNPROCESSABLE_ENTITY
+            );
         }
 
         return response()->noContent();
@@ -115,6 +132,11 @@ class ClientContactController extends Controller
 
         $contact = $this->contactService->makePrimary($contact);
 
-        return response()->json(['data' => $contact, 'message' => 'Contact set as primary.']);
+        return response()->json(
+            [
+                'data' => $contact,
+                'message' => 'Contact set as primary.',
+            ]
+        );
     }
 }

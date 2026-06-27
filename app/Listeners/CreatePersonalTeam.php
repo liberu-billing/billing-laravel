@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Models\User;
 use App\Services\TeamManagementService;
 use Illuminate\Auth\Events\Registered;
 
@@ -11,6 +12,8 @@ class CreatePersonalTeam
 
     public function handle(Registered $event): void
     {
-        $this->teamManagementService->assignUserToDefaultTeam($event->user);
+        /** @var User $user */
+        $user = $event->user;
+        $this->teamManagementService->assignUserToDefaultTeam($user);
     }
 }

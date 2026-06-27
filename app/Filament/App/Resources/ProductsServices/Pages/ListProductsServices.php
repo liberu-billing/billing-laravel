@@ -7,13 +7,14 @@ namespace App\Filament\App\Resources\ProductsServices\Pages;
 use App\Filament\App\Resources\ProductsServices\ProductsServiceResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
+use Override;
 
 class ListProductsServices extends ListRecords
 {
-    #[\Override]
+    #[Override]
     protected static string $resource = ProductsServiceResource::class;
 
-    #[\Override]
+    #[Override]
     protected function getActions(): array
     {
         return [

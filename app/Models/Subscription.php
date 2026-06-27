@@ -2,11 +2,44 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Carbon;
+use Override;
 
+/**
+ * @property int $id
+ * @property int $customer_id
+ * @property int $product_service_id
+ * @property int|null $team_id
+ * @property Carbon $start_date
+ * @property Carbon|null $end_date
+ * @property string $renewal_period
+ * @property string $status
+ * @property string $price
+ * @property string $currency
+ * @property bool $auto_renew
+ * @property Carbon|null $last_billed_at
+ * @property Carbon|null $ends_at
+ * @property string|null $domain
+ * @property string|null $domain_name
+ * @property string|null $domain_registrar
+ * @property Carbon|null $domain_expiration_date
+ * @property array|null $scheduled_change
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Customer|null $customer
+ * @property-read Products_Service|null $productService
+ * @property-read Collection<int, Invoice> $invoices
+ * @property-read Collection<int, ServiceSuspension> $suspensions
+ * @property-read ServiceSuspension|null $activeSuspension
+ * @property-read HostingAccount|null $hostingAccount
+ */
 #[Fillable([
     'customer_id',
     'product_service_id',
@@ -29,10 +62,14 @@ class Subscription extends Model
 {
     use HasFactory;
 
-    #[\Override]
-    protected $casts = ['start_date' => 'datetime', 'end_date' => 'datetime', 'last_billed_at' => 'datetime'];
+    #[Override]
+    protected $casts = [
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
+        'last_billed_at' => 'datetime',
+    ];
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
 
@@ -50,34 +87,45 @@ class Subscription extends Model
 
     }
 
-    public function customer()
+    public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
 
-    public function productService()
+    public function productService(): BelongsTo
     {
-        return $this->belongsTo(Products_Service::class, 'product_service_id');
+        return $this->belongsTo(
+            Products_Service::class,
+            'product_service_id'
+        );
     }
 
-    public function invoices()
+    public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
     }
 
-    public function suspensions()
+    public function suspensions(): HasMany
     {
         return $this->hasMany(ServiceSuspension::class);
     }
 
-    public function activeSuspension()
+    public function hostingAccount(): HasOne
+    {
+        return $this->hasOne(HostingAccount::class);
+    }
+
+    public function activeSuspension(): HasOne
     {
         return $this->hasOne(ServiceSuspension::class)
-            ->where('is_active', true)
+            ->where(
+                'is_active',
+                true
+            )
             ->whereNull('unsuspended_at');
     }
 
-    public function renew()
+    public function renew(): bool
     {
         if (! $this->auto_renew || $this->status === 'cancelled') {
             return false;
@@ -91,7 +139,7 @@ class Subscription extends Model
         return $this->save();
     }
 
-    public function cancel()
+    public function cancel(): bool
     {
         $this->auto_renew = false;
         $this->status = 'cancelled';
@@ -99,14 +147,14 @@ class Subscription extends Model
         return $this->save();
     }
 
-    public function suspend()
+    public function suspend(): bool
     {
         $this->status = 'suspended';
 
         return $this->save();
     }
 
-    public function resume()
+    public function resume(): bool
     {
         if ($this->status === 'suspended') {
             $this->status = 'active';
@@ -122,7 +170,7 @@ class Subscription extends Model
         return $this->status === 'active' && $this->end_date->isFuture();
     }
 
-    public function needsBilling()
+    public function needsBilling(): bool
     {
         if (! $this->last_billed_at) {
             return true;

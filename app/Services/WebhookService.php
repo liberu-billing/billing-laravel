@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\WebhookEndpoint;
 use App\Models\WebhookEvent;
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -56,17 +57,27 @@ class WebhookService
     public function dispatch(string $eventType, array $payload, ?int $teamId = null): void
     {
         $query = WebhookEndpoint::query()
-            ->where('is_active', true);
+            ->where(
+                'is_active',
+                true
+            );
 
         if ($teamId) {
-            $query->where('team_id', $teamId);
+            $query->where(
+                'team_id',
+                $teamId
+            );
         }
 
         $endpoints = $query->get();
 
         foreach ($endpoints as $endpoint) {
             if ($endpoint->isSubscribedTo($eventType)) {
-                $this->createWebhookEvent($endpoint, $eventType, $payload);
+                $this->createWebhookEvent(
+                    $endpoint,
+                    $eventType,
+                    $payload
+                );
             }
         }
     }
@@ -76,12 +87,14 @@ class WebhookService
      */
     protected function createWebhookEvent(WebhookEndpoint $endpoint, string $eventType, array $payload): WebhookEvent
     {
-        return WebhookEvent::create([
-            'webhook_endpoint_id' => $endpoint->id,
-            'event_type' => $eventType,
-            'payload' => $payload,
-            'status' => 'pending',
-        ]);
+        return WebhookEvent::create(
+            [
+                'webhook_endpoint_id' => $endpoint->id,
+                'event_type' => $eventType,
+                'payload' => $payload,
+                'status' => 'pending',
+            ]
+        );
     }
 
     /**
@@ -106,13 +119,20 @@ class WebhookService
 
             // Add signature if secret is configured
             if ($endpoint->secret) {
-                $signature = hash_hmac('sha256', json_encode($payload), (string) $endpoint->secret);
+                $signature = hash_hmac(
+                    'sha256',
+                    json_encode($payload),
+                    (string) $endpoint->secret
+                );
                 $headers['X-Webhook-Signature'] = $signature;
             }
 
             $response = Http::timeout(30)
                 ->withHeaders($headers)
-                ->post($endpoint->url, $payload);
+                ->post(
+                    $endpoint->url,
+                    $payload
+                );
 
             if ($response->successful()) {
                 $event->markAsSent();
@@ -121,22 +141,30 @@ class WebhookService
                 return true;
             }
 
-            throw new \Exception('HTTP '.$response->status().': '.$response->body());
-        } catch (\Exception $e) {
-            Log::error('Webhook delivery failed', [
-                'webhook_event_id' => $event->id,
-                'endpoint_url' => $endpoint->url,
-                'error' => $e->getMessage(),
-            ]);
+            throw new Exception('HTTP '.$response->status().': '.$response->body());
+        } catch (Exception $e) {
+            Log::error(
+                'Webhook delivery failed',
+                [
+                    'webhook_event_id' => $event->id,
+                    'endpoint_url' => $endpoint->url,
+                    'error' => $e->getMessage(),
+                ]
+            );
 
             if ($event->shouldRetry($endpoint->max_retries)) {
-                $event->markAsFailed($e->getMessage(), $endpoint->retry_interval);
+                $event->markAsFailed(
+                    $e->getMessage(),
+                    $endpoint->retry_interval
+                );
             } else {
-                $event->update([
-                    'status' => 'failed',
-                    'last_error' => $e->getMessage(),
-                    'attempts' => $event->attempts + 1,
-                ]);
+                $event->update(
+                    [
+                        'status' => 'failed',
+                        'last_error' => $e->getMessage(),
+                        'attempts' => $event->attempts + 1,
+                    ]
+                );
             }
 
             return false;
@@ -149,12 +177,24 @@ class WebhookService
     public function processPending(): int
     {
         $processed = 0;
-        $events = WebhookEvent::where('status', 'pending')
-            ->orWhere(function ($query): void {
-                $query->where('status', 'failed')
-                    ->whereNotNull('next_retry_at')
-                    ->where('next_retry_at', '<=', now());
-            })
+        $events = WebhookEvent::where(
+            'status',
+            'pending'
+        )
+            ->orWhere(
+                function ($query): void {
+                    $query->where(
+                        'status',
+                        'failed'
+                    )
+                        ->whereNotNull('next_retry_at')
+                        ->where(
+                            'next_retry_at',
+                            '<=',
+                            now()
+                        );
+                }
+            )
             ->with('webhookEndpoint')
             ->limit(100)
             ->get();
@@ -200,8 +240,15 @@ class WebhookService
      */
     public static function verifySignature(string $payload, string $signature, string $secret): bool
     {
-        $expectedSignature = hash_hmac('sha256', $payload, $secret);
+        $expectedSignature = hash_hmac(
+            'sha256',
+            $payload,
+            $secret
+        );
 
-        return hash_equals($expectedSignature, $signature);
+        return hash_equals(
+            $expectedSignature,
+            $signature
+        );
     }
 }

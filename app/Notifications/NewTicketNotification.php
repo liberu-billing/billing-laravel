@@ -12,7 +12,7 @@ class NewTicketNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(private Ticket $ticket) {}
+    public function __construct(private readonly Ticket $ticket) {}
 
     public function via($notifiable): array
     {
@@ -27,7 +27,10 @@ class NewTicketNotification extends Notification implements ShouldQueue
             ->line('A new support ticket has been created.')
             ->line('Title: '.$this->ticket->title)
             ->line('Priority: '.ucfirst($this->ticket->priority))
-            ->action('View Ticket', url('/tickets/'.$this->ticket->id))
+            ->action(
+                'View Ticket',
+                url('/tickets/'.$this->ticket->id)
+            )
             ->line('Thank you for using our application!');
     }
 }

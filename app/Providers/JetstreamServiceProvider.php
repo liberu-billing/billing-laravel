@@ -13,13 +13,14 @@ use App\Actions\Jetstream\RemoveTeamMember;
 use App\Actions\Jetstream\UpdateTeamName;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Jetstream\Jetstream;
+use Override;
 
 class JetstreamServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
      */
-    #[\Override]
+    #[Override]
     public function register(): void
     {
         //
@@ -54,17 +55,25 @@ class JetstreamServiceProvider extends ServiceProvider
     {
         Jetstream::defaultApiTokenPermissions(['read']);
 
-        Jetstream::role('admin', 'Administrator', [
-            'create',
-            'read',
-            'update',
-            'delete',
-        ])->description('Administrator users can perform any action.');
+        Jetstream::role(
+            'admin',
+            'Administrator',
+            [
+                'create',
+                'read',
+                'update',
+                'delete',
+            ]
+        )->description('Administrator users can perform any action.');
 
-        Jetstream::role('editor', 'Editor', [
-            'read',
-            'create',
-            'update',
-        ])->description('Editor users have the ability to read, create, and update.');
+        Jetstream::role(
+            'editor',
+            'Editor',
+            [
+                'read',
+                'create',
+                'update',
+            ]
+        )->description('Editor users have the ability to read, create, and update.');
     }
 }

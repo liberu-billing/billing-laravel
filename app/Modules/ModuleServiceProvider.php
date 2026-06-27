@@ -10,16 +10,19 @@ use Filament\PanelRegistry;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use Override;
+use ReflectionClass;
+use Throwable;
 
 class ModuleServiceProvider extends ServiceProvider
 {
-    #[\Override]
+    #[Override]
     public function register(): void
     {
         try {
             $this->registerModules();
             $this->registerExternalModules();
-        } catch (\Throwable) {
+        } catch (Throwable) {
             // Silently skip during initial setup (no DB / cache yet)
         }
     }
@@ -28,7 +31,7 @@ class ModuleServiceProvider extends ServiceProvider
     {
         try {
             $this->bootModules();
-        } catch (\Throwable) {
+        } catch (Throwable) {
             // Silently skip during initial setup (no DB / cache yet)
         }
     }
@@ -42,7 +45,11 @@ class ModuleServiceProvider extends ServiceProvider
 
             foreach (File::directories($modulesPath) as $modulePath) {
                 $moduleName = basename((string) $modulePath);
-                $this->registerModule($moduleName, $modulePath, $namespace);
+                $this->registerModule(
+                    $moduleName,
+                    $modulePath,
+                    $namespace
+                );
             }
         }
     }
@@ -68,7 +75,10 @@ class ModuleServiceProvider extends ServiceProvider
         if (File::exists($configPath)) {
             foreach (File::files($configPath) as $configFile) {
                 $configName = Str::snake($moduleName).'.'.$configFile->getFilenameWithoutExtension();
-                $this->mergeConfigFrom($configFile->getPathname(), $configName);
+                $this->mergeConfigFrom(
+                    $configFile->getPathname(),
+                    $configName
+                );
             }
         }
 
@@ -87,18 +97,34 @@ class ModuleServiceProvider extends ServiceProvider
             return;
         }
 
-        $this->registerModuleRoutes($moduleName, $modulePath, $srcPath);
+        $this->registerModuleRoutes(
+            $moduleName,
+            $modulePath,
+            $srcPath
+        );
 
-        foreach (['resources/views' => Str::snake($moduleName), 'resources/lang' => Str::snake($moduleName)] as $subPath => $ns) {
+        foreach ([
+            'resources/views' => Str::snake($moduleName),
+            'resources/lang' => Str::snake($moduleName),
+        ] as $subPath => $ns) {
             $fullPath = $srcPath.'/'.$subPath;
             if (! File::exists($fullPath)) {
                 $fullPath = $modulePath.'/'.$subPath;
             }
             if (File::exists($fullPath)) {
-                if (Str::endsWith($subPath, 'views')) {
-                    $this->loadViewsFrom($fullPath, $ns);
+                if (Str::endsWith(
+                    $subPath,
+                    'views'
+                )) {
+                    $this->loadViewsFrom(
+                        $fullPath,
+                        $ns
+                    );
                 } else {
-                    $this->loadTranslationsFrom($fullPath, $ns);
+                    $this->loadTranslationsFrom(
+                        $fullPath,
+                        $ns
+                    );
                 }
             }
         }
@@ -115,7 +141,11 @@ class ModuleServiceProvider extends ServiceProvider
             return;
         }
 
-        foreach (['web.php', 'api.php', 'admin.php'] as $file) {
+        foreach ([
+            'web.php',
+            'api.php',
+            'admin.php',
+        ] as $file) {
             $path = $routesPath.'/'.$file;
             if (File::exists($path)) {
                 $this->loadRoutesFrom($path);
@@ -132,7 +162,11 @@ class ModuleServiceProvider extends ServiceProvider
 
             foreach (File::directories($modulesPath) as $modulePath) {
                 $moduleName = basename((string) $modulePath);
-                $this->bootModule($moduleName, $modulePath, $namespace);
+                $this->bootModule(
+                    $moduleName,
+                    $modulePath,
+                    $namespace
+                );
             }
         }
     }
@@ -147,9 +181,12 @@ class ModuleServiceProvider extends ServiceProvider
         }
 
         if (File::exists($assetsPath)) {
-            $this->publishes([
-                $assetsPath => public_path("modules/{$moduleName}"),
-            ], Str::snake($moduleName).'-assets');
+            $this->publishes(
+                [
+                    $assetsPath => public_path("modules/{$moduleName}"),
+                ],
+                Str::snake($moduleName).'-assets'
+            );
         }
 
         $configPath = $srcPath.'/config';
@@ -159,13 +196,21 @@ class ModuleServiceProvider extends ServiceProvider
 
         if (File::exists($configPath)) {
             foreach (File::files($configPath) as $configFile) {
-                $this->publishes([
-                    $configFile->getPathname() => config_path(Str::snake($moduleName).'.'.$configFile->getFilename()),
-                ], Str::snake($moduleName).'-config');
+                $this->publishes(
+                    [
+                        $configFile->getPathname() => config_path(Str::snake($moduleName).'.'.$configFile->getFilename()),
+                    ],
+                    Str::snake($moduleName).'-config'
+                );
             }
         }
 
-        $this->registerModuleFilament($moduleName, $modulePath, $srcPath, $namespace);
+        $this->registerModuleFilament(
+            $moduleName,
+            $modulePath,
+            $srcPath,
+            $namespace
+        );
     }
 
     protected function registerModuleFilament(string $moduleName, string $modulePath, string $srcPath, string $namespace): void
@@ -181,35 +226,46 @@ class ModuleServiceProvider extends ServiceProvider
 
         $filamentNamespace = "{$namespace}\\{$moduleName}\\Filament";
 
-        $this->callAfterResolving(PanelRegistry::class, function (PanelRegistry $registry) use ($filamentPath, $filamentNamespace): void {
-            foreach ($registry->all() as $panel) {
-                if (File::isDirectory($filamentPath.'/Resources')) {
-                    $panel->discoverResources(
-                        in: $filamentPath.'/Resources',
-                        for: $filamentNamespace.'\\Resources',
-                    );
-                }
+        $this->callAfterResolving(
+            PanelRegistry::class,
+            function (PanelRegistry $registry) use ($filamentPath, $filamentNamespace): void {
+                foreach ($registry->all() as $panel) {
+                    if (File::isDirectory($filamentPath.'/Resources')) {
+                        $panel->discoverResources(
+                            in: $filamentPath.'/Resources',
+                            for: $filamentNamespace.'\\Resources',
+                        );
+                    }
 
-                if (File::isDirectory($filamentPath.'/Pages')) {
-                    $panel->discoverPages(
-                        in: $filamentPath.'/Pages',
-                        for: $filamentNamespace.'\\Pages',
-                    );
-                }
+                    if (File::isDirectory($filamentPath.'/Pages')) {
+                        $panel->discoverPages(
+                            in: $filamentPath.'/Pages',
+                            for: $filamentNamespace.'\\Pages',
+                        );
+                    }
 
-                if (File::isDirectory($filamentPath.'/Widgets')) {
-                    $panel->discoverWidgets(
-                        in: $filamentPath.'/Widgets',
-                        for: $filamentNamespace.'\\Widgets',
-                    );
+                    if (File::isDirectory($filamentPath.'/Widgets')) {
+                        $panel->discoverWidgets(
+                            in: $filamentPath.'/Widgets',
+                            for: $filamentNamespace.'\\Widgets',
+                        );
+                    }
                 }
             }
-        });
+        );
     }
 
     protected function registerExternalModules(): void
     {
-        if (! config('modules.load_composer_modules', false) && empty(config('modules.external_paths', []))) {
+        if (! config(
+            'modules.load_composer_modules',
+            false
+        ) && empty(
+            config(
+                'modules.external_paths',
+                []
+            )
+        )) {
             return;
         }
 
@@ -219,8 +275,11 @@ class ModuleServiceProvider extends ServiceProvider
             $moduleName = $module->getName();
             $this->registerModule(
                 $moduleName,
-                dirname((new \ReflectionClass($module))->getFileName()),
-                config('modules.namespace', 'App\\Modules')
+                dirname(new ReflectionClass($module)->getFileName()),
+                config(
+                    'modules.namespace',
+                    'App\\Modules'
+                )
             );
         }
     }
@@ -233,19 +292,34 @@ class ModuleServiceProvider extends ServiceProvider
     protected function modulePaths(): array
     {
         $paths = [
-            config('modules.path', app_path('Modules')) => config('modules.namespace', 'App\\Modules'),
+            config(
+                'modules.path',
+                app_path('Modules')
+            ) => config(
+                'modules.namespace',
+                'App\\Modules'
+            ),
         ];
 
         $altPath = base_path('app-modules');
-        $altNamespace = config('modules.alt_namespace', 'Modules');
+        $altNamespace = config(
+            'modules.alt_namespace',
+            'Modules'
+        );
 
         if (File::exists($altPath)) {
             $paths[$altPath] = $altNamespace;
         }
 
-        foreach (config('modules.external_paths', []) as $extPath) {
+        foreach (config(
+            'modules.external_paths',
+            []
+        ) as $extPath) {
             if (File::exists($extPath)) {
-                $paths[$extPath] = config('modules.namespace', 'App\\Modules');
+                $paths[$extPath] = config(
+                    'modules.namespace',
+                    'App\\Modules'
+                );
             }
         }
 
@@ -255,11 +329,14 @@ class ModuleServiceProvider extends ServiceProvider
     protected function isModuleEnabled(string $moduleName): bool
     {
         try {
-            $record = ModuleModel::where('name', $moduleName)->first();
+            $record = ModuleModel::where(
+                'name',
+                $moduleName
+            )->first();
             if ($record !== null) {
                 return (bool) $record->enabled;
             }
-        } catch (\Throwable) {
+        } catch (Throwable) {
             // DB not ready (fresh install or no migration run yet) — default to enabled
         }
 

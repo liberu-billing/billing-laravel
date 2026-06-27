@@ -21,20 +21,33 @@ class AddTeamMember implements AddsTeamMembers
      */
     public function add(User $user, Team $team, string $email, ?string $role = null): void
     {
-        Gate::forUser($user)->authorize('addTeamMember', $team);
+        Gate::forUser($user)->authorize(
+            'addTeamMember',
+            $team
+        );
 
-        $this->validate($team, $email, $role);
+        $this->validate(
+            $team,
+            $email,
+            $role
+        );
 
         $newTeamMember = Jetstream::findUserByEmailOrFail($email);
 
-        AddingTeamMember::dispatch($team, $newTeamMember);
+        AddingTeamMember::dispatch(
+            $team,
+            $newTeamMember
+        );
 
         $team->users()->attach(
             $newTeamMember,
             ['role' => $role]
         );
 
-        TeamMemberAdded::dispatch($team, $newTeamMember);
+        TeamMemberAdded::dispatch(
+            $team,
+            $newTeamMember
+        );
     }
 
     /**
@@ -42,13 +55,20 @@ class AddTeamMember implements AddsTeamMembers
      */
     protected function validate(Team $team, string $email, ?string $role): void
     {
-        Validator::make([
-            'email' => $email,
-            'role' => $role,
-        ], $this->rules(), [
-            'email.exists' => __('We were unable to find a registered user with this email address.'),
-        ])->after(
-            $this->ensureUserIsNotAlreadyOnTeam($team, $email)
+        Validator::make(
+            [
+                'email' => $email,
+                'role' => $role,
+            ],
+            $this->rules(),
+            [
+                'email.exists' => __('We were unable to find a registered user with this email address.'),
+            ]
+        )->after(
+            $this->ensureUserIsNotAlreadyOnTeam(
+                $team,
+                $email
+            )
         )->validateWithBag('addTeamMember');
     }
 
@@ -59,12 +79,22 @@ class AddTeamMember implements AddsTeamMembers
      */
     protected function rules(): array
     {
-        return array_filter([
-            'email' => ['required', 'email', 'exists:users'],
-            'role' => Jetstream::hasRoles()
-                            ? ['required', 'string', new Role]
-                            : null,
-        ]);
+        return array_filter(
+            [
+                'email' => [
+                    'required',
+                    'email',
+                    'exists:users',
+                ],
+                'role' => Jetstream::hasRoles()
+                    ? [
+                        'required',
+                        'string',
+                        new Role,
+                    ]
+                    : null,
+            ]
+        );
     }
 
     /**

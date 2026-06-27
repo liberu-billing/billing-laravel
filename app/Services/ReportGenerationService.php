@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Customer;
 use App\Models\Report;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Exception;
@@ -18,9 +19,18 @@ class ReportGenerationService
         $data = $this->gatherReportData($report);
 
         return match ($report->format) {
-            'pdf' => $this->generatePdfReport($data, $report),
-            'csv' => $this->generateCsvReport($data, $report),
-            'excel' => $this->generateExcelReport($data, $report),
+            'pdf' => $this->generatePdfReport(
+                $data,
+                $report
+            ),
+            'csv' => $this->generateCsvReport(
+                $data,
+                $report
+            ),
+            'excel' => $this->generateExcelReport(
+                $data,
+                $report
+            ),
             default => throw new Exception('Unsupported report format')
         };
     }
@@ -56,9 +66,15 @@ class ReportGenerationService
 
     protected function generatePdfReport($data, Report $report): string
     {
-        $pdf = Pdf::loadView("reports.templates.{$report->type}", ['data' => $data]);
+        $pdf = Pdf::loadView(
+            "reports.templates.{$report->type}",
+            ['data' => $data]
+        );
         $filename = "report_{$report->id}.pdf";
-        Storage::put("reports/{$filename}", $pdf->output());
+        Storage::put(
+            "reports/{$filename}",
+            $pdf->output()
+        );
 
         return $filename;
     }
@@ -66,11 +82,22 @@ class ReportGenerationService
     protected function generateCsvReport($data, Report $report): string
     {
         $filename = "report_{$report->id}.csv";
-        $handle = fopen(Storage::path("reports/{$filename}"), 'w');
+        $handle = fopen(
+            Storage::path("reports/{$filename}"),
+            'w'
+        );
 
-        fputcsv($handle, array_keys(reset($data)), escape: '\\');
+        fputcsv(
+            $handle,
+            array_keys(reset($data)),
+            escape: '\\'
+        );
         foreach ($data as $row) {
-            fputcsv($handle, $row, escape: '\\');
+            fputcsv(
+                $handle,
+                $row,
+                escape: '\\'
+            );
         }
 
         fclose($handle);
@@ -85,12 +112,12 @@ class ReportGenerationService
 
         $headers = array_keys(reset($data));
         foreach ($headers as $col => $header) {
-            $sheet->setCellValueByColumnAndRow($col + 1, 1, $header);
+            $sheet->setCellValue([$col + 1, 1], $header);
         }
 
         foreach ($data as $row => $rowData) {
             foreach ($rowData as $col => $value) {
-                $sheet->setCellValueByColumnAndRow($col + 1, $row + 2, $value);
+                $sheet->setCellValue([$col + 1, $row + 2], $value);
             }
         }
 

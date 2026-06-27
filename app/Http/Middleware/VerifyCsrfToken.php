@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Middleware;
 
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
+use Override;
 
 class VerifyCsrfToken extends PreventRequestForgery
 {
@@ -13,7 +14,7 @@ class VerifyCsrfToken extends PreventRequestForgery
      *
      * @var array<int, string>
      */
-    #[\Override]
+    #[Override]
     protected $except = [
         //
     ];

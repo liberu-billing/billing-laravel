@@ -3,6 +3,7 @@
 namespace App\Services\Registrars;
 
 use GuzzleHttp\Client;
+use Illuminate\Support\Carbon;
 
 class EnomClient
 {
@@ -22,36 +23,72 @@ class EnomClient
         $this->password = config('services.enom.password');
     }
 
-    public function registerDomain($domainName, $customerId): void
+    /**
+     * @return array{expiration_date: Carbon|null}
+     */
+    public function registerDomain($domainName, $customerId): array
     {
-        // Implement eNom API call to register domain
-        // Return result with expiration date
+        // ponytail: stub — implement eNom API call to register domain
+        $this->makeApiCall('Register', ['SLD' => $domainName, 'customerid' => $customerId]);
+
+        return ['expiration_date' => null];
     }
 
-    public function renewDomain($domainName, $period): void
+    /**
+     * @return array{new_expiration_date: Carbon|null}
+     */
+    public function renewDomain($domainName, $period): array
     {
-        // Implement eNom API call to renew domain
-        // Return result with new expiration date
+        // ponytail: stub — implement eNom API call to renew domain
+        $this->makeApiCall('Extend', ['SLD' => $domainName, 'NumYears' => $period]);
+
+        return ['new_expiration_date' => null];
     }
 
-    public function transferDomain($domainName, $authCode, $customerId): void
+    /**
+     * @return array{expiration_date: Carbon|null}
+     */
+    public function transferDomain($domainName, $authCode, $customerId): array
     {
-        // Implement eNom API call to transfer domain
-        // Return result with expiration date
+        // ponytail: stub — implement eNom API call to transfer domain
+        $this->makeApiCall('TP_CreateOrder', ['SLD' => $domainName, 'AuthInfo' => $authCode, 'customerid' => $customerId]);
+
+        return ['expiration_date' => null];
     }
 
-    protected function makeApiCall($command, $params)
+    /**
+     * @return array<int, string>
+     */
+    public function getAvailableTlds(): array
     {
-        $params = array_merge([
-            'command' => $command,
-            'uid' => $this->username,
-            'pw' => $this->password,
-            'responsetype' => 'xml',
-        ], $params);
+        // ponytail: stub — implement eNom GetTLDList API call and parse response
+        return [];
+    }
 
-        $this->client->get($this->apiUrl, [
-            'query' => $params,
-        ]);
+    public function getDomainPrice(string $tld): float
+    {
+        // ponytail: stub — implement eNom GetExtAttributes/pricing API call
+        return 0.0;
+    }
+
+    protected function makeApiCall($command, $params): void
+    {
+        $params = array_merge(
+            [
+                'command' => $command,
+                'uid' => $this->username,
+                'pw' => $this->password,
+                'responsetype' => 'xml',
+            ],
+            $params
+        );
+
+        $this->client->get(
+            $this->apiUrl,
+            [
+                'query' => $params,
+            ]
+        );
 
         // Parse XML response and return result
     }

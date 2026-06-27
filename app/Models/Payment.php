@@ -9,7 +9,39 @@ use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
+use Override;
 
+/**
+ * @property int $id
+ * @property int $invoice_id
+ * @property int $payment_gateway_id
+ * @property int|null $customer_id
+ * @property Carbon $payment_date
+ * @property float $amount
+ * @property string $currency
+ * @property string $payment_method
+ * @property string $transaction_id
+ * @property string $refund_status
+ * @property string|null $status
+ * @property float|null $refunded_amount
+ * @property string|null $refund_reason
+ * @property string|null $reconciliation_status
+ * @property string|null $reconciliation_notes
+ * @property string|null $stripe_token
+ * @property string|null $square_token
+ * @property string|null $google_pay_token
+ * @property int|null $team_id
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Invoice|null $invoice
+ * @property-read PaymentGateway|null $paymentGateway
+ * @property-read Currency|null $currency
+ * @property-read Affiliate|null $affiliate
+ * @property-read string $reconciliation_status_badge
+ * @property-read string $refund_status_badge
+ */
 #[Fillable([
     'invoice_id',
     'payment_gateway_id',
@@ -47,7 +79,7 @@ class Payment extends Model
     use HasFactory;
     use HasTeam;
 
-    #[\Override]
+    #[Override]
     protected $fillable = [
         'invoice_id',
         'payment_gateway_id',
@@ -61,7 +93,7 @@ class Payment extends Model
         'payment_method_details',
     ];
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
 
@@ -77,31 +109,37 @@ class Payment extends Model
 
     protected function reconciliationStatusBadge(): Attribute
     {
-        return Attribute::make(get: fn (): string => match ($this->reconciliation_status) {
-            'reconciled' => '<span class="badge badge-success">Reconciled</span>',
-            'unmatched' => '<span class="badge badge-warning">Unmatched</span>',
-            'discrepancy' => '<span class="badge badge-danger">Discrepancy</span>',
-            'failed' => '<span class="badge badge-danger">Failed</span>',
-            default => '<span class="badge badge-secondary">Pending</span>',
-        });
+        return Attribute::make(
+            get: fn (): string => match ($this->reconciliation_status) {
+                'reconciled' => '<span class="badge badge-success">Reconciled</span>',
+                'unmatched' => '<span class="badge badge-warning">Unmatched</span>',
+                'discrepancy' => '<span class="badge badge-danger">Discrepancy</span>',
+                'failed' => '<span class="badge badge-danger">Failed</span>',
+                default => '<span class="badge badge-secondary">Pending</span>',
+            }
+        );
     }
 
-    public function invoice()
+    public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
     }
 
-    public function paymentGateway()
+    public function paymentGateway(): BelongsTo
     {
         return $this->belongsTo(PaymentGateway::class);
     }
 
-    public function currency()
+    public function currency(): BelongsTo
     {
-        return $this->belongsTo(Currency::class, 'currency', 'code');
+        return $this->belongsTo(
+            Currency::class,
+            'currency',
+            'code'
+        );
     }
 
-    public function affiliate()
+    public function affiliate(): BelongsTo
     {
         return $this->belongsTo(Affiliate::class);
     }
@@ -136,21 +174,29 @@ class Payment extends Model
 
     public function getFormattedAmount(): string
     {
-        return number_format($this->amount, 2).' '.$this->currency;
+        return number_format(
+            $this->amount,
+            2
+        ).' '.$this->currency;
     }
 
     public function getFormattedRefundedAmount(): string
     {
-        return number_format($this->refunded_amount ?? 0, 2).' '.$this->currency;
+        return number_format(
+            $this->refunded_amount ?? 0,
+            2
+        ).' '.$this->currency;
     }
 
     protected function refundStatusBadge(): Attribute
     {
-        return Attribute::make(get: fn (): string => match ($this->refund_status) {
-            'none' => '<span class="badge badge-danger">No Refund</span>',
-            'partial' => '<span class="badge badge-warning">Partial Refund</span>',
-            'full' => '<span class="badge badge-success">Full Refund</span>',
-            default => '<span class="badge badge-secondary">Unknown</span>',
-        });
+        return Attribute::make(
+            get: fn (): string => match ($this->refund_status) {
+                'none' => '<span class="badge badge-danger">No Refund</span>',
+                'partial' => '<span class="badge badge-warning">Partial Refund</span>',
+                'full' => '<span class="badge badge-success">Full Refund</span>',
+                default => '<span class="badge badge-secondary">Unknown</span>',
+            }
+        );
     }
 }

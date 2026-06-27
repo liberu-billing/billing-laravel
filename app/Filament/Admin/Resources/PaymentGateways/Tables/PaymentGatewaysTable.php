@@ -17,24 +17,34 @@ class PaymentGatewaysTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->columns([
-                TextColumn::make('name'),
-                IconColumn::make('is_active')
-                    ->boolean(),
-                TextColumn::make('created_at')
-                    ->dateTime(),
-            ])
-            ->filters([
-                //
-            ])
-            ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ]);
+            ->columns(
+                [
+                    TextColumn::make('name'),
+                    IconColumn::make('is_active')
+                        ->boolean(),
+                    TextColumn::make('created_at')
+                        ->dateTime(),
+                ]
+            )
+            ->filters(
+                [
+                    //
+                ]
+            )
+            ->recordActions(
+                [
+                    EditAction::make(),
+                    DeleteAction::make(),
+                ]
+            )
+            ->toolbarActions(
+                [
+                    BulkActionGroup::make(
+                        [
+                            DeleteBulkAction::make(),
+                        ]
+                    ),
+                ]
+            );
     }
 }

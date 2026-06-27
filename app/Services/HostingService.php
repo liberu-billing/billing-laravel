@@ -27,12 +27,19 @@ class HostingService
         }
 
         $client = $this->getClientForControlPanel($server->control_panel);
-        $price = $this->pricingService->calculatePrice($product, $options);
+        $price = $this->pricingService->calculatePrice(
+            $product,
+            $options
+        );
 
         // Configure client with server details
         $client->setServer($server);
 
-        $result = $client->createAccount($account->username, $account->domain, $product->name);
+        $result = $client->createAccount(
+            $account->username,
+            $account->domain,
+            $product->name
+        );
 
         if ($result) {
             $account->status = 'active';
@@ -43,10 +50,13 @@ class HostingService
             // Increment server account count
             $server->increment('active_accounts');
 
-            Log::info('Provisioned new hosting account', [
-                'account_id' => $account->id,
-                'server_id' => $server->id,
-            ]);
+            Log::info(
+                'Provisioned new hosting account',
+                [
+                    'account_id' => $account->id,
+                    'server_id' => $server->id,
+                ]
+            );
         }
 
         return $result;
@@ -64,7 +74,10 @@ class HostingService
             $account->status = 'suspended';
             $account->save();
 
-            Log::info('Suspended hosting account', ['account_id' => $account->id]);
+            Log::info(
+                'Suspended hosting account',
+                ['account_id' => $account->id]
+            );
         }
 
         return $result;
@@ -82,7 +95,10 @@ class HostingService
             $account->status = 'active';
             $account->save();
 
-            Log::info('Unsuspended hosting account', ['account_id' => $account->id]);
+            Log::info(
+                'Unsuspended hosting account',
+                ['account_id' => $account->id]
+            );
         }
 
         return $result;
@@ -94,18 +110,27 @@ class HostingService
         $client = $this->getClientForControlPanel($server->control_panel);
         $client->setServer($server);
 
-        $newPrice = $this->pricingService->calculatePrice($newProduct, $options);
-        $result = $client->changePackage($account->username, $newProduct->name);
+        $newPrice = $this->pricingService->calculatePrice(
+            $newProduct,
+            $options
+        );
+        $result = $client->changePackage(
+            $account->username,
+            $newProduct->name
+        );
 
         if ($result) {
             $account->package = $newProduct->name;
             $account->price = $newPrice;
             $account->save();
 
-            Log::info('Upgraded hosting account', [
-                'account_id' => $account->id,
-                'new_package' => $newProduct->name,
-            ]);
+            Log::info(
+                'Upgraded hosting account',
+                [
+                    'account_id' => $account->id,
+                    'new_package' => $newProduct->name,
+                ]
+            );
         }
 
         return $result;
@@ -117,18 +142,27 @@ class HostingService
         $client = $this->getClientForControlPanel($server->control_panel);
         $client->setServer($server);
 
-        $newPrice = $this->pricingService->calculatePrice($newProduct, $options);
-        $result = $client->changePackage($account->username, $newProduct->name);
+        $newPrice = $this->pricingService->calculatePrice(
+            $newProduct,
+            $options
+        );
+        $result = $client->changePackage(
+            $account->username,
+            $newProduct->name
+        );
 
         if ($result) {
             $account->package = $newProduct->name;
             $account->price = $newPrice;
             $account->save();
 
-            Log::info('Downgraded hosting account', [
-                'account_id' => $account->id,
-                'new_package' => $newProduct->name,
-            ]);
+            Log::info(
+                'Downgraded hosting account',
+                [
+                    'account_id' => $account->id,
+                    'new_package' => $newProduct->name,
+                ]
+            );
         }
 
         return $result;
@@ -149,7 +183,10 @@ class HostingService
             // Decrement server account count
             $server->decrement('active_accounts');
 
-            Log::info('Terminated hosting account', ['account_id' => $account->id]);
+            Log::info(
+                'Terminated hosting account',
+                ['account_id' => $account->id]
+            );
         }
 
         return $result;
@@ -161,20 +198,29 @@ class HostingService
         $client = $this->getClientForControlPanel($server->control_panel);
         $client->setServer($server);
 
-        $result = $client->addAddon($account->username, $addon);
+        $result = $client->addAddon(
+            $account->username,
+            $addon
+        );
 
         if ($result) {
             $addons = $account->addons ?? [];
-            if (! in_array($addon, $addons)) {
+            if (! in_array(
+                $addon,
+                $addons
+            )) {
                 $addons[] = $addon;
                 $account->addons = $addons;
                 $account->save();
             }
 
-            Log::info('Added addon to hosting account', [
-                'account_id' => $account->id,
-                'addon' => $addon,
-            ]);
+            Log::info(
+                'Added addon to hosting account',
+                [
+                    'account_id' => $account->id,
+                    'addon' => $addon,
+                ]
+            );
         }
 
         return $result;
@@ -186,18 +232,27 @@ class HostingService
         $client = $this->getClientForControlPanel($server->control_panel);
         $client->setServer($server);
 
-        $result = $client->removeAddon($account->username, $addon);
+        $result = $client->removeAddon(
+            $account->username,
+            $addon
+        );
 
         if ($result) {
             $addons = $account->addons ?? [];
-            $addons = array_filter($addons, fn ($a): bool => $a !== $addon);
+            $addons = array_filter(
+                $addons,
+                fn ($a): bool => $a !== $addon
+            );
             $account->addons = array_values($addons);
             $account->save();
 
-            Log::info('Removed addon from hosting account', [
-                'account_id' => $account->id,
-                'addon' => $addon,
-            ]);
+            Log::info(
+                'Removed addon from hosting account',
+                [
+                    'account_id' => $account->id,
+                    'addon' => $addon,
+                ]
+            );
         }
 
         return $result;
@@ -209,7 +264,10 @@ class HostingService
             return HostingServer::find($serverId);
         }
 
-        return HostingServer::where('is_active', true)
+        return HostingServer::where(
+            'is_active',
+            true
+        )
             ->whereRaw('active_accounts < max_accounts')
             ->orderBy('active_accounts')
             ->first();

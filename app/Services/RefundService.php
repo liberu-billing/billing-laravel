@@ -23,7 +23,10 @@ class RefundService
         DB::beginTransaction();
 
         try {
-            $refundResult = $this->paymentGatewayService->refundPayment($payment, $amount);
+            $refundResult = $this->paymentGatewayService->refundPayment(
+                $payment,
+                $amount
+            );
 
             if ($refundResult['success']) {
                 $payment->refund_status = $amount == $payment->amount ? 'full' : 'partial';
@@ -35,14 +38,20 @@ class RefundService
 
                 DB::commit();
 
-                return ['success' => true, 'message' => 'Refund processed successfully.'];
+                return [
+                    'success' => true,
+                    'message' => 'Refund processed successfully.',
+                ];
             } else {
                 throw new Exception($refundResult['message']);
             }
         } catch (Exception $e) {
             DB::rollBack();
 
-            return ['success' => false, 'message' => 'Refund failed: '.$e->getMessage()];
+            return [
+                'success' => false,
+                'message' => 'Refund failed: '.$e->getMessage(),
+            ];
         }
     }
 

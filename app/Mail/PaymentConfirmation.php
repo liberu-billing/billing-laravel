@@ -15,10 +15,7 @@ class PaymentConfirmation extends Mailable
 {
     use Queueable, SerializesModels;
 
-    /**
-     * @var Payment
-     */
-    public $payment;
+    public Payment $payment;
 
     public function __construct(Payment $payment)
     {

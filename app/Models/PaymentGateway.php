@@ -6,9 +6,23 @@ namespace App\Models;
 
 use App\Traits\HasTeam;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
+use Override;
 
+/**
+ * @property int $id
+ * @property int|null $team_id
+ * @property string $name
+ * @property string $api_key
+ * @property string $secret_key
+ * @property bool $is_active
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Collection<int, Payment> $payments
+ */
 #[Fillable([
     'name',
     'api_key',
@@ -17,10 +31,9 @@ use Illuminate\Database\Eloquent\Model;
 ])]
 class PaymentGateway extends Model
 {
-    use HasFactory;
     use HasTeam;
 
-    #[\Override]
+    #[Override]
     protected function casts(): array
     {
 
@@ -30,7 +43,7 @@ class PaymentGateway extends Model
 
     }
 
-    public function payments()
+    public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
     }

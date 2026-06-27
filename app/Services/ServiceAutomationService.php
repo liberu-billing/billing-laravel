@@ -21,15 +21,29 @@ class ServiceAutomationService
         $suspended = 0;
         $overdueDate = now()->subDays($daysOverdue);
 
-        $overdueInvoices = Invoice::whereIn('status', ['pending', 'overdue'])
-            ->where('due_date', '<=', $overdueDate)
+        $overdueInvoices = Invoice::whereIn(
+            'status',
+            [
+                'pending',
+                'overdue',
+            ]
+        )
+            ->where(
+                'due_date',
+                '<=',
+                $overdueDate
+            )
             ->whereDoesntHave('subscription.activeSuspension')
             ->with('subscription')
             ->get();
 
         foreach ($overdueInvoices as $invoice) {
             if ($invoice->subscription) {
-                $this->suspendService($invoice->subscription, $invoice, 'overdue_payment');
+                $this->suspendService(
+                    $invoice->subscription,
+                    $invoice,
+                    'overdue_payment'
+                );
                 $suspended++;
             }
         }
@@ -47,14 +61,16 @@ class ServiceAutomationService
         ?string $notes = null,
         ?int $userId = null
     ): ServiceSuspension {
-        $suspension = ServiceSuspension::create([
-            'subscription_id' => $subscription->id,
-            'invoice_id' => $invoice?->id,
-            'reason' => $reason,
-            'notes' => $notes,
-            'suspended_at' => now(),
-            'suspended_by' => $userId,
-        ]);
+        $suspension = ServiceSuspension::create(
+            [
+                'subscription_id' => $subscription->id,
+                'invoice_id' => $invoice?->id,
+                'reason' => $reason,
+                'notes' => $notes,
+                'suspended_at' => now(),
+                'suspended_by' => $userId,
+            ]
+        );
 
         // Update subscription status
         $subscription->update(['status' => 'suspended']);
@@ -71,10 +87,13 @@ class ServiceAutomationService
             $subscription->team_id
         );
 
-        Log::info('Service suspended', [
-            'subscription_id' => $subscription->id,
-            'reason' => $reason,
-        ]);
+        Log::info(
+            'Service suspended',
+            [
+                'subscription_id' => $subscription->id,
+                'reason' => $reason,
+            ]
+        );
 
         return $suspension;
     }
@@ -105,9 +124,12 @@ class ServiceAutomationService
             $subscription->team_id
         );
 
-        Log::info('Service unsuspended', [
-            'subscription_id' => $subscription->id,
-        ]);
+        Log::info(
+            'Service unsuspended',
+            [
+                'subscription_id' => $subscription->id,
+            ]
+        );
 
         return true;
     }
@@ -135,10 +157,12 @@ class ServiceAutomationService
      */
     public function terminateService(Subscription $subscription, ?int $userId = null): bool
     {
-        $subscription->update([
-            'status' => 'terminated',
-            'ends_at' => now(),
-        ]);
+        $subscription->update(
+            [
+                'status' => 'terminated',
+                'ends_at' => now(),
+            ]
+        );
 
         // Trigger webhook
         $this->webhookService->dispatch(
@@ -150,9 +174,12 @@ class ServiceAutomationService
             $subscription->team_id
         );
 
-        Log::info('Service terminated', [
-            'subscription_id' => $subscription->id,
-        ]);
+        Log::info(
+            'Service terminated',
+            [
+                'subscription_id' => $subscription->id,
+            ]
+        );
 
         return true;
     }

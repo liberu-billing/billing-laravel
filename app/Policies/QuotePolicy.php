@@ -6,7 +6,6 @@ use App\Models\Quote;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-/** @SuppressWarnings(PHPMD.UnusedFormalParameter) */
 class QuotePolicy
 {
     use HandlesAuthorization;
