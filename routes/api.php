@@ -96,7 +96,9 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
     });
 
     // Client Notes endpoints
-    Route::get('client-notes', [ClientNoteController::class, 'index']);
+    Route::middleware('ability:client-notes:read')->group(function (): void {
+        Route::get('client-notes', [ClientNoteController::class, 'index']);
+    });
     Route::middleware('ability:client-notes:write')->group(function (): void {
         Route::post('client-notes', [ClientNoteController::class, 'store']);
         Route::delete('client-notes/{note}', [ClientNoteController::class, 'destroy']);
@@ -119,6 +121,8 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
         Route::get('canned-responses/most-used', [CannedResponseController::class, 'mostUsed']);
         Route::get('canned-responses/variables', [CannedResponseController::class, 'variables']);
         Route::get('canned-responses/{shortcode}', [CannedResponseController::class, 'show']);
+    });
+    Route::middleware('ability:canned-responses:write')->group(function (): void {
         Route::post('canned-responses/{shortcode}/use', [CannedResponseController::class, 'use']);
     });
 
@@ -139,10 +143,18 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
     });
 
     // Package Group endpoints (Blesta)
-    Route::apiResource('package-groups', PackageGroupController::class);
-    Route::post('package-groups/{packageGroup}/packages', [PackageGroupController::class, 'addPackage']);
-    Route::delete('package-groups/{packageGroup}/packages/{plan}', [PackageGroupController::class, 'removePackage']);
-    Route::post('package-groups/{packageGroup}/reorder', [PackageGroupController::class, 'reorder']);
+    Route::middleware('ability:package-groups:read')->group(function (): void {
+        Route::get('package-groups', [PackageGroupController::class, 'index'])->name('package-groups.index');
+        Route::get('package-groups/{packageGroup}', [PackageGroupController::class, 'show'])->name('package-groups.show');
+    });
+    Route::middleware('ability:package-groups:write')->group(function (): void {
+        Route::post('package-groups', [PackageGroupController::class, 'store'])->name('package-groups.store');
+        Route::match(['put', 'patch'], 'package-groups/{packageGroup}', [PackageGroupController::class, 'update'])->name('package-groups.update');
+        Route::delete('package-groups/{packageGroup}', [PackageGroupController::class, 'destroy'])->name('package-groups.destroy');
+        Route::post('package-groups/{packageGroup}/packages', [PackageGroupController::class, 'addPackage']);
+        Route::delete('package-groups/{packageGroup}/packages/{plan}', [PackageGroupController::class, 'removePackage']);
+        Route::post('package-groups/{packageGroup}/reorder', [PackageGroupController::class, 'reorder']);
+    });
 });
 
 // Public Knowledge Base endpoints (no auth required)

@@ -11,7 +11,10 @@ class ClientNoteController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
+        // No team_id exists on the clients table, so ownership is scoped to the
+        // authoring user — the only ownership linkage the schema provides.
         $query = ClientNote::with(['user'])
+            ->where('user_id', $request->user()?->getAuthIdentifier())
             ->where(
                 'client_id',
                 $request->client_id
@@ -109,8 +112,11 @@ class ClientNoteController extends Controller
         return response()->json($note->load('user'));
     }
 
-    public function destroy(ClientNote $note): JsonResponse
+    public function destroy(Request $request, ClientNote $note): JsonResponse
     {
+        // No team scoping is possible (clients have no team_id); restrict to the author.
+        abort_unless($note->user_id === $request->user()?->getAuthIdentifier(), 404);
+
         $note->delete();
 
         return response()->json(['message' => 'Note deleted successfully']);

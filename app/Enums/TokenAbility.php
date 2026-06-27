@@ -16,7 +16,11 @@ enum TokenAbility: string
     case QuotesWrite = 'quotes:write';
     case WebhooksManage = 'webhooks:manage';
     case CannedResponsesRead = 'canned-responses:read';
+    case CannedResponsesWrite = 'canned-responses:write';
+    case ClientNotesRead = 'client-notes:read';
     case ClientNotesWrite = 'client-notes:write';
+    case PackageGroupsRead = 'package-groups:read';
+    case PackageGroupsWrite = 'package-groups:write';
 
     /**
      * @return list<string>

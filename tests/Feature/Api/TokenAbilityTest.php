@@ -102,7 +102,7 @@ class TokenAbilityTest extends TestCase
         $user = User::factory()->withPersonalTeam()->create();
         Sanctum::actingAs($user, ['invoices:write']);
 
-        $customer = Customer::factory()->create();
+        $customer = Customer::factory()->create(['team_id' => $user->currentTeam->id]);
         $response = $this->postJson('/api/invoices', [
             'customer_id' => $customer->id,
             'issue_date' => now()->toDateString(),
