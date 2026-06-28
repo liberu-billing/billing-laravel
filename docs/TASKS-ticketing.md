@@ -45,13 +45,13 @@ before finalizing.
 
 ### P0 — Departments + assignment
 
-- [ ] **TK1. Ticket departments** (spec 95) — dep none
+- [x] **TK1. Ticket departments** (spec 95) — dep none
   - Migration `ticket_departments`: `id`, `team_id` (FK teams, cascade), `name`, `email` (string, nullable — for piping in TK6), `is_active` (boolean, default true), timestamps.
   - Migration: add `tickets.department_id` (nullable FK ticket_departments, nullOnDelete). `Ticket belongsTo Department`, add `'department_id'` to fillable.
   - Admin CRUD resource for departments; department select on the ticket form.
   - Gate test `test_ticket_can_belong_to_department`.
 
-- [ ] **TK2. Staff assignment** (spec 95) — dep none
+- [x] **TK2. Staff assignment** (spec 95) — dep none
   - Migration: add `tickets.assigned_to` (nullable FK users, nullOnDelete). `Ticket belongsTo assignee (User)`, scope `assignedTo($userId)`, `'assigned_to'` fillable.
   - Admin "Assign" action; show assignee in list. Optional event/notification on assignment.
   - Gate test `test_ticket_can_be_assigned_to_staff`; `test_assigned_scope_filters_by_staff`.

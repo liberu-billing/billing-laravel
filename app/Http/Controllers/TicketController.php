@@ -92,12 +92,21 @@ class TicketController extends Controller
             [
                 'responses.user',
                 'user',
+                'assignee',
+                'department',
             ]
         );
 
+        $staff = User::role(
+            [
+                'admin',
+                'super_admin',
+            ]
+        )->get();
+
         return view(
             'tickets.show',
-            compact('ticket')
+            compact('ticket', 'staff')
         );
     }
 
@@ -122,6 +131,30 @@ class TicketController extends Controller
         return redirect()->back()->with(
             'success',
             'Ticket status updated.'
+        );
+    }
+
+    public function assign(Request $request, Ticket $ticket): RedirectResponse
+    {
+        $this->authorize(
+            'update',
+            $ticket
+        );
+
+        $validated = $request->validate(
+            [
+                'assigned_to' => [
+                    'nullable',
+                    'exists:users,id',
+                ],
+            ]
+        );
+
+        $ticket->update(['assigned_to' => $validated['assigned_to'] ?? null]);
+
+        return redirect()->back()->with(
+            'success',
+            'Ticket assignment updated.'
         );
     }
 }
