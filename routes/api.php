@@ -156,3 +156,7 @@ Route::prefix('knowledge-base')->group(function (): void {
     Route::post('articles/{slug}/not-helpful', [KnowledgeBaseController::class, 'markNotHelpful']);
     Route::get('categories/{categoryId}/articles', [KnowledgeBaseController::class, 'byCategory']);
 });
+
+// Public license endpoints (SDK calls anonymously with a license key)
+Route::post('v1/license/validate', [\App\Http\Controllers\Api\LicenseValidationController::class, 'validateLicense']);
+Route::post('v1/license/download', [\App\Http\Controllers\Api\LicenseDownloadController::class, 'download']);
