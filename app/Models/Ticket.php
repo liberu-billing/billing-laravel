@@ -20,6 +20,7 @@ use Illuminate\Support\Carbon;
  * @property string $description
  * @property string $status
  * @property string $priority
+ * @property array|null $custom_fields
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read User|null $user
@@ -35,10 +36,21 @@ use Illuminate\Support\Carbon;
     'description',
     'status',
     'priority',
+    'custom_fields',
 ])]
 class Ticket extends Model
 {
     use HasFactory;
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'custom_fields' => 'array',
+        ];
+    }
 
     public function user(): BelongsTo
     {

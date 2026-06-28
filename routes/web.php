@@ -25,6 +25,8 @@ Route::middleware(['auth'])->group(function (): void {
     Route::resource('tickets', TicketController::class);
     Route::post('tickets/{ticket}/assign', [TicketController::class, 'assign'])
         ->name('tickets.assign');
+    Route::get('tickets/attachments/{attachment}/download', [TicketController::class, 'downloadAttachment'])
+        ->name('tickets.attachments.download');
     // Route::post('tickets/{ticket}/responses', [TicketResponseController::class, 'store'])
     //     ->name('ticket.responses.store');
 

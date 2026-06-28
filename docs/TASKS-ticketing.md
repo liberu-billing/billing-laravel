@@ -58,24 +58,24 @@ before finalizing.
 
 ### P1 — Attachments + custom fields
 
-- [ ] **TK3. Attachments** (spec 95) — dep none
+- [x] **TK3. Attachments** (spec 95) — dep none
   - Migration `ticket_attachments`: `id`, polymorphic `attachable` (ticket OR ticket_response), `uploaded_by` (FK users), `path`, `original_name`, `mime`, `size`, timestamps. Private storage.
   - Add an upload field to the reply form; download route gated by `TicketPolicy` (requester is opener, assignee, or staff).
   - Gate tests: `test_attachment_stored_with_private_visibility`, `test_unauthorized_user_cannot_download_attachment` (403).
 
-- [ ] **TK4. Custom fields** (spec 95) — dep TK1
+- [x] **TK4. Custom fields** (spec 95) — dep TK1
   - Migration `ticket_custom_fields`: `id`, `team_id`, `department_id` (nullable), `label`, `type` (`text|select|number|checkbox`), `options` (json, nullable), `is_required` (bool). Store values in `tickets.custom_fields` (json column on tickets).
   - Admin defines fields; ticket form renders them dynamically; required-validation enforced.
   - Gate tests: `test_custom_field_values_persist_on_ticket`, `test_required_custom_field_is_validated`.
 
 ### P2 — Escalation + email piping
 
-- [ ] **TK5. Escalation rules** (spec 95) — dep TK1, TK2
+- [x] **TK5. Escalation rules** (spec 95) — dep TK1, TK2
   - Migration `ticket_escalation_rules`: `id`, `team_id`, `department_id` (nullable), `minutes_without_response` (int), `action` (`raise_priority|reassign|notify`), `target_user_id` (nullable). 
   - `TicketEscalationService` + console command `tickets:escalate` (scheduled) that finds tickets breaching a rule and applies the action.
   - Gate tests: `test_overdue_ticket_raises_priority`, `test_escalation_reassigns_to_target`.
 
-- [ ] **TK6. Email piping (inbound)** (spec 95) — dep TK1 — DEPENDENCY-HEAVY
+- [x] **TK6. Email piping (inbound)** (spec 95) — dep TK1 — DEPENDENCY-HEAVY
   - `InboundEmailService::handle(array $payload): TicketResponse|Ticket` — parse a normalized inbound-email payload (sender → match customer by email; subject/ticket-ref → append `TicketResponse` or open a new `Ticket` for the department whose `email` matched). Attachments → TK3.
   - Wire to a real mailbox (IMAP poll command OR a Mailgun/Postmark inbound webhook route) — **deploy-config, out of the gate test's scope**; the gate test feeds the service a parsed payload directly.
   - Gate tests: `test_inbound_email_appends_response_to_existing_ticket`, `test_inbound_email_opens_new_ticket_for_department`.
