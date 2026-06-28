@@ -109,10 +109,20 @@ class EnomClient implements RegistrarClient
     public function getDnsRecords(string $domainName): array
     {
         [$sld, $tld] = $this->splitDomain($domainName);
-        $this->makeApiCall('GetHosts', ['SLD' => $sld, 'TLD' => $tld]);
+        $xml = $this->makeApiCall('GetHosts', ['SLD' => $sld, 'TLD' => $tld]);
 
-        // ponytail: parse eNom GetHosts XML into records — done in R7 (DNS/WHOIS).
-        return [];
+        $records = [];
+        foreach ($xml->host ?? [] as $host) {
+            $records[] = [
+                'id' => (string) ($host->HostID ?? ''),
+                'type' => (string) ($host->RecordType ?? ''),
+                'name' => (string) ($host->HostName ?? ''),
+                'content' => (string) ($host->Address ?? ''),
+                'ttl' => (int) ($host->TTL ?? 3600),
+            ];
+        }
+
+        return $records;
     }
 
     /**
@@ -140,10 +150,19 @@ class EnomClient implements RegistrarClient
     public function getWhoisContacts(string $domainName): array
     {
         [$sld, $tld] = $this->splitDomain($domainName);
-        $this->makeApiCall('GetWhoisContact', ['SLD' => $sld, 'TLD' => $tld]);
+        $xml = $this->makeApiCall('GetWhoisContact', ['SLD' => $sld, 'TLD' => $tld]);
 
-        // ponytail: parse contacts — done in R7 (DNS/WHOIS).
-        return [];
+        $contacts = [];
+        foreach ($xml->contacts->contact ?? [] as $contact) {
+            $type = (string) ($contact->ContactType ?? 'Registrant');
+            $contacts[$type] = [
+                'first_name' => (string) ($contact->FirstName ?? ''),
+                'last_name' => (string) ($contact->LastName ?? ''),
+                'email' => (string) ($contact->EmailAddress ?? ''),
+            ];
+        }
+
+        return $contacts;
     }
 
     /**

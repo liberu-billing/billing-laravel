@@ -59,7 +59,7 @@ before finalizing.
   - Public route + page: customer enters a domain → `checkAvailability` across enabled TLDs; show available + price (from `Tld` markup). Optional: simple namespinning suggestions (append common TLDs / hyphenations).
   - Gate test `test_domain_search_returns_availability_and_price`.
 
-- [ ] **R4. Transfer flow** (spec 34) — dep R2
+- [x] **R4. Transfer flow** (spec 34) — dep R2
   - `transferDomain` with EPP/auth code: initiate + persist transfer status on the subscription. `DomainService::transferDomain` end-to-end.
   - Gate tests (`Http::fake()`): `test_transfer_initiates_with_auth_code`, `test_transfer_status_persists`.
 
@@ -73,7 +73,7 @@ before finalizing.
 
 ### P2 — DNS/WHOIS real, value-adds, second registrar
 
-- [ ] **R7. Real DNS + WHOIS** (spec 47, 48) — dep R2
+- [x] **R7. Real DNS + WHOIS** (spec 47, 48) — dep R2
   - Implement `getDnsRecords`/`addDnsRecord`/`deleteDnsRecord` and `getWhoisContacts`/`updateWhoisContacts` against the API. The `DomainManagement` client page becomes functional.
   - Gate tests (`Http::fake()`): `test_dns_records_fetched`, `test_dns_record_added`, `test_whois_contacts_updated`.
 

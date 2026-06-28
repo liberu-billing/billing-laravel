@@ -72,6 +72,7 @@ class DomainService
             $subscription->domain_name = $domainName;
             $subscription->domain_registrar = $newRegistrar;
             $subscription->domain_expiration_date = $result['expiration_date'];
+            $subscription->domain_transfer_status = 'pending';
             $subscription->save();
 
             // Update HostingAccount
