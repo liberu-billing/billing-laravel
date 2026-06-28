@@ -66,7 +66,7 @@ class LiberuLicenseClient
 
     /**
      * @param  array<string, string>  $payload
-     * @return array<string, mixed>|null  null on transport failure
+     * @return array<string, mixed>|null null on transport failure
      */
     private function post(string $path, array $payload): ?array
     {

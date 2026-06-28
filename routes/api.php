@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\ClientContactController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\KnowledgeBaseController;
+use App\Http\Controllers\Api\LicenseDownloadController;
+use App\Http\Controllers\Api\LicenseValidationController;
 use App\Http\Controllers\Api\PackageGroupController;
 use App\Http\Controllers\Api\QuoteController;
 use App\Http\Controllers\Api\SubscriptionController;
@@ -158,5 +160,5 @@ Route::prefix('knowledge-base')->group(function (): void {
 });
 
 // Public license endpoints (SDK calls anonymously with a license key)
-Route::post('v1/license/validate', [\App\Http\Controllers\Api\LicenseValidationController::class, 'validateLicense']);
-Route::post('v1/license/download', [\App\Http\Controllers\Api\LicenseDownloadController::class, 'download']);
+Route::post('v1/license/validate', [LicenseValidationController::class, 'validateLicense']);
+Route::post('v1/license/download', [LicenseDownloadController::class, 'download']);
