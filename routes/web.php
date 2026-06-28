@@ -23,6 +23,8 @@ use Laravel\Jetstream\Http\Controllers\TeamInvitationController;
 
 Route::middleware(['auth'])->group(function (): void {
     Route::resource('tickets', TicketController::class);
+    Route::post('tickets/{ticket}/project', [TicketController::class, 'createProject'])
+        ->name('tickets.project.create');
     // Route::post('tickets/{ticket}/responses', [TicketResponseController::class, 'store'])
     //     ->name('ticket.responses.store');
 
