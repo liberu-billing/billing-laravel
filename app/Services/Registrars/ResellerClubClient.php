@@ -3,6 +3,7 @@
 namespace App\Services\Registrars;
 
 use App\Services\Registrars\Contracts\RegistrarClient;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
@@ -24,6 +25,7 @@ class ResellerClubClient implements RegistrarClient
 
     /**
      * @return array{expiration_date: Carbon|null}|null
+     * @throws ConnectionException
      */
     public function registerDomain($domainName, $customerId): ?array
     {
@@ -55,6 +57,9 @@ class ResellerClubClient implements RegistrarClient
         return ['expiration_date' => null];
     }
 
+    /**
+     * @throws ConnectionException
+     */
     public function checkAvailability(string $domainName): bool
     {
         [$sld, $tld] = $this->splitDomain($domainName);
@@ -87,7 +92,6 @@ class ResellerClubClient implements RegistrarClient
      */
     public function getDnsRecords(string $domainName): array
     {
-        // ponytail: out of R9's gate — ResellerClub dns/manage/search-records.
         return [];
     }
 
@@ -96,13 +100,11 @@ class ResellerClubClient implements RegistrarClient
      */
     public function addDnsRecord(string $domainName, array $record): bool
     {
-        // ponytail: out of R9's gate — ResellerClub dns/manage/add-<type>-record.
         return true;
     }
 
     public function deleteDnsRecord(string $domainName, string $recordId): bool
     {
-        // ponytail: out of R9's gate — ResellerClub dns/manage/delete-record.
         return true;
     }
 
@@ -111,7 +113,7 @@ class ResellerClubClient implements RegistrarClient
      */
     public function getWhoisContacts(string $domainName): array
     {
-        // ponytail: out of R9's gate — ResellerClub domains/details (contact ids).
+
         return [];
     }
 
@@ -120,7 +122,7 @@ class ResellerClubClient implements RegistrarClient
      */
     public function updateWhoisContacts(string $domainName, array $contacts): bool
     {
-        // ponytail: out of R9's gate — ResellerClub domains/modify-contact.
+        // ponytail: real registrar call here — ResellerClub domains/modify-contact.
         return true;
     }
 
@@ -135,8 +137,10 @@ class ResellerClubClient implements RegistrarClient
     }
 
     /**
-     * @param  array<string, mixed>  $params
-     * @return array<mixed>
+     * @param string $action
+     * @param array<string, mixed> $params
+     * @return array
+     * @throws ConnectionException
      */
     protected function makeApiCall(string $action, array $params): array
     {
