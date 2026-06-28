@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CannedResponseController;
 use App\Http\Controllers\Api\ClientContactController;
 use App\Http\Controllers\Api\CustomerController;
+use App\Http\Controllers\Api\InboundEmailController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\KnowledgeBaseController;
 use App\Http\Controllers\Api\LicenseDownloadController;
@@ -158,6 +159,9 @@ Route::prefix('knowledge-base')->group(function (): void {
     Route::post('articles/{slug}/not-helpful', [KnowledgeBaseController::class, 'markNotHelpful']);
     Route::get('categories/{categoryId}/articles', [KnowledgeBaseController::class, 'byCategory']);
 });
+
+// Inbound email webhook (provider posts a normalized payload; secured via deploy-config)
+Route::post('inbound-email', [InboundEmailController::class, 'store']);
 
 // Public license endpoints (SDK calls anonymously with a license key)
 Route::post('v1/license/validate', [LicenseValidationController::class, 'validateLicense']);
