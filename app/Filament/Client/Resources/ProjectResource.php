@@ -6,6 +6,7 @@ namespace App\Filament\Client\Resources;
 
 use App\Filament\Client\Resources\ProjectResource\Pages\ListProjects;
 use App\Filament\Client\Resources\ProjectResource\Pages\ViewProject;
+use App\Filament\Client\Resources\ProjectResource\RelationManagers\MessagesRelationManager;
 use App\Models\Project;
 use BackedEnum;
 use Filament\Actions\ViewAction;
@@ -54,6 +55,17 @@ class ProjectResource extends Resource
                 ]
             )
             ->defaultSort('created_at', 'desc');
+    }
+
+    /**
+     * @return array<int, class-string>
+     */
+    #[Override]
+    public static function getRelations(): array
+    {
+        return [
+            MessagesRelationManager::class,
+        ];
     }
 
     #[Override]

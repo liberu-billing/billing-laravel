@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Filament;
 
+use App\Filament\Admin\Pages\ProjectReports;
 use App\Filament\Admin\Resources\Projects\Pages\CreateProject;
 use App\Filament\Admin\Resources\Projects\Pages\EditProject;
 use App\Filament\Client\Resources\ProjectResource\Pages\ListProjects as ClientListProjects;
+use App\Filament\Client\Resources\ProjectResource\Pages\ViewProject as ClientViewProject;
 use App\Models\Customer;
 use App\Models\Project;
 use App\Models\User;
@@ -89,5 +91,41 @@ class ProjectResourceTest extends TestCase
         Livewire::test(ClientListProjects::class)
             ->assertCanSeeTableRecords([$myProject])
             ->assertCanNotSeeTableRecords([$otherProject]);
+    }
+
+    public function test_client_can_view_own_project_with_discussion(): void
+    {
+        $user = User::factory()->withPersonalTeam()->create();
+        $team = $user->currentTeam;
+        $customer = Customer::factory()->create(['team_id' => $team->id, 'email' => $user->email]);
+        $project = Project::factory()->create(['team_id' => $team->id, 'customer_id' => $customer->id]);
+
+        $this->actingAs($user);
+        $panel = Filament::getPanel('client');
+        Filament::setCurrentPanel($panel);
+        $panel->boot();
+
+        Livewire::test(ClientViewProject::class, ['record' => $project->id])
+            ->assertSuccessful();
+    }
+
+    public function test_admin_can_render_project_reports_page(): void
+    {
+        $user = User::factory()->withPersonalTeam()->create();
+        $this->actingAs($user);
+
+        $customer = Customer::factory()->create(['team_id' => $user->currentTeam->id]);
+        Project::factory()->create([
+            'team_id' => $user->currentTeam->id,
+            'customer_id' => $customer->id,
+        ]);
+
+        $panel = Filament::getPanel('admin');
+        Filament::setCurrentPanel($panel);
+        $panel->boot();
+        Filament::setTenant($user->currentTeam);
+
+        Livewire::test(ProjectReports::class)
+            ->assertSuccessful();
     }
 }
