@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Tld;
 use App\Services\DomainService;
+use App\Services\Registrars\Contracts\RegistrarClient;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -37,7 +38,7 @@ class DomainSearchController extends Controller
     /**
      * @return array{domain: string, available: bool, price: float|null}
      */
-    private function lookup(string $domain, \App\Services\Registrars\Contracts\RegistrarClient $client): array
+    private function lookup(string $domain, RegistrarClient $client): array
     {
         $available = $client->checkAvailability($domain);
         $parts = explode('.', $domain);

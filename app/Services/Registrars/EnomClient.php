@@ -24,7 +24,7 @@ class EnomClient implements RegistrarClient
     }
 
     /**
-     * @return array{expiration_date: \Illuminate\Support\Carbon|null}|null
+     * @return array{expiration_date: Carbon|null}|null
      */
     public function registerDomain($domainName, $customerId): ?array
     {
@@ -40,7 +40,7 @@ class EnomClient implements RegistrarClient
     }
 
     /**
-     * @return array{new_expiration_date: \Illuminate\Support\Carbon|null}|null
+     * @return array{new_expiration_date: Carbon|null}|null
      */
     public function renewDomain($domainName, $period): ?array
     {
@@ -56,7 +56,7 @@ class EnomClient implements RegistrarClient
     }
 
     /**
-     * @return array{expiration_date: \Illuminate\Support\Carbon|null}|null
+     * @return array{expiration_date: Carbon|null}|null
      */
     public function transferDomain($domainName, $authCode, $customerId): ?array
     {
