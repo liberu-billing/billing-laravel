@@ -2,10 +2,11 @@
 
 namespace App\Services\Registrars;
 
+use App\Services\Registrars\Contracts\RegistrarClient;
 use GuzzleHttp\Client;
 use Illuminate\Support\Carbon;
 
-class ResellerClubClient
+class ResellerClubClient implements RegistrarClient
 {
     protected Client $client;
 
@@ -48,6 +49,27 @@ class ResellerClubClient
     {
         // ponytail: stub — implement ResellerClub API call to transfer domain
         return ['expiration_date' => null];
+    }
+
+    public function checkAvailability(string $domainName): bool
+    {
+        // ponytail: stub — ResellerClub domains/available; real call in R9.
+        return false;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function getAvailableTlds(): array
+    {
+        // ponytail: stub — real call in R9.
+        return [];
+    }
+
+    public function getDomainPrice(string $tld): float
+    {
+        // ponytail: stub — ResellerClub products/customer-price; real call in R9.
+        return 0.0;
     }
 
     /**

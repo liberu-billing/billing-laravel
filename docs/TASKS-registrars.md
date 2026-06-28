@@ -44,12 +44,12 @@ before finalizing.
 
 ### P0 — Interface + real Enom client
 
-- [ ] **R1. `RegistrarClient` interface + binding** — dep none
+- [x] **R1. `RegistrarClient` interface + binding** — dep none
   - Extract `App\Services\Registrars\Contracts\RegistrarClient` interface (the 10 methods above). `EnomClient` + `ResellerClubClient` implement it.
   - `DomainService` resolves the client by registrar name (`enom`|`resellerclub`) via a small factory/match — replaces the two injected concretes.
   - Gate test `test_domain_service_resolves_registrar_by_name` (returns the right client class per name).
 
-- [ ] **R2. Real Enom HTTP client — register + availability + price** (spec 32, 33) — dep R1
+- [x] **R2. Real Enom HTTP client — register + availability + price** (spec 32, 33) — dep R1
   - Implement `registerDomain`, `getDomainPrice`, and a `checkAvailability(string $domain): bool` against the Enom reseller API using `Http::withQueryParameters(...)`. Parse the response; throw a typed exception on API error.
   - Gate tests (`Http::fake()`): `test_register_calls_enom_with_credentials`, `test_availability_parses_available_response`, `test_api_error_throws`.
 

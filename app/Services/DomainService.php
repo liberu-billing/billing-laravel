@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\HostingAccount;
 use App\Models\Subscription;
+use App\Services\Registrars\Contracts\RegistrarClient;
 use App\Services\Registrars\EnomClient;
 use App\Services\Registrars\ResellerClubClient;
 use Exception;
@@ -14,7 +15,7 @@ class DomainService
 
     public function registerDomain(Subscription $subscription, $domainName, $registrar = 'enom')
     {
-        $client = $this->getClientForRegistrar($registrar);
+        $client = $this->clientFor($registrar);
         $result = $client->registerDomain(
             $domainName,
             $subscription->customer->id
@@ -44,7 +45,7 @@ class DomainService
 
     public function renewDomain(Subscription $subscription, $period = 1)
     {
-        $client = $this->getClientForRegistrar($subscription->domain_registrar);
+        $client = $this->clientFor($subscription->domain_registrar);
         $result = $client->renewDomain(
             $subscription->domain_name,
             $period
@@ -60,7 +61,7 @@ class DomainService
 
     public function transferDomain(Subscription $subscription, $domainName, $authCode, $newRegistrar)
     {
-        $client = $this->getClientForRegistrar($newRegistrar);
+        $client = $this->clientFor($newRegistrar);
         $result = $client->transferDomain(
             $domainName,
             $authCode,
@@ -92,7 +93,7 @@ class DomainService
      */
     public function getDnsRecords(Subscription $subscription): array
     {
-        return $this->getClientForRegistrar($subscription->domain_registrar)
+        return $this->clientFor($subscription->domain_registrar)
             ->getDnsRecords($subscription->domain_name);
     }
 
@@ -101,13 +102,13 @@ class DomainService
      */
     public function addDnsRecord(Subscription $subscription, array $record): bool
     {
-        return $this->getClientForRegistrar($subscription->domain_registrar)
+        return $this->clientFor($subscription->domain_registrar)
             ->addDnsRecord($subscription->domain_name, $record);
     }
 
     public function deleteDnsRecord(Subscription $subscription, string $recordId): bool
     {
-        return $this->getClientForRegistrar($subscription->domain_registrar)
+        return $this->clientFor($subscription->domain_registrar)
             ->deleteDnsRecord($subscription->domain_name, $recordId);
     }
 
@@ -116,7 +117,7 @@ class DomainService
      */
     public function getWhoisContacts(Subscription $subscription): array
     {
-        return $this->getClientForRegistrar($subscription->domain_registrar)
+        return $this->clientFor($subscription->domain_registrar)
             ->getWhoisContacts($subscription->domain_name);
     }
 
@@ -125,11 +126,11 @@ class DomainService
      */
     public function updateWhoisContacts(Subscription $subscription, array $contacts): bool
     {
-        return $this->getClientForRegistrar($subscription->domain_registrar)
+        return $this->clientFor($subscription->domain_registrar)
             ->updateWhoisContacts($subscription->domain_name, $contacts);
     }
 
-    protected function getClientForRegistrar($registrar): EnomClient|ResellerClubClient
+    public function clientFor($registrar): RegistrarClient
     {
         return match ($registrar) {
             'enom' => $this->enomClient,
