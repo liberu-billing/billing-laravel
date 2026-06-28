@@ -3,13 +3,12 @@
 namespace App\Services\Registrars;
 
 use App\Services\Registrars\Contracts\RegistrarClient;
-use GuzzleHttp\Client;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Http;
+use RuntimeException;
 
 class ResellerClubClient implements RegistrarClient
 {
-    protected Client $client;
-
     protected $apiUrl;
 
     protected $authUserId;
@@ -18,7 +17,6 @@ class ResellerClubClient implements RegistrarClient
 
     public function __construct()
     {
-        $this->client = new Client;
         $this->apiUrl = config('services.resellerclub.api_url');
         $this->authUserId = config('services.resellerclub.auth_userid');
         $this->apiKey = config('services.resellerclub.api_key');
@@ -29,7 +27,13 @@ class ResellerClubClient implements RegistrarClient
      */
     public function registerDomain($domainName, $customerId): ?array
     {
-        // ponytail: stub — implement ResellerClub API call to register domain
+        $this->makeApiCall('domains/register.json', [
+            'domain-name' => $domainName,
+            'years' => 1,
+            'customer-id' => $customerId,
+            'invoice-option' => 'NoInvoice',
+        ]);
+
         return ['expiration_date' => null];
     }
 
@@ -38,7 +42,7 @@ class ResellerClubClient implements RegistrarClient
      */
     public function renewDomain($domainName, $period): ?array
     {
-        // ponytail: stub — implement ResellerClub API call to renew domain
+        // ponytail: out of R9's gate — renew payload needs order-id lookup; add when DomainService renews.
         return ['new_expiration_date' => null];
     }
 
@@ -47,14 +51,20 @@ class ResellerClubClient implements RegistrarClient
      */
     public function transferDomain($domainName, $authCode, $customerId): ?array
     {
-        // ponytail: stub — implement ResellerClub API call to transfer domain
+        // ponytail: out of R9's gate — add when transfers are wired.
         return ['expiration_date' => null];
     }
 
     public function checkAvailability(string $domainName): bool
     {
-        // ponytail: stub — ResellerClub domains/available; real call in R9.
-        return false;
+        [$sld, $tld] = $this->splitDomain($domainName);
+
+        $result = $this->makeApiCall('domains/available.json', [
+            'domain-name' => $sld,
+            'tlds' => $tld,
+        ]);
+
+        return ($result[$domainName]['status'] ?? null) === 'available';
     }
 
     /**
@@ -62,13 +72,13 @@ class ResellerClubClient implements RegistrarClient
      */
     public function getAvailableTlds(): array
     {
-        // ponytail: stub — real call in R9.
+        // ponytail: out of R9's gate — ResellerClub products/customer-price exposes TLDs; add when needed.
         return [];
     }
 
     public function getDomainPrice(string $tld): float
     {
-        // ponytail: stub — ResellerClub products/customer-price; real call in R9.
+        // ponytail: out of R9's gate — products/customer-price; add when pricing pulls live.
         return 0.0;
     }
 
@@ -77,7 +87,7 @@ class ResellerClubClient implements RegistrarClient
      */
     public function getDnsRecords(string $domainName): array
     {
-        // ponytail: real registrar call here — ResellerClub dns/manage/search-records.
+        // ponytail: out of R9's gate — ResellerClub dns/manage/search-records.
         return [];
     }
 
@@ -86,13 +96,13 @@ class ResellerClubClient implements RegistrarClient
      */
     public function addDnsRecord(string $domainName, array $record): bool
     {
-        // ponytail: real registrar call here — ResellerClub dns/manage/add-<type>-record.
+        // ponytail: out of R9's gate — ResellerClub dns/manage/add-<type>-record.
         return true;
     }
 
     public function deleteDnsRecord(string $domainName, string $recordId): bool
     {
-        // ponytail: real registrar call here — ResellerClub dns/manage/delete-record.
+        // ponytail: out of R9's gate — ResellerClub dns/manage/delete-record.
         return true;
     }
 
@@ -101,7 +111,7 @@ class ResellerClubClient implements RegistrarClient
      */
     public function getWhoisContacts(string $domainName): array
     {
-        // ponytail: real registrar call here — ResellerClub domains/details (contact ids).
+        // ponytail: out of R9's gate — ResellerClub domains/details (contact ids).
         return [];
     }
 
@@ -110,27 +120,37 @@ class ResellerClubClient implements RegistrarClient
      */
     public function updateWhoisContacts(string $domainName, array $contacts): bool
     {
-        // ponytail: real registrar call here — ResellerClub domains/modify-contact.
+        // ponytail: out of R9's gate — ResellerClub domains/modify-contact.
         return true;
     }
 
-    protected function makeApiCall(string $action, $params)
+    /**
+     * @return array{0: string, 1: string}
+     */
+    protected function splitDomain(string $domainName): array
     {
-        $params = array_merge(
-            [
-                'auth-userid' => $this->authUserId,
-                'api-key' => $this->apiKey,
-            ],
-            $params
-        );
+        $parts = explode('.', $domainName, 2);
 
-        $this->client->post(
-            $this->apiUrl.$action,
-            [
-                'form_params' => $params,
-            ]
-        );
+        return [$parts[0], $parts[1] ?? ''];
+    }
 
-        // Parse JSON response and return result
+    /**
+     * @param  array<string, mixed>  $params
+     * @return array<mixed>
+     */
+    protected function makeApiCall(string $action, array $params): array
+    {
+        $response = Http::get(rtrim($this->apiUrl, '/').'/'.$action, array_merge([
+            'auth-userid' => $this->authUserId,
+            'api-key' => $this->apiKey,
+        ], $params));
+
+        $json = $response->json() ?? [];
+
+        if ($response->failed() || ($json['status'] ?? null) === 'ERROR') {
+            throw new RuntimeException('ResellerClub API error: '.($json['message'] ?? $response->body()));
+        }
+
+        return $json;
     }
 }

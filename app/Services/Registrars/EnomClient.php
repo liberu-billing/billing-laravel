@@ -3,6 +3,7 @@
 namespace App\Services\Registrars;
 
 use App\Services\Registrars\Contracts\RegistrarClient;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
 use SimpleXMLElement;
@@ -101,6 +102,19 @@ class EnomClient implements RegistrarClient
         $xml = $this->makeApiCall('PE_GetDomainPrice', ['TLD' => ltrim($tld, '.')]);
 
         return (float) ($xml->price ?? 0);
+    }
+
+    /**
+     * Current registry expiration date for a domain (used by the sync command).
+     */
+    public function getDomainExpiration(string $domainName): ?Carbon
+    {
+        [$sld, $tld] = $this->splitDomain($domainName);
+        $xml = $this->makeApiCall('GetDomainExp', ['SLD' => $sld, 'TLD' => $tld]);
+
+        $date = trim((string) ($xml->ExpirationDate ?? ''));
+
+        return $date !== '' ? Carbon::parse($date) : null;
     }
 
     /**
