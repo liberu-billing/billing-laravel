@@ -87,8 +87,15 @@ class EnomClient
      */
     public function addDnsRecord(string $domainName, array $record): bool
     {
+        // Only accept known DNS-record fields from the caller; never let a
+        // record key smuggle in command/uid/pw/SLD (SLD is set authoritatively below).
+        $allowed = array_intersect_key(
+            $record,
+            array_flip(['type', 'name', 'content', 'ttl', 'host', 'address', 'priority'])
+        );
+
         // ponytail: real registrar call here — eNom SetHosts (eNom replaces the full host set).
-        $this->makeApiCall('SetHosts', array_merge(['SLD' => $domainName], $record));
+        $this->makeApiCall('SetHosts', array_merge($allowed, ['SLD' => $domainName]));
 
         return true;
     }
@@ -125,14 +132,15 @@ class EnomClient
 
     protected function makeApiCall($command, $params): void
     {
+        // Trusted credentials/command must win over caller-supplied params, so merge them LAST.
         $params = array_merge(
+            $params,
             [
                 'command' => $command,
                 'uid' => $this->username,
                 'pw' => $this->password,
                 'responsetype' => 'xml',
-            ],
-            $params
+            ]
         );
 
         $this->client->get(
