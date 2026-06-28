@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Ticket;
+use App\Models\TicketAttachment;
+use App\Models\TicketCustomField;
 use App\Models\User;
 use App\Notifications\NewTicketNotification;
 use Illuminate\Contracts\View\Factory;
@@ -10,6 +12,8 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TicketController extends Controller
 {
@@ -34,23 +38,29 @@ class TicketController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $validated = $request->validate(
-            [
-                'title' => [
-                    'required',
-                    'string',
-                    'max:255',
-                ],
-                'description' => [
-                    'required',
-                    'string',
-                ],
-                'priority' => [
-                    'required',
-                    'in:low,medium,high',
-                ],
-            ]
-        );
+        $rules = [
+            'title' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+            'description' => [
+                'required',
+                'string',
+            ],
+            'priority' => [
+                'required',
+                'in:low,medium,high',
+            ],
+        ];
+
+        // Add a rule per admin-defined custom field; required ones must be filled.
+        $customFields = TicketCustomField::active()->get();
+        foreach ($customFields as $field) {
+            $rules["custom_fields.{$field->id}"] = $field->is_required ? ['required'] : ['nullable'];
+        }
+
+        $validated = $request->validate($rules);
 
         $ticket = Ticket::create(
             [
@@ -58,6 +68,7 @@ class TicketController extends Controller
                 'title' => $validated['title'],
                 'description' => $validated['description'],
                 'priority' => $validated['priority'],
+                'custom_fields' => $request->input('custom_fields', []),
             ]
         );
 
@@ -92,12 +103,21 @@ class TicketController extends Controller
             [
                 'responses.user',
                 'user',
+                'assignee',
+                'department',
             ]
         );
 
+        $staff = User::role(
+            [
+                'admin',
+                'super_admin',
+            ]
+        )->get();
+
         return view(
             'tickets.show',
-            compact('ticket')
+            compact('ticket', 'staff')
         );
     }
 
@@ -122,6 +142,43 @@ class TicketController extends Controller
         return redirect()->back()->with(
             'success',
             'Ticket status updated.'
+        );
+    }
+
+    public function assign(Request $request, Ticket $ticket): RedirectResponse
+    {
+        $this->authorize(
+            'update',
+            $ticket
+        );
+
+        $validated = $request->validate(
+            [
+                'assigned_to' => [
+                    'nullable',
+                    'exists:users,id',
+                ],
+            ]
+        );
+
+        $ticket->update(['assigned_to' => $validated['assigned_to'] ?? null]);
+
+        return redirect()->back()->with(
+            'success',
+            'Ticket assignment updated.'
+        );
+    }
+
+    public function downloadAttachment(TicketAttachment $attachment): StreamedResponse
+    {
+        $this->authorize(
+            'view',
+            $attachment->owningTicket()
+        );
+
+        return Storage::disk('local')->download(
+            $attachment->path,
+            $attachment->original_name
         );
     }
 }
